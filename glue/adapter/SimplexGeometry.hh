@@ -29,7 +29,7 @@
 #include "../../dune/grid/genericgeometry/referenceelements.hh"
 #include "../../dune/grid/genericgeometry/misc.hh"
 
-#include "../misc/geometry.h"
+#include "../misc/geometry.hh"
 
 using namespace Dune;
 

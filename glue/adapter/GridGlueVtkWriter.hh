@@ -25,7 +25,7 @@
 #include <vector>
 #include <list>
 
-#include "../misc/geometry.h"
+#include "../misc/geometry.hh"
 
 
 using namespace std;

@@ -44,7 +44,7 @@
 #include "../../dune/common/fvector.hh"
 #include "../../dune/common/fmatrix.hh"
 
-#include "../misc/geometry.h"
+#include "../misc/geometry.hh"
 #include "../misc/MultiDimOctree.hh"
 #include <psurface/ContactMapping.h>
 
