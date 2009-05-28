@@ -20,7 +20,7 @@
 #define EXTRACTORSELECTOR_HH_
 
 #ifdef GRID_GLUE_USE_CONCEPTS
-#include "../misc/conceptchecking.h"
+#include "../misc/conceptchecking.hh"
 #include "GridExtractor.hh"
 #endif
 #include "GridExtractionTraits.hh"

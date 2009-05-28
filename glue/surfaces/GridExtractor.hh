@@ -33,7 +33,7 @@
 #include "GridMeshTraits.hh"
 
 #include "GridExtractorConcept.hh"
-#include "../misc/conceptchecking.h"
+#include "../misc/conceptchecking.hh"
 
 
 using namespace Dune;

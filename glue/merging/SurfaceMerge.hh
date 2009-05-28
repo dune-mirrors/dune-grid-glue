@@ -22,7 +22,7 @@
 #define SURFACEMERGE_HH_
 
 #include <vector>
-#include "../misc/conceptchecking.h"
+#include "../misc/conceptchecking.hh"
 #include "../merging/SurfaceMergeConcept.hh"
 
 

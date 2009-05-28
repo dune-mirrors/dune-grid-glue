@@ -20,7 +20,7 @@
 #define REMOTEINTERSECTIONITERATORS_HH_
 
 #ifdef GRID_GLUE_USE_CONCEPTS
-#include "../misc/conceptchecking.h"
+#include "../misc/conceptchecking.hh"
 #include "RemoteIntersectionConcepts.hh"
 #endif
 #include "RemoteIntersection.hh"

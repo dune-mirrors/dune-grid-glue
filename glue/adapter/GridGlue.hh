@@ -23,7 +23,7 @@
 #include "../../dune/common/fixedarray.hh"
 
 #ifdef GRID_GLUE_USE_CONCEPTS
-#include "../misc/conceptchecking.h"
+#include "../misc/conceptchecking.hh"
 #include "../merging/SurfaceMerge.hh"
 #endif
 #include "../surfaces/GridExtractor.hh"
