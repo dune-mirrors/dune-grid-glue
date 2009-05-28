@@ -76,8 +76,8 @@ The full build-system is described in the dune-common/doc/buildsystem (SVN versi
 dune-grid-glue prerequisites
 ----------------------------
 
-For ContactMappingSurfaceMerge to work the module needs libamiramesh and libpsurface.
-Specify the paths to those libraries with the configure flags in an options file (--with-amiramesh="..." --with-psurface="...")
+For ContactMappingSurfaceMerge to work the module needs libpsurface.
+Specify the path to this library with the configure flag in an options file (--with-psurface="...")
 
 The module currently works with dune 1.2.
 Since various modules are required and at the time of development some of them were also undergoing changes a working setup
