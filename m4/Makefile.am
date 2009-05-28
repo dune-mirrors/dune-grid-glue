@@ -1,4 +1,4 @@
-M4FILES = dune-grid-glue.m4 amiramesh.m4 psurface.m4
+M4FILES = dune-grid-glue.m4
 
 aclocaldir = $(datadir)/aclocal
 aclocal_DATA = $(M4FILES)
