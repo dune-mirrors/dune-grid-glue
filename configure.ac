@@ -12,6 +12,9 @@ AM_CONFIG_HEADER([config.h])
 # this implies checking for [dune-common], [dune-grid]
 DUNE_CHECK_ALL
 
+# the infamous Dune --> . symlink
+DUNE_SYMLINK
+
 # implicitly set the Dune-flags everywhere
 AC_SUBST(AM_CPPFLAGS, $DUNE_CPPFLAGS)
 AC_SUBST(AM_LDFLAGS, $DUNE_LDFLAGS)
