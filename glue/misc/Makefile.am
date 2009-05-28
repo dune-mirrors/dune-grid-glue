@@ -3,8 +3,8 @@
 # These libraries do not need other libraries besides lcommon and lgrid
 miscdir = $(includedir)/dune/glue/misc
 misc_HEADERS = Box.hh\
-	conceptchecking.h\
-	geometry.h\
+	conceptchecking.hh\
+	geometry.hh\
 	MultiDimOctree.hh\
 	Timer.hh
 
