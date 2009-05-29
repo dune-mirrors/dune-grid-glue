@@ -567,7 +567,7 @@ WARN_LOGFILE           =
 INPUT                  = @srcdir@/mainpage \
                          @srcdir@/modules \
                          @top_srcdir@/glue/adapter \
-                         @top_srcdir@/glue/mergin \
+                         @top_srcdir@/glue/merging \
                          @top_srcdir@/glue/misc \
                          @top_srcdir@/glue/surfaces
 
