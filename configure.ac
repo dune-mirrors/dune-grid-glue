@@ -26,6 +26,9 @@ AC_CONFIG_FILES([Makefile
   glue/merging/Makefile
   glue/misc/Makefile
   glue/surfaces/Makefile
+  doc/Makefile
+  doc/doxygen/Makefile
+  doc/doxygen/Doxyfile
   m4/Makefile
   dune-grid-glue.pc
 ])
