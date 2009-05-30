@@ -21,13 +21,13 @@
 #ifndef SIMPLEXGEOMETRY_HH_
 #define SIMPLEXGEOMETRY_HH_
 
-#include "../../dune/common/static_assert.hh"
-#include "../../dune/common/fixedarray.hh"
-#include "../../dune/grid/genericgeometry/geometry.hh"
-#include "../../dune/grid/genericgeometry/geometrytraits.hh"
-#include "../../dune/grid/genericgeometry/cornermapping.hh"
-#include "../../dune/grid/genericgeometry/referenceelements.hh"
-#include "../../dune/grid/genericgeometry/misc.hh"
+#include <dune/common/static_assert.hh>
+#include <dune/common/fixedarray.hh>
+#include <dune/grid/genericgeometry/geometry.hh>
+#include <dune/grid/genericgeometry/geometrytraits.hh>
+#include <dune/grid/genericgeometry/cornermapping.hh>
+#include <dune/grid/genericgeometry/referenceelements.hh>
+#include <dune/grid/genericgeometry/misc.hh>
 
 #include "../misc/geometry.hh"
 

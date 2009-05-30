@@ -20,20 +20,20 @@
 #define GRIDMESHTRAITS_HH_
 
 // always include those that are shipped with dune
-#include "../../dune/grid/sgrid.hh"
-#include "../../dune/grid/onedgrid.hh"
-#include "../../dune/grid/yaspgrid.hh"
+#include <dune/grid/sgrid.hh>
+#include <dune/grid/onedgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 
 #if HAVE_UG
-#include "../../dune/grid/uggrid.hh"
+#include <dune/grid/uggrid.hh>
 #endif
 
 #if HAVE_ALUGRID
-#include "../../dune/grid/alugrid.hh"
+#include <dune/grid/alugrid.hh>
 #endif
 
 #if HAVE_ALBERTA
-#include "../../dune/grid/albertagrid.hh"
+#include <dune/grid/albertagrid.hh>
 #endif
 
 

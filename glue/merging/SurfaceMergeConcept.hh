@@ -19,7 +19,7 @@
 #ifndef SURFACEMERGECONCEPT_HH_
 #define SURFACEMERGECONCEPT_HH_
 
-#include "../../dune/common/fvector.hh"
+#include <dune/common/fvector.hh>
 #include <vector>
 
 /**

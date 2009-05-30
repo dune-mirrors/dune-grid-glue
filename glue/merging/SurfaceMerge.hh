@@ -23,7 +23,7 @@
 
 #include <vector>
 #include "../misc/conceptchecking.hh"
-#include "../merging/SurfaceMergeConcept.hh"
+#include "SurfaceMergeConcept.hh"
 
 
 using namespace std;

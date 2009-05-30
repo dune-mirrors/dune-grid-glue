@@ -20,8 +20,8 @@
 #ifndef REMOTEINTERSECTIONCONCEPTS_HH_
 #define REMOTEINTERSECTIONCONCEPTS_HH_
 
-#include "../../dune/common/geometrytype.hh"
-#include "../../dune/common/fvector.hh"
+#include <dune/common/geometrytype.hh>
+#include <dune/common/fvector.hh>
 
 
 namespace RemoteIntersectionInterface

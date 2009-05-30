@@ -20,8 +20,8 @@
 #define REMOTEINTERSECTION_HH_
 
 
-#include "../../dune/common/fvector.hh"
-#include "../../dune/common/geometrytype.hh"
+#include <dune/common/fvector.hh>
+#include <dune/common/geometrytype.hh>
 
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"

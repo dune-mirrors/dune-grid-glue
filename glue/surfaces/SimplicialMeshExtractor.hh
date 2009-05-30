@@ -24,9 +24,9 @@
 #include <map>
 #include <algorithm>
 
-#include "../../dune/common/exceptions.hh"
-#include "../../dune/common/fvector.hh"
-#include "../../dune/grid/common/geometry.hh"
+#include <dune/common/exceptions.hh>
+#include <dune/common/fvector.hh>
+#include <dune/grid/common/geometry.hh>
 
 #include "SurfaceDescriptor.hh"
 

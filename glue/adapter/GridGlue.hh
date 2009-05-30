@@ -20,7 +20,7 @@
 #ifndef GRIDGLUE_HH_
 #define GRIDGLUE_HH_
 
-#include "../../dune/common/fixedarray.hh"
+#include <dune/common/fixedarray.hh>
 
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"

@@ -41,8 +41,8 @@
 #include <algorithm>
 #include <limits>
 
-#include "../../dune/common/fvector.hh"
-#include "../../dune/common/fmatrix.hh"
+#include <dune/common/fmatrix.hh>
+#include <dune/common/fvector.hh>
 
 #include "../misc/geometry.hh"
 #include "../misc/MultiDimOctree.hh"
