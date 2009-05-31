@@ -638,38 +638,6 @@ namespace RemoteIntersectionInterface
         return this->realIterator.dereference().numberInDomainEntity();
       }
 
-
-      /*! @brief Return an outer normal (length not necessarily 1)
-
-         The returned vector may depend on local position within the intersection.
-       */
-      FieldVector<ctype, coorddim> outerNormal(const FieldVector<ctype, mydim> &local) const
-      {
-        return this->realIterator.dereference().outerNormalTarget(local);
-      }
-
-
-      /*! @brief return outer normal scaled with the integration element
-         @copydoc outerNormal
-         The normal is scaled with the integration element of the intersection. This
-         method is redundant but it may be more efficent to use this function
-         rather than computing the integration element via intersectionGlobal().
-       */
-      FieldVector<ctype, coorddim> integrationOuterNormal(const FieldVector<ctype, mydim> &local) const
-      {
-        return this->realIterator.dereference().integrationOuterNormalTarget(local);
-      }
-
-      /*! @brief Return unit outer normal (length == 1)
-
-         The returned vector may depend on the local position within the intersection.
-         It is scaled to have unit length.
-       */
-      FieldVector<ctype, coorddim> unitOuterNormal(const FieldVector<ctype, mydim> &local) const
-      {
-        return this->realIterator.dereference().unitOuterNormalTarget(local);
-      }
-
     };
 
 
