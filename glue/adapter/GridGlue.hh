@@ -64,6 +64,7 @@ template<
 class GridGlue
 {
 private:
+
   /*   C H E C K   C O N C E P T S   */
 
   typedef GET1 DomGridExtractionTraits;
@@ -80,7 +81,8 @@ private:
   /*   P R I V A T E   T Y P E S   */
 
   typedef GridGlue<GET1, GET2, SM> This;
-
+public:
+  /** \todo Please doc me! */
   template<typename BSET1, typename BSET2, typename BSM, ExtractorType type1, ExtractorType type2>
   class BuilderImpl;
 
@@ -104,21 +106,29 @@ public:
 
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
 
+  /** \brief Grid view of the domain grid */
   typedef typename DomGridExtractionTraits::GridView DomainGridView;
 
+  /** \brief Domain grid type */
   typedef typename DomainGridView::Grid DomainGridType;
 
+  /** \brief Extractor used for the domain grid */
   typedef typename ExtractorSelector<DomGridExtractionTraits>::ExtractorType DomainExtractor;
 
+  /** \brief Dimension of the domain extractor */
   enum { domdim = DomainExtractor::dim };
 
 
+  /** \brief Grid view of the target grid */
   typedef typename TarGridExtractionTraits::GridView TargetGridView;
 
+  /** \brief Target grid type */
   typedef typename TargetGridView::Grid TargetGridType;
 
+  /** \brief Extractor used for the target grid */
   typedef typename ExtractorSelector<TarGridExtractionTraits>::ExtractorType TargetExtractor;
 
+  /** \brief Dimension of the target extractor */
   enum { tardim = TargetExtractor::dim };
 
 
@@ -126,10 +136,12 @@ public:
   /// (must be the same for both extractors!)
   enum { dimw = DomainExtractor::dimw };
 
-
-  // TODO maybe use traits class to decide which has more precision (DomainGridType::ctype or TargetGridType::ctype) and then take this one
+  /** \brief The type used for coordinates
+      \todo maybe use traits class to decide which has more precision (DomainGridType::ctype or TargetGridType::ctype) and then take this one
+   */
   typedef typename DomainGridType::ctype ctype;
 
+  /** \brief The type used for coordinate vectors */
   typedef FieldVector<ctype, dimw>                   Coords;
 
   typedef CoordinateTransformation<dimw, ctype>      Transformation;
@@ -160,8 +172,10 @@ public:
 #endif
 
 #ifdef GRID_GLUE_USE_CONCEPTS
+  /** \todo Please doc me! */
   typedef BuilderImpl<GET1, GET2, SM, DomainExtractor::type, TargetExtractor::type>  Builder;
 #else
+  /** \todo Please doc me! */
   typedef BuilderImpl<GET1, GET2, SM,
       ExtractorClassifier<
           DomainExtractor::GridView::dimension,
