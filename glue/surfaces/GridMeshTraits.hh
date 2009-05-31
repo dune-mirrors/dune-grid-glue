@@ -216,7 +216,7 @@ struct GridMeshTraits<Dune::SGrid<3, 3>, mtype>
  * @brief for YaspGrid which uses quadrilaterals
  */
 template<MeshClassification::MeshType mtype>
-struct GridMeshTraits<Dune::YaspGrid<2, 2>, mtype>
+struct GridMeshTraits<Dune::YaspGrid<2>, mtype>
 {
   static const MeshClassification::MeshType mesh = MeshClassification::cube;
 };
@@ -227,7 +227,7 @@ struct GridMeshTraits<Dune::YaspGrid<2, 2>, mtype>
  * @brief for YaspGrid which uses hexahedra
  */
 template<MeshClassification::MeshType mtype>
-struct GridMeshTraits<Dune::YaspGrid<3, 3>, mtype>
+struct GridMeshTraits<Dune::YaspGrid<3>, mtype>
 {
   static const MeshClassification::MeshType mesh = MeshClassification::cube;
 };
