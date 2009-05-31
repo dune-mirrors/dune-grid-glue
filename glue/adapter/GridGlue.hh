@@ -368,7 +368,7 @@ public:
    */
   int targetEntityNextFace(const TargetElement& e, int index = 0) const;
 
-
+#if 0  // if this #if 0 isn't there doxygen gets screwed up
   //	/**
   //	 * @brief tells how many faces of an element could be (partially) mapped
   //	 * @param e the element
@@ -389,7 +389,7 @@ public:
   //	 * @return the number of (partially) mapped faces for this element
   //	 */
   //	int facesMappedToDomain(const TargetElement& e, unsigned int* faces) const;
-
+#endif
 
   /*   I N T E R S E C T I O N S   A N D   I N T E R S E C T I O N   I T E R A T O R S   */
 
