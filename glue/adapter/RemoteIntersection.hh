@@ -105,22 +105,23 @@ namespace RemoteIntersectionInterface
 
 
     /*   C O N S T R U C T O R S   */
+    /** \brief Copy construction from another RemoteIntersection */
     RemoteIntersection(const RemoteIntersection& impl)
       : realIntersection(impl.realIntersection)
     {}
 
-
+    /** \brief Copy construction from an implementation class */
     RemoteIntersection(const RemoteIntersectionImpl& impl) : realIntersection(impl)
     {}
 
-
+    /** \brief Assigment from another RemoteIntersection */
     RemoteIntersection& operator=(const RemoteIntersection& impl)
     {
       this->realIntersection = impl.realIntersection;
       return *this;
     }
 
-
+    /** \brief Assignment from an implementation class */
     RemoteIntersection& operator=(const RemoteIntersectionImpl& impl)
     {
       this->realIntersection = impl;
@@ -130,46 +131,46 @@ namespace RemoteIntersectionInterface
 
     /*   F U N C T I O N A L I T Y   */
 
-    // return EntityPointer to the Entity on the inside of this intersection. That is the Entity where we started this .
+    /** \brief return EntityPointer to the Entity on the inside of this intersection.
+        That is the Entity where we started this. */
     DomainEntityPointer entityDomain() const
     {
       return this->realIntersection.entityDomain();
     }
 
 
-    // return EntityPointer to the Entity on the outside of this intersection. That is the neighboring Entity.
+    /** \brief return EntityPointer to the Entity on the outside of this intersection. That is the neighboring Entity. */
     TargetEntityPointer entityTarget() const
     {
       return this->realIntersection.entityTarget();
     }
 
 
-    // geometrical information about this intersection in local coordinates of the inside() entity.
-    // takes local domain intersection coords and maps them to domain parent element local coords
+    /** \brief geometrical information about this intersection in local coordinates of the inside() entity.
+        takes local domain intersection coords and maps them to domain parent element local coords */
     const DomainLocalGeometry& intersectionDomainLocal() const
     {
       return this->realIntersection.geometryInDomainEntity();
     }
 
 
-    // geometrical information about this intersection in local coordinates of the outside() entity.
-    // takes local target intersection coords and maps them to target parent element local coords
+    /** \brief geometrical information about this intersection in local coordinates of the outside() entity.
+        takes local target intersection coords and maps them to target parent element local coords */
     const TargetLocalGeometry& intersectionTargetLocal() const
     {
       return this->realIntersection.geometryInTargetEntity();
     }
 
 
-    // geometrical information about this intersection in global coordinates in the domain grid.
-    // takes local domain intersection coords and maps them to domain grid world coords
+    /** \brief geometrical information about this intersection in global coordinates in the domain grid.
+        takes local domain intersection coords and maps them to domain grid world coords */
     const DomainGeometry& intersectionDomainGlobal() const
     {
       return this->realIntersection.geometryDomain();
     }
 
 
-    // geometrical information about this intersection in global coordinates in the target grid.
-    // takes local target intersection coords and maps them to target grid world coords
+    /** \brief geometrical information about this intersection in global coordinates in the target grid. */
     const TargetGeometry& intersectionTargetGlobal() const
     {
       return this->realIntersection.geometryTarget();
@@ -198,35 +199,35 @@ namespace RemoteIntersectionInterface
     }
 
 
-    // obtain the type of reference element for this intersection
+    /** \brief obtain the type of reference element for this intersection */
     GeometryType type() const
     {
       return this->realIntersection.type();
     }
 
 
-    // Local number of codim 1 entity in the inside() Entity where intersection is contained in.
+    /** \brief Local number of codim 1 entity in the inside() Entity where intersection is contained in. */
     int numberInDomainEntity() const
     {
       return this->realIntersection.numberInDomainEntity();
     }
 
 
-    // Local number of codim 1 entity in outside() Entity where intersection is contained in.
+    /** \brief Local number of codim 1 entity in outside() Entity where intersection is contained in. */
     int numberInTargetEntity() const
     {
       return this->realIntersection.numberInTargetEntity();
     }
 
 
-    // Return an outer normal (length not necessarily 1).
+    /** \brief Return an outer normal (length not necessarily 1). */
     FieldVector<ctype, coorddim>    outerNormalDomain(const FieldVector<ctype, mydim> &local) const
     {
       return this->realIntersection.outerNormalDomain(local);
     }
 
 
-    // Return an outer normal (length not necessarily 1).
+    /** \brief Return an outer normal */
     FieldVector<ctype, coorddim>    unitOuterNormalDomain(const FieldVector<ctype, mydim> &local) const
     {
       FieldVector<ctype, coorddim> normal = this->realIntersection.outerNormalDomain(local);
@@ -235,21 +236,21 @@ namespace RemoteIntersectionInterface
     }
 
 
-    // Return an outer normal (length not necessarily 1).
+    /** \brief Return an outer normal (length not necessarily 1) */
     FieldVector<ctype, coorddim>    integrationOuterNormalDomain(const FieldVector<ctype, mydim> &local) const
     {
       return this->unitOuterNormalDomain(local) *= this->realIntersection.geometryDomain().integrationElement(local);
     }
 
 
-    // Return an outer normal (length not necessarily 1).
+    /** \brief Return an outer normal (length not necessarily 1). */
     FieldVector<ctype, coorddim>    outerNormalTarget(const FieldVector<ctype, mydim> &local) const
     {
       return this->realIntersection.outerNormalTarget(local);
     }
 
 
-    // Return an outer normal (length not necessarily 1).
+    /** \brief Return a unit outer normal of the target intersection */
     FieldVector<ctype, coorddim>    unitOuterNormalTarget(const FieldVector<ctype, mydim> &local) const
     {
       FieldVector<ctype, coorddim> normal = this->realIntersection.outerNormalTarget(local);
@@ -258,7 +259,7 @@ namespace RemoteIntersectionInterface
     }
 
 
-    // Return an outer normal (length not necessarily 1).
+    /** \brief Return an outer normal (length not necessarily 1) */
     FieldVector<ctype, coorddim>    integrationOuterNormalTarget(const FieldVector<ctype, mydim> &local) const
     {
       return this->unitOuterNormalTarget(local) *= this->realIntersection.geometryTarget().integrationElement(local);
