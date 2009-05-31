@@ -46,11 +46,11 @@ using namespace ExtractorClassification;
  * @brief sequential adapter to couple two grids at specified close together boundaries
  *
  *
- * @param GET1 a first traits class to determine the type of surface extractor to use for the domain grid,
+ * @tparam GET1 a first traits class to determine the type of surface extractor to use for the domain grid,
  * has to be a model of GridExtractionTraitsConcept
- * @param GET2 a second traits class to determine the type of surface extractor to use for the target grid,
+ * @tparam GET2 a second traits class to determine the type of surface extractor to use for the target grid,
  * has to be a model of GridExtractionTraitsConcept
- * @param SM the surface merging class, has to be a model of the SurfaceMergeConcept
+ * @tparam SM the surface merging class, has to be a model of the SurfaceMergeConcept
  */
 template<
     typename GET1,
