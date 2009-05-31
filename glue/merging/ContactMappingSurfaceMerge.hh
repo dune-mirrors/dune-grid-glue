@@ -51,7 +51,11 @@
 
 using namespace std;
 
+/** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
 
+   \tparam dim Grid dimension
+   \tparam T Type used for coordinates
+ */
 template<int dim, typename T = double>
 class ContactMappingSurfaceMerge
 {
