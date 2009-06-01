@@ -557,7 +557,33 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
 
     STDOUTLN("Building merged grid... (wait for finish!)");
     // compute the merged grid using the contact mapping class' functionality
-    this->_cm.build(domain_coords, this->_domi, target_coords, this->_tari, this->_maxdist, this->_domnormals);
+
+    // Hack: recopy data to match new interface of psurface library
+    std::vector<std::tr1::array<double,dim> > domain_coords_blocked(domain_coords.size()/dim);
+    for (size_t i=0; i<domain_coords_blocked.size(); i++)
+      for (int j=0; j<dim; j++)
+        domain_coords_blocked[i][j] = domain_coords[dim*i + j];
+
+    std::vector<std::tr1::array<int,dim> > domain_segments_blocked(this->_domi.size()/dim);
+    for (size_t i=0; i<domain_segments_blocked.size(); i++)
+      for (int j=0; j<dim; j++)
+        domain_segments_blocked[i][j] = this->_domi[dim*i + j];
+
+    std::vector<std::tr1::array<double,dim> > target_coords_blocked(target_coords.size()/dim);
+    for (size_t i=0; i<target_coords_blocked.size(); i++)
+      for (int j=0; j<dim; j++)
+        target_coords_blocked[i][j] = target_coords[dim*i + j];
+
+    std::vector<std::tr1::array<int,dim> > target_segments_blocked(this->_tari.size()/dim);
+    for (size_t i=0; i<target_segments_blocked.size(); i++)
+      for (int j=0; j<dim; j++)
+        target_segments_blocked[i][j] = this->_tari[dim*i + j];
+
+    //this->_cm.build(domain_coords, this->_domi, target_coords, this->_tari, this->_maxdist, this->_domnormals);
+    this->_cm.build(domain_coords_blocked, domain_segments_blocked,
+                    target_coords_blocked, target_segments_blocked,
+                    this->_maxdist, this->_domnormals);
+
     STDOUTLN("Finished building merged grid!");
 
     {
