@@ -144,15 +144,19 @@ public:
   /** \brief The type used for coordinate vectors */
   typedef FieldVector<ctype, dimw>                   Coords;
 
+  /** \brief The type of transformation used */
   typedef CoordinateTransformation<dimw, ctype>      Transformation;
 
-
+  /** \brief The type of the domain grid elements */
   typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainElement;
 
+  /** \brief Pointer type to domain grid elements */
   typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainElementPtr;
 
+  /** \brief The type of the domain grid vertices */
   typedef typename DomainGridView::Traits::template Codim<DomainGridType::dimension>::Entity DomainVertex;
 
+  /** \brief Pointer type to domain grid vertices */
   typedef typename DomainGridView::Traits::template Codim<DomainGridType::dimension>::EntityPointer DomainVertexPtr;
 
 
@@ -188,12 +192,16 @@ public:
   Builder;
 #endif
 
+  /** \brief Type of remote intersection objects */
   typedef RemoteIntersectionInterface::RemoteIntersection<RemoteIntersectionImpl>    RemoteIntersection;
 
+  /** \brief Type of the iterator that iterates over remove intersections */
   typedef typename IntersectionIterators::RemoteIntersectionIterator RemoteIntersectionIterator;
 
+  /** \todo Please doc me! */
   typedef typename IntersectionIterators::RemoteIntersectionDomainIterator DomainIntersectionIterator;
 
+  /** \todo Please doc me! */
   typedef typename IntersectionIterators::RemoteIntersectionTargetIterator TargetIntersectionIterator;
 
 
