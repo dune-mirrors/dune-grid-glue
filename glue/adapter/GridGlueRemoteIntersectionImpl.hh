@@ -147,7 +147,7 @@ public:
   }
 
 
-  // return true if intersection is conforming (improbable due to geometry matching).
+  /** \brief Return true if intersection is conforming */
   bool conforming() const;
 
 
