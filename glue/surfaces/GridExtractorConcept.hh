@@ -339,8 +339,8 @@ private:
   ElementDescriptor<GridView> *ed;
   FaceDescriptor<GridView>    *fd;
   FaceDescriptorTester fdt;
-  vector<BarycentricCoords>   coords;
-  vector<SimplexTopology>     faces;
+  std::vector<BarycentricCoords>   coords;
+  std::vector<SimplexTopology>     faces;
   Vertex v;
   VertexPtr vptr;
   Element e;

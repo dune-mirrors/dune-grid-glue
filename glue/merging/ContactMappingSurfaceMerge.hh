@@ -49,8 +49,6 @@
 #include <psurface/ContactMapping.h>
 
 
-using namespace std;
-
 /** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
 
    \tparam dim Grid dimension
@@ -121,7 +119,7 @@ private:
      * from the given array
      * @param unordered array containing all overlap simplices
      */
-    void setOverlaps(const vector<IntPrimitive>& unordered);
+    void setOverlaps(const std::vector<IntPrimitive>& unordered);
 
     /**
      * @brief getter for the number of simplex overlaps in the merged grid
@@ -181,11 +179,11 @@ private:
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending domain parent simplex indices (see _domi)
-    vector<IntPrimitive> domOrder;
+    std::vector<IntPrimitive> domOrder;
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending target parent simplex indices (see _tari)
-    vector<IntPrimitive*> tarOrder;
+    std::vector<IntPrimitive*> tarOrder;
 
     /// @brief used to recompute original index of an overlap in "tarOrder"
     IntPrimitive*         baseptr;
@@ -245,19 +243,19 @@ private:
   /* geometric data for both domain and targt */
 
   /// @brief domain coordinates
-  vector<Coords>   _domc;
+  std::vector<Coords>   _domc;
 
   /// @brief target coordinates
-  vector<Coords>   _tarc;
+  std::vector<Coords>   _tarc;
 
 
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
-  vector<int>         _domi;
+  std::vector<int>         _domi;
 
   /// @brief target indices (internal copy)
-  vector<int>         _tari;
+  std::vector<int>         _tari;
 
 
   /* members associated with the merged grid */
@@ -276,7 +274,7 @@ private:
   mutable Locator _olclocator;
 
   /// @brief the data repository for the entities in the locator (no direct access to this)
-  vector<OverlapCorner>  _olcorners;
+  std::vector<OverlapCorner>  _olcorners;
 
   /// @brief the geometry accessing functor the entities in the locator
   OverlapCornerGeometry* _olcgeometry;
@@ -602,7 +600,7 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
 
     // re-initialize the point locator
     {
-      Coords lower(numeric_limits<ctype>::max()), upper(-numeric_limits<ctype>::max());
+      Coords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
       // compute the bounding box of the merged grid
       typename Dune::FieldVector<Coords, dim>::size_type j;
       typename Coords::size_type k;
@@ -658,7 +656,7 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
   }
   catch (...)
   {
-    cerr << "ContactMappingSurfaceMerge: Unknown exception occurred!" << endl;
+    std::cerr << "ContactMappingSurfaceMerge: Unknown exception occurred!" << std::endl;
   }
   // only arriving here after exception
   return false;
@@ -919,7 +917,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 /* IMPLEMENTATION OF   O V E R L A P  M A N A G E R  SUBCLASS */
 
 template<int dim, typename T>
-void ContactMappingSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const vector<IntPrimitive>& unordered)
+void ContactMappingSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<IntPrimitive>& unordered)
 {
   this->domOrder.resize(unordered.size());
   this->tarOrder.resize(unordered.size(), NULL);
