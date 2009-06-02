@@ -13,7 +13,7 @@
  */
 /**
  * @file RemoteIntersectionIterators.hh
- * @brief
+ * @brief Provide iterators over remote intersections
  */
 
 #ifndef REMOTEINTERSECTIONITERATORS_HH_
@@ -29,6 +29,7 @@
 namespace RemoteIntersectionInterface
 {
 
+  /** \brief Iterator over remote intersections */
   template<typename RemoteIntersectionImpl,
       typename IndependentIteratorImpl,
       typename DomainIteratorImpl,
@@ -65,7 +66,7 @@ namespace RemoteIntersectionInterface
 
     typedef RemoteIntersection<RemoteIntersectionImpl>  ThisRemoteIntersection;
 
-
+    /** \todo Please doc me! */
     class IndependentIterator
     {
 
@@ -299,54 +300,6 @@ namespace RemoteIntersectionInterface
       }
 
 
-      /*! @brief geometrical information about this intersection in local
-         coordinates of the inside() entity.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to local coordinates of the
-         inside() entity.
-       */
-      const DomainLocalGeometry& intersectionSelfLocal() const
-      {
-        return this->realIterator.dereference().intersectionDomainLocal();
-      }
-
-
-      /*! @brief geometrical information about this intersection in local
-         coordinates of the outside() entity.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to local coordinates of the
-         outside() entity.
-       */
-      const TargetLocalGeometry& intersectionNeighborLocal() const
-      {
-        return this->realIterator.dereference().intersectionTargetLocal();
-      }
-
-
-      /*! @brief geometrical information about this intersection in global coordinates.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to global (world) coordinates.
-       */
-      const DomainGeometry& intersectionSelfGlobal() const
-      {
-        return this->realIterator.dereference().intersectionDomainGlobal();
-      }
-
-
-      /*! @brief geometrical information about this intersection in global coordinates.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to global (world) coordinates.
-       */
-      const TargetGeometry& intersectionNeighborGlobal() const
-      {
-        return this->realIterator.dereference().intersectionTargetGlobal();
-      }
-
-
       /*! @brief mapping of local coordinates, i.e. selflocal -> neighborlocal
 
          Maps a point in local intersection coords on domain intersection to a
@@ -387,38 +340,6 @@ namespace RemoteIntersectionInterface
       int numberInNeighbor() const
       {
         return this->realIterator.dereference().numberInTargetEntity();
-      }
-
-
-      /*! @brief Return an outer normal (length not necessarily 1)
-
-         The returned vector may depend on local position within the intersection.
-       */
-      FieldVector<ctype, coorddim> outerNormal(const FieldVector<ctype, mydim> &local) const
-      {
-        return this->realIterator.dereference().outerNormalDomain(local);
-      }
-
-
-      /*! @brief return outer normal scaled with the integration element
-         @copydoc outerNormal
-         The normal is scaled with the integration element of the intersection. This
-         method is redundant but it may be more efficent to use this function
-         rather than computing the integration element via intersectionGlobal().
-       */
-      FieldVector<ctype, coorddim> integrationOuterNormal(const FieldVector<ctype, mydim> &local) const
-      {
-        return this->realIterator.dereference().integrationOuterNormalDomain(local);
-      }
-
-      /*! @brief Return unit outer normal (length == 1)
-
-         The returned vector may depend on the local position within the intersection.
-         It is scaled to have unit length.
-       */
-      FieldVector<ctype, coorddim> unitOuterNormal(const FieldVector<ctype, mydim> &local) const
-      {
-        return this->realIterator.dereference().unitOuterNormalDomain(local);
       }
 
     };
@@ -548,54 +469,6 @@ namespace RemoteIntersectionInterface
       }
 
 
-      /*! @brief geometrical information about this intersection in local
-         coordinates of the inside() entity.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to local coordinates of the
-         inside() entity.
-       */
-      const TargetLocalGeometry& intersectionSelfLocal() const
-      {
-        return this->realIterator.dereference().intersectionTargetLocal();
-      }
-
-
-      /*! @brief geometrical information about this intersection in local
-         coordinates of the outside() entity.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to local coordinates of the
-         outside() entity.
-       */
-      const DomainLocalGeometry& intersectionNeighborLocal() const
-      {
-        return this->realIterator.dereference().intersectionDomainLocal();
-      }
-
-
-      /*! @brief geometrical information about this intersection in global coordinates.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to global (world) coordinates.
-       */
-      const TargetGeometry& intersectionSelfGlobal() const
-      {
-        return this->realIterator.dereference().intersectionTargetGlobal();
-      }
-
-
-      /*! @brief geometrical information about this intersection in global coordinates.
-
-         This method returns a Geometry object that provides a mapping from
-         local coordinates of the intersection to global (world) coordinates.
-       */
-      const DomainGeometry& intersectionNeighborGlobal() const
-      {
-        return this->realIterator.dereference().intersectionDomainGlobal();
-      }
-
-
       /*! @brief mapping of local coordinates, i.e. selflocal -> neighborlocal
 
          Maps a point in local intersection coords on target intersection to a
@@ -622,20 +495,6 @@ namespace RemoteIntersectionInterface
       GeometryType type() const
       {
         return this->realIterator.dereference().type();
-      }
-
-
-      //! Local number of codim 1 entity in the inside() Entity where intersection is contained in
-      int numberInSelf() const
-      {
-        return this->realIterator.dereference().numberInTargetEntity();
-      }
-
-
-      //! Local number of codim 1 entity in outside() Entity where intersection is contained in
-      int numberInNeighbor() const
-      {
-        return this->realIterator.dereference().numberInDomainEntity();
       }
 
     };
