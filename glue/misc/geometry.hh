@@ -631,34 +631,6 @@ void printGeometry(const GEO &geo, const char *name)
 }
 
 
-/**
- * @brief for a simplex geometry object (2D or 3D only!) checks if a point is contained
- *
- * The given point is in the geometry's global coordinates and it is checked
- * if the point is located inside of the simplicial shape of the geometry's domain.
- * E.g. you can use this routine to check whether a point in local codim 0 coordinates is
- * contained in one of the codim 0 entity's intersections. The intersections' checkInside
- * member fails in this case...
- * IMPORTANT: call this only for geometries that map from 1D to 2D or from 2D to 3D!!
- */
-template<typename GEO, typename K>
-bool checkInside(const GEO &geo, const Dune::FieldVector<K, GEO::coorddimension> &global, K tol = 1E-10)
-{
-  const int cdim = GEO::coorddimension;
-
-  // idea map the point to local coordinates and then back to globals again,
-  // if the result is too different (decide by given tolerance) the point has
-  // not been on the face
-  // NOTE: this is the most generic approach and despite of the function description
-  // works for all kind of geometries!
-  Dune::FieldVector<K, cdim> ownglobal = geo.global(geo.local(global));
-  for (int i = 0; i < cdim; ++i)
-    if (ownglobal[i] < global[i] - tol || ownglobal[i] > global[i] + tol)
-      return false;
-  return true;
-}
-
-
 template <int dim>
 int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
 {
