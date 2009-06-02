@@ -24,8 +24,8 @@ using namespace std;
 using namespace ExtractorClassification;
 
 
-/*   I M P L E M E N T A T I O N   O F   S U B C L A S S   BUILDER IMPL   */
-/*   (Specialization for two "non-surface" grids, i.e. meshes, manifolds) */
+/** \brief   I M P L E M E N T A T I O N   O F   S U B C L A S S   BUILDER IMPL
+   (Specialization for two "non-surface" grids, i.e. meshes, manifolds) */
 
 template<typename GET1, typename GET2, typename SM>
 template<typename BGET1, typename BGET2, typename BSM, ExtractorType type1, ExtractorType type2>
