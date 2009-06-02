@@ -84,7 +84,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent domain simplex' index of @c a smaller
    */
-  static bool domainParentSmaller(const IntPrimitive& a, const IntPrimitive& b)
+  static bool domainParentSmaller(const IntersectionPrimitive<float>& a, const IntersectionPrimitive<float>& b)
   {
     return a.tris[0] < b.tris[0];
   }
@@ -95,7 +95,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent target simplex' index of @c a smaller
    */
-  static bool targetParentSmaller(const IntPrimitive* a, const IntPrimitive* b)
+  static bool targetParentSmaller(const IntersectionPrimitive<float>* a, const IntersectionPrimitive<float>* b)
   {
     return a->tris[1] < b->tris[1];
   }
@@ -119,7 +119,7 @@ private:
      * from the given array
      * @param unordered array containing all overlap simplices
      */
-    void setOverlaps(const std::vector<IntPrimitive>& unordered);
+    void setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered);
 
     /**
      * @brief getter for the number of simplex overlaps in the merged grid
@@ -150,7 +150,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntPrimitive& domain(unsigned int idx) const
+    const IntersectionPrimitive<float>& domain(unsigned int idx) const
     {
       return this->domOrder[idx];
     }
@@ -160,7 +160,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntPrimitive& target(unsigned int idx) const
+    const IntersectionPrimitive<float>& target(unsigned int idx) const
     {
       return *this->tarOrder[idx];
     }
@@ -179,14 +179,14 @@ private:
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending domain parent simplex indices (see _domi)
-    std::vector<IntPrimitive> domOrder;
+    std::vector<IntersectionPrimitive<float> > domOrder;
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending target parent simplex indices (see _tari)
-    std::vector<IntPrimitive*> tarOrder;
+    std::vector<IntersectionPrimitive<float>*> tarOrder;
 
     /// @brief used to recompute original index of an overlap in "tarOrder"
-    IntPrimitive*         baseptr;
+    IntersectionPrimitive<float>*         baseptr;
   };
 
 
@@ -216,7 +216,7 @@ private:
     /// @brief mandatory for the point locator
     bool operator()(const Coords& lower, const Coords& upper, const OverlapCorner& item) const
     {
-      const IntPrimitive& ip = this->olm.domain(item.idx);
+      const IntersectionPrimitive<float>& ip = this->olm.domain(item.idx);
       for (typename Coords::size_type i = 0; i < dim; ++i)
         if (lower[i] > ip.points[item.corner][i] || upper[i] <= ip.points[item.corner][i])
           return false;
@@ -586,7 +586,7 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
 
     {
       // get the representation from the contact mapping object
-      std::vector<IntPrimitive> overlaps;
+      std::vector<IntersectionPrimitive<float> > overlaps;
       this->_cm.getOverlaps(overlaps);
       // initialize the merged grid overlap manager
       this->_olm.setOverlaps(overlaps);
@@ -710,7 +710,7 @@ inline bool ContactMappingSurfaceMerge<dim, T>::targetSimplexMatched(unsigned in
 //	// now check in the results if there is a target vertex there
 //	for (unsigned int i = 0; i < count; ++i)
 //	{
-//		const IntPrimitive& ip = this->_olm.domain(res[i]->idx);
+//		const IntersectionPrimitive<float>& ip = this->_olm.domain(res[i]->idx);
 //		for (int j = 0; j < dim-1; ++j)
 //		{
 //			// for a vertex only 0 and 1 are possible bar. coord values
@@ -793,7 +793,7 @@ template<int dim, typename T>
 Dune::FieldVector<typename ContactMappingSurfaceMerge<dim, T>::Coords, dim> ContactMappingSurfaceMerge<dim, T>::simplexCorners(unsigned int idx) const
 {
   // get the simplex overlap
-  const IntPrimitive& ip = this->_olm.domain(idx);
+  const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
   // copy the relevant fields from the points stored with the simplex overlap
   Dune::FieldVector<Coords, dim> result;
   for (int i = 0; i < dim; ++i)       // #simplex_corners equals dim here
@@ -807,7 +807,7 @@ template<int dim, typename T>
 typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<dim, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntPrimitive& ip = this->_olm.domain(idx);
+  const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
   // read the local coordinates from the overlap's struct,
   // but note that the last coordinate is only stored implicitly
   // (sum must be 1.0, i.e. last is lin. dep.)
@@ -815,7 +815,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 
   if (dim == 2)
   {
-    // ContactMapping::getOverlaps fills the IntPrimitive data objects with
+    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
     // POSITIVELY oriented  "reverse" barycentric coordinates in the domain parent.
     // So in order to have a barycentric representation of local corners we just
     // reverse the order of the local coordinates' components.
@@ -824,7 +824,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
   }
   else
   {
-    // ContactMapping::getOverlaps fills the IntPrimitive data objects with
+    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
     // POSITIVELY oriented barycentric coordinates in the domain parent.
     // Since this is what we want we just stick to this order of corners.
     for (int j = 0; j < dim-1; ++j)             // #dimensions of coordinate space
@@ -847,7 +847,7 @@ template<int dim, typename T>
 typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<dim, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntPrimitive& ip = this->_olm.domain(idx);
+  const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
   // read the local coordinates from the overlap's struct,
   // but note that the last coordinate is only stored implicitly
   // (sum must be 1.0, i.e. last is lin. dep.)
@@ -855,7 +855,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 
   if (dim == 2)
   {
-    // ContactMapping::getOverlaps fills the IntPrimitive data objects with
+    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
     // NEGATIVELY oriented "reverse" barycentric coordinates in the target parent
     // (actually this probably is a bug...).
     // So in order to have a positive orientation of corners we reverse
@@ -865,7 +865,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
   }
   else       // dim == 3
   {
-    // ContactMapping::getOverlaps fills the IntPrimitive data objects with
+    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
     // NEGATIVELY oriented barycentric coordinates in the target parent.
     // So we just reverse the numbering of corners and are done.
     for (int j = 0; j < dim-1; ++j)             // #dimensions of coordinate space
@@ -917,7 +917,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 /* IMPLEMENTATION OF   O V E R L A P  M A N A G E R  SUBCLASS */
 
 template<int dim, typename T>
-void ContactMappingSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<IntPrimitive>& unordered)
+void ContactMappingSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered)
 {
   this->domOrder.resize(unordered.size());
   this->tarOrder.resize(unordered.size(), NULL);
