@@ -624,10 +624,10 @@ FieldVector<K, 3> computeNormal(const FieldVector<K, 3> &v0, const FieldVector<K
 template<typename GEO>
 void printGeometry(const GEO &geo, const char *name)
 {
-  STDOUT(name << " :");
+  std::cout << name << " :";
   for (int i = 0; i < geo.corners(); ++i)
     STDOUT(" (" << geo.corner(i) << ")");
-  STDOUTLN("");
+  std::cout << std::endl;
 }
 
 
