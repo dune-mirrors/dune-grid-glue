@@ -16,8 +16,8 @@
  * @brief grid extractor implementation for simplicial surface grids
  */
 
-#ifndef SIMPLICIALSURFACEEXTRACTOR_HH_
-#define SIMPLICIALSURFACEEXTRACTOR_HH_
+#ifndef SIMPLICIALSURFACEEXTRACTOR_HH
+#define SIMPLICIALSURFACEEXTRACTOR_HH
 
 
 #include <vector>
@@ -32,8 +32,6 @@
 #include "SurfaceDescriptor.hh"
 
 
-using namespace Dune;
-using namespace std;
 
 
 /**

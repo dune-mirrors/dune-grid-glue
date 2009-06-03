@@ -30,8 +30,6 @@
 
 #include "SurfaceDescriptor.hh"
 
-using namespace Dune;
-using namespace std;
 
 
 /**
@@ -40,8 +38,8 @@ using namespace std;
  *
  * Provides methods that build topology information for given grids.
  * Note that these methods only operate on the grid.
- * The template parameters
- * @li GV the grid view class type
+ *
+ * \tparam GV the grid view class type
  */
 template<typename GV>
 class SimplicialMeshExtractor
