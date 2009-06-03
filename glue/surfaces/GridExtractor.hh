@@ -35,10 +35,6 @@
 #include "../misc/conceptchecking.hh"
 
 
-using namespace Dune;
-using namespace std;
-
-
 namespace ExtractorClassification
 {
   enum ExtractorType
@@ -249,7 +245,7 @@ public:
    * @param coords a vector that will be resized (!) and filled with the coordinates,
    * note that the single components are written consecutively
    */
-  void getCoords(vector<FieldVector<ctype, dimw> >& coords) const
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
   {
     imp.getCoords(coords);
   }
@@ -271,7 +267,7 @@ public:
    * Deallocation is done in this class.
    * @return the _indices array
    */
-  void getFaces(vector<SimplexTopology>& faces) const
+  void getFaces(std::vector<SimplexTopology>& faces) const
   {
     imp.getFaces(faces);
   }
