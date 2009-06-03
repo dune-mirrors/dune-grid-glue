@@ -30,7 +30,6 @@
 #include <dune/common/fixedarray.hh>
 #include <dune/grid/common/geometry.hh>
 #include "SurfaceDescriptor.hh"
-#include "GridMeshTraits.hh"
 
 #include "GridExtractorConcept.hh"
 #include "../misc/conceptchecking.hh"

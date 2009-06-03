@@ -20,9 +20,18 @@
 #ifndef GRIDEXTRACTIONTRAITS_HH_
 #define GRIDEXTRACTIONTRAITS_HH_
 
-#include "GridMeshTraits.hh"
+/// @brief enum helper to identify a grid's mesh type
 
-
+namespace MeshClassification
+{
+  enum MeshType
+  {
+    hybrid  = 0,
+    simplex = 1,
+    cube    = 2,
+    rectangular = 3
+  };
+}
 
 /**
  * @class GridExtractionTraitsConcept
@@ -52,7 +61,7 @@ private:
  *
  * This can be overloaded in order to change single components.
  * But actually such a small class is rewritten pretty quickly...
- * (efficieny!)
+ * (efficiency!)
  * !!IMPORTANT!!
  * Use the third parameter with care! E.g. specifying "simplex" for a given grid for which a simplicial
  * extractor would have been chosen anyway results in ambiguous template specializations and thus
@@ -68,9 +77,8 @@ struct DefaultExtractionTraits
   /// @brief default is the extraction of a manifold
   enum { dimS = GridView::dimension-static_cast<int>(!extract_mesh)       };
 
-  /// @brief determines the type of the extractor used, defaults
-  /// to automatic determination through traits class (recommended).
-  static const MeshClassification::MeshType mesh = GridMeshTraits<typename GridView::Grid, mtype>::mesh;
+  /// @brief determines the type of the extractor used
+  static const MeshClassification::MeshType mesh = mtype;
 };
 
 
