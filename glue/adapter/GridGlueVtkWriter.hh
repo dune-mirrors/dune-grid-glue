@@ -209,14 +209,14 @@ public:
       {
         if (dimw == 2)
         {
-          fmerged << domisit.intersectionSelfGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
-                  << domisit.intersectionSelfGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
-                  << domisit.intersectionSelfGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                  << domisit.intersectionSelfGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
+          fmerged << domisit->intersectionDomainGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
+                  << domisit->intersectionDomainGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
+                  << domisit->intersectionDomainGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
+                  << domisit->intersectionDomainGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
         }
         else                         // dimw == 3
           for (int i = 0; i < 3; ++i)
-            fmerged << domisit.intersectionSelfGlobal().corner(i) << (pad ? " 0" : "  ") << endl;
+            fmerged << domisit->intersectionDomainGlobal().corner(i) << (pad ? " 0" : "  ") << endl;
       }
     }
 
@@ -435,14 +435,14 @@ public:
       {
         if (dimw == 2)
         {
-          fmerged << tarisit.intersectionSelfGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
-                  << tarisit.intersectionSelfGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
-                  << tarisit.intersectionSelfGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                  << tarisit.intersectionSelfGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
+          fmerged << tarisit->intersectionTargetGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
+                  << tarisit->intersectionTargetGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
+                  << tarisit->intersectionTargetGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
+                  << tarisit->intersectionTargetGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
         }
         else                         // dimw == 3
           for (int i = 0; i < 3; ++i)
-            fmerged << tarisit.intersectionSelfGlobal().corner(i) << (pad ? " 0" : "  ") << endl;
+            fmerged << tarisit->intersectionTargetGlobal().corner(i) << (pad ? " 0" : "  ") << endl;
       }
     }
 
