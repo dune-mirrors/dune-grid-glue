@@ -30,6 +30,7 @@
 #include "CubeSurfaceExtractor.hh"
 #include "CubeManifoldExtractor.hh"
 #include "CubeMeshExtractor.hh"
+#include "GeneralSurfaceExtractor.hh"
 
 
 /**
@@ -110,7 +111,7 @@ template<typename GSET>
 template<typename LSET>
 struct ExtractorSelector<GSET>::Helper<LSET, 3, 3, 2, MeshClassification::hybrid>
 {
-  //	typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
+  typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 

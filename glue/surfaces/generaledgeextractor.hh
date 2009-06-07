@@ -1,24 +1,24 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 /*
- *  Filename:    CubeSurfaceExtractor.hh
+ *  Filename:    generaledgeextractor.hh
  *  Version:     1.0
- *  Created on:  Apr 25, 2009
+ *  Created on:  Jun 7, 2009
  *  Author:      Gerrit Buse
  *  ---------------------------------
- *  Project:     dune-grid-glue
- *  Description: grid extractor implementation for cube surface grids
+ *  Project:     dune-grid-glue-howto
+ *  Description: <short_description>
  *  subversion:  $Id$
  *
  */
 /**
- * @file CubeSurfaceExtractor.hh
- * @brief
+ * @file generaledgeextractor.hh
+ * @brief extractor class that extracts (edge) boundary of 2d grids
+ * with arbitrary elements
  */
 
-#ifndef CUBESURFACEEXTRACTOR_HH_
-#define CUBESURFACEEXTRACTOR_HH_
-
+#ifndef GENERALEDGEEXTRACTOR_HH_
+#define GENERALEDGEEXTRACTOR_HH_
 
 #include <vector>
 #include <deque>
@@ -30,19 +30,16 @@
 #include <dune/common/fixedarray.hh>
 #include <dune/grid/common/geometry.hh>
 #include "SurfaceDescriptor.hh"
-#include "generaledgeextractor.hh"
+
 
 
 /**
- * @class CubeSurfaceExtractor
- * @brief grid extractor implementation for cube surface grids
- *
- * Provides methods that build topology information for given grids.
- * The template parameters
- * @li GV the grid class type
+ * @class GeneralEdgeExtractor
+ * @brief extractor implementation that extracts (edge) boundary of 2d grids
+ * with arbitrary elements
  */
-template<typename GV, bool rect = false, int dimG = GV::dimension>
-class CubeSurfaceExtractor
+template<typename GV>
+class GeneralEdgeExtractor
 {
 public:
 
@@ -50,23 +47,18 @@ public:
 
   enum
   {
-    dimw = GV::dimensionworld
+    dimw = 2
   };
 
   enum
   {
-    dim = GV::dimension
+    dim = 2
   };
 
   /// @brief compile time number of corners of surface simplices
   enum
   {
-    simplex_corners = dim
-  };
-
-  enum
-  {
-    cube_corners = 1 << (dim-1)
+    simplex_corners = 2
   };
 
   typedef GV GridView;
@@ -117,22 +109,18 @@ private:
     FaceInfo()
     {}
 
-    FaceInfo(unsigned int index_, IndexType parent_, unsigned int num_in_parent_, unsigned int first_)
-      :       parent(parent_), index(index_), num_in_parent(num_in_parent_), first(first_)
+    FaceInfo(unsigned int index_, IndexType parent_, unsigned int num_in_parent_)
+      :       parent(parent_), index(index_), num_in_parent(num_in_parent_)
     {}
 
     /// @brief the index of the parent element (from index set)
     IndexType parent;
 
     /// @brief the index of this face (in internal storage scheme) // NEEDED??
-    unsigned int index : 27;
+    unsigned int index : 28;
 
     /// @brief the number of the face in the parent element
     unsigned int num_in_parent : 4;
-
-    /// @brief flag telling whether this is the first of two triangles
-    /// refining the associated face
-    unsigned int first : 1;
 
     /// @brief the corner indices plus the numbers of the vertices in the parent element
     CornerInfo corners[simplex_corners];
@@ -156,6 +144,7 @@ private:
 
     /// @brief the index of this coordinate (in internal storage scheme) // NEEDED??
     unsigned int index;
+
   };
 
 
@@ -178,7 +167,7 @@ private:
    */
   struct ElementInfo
   {
-    ElementInfo(unsigned int idx_, ElementPtr& p_, unsigned int num_ = 2) : idx(idx_), num(num_), p(p_)
+    ElementInfo(unsigned int idx_, ElementPtr& p_, unsigned int num_ = 1) : idx(idx_), num(num_), p(p_)
     {}
 
     /// @brief the index of this element's first face in the internal list of extracted faces
@@ -240,17 +229,16 @@ public:
    * @brief except from the GridView initializes all member variables with null values
    * @param gv the grid view object to work with
    */
-  CubeSurfaceExtractor(const GV& gv) :
-    _gv(gv), _codim0element(GeometryType::cube, dim)
+  GeneralEdgeExtractor(const GV& gv) : _gv(gv)
   {
-    STDOUTLN("This is CubeSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
+    STDOUTLN("This is GeneralEdgeExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
   }
 
 
   /**
    * @brief default destructor, frees memory
    */
-  ~CubeSurfaceExtractor();
+  ~GeneralEdgeExtractor();
 
 
   /*  F U N C T I O N A L I T Y  */
@@ -261,11 +249,10 @@ public:
    *
    * Extracts a codimension 1 surface from the grid @c g and builds up two arrays
    * with the topology of the surface written to them. The description of the
-   * surface part that is to be extracted is given in form of a mapper or set object
-   * @c m specifying an index set with codimension 0 entities near or on the boundary.
-   * It is assumed that only one geometric shape exists on the boundary.
-   * The template parameter n then denotes the number of corners per boundary element
-   * (e.g. n==3 for triangles in a 3D grid of tetrahedra).
+   * surface part that is to be extracted is given in form of a decider function
+   * that returns a boolean value for each codim 0 entity. If an entity is "in" that
+   * means that all of its boundary faces are considered in the surface.
+   * It is further assumed that only one geometric shape (simplex!) exists on the boundary.
    *
    * Assumed that we are in 2D the coords array will have the structure
    * x0 y0 x1 y1 ... x(n-1) y(n-1)
@@ -274,7 +261,7 @@ public:
    * we have always groups of 3 indices describing one triangle.
    *
    * Hint: The exception Dune::MathError is thrown if not all "interesting" boundary
-   * segments have are cubes.
+   * segments have are simplices.
    * @param descr a descriptor that "selects" the elements whose faces are to add to the surface
    */
   void update(const ElementDescriptor<GV>& descr);
@@ -286,20 +273,20 @@ public:
    *
    * Extracts a codimension 1 surface from the grid @c g and builds up two arrays
    * with the topology of the surface written to them. The description of the
-   * surface part that is to be extracted is given in form of a mapper or set object
-   * @c m specifying an index set with codimension 0 entities near or on the boundary.
-   * It is assumed that only one geometric shape exists on the boundary.
-   * The template parameter n then denotes the number of corners per boundary element
-   * (e.g. n==3 for triangles in a 3D grid of tetrahedra).
+   * surface part that is to be extracted is given in form of a decider function
+   * that returns a boolean value for each codim 0 entity's every face.
+   * Note that the function is only called for faces that are part of the domain boundary.
+   * Inner faces cannot be part of the surface.
+   * It is further assumed that only one geometric shape (simplex!) exists on the boundary.
    *
    * Assumed that we are in 2D the coords array will have the structure
    * x0 y0 x1 y1 ... x(n-1) y(n-1)
    * Values in the @c _indices array then refer to the indices of the coordinates, e.g.
-   * index 1 is associated with the position x1. If the surface consists of triangles
+   * index 1 is associated with the position x1. If we the surface consists of triangles
    * we have always groups of 3 indices describing one triangle.
    *
    * Hint: The exception Dune::MathError is thrown if not all "interesting" boundary
-   * segments have are cubes.
+   * segments have are simplices.
    * @param descr a descriptor that "selects" the faces to add to the surface
    */
   void update(const FaceDescriptor<GV>& descr);
@@ -421,33 +408,18 @@ public:
   }
 
 
-  //	/**
-  //	 * @brief transforms local triangle coordinates to quadrilateral coordinates
-  //	 *
-  //	 * Necessary because quadrilaterals on the surface are internally subdivided
-  //	 * to triangles which are ordinarily accessed with the usual local coordinates.
-  //	 * But if the geometry of the face or the element is about to be used the
-  //	 * triangle coordinates first have to be transformed to quadrilateral coordinates.
-  //	 * @param index the index of the face
-  //	 * @param coords barycentric coords
-  //	 * @return @c local face coords
-  //	 */
-  //	FieldVector<dimw-1> toFaceCoords(unsigned int index, const Coords &coords) const
-  //	{
-  //		// nothing to do for the first triangle
-  //		if (this->_faces[index].first == 1)
-  //			return coords;
-  //
-  //		// it is a "2nd" face => corners (3 2 1) i.e. ((1 1) (0 1) (1 0))
-  //		Coords result;
-  //		ctype first_coord = 1.0 - result[0] - result[1];
-  //		// point 1 = (1 0)  ->  (0 1)
-  //		// point 2 = (0 1)  ->  (1 0)
-  //		// point 3 = (0 0)  ->  (1 1)
-  //		result[0] = 1.0-coords[0];
-  //		result[1] = 1.0-coords[1];
-  //		return result;
-  //	}
+  /**
+   * @brief this is a dummy
+   *
+   * Only required to ensure uniform interfaces with other extractors.
+   * @param index the index of the face
+   * @param coords local face coords
+   * @return @c coords
+   */
+  Coords toFaceCoords(unsigned int index, const Coords &coords) const
+  {
+    return coords;
+  }
 
 
   /**
@@ -564,15 +536,16 @@ public:
     return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
   }
 
-}; // end of class CubeSurfaceExtractor
+}; // end of class GeneralEdgeExtractor
 
 
 
-template<typename GV, bool rect, int dimG>
-CubeSurfaceExtractor<GV, rect, dimG>::~CubeSurfaceExtractor()
+template<typename GV>
+GeneralEdgeExtractor<GV>::~GeneralEdgeExtractor()
 {
   // only the objects that have been allocated manually have to be
   // deallocated manually again
+  // free all the manually allocated memory
   for (typename VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
@@ -582,8 +555,9 @@ CubeSurfaceExtractor<GV, rect, dimG>::~CubeSurfaceExtractor()
 }
 
 
-template<typename GV, bool rect, int dimG>
-void CubeSurfaceExtractor<GV, rect, dimG>::clear()
+
+template<typename GV>
+void GeneralEdgeExtractor<GV>::clear()
 {
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
@@ -609,8 +583,9 @@ void CubeSurfaceExtractor<GV, rect, dimG>::clear()
 }
 
 
-template<typename GV, bool rect, int dimG>
-void CubeSurfaceExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& descr)
+
+template<typename GV>
+void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -633,10 +608,7 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& d
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
     {
-      // check if there are unwanted geometric shapes
-      // if one appears => exit with error
-      if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
+      // there are no unwanted geometric shapes, every 2D element is valid!
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
@@ -662,29 +634,27 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& d
             else
             {
               // the element info exists already, register the additional face
-              this->_elmtInfo[eindex]->num += 2;
+              this->_elmtInfo[eindex]->num++;
             }
 
             // get faces index in parent element
             const int num_in_parent = is->numberInSelf();
 
-            // now we only have to care about the 3D case, i.e. the quadrilateral
-            // face has to be divided into two triangles
+            // add a new face to the temporary collection
+            temp_faces.push_back(FaceInfo(simplex_index, eindex, num_in_parent));
 
-            VertexPtr* vptrs[4];
-            unsigned int vertex_indices[4];
-            unsigned int vertex_numbers[4];
-
-            // get the vertex pointers for the quadrilateral's corner vertices
-            // and try for each of them whether it is already inserted or not
-            for (int i = 0; i < 4; ++i)
+            // try for each of the faces vertices whether it is already inserted or not
+            for (int i = 0; i < simplex_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              vertex_numbers[i] = orientedSubface<dim>(this->_codim0element, num_in_parent, i);
+              int vertex_number = orientedSubface<dim>(this->_codim0element, num_in_parent, i);
 
               // get the vertex pointer and the index from the index set
-              vptrs[i] = new VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
-              IndexType vindex = this->index<dim>(*(*vptrs[i]));
+              VertexPtr vptr(elit->template entity<dim>(vertex_number));
+              IndexType vindex = this->index<dim>(*vptr);
+
+              // remember the vertex' number in parent element's vertices
+              temp_faces.back().corners[i].num = vertex_number;
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
@@ -692,42 +662,21 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& d
               if (vimit == this->_vtxInfo.end())
               {
                 // insert into the map
-                this->_vtxInfo[vindex] = new VertexInfo(vertex_index, *vptrs[i]);
-                // remember this vertex' index
-                vertex_indices[i] = vertex_index;
+                this->_vtxInfo[vindex] = new VertexInfo(vertex_index, vptr);
+                // remember the vertex as a corner of the current face in temp_faces
+                temp_faces.back().corners[i].idx = vertex_index;
                 // increase the current index
                 vertex_index++;
               }
               else
               {
-                // only remember the vertex' index
-                vertex_indices[i] = vimit->second->idx;
+                // only insert the index into the simplices array
+                temp_faces.back().corners[i].idx = vimit->second->idx;
               }
             }
 
-            // now introduce the two triangles subdividing the quadrilateral
-            // ATTENTION: the order of vertices given by "orientedSubface" corresponds to the order
-            // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
-
-            // add a new face to the temporary collection for the first tri
-            temp_faces.push_back(FaceInfo(simplex_index++, eindex, num_in_parent, 1));
-            temp_faces.back().corners[0].idx = vertex_indices[0];
-            temp_faces.back().corners[1].idx = vertex_indices[1];
-            temp_faces.back().corners[2].idx = vertex_indices[2];
-            // remember the vertices' numbers in parent element's vertices
-            temp_faces.back().corners[0].num = vertex_numbers[0];
-            temp_faces.back().corners[1].num = vertex_numbers[1];
-            temp_faces.back().corners[2].num = vertex_numbers[2];
-
-            // add a new face to the temporary collection for the second tri
-            temp_faces.push_back(FaceInfo(simplex_index++, eindex, num_in_parent, 0));
-            temp_faces.back().corners[0].idx = vertex_indices[3];
-            temp_faces.back().corners[1].idx = vertex_indices[2];
-            temp_faces.back().corners[2].idx = vertex_indices[1];
-            // remember the vertices' numbers in parent element's vertices
-            temp_faces.back().corners[0].num = vertex_numbers[3];
-            temp_faces.back().corners[1].num = vertex_numbers[2];
-            temp_faces.back().corners[2].num = vertex_numbers[1];
+            // now increase the current face index
+            simplex_index++;
           }
         }                         // end loop over intersections
       }
@@ -756,7 +705,9 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& d
     current->coord = it1->second->p->geometry().corner(0);
   }
 
-  //	const char prefix[] = "CubeSurfaceExtractor: ";
+
+
+  //	const char prefix[] = "GeneralEdgeExtractor: ";
   //
   //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
   //	for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -788,8 +739,8 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& d
 }
 
 
-template<typename GV, bool rect, int dimG>
-void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& descr)
+template<typename GV>
+void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -815,10 +766,7 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
     {
-      // check if there are unwanted geometric shapes
-      // if one appears => exit with error
-      if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->geometry().type());
+      // there are no unwanted geometric shapes, every 2d element is valid!
 
       // remember the indices of the faces that shall become
       // part of the surface
@@ -839,29 +787,27 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
         eindex = this->indexSet().template index<0>(*elit);
-        this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, 2*boundary_faces.size());
+        this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, boundary_faces.size());
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
         for (typename set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
-          // now we only have to care about the 3D case, i.e. the quadrilateral
-          // face has to be divided into two triangles
+          // add a new face to the temporary collection
+          temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit));
 
-          VertexPtr* vptrs[4];
-          unsigned int vertex_indices[4];
-          unsigned int vertex_numbers[4];
-
-          // get the vertex pointers for the quadrilateral's corner vertices
-          // and try for each of them whether it is already inserted or not
-          for (int i = 0; i < cube_corners; ++i)
+          // try for each of the faces vertices whether it is already inserted or not
+          for (int i = 0; i < simplex_corners; ++i)
           {
             // get the number of the vertex in the parent element
-            vertex_numbers[i] = orientedSubface<dim>(this->_codim0element, *sit, i);
+            int vertex_number = orientedSubface<dim>(this->_codim0element, *sit, i);
 
             // get the vertex pointer and the index from the index set
-            vptrs[i] = new VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
-            IndexType vindex = this->index<dim>(*(*vptrs[i]));
+            VertexPtr vptr(elit->template entity<dim>(vertex_number));
+            IndexType vindex = this->index<dim>(*vptr);
+
+            // remember the vertex' number in parent element's vertices
+            temp_faces.back().corners[i].num = vertex_number;
 
             // if the vertex is not yet inserted in the vertex info map
             // it is a new one -> it will be inserted now!
@@ -869,42 +815,22 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
             if (vimit == this->_vtxInfo.end())
             {
               // insert into the map
-              this->_vtxInfo[vindex] = new VertexInfo(vertex_index, *vptrs[i]);
-              // remember this vertex' index
-              vertex_indices[i] = vertex_index;
+              this->_vtxInfo[vindex] = new VertexInfo(vertex_index, vptr);
+              // remember the vertex as a corner of the current face in temp_faces
+              temp_faces.back().corners[i].idx = vertex_index;
               // increase the current index
               vertex_index++;
             }
             else
             {
-              // only remember the vertex' index
-              vertex_indices[i] = vimit->second->idx;
+              // only insert the index into the simplices array
+              temp_faces.back().corners[i].idx = vimit->second->idx;
             }
           }
 
-          // now introduce the two triangles subdividing the quadrilateral
-          // ATTENTION: the order of vertices given by "orientedSubface" corresponds to the order
-          // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
+          // now increase the current face index
+          simplex_index++;
 
-          // add a new face to the temporary collection for the first tri
-          temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 1));
-          temp_faces.back().corners[0].idx = vertex_indices[0];
-          temp_faces.back().corners[1].idx = vertex_indices[1];
-          temp_faces.back().corners[2].idx = vertex_indices[2];
-          // remember the vertices' numbers in parent element's vertices
-          temp_faces.back().corners[0].num = vertex_numbers[0];
-          temp_faces.back().corners[1].num = vertex_numbers[1];
-          temp_faces.back().corners[2].num = vertex_numbers[2];
-
-          // add a new face to the temporary collection for the second tri
-          temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 0));
-          temp_faces.back().corners[0].idx = vertex_indices[3];
-          temp_faces.back().corners[1].idx = vertex_indices[2];
-          temp_faces.back().corners[2].idx = vertex_indices[1];
-          // remember the vertices' numbers in parent element's vertices
-          temp_faces.back().corners[0].num = vertex_numbers[3];
-          temp_faces.back().corners[1].num = vertex_numbers[2];
-          temp_faces.back().corners[2].num = vertex_numbers[1];
         }                         // end loop over found surface parts
       }
     }             // end loop over elements
@@ -933,7 +859,7 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
   }
 
 
-  //	const char prefix[] = "CubeSurfaceExtractor: ";
+  //	const char prefix[] = "GeneralEdgeExtractor: ";
   //
   //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
   //	for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -962,151 +888,81 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
   //		}
   //
   //	}
+
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeSurfaceExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
+template<typename GV>
+inline void GeneralEdgeExtractor<GV>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
 {
-  // only interpolate barycentric in the given triangle => for flat quads this is exact!
   array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, wcoords, dimw);
+  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, wcoords, simplex_corners);
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeSurfaceExtractor<GV, rect, dimG>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
+template<typename GV>
+inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
 {
-  if (rect)
-  {
-    array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->numberInSelf(index);
-    // computing the locals is straight forward for flat rectangles,
-    // we only need the triangle's corners in element coordinate
-    if (this->_faces[index].first)
-    {
-      // the triangle's corners are (0 1 2) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
-    }
-    else
-    {
-      // the triangle's corners are (3 2 1) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, 3-i);
-    }
-    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
-  }
-  else
-  {
-    Coords wcoords;
-    this->localAndGlobalCoords(index, bcoords, ecoords, wcoords);
-  }
+  array<Coords, simplex_corners> corners;
+  unsigned int num_in_self = this->numberInSelf(index);
+  for (int i = 0; i < simplex_corners; ++i)
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, ecoords, simplex_corners);
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeSurfaceExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
+template<typename GV>
+inline void GeneralEdgeExtractor<GV>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
 {
+  this->localCoords(index, bcoords, ecoords);
+  //	wcoords = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().global(ecoords);
   this->globalCoords(index, bcoords, wcoords);
-  // for rectangles avoid using world coordinates
-  if (rect)
-    this->localCoords(index, bcoords, ecoords);
-  else
-    ecoords = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().local(wcoords);
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV>
 template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
+inline void GeneralEdgeExtractor<GV>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
 {
   array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<simplex_corners, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
+    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV>
 template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect, dimG>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
+inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
 {
-  if (rect)
-  {
-    array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->numberInSelf(index);
-    // computing the locals is straight forward for flat rectangles,
-    // we only need the triangle's corners in element coordinate
-    if (this->_faces[index].first)
-    {
-      // the triangle's corners are (0 1 2) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
-    }
-    else
-    {
-      // the triangle's corners are (3 2 1) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, 3-i);
-    }
-    for (int i = 0; i < size; ++i)
-      interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
-  }
-  else
-  {
-    CoordContainer wcoords;
-    this->localAndGlobalCoords(index, bcoords, ecoords, wcoords, size);
-  }
+  array<Coords, simplex_corners> corners;
+  unsigned int num_in_self = this->numberInSelf(index);
+  for (int i = 0; i < simplex_corners; ++i)
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+  for (int i = 0; i < size; ++i)
+    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV>
 template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
+inline void GeneralEdgeExtractor<GV>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
 {
-  this->globalCoords(index, bcoords, wcoords, size);
-  // for rectangles avoid using world coordinates
-  if (rect)
-    this->localCoords(index, bcoords, ecoords, size);
-  else
+  array<Coords, simplex_corners> corners;
+  ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
+  unsigned int num_in_self = this->numberInSelf(index);
+  for (int i = 0; i < simplex_corners; ++i)
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+  for (int i = 0; i < size; ++i)
   {
-    ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
-    for (int i = 0; i < size; ++i)
-      ecoords[i] = eptr->geometry().local(wcoords[i]);
+    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
+    wcoords[i] = eptr->geometry().global(ecoords[i]);
   }
 }
 
 
 
-/*   S P E C I A L I Z A T I O N   F O R   2 D   G R I D S   */
-template<typename GV, bool rect>
-class CubeSurfaceExtractor<GV, rect, 2> : public GeneralEdgeExtractor<GV>
-{
-private:
-
-  typedef GeneralEdgeExtractor<GV>  Base;
-
-
-public:
-
-  /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
-
-  enum
-  {
-    cube_corners = 1 << (Base::dim-1)
-  };
-
-
-  /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
-
-  CubeSurfaceExtractor(const GV& gv) : Base(gv)
-  {
-    STDOUTLN("This is CubeSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << GeometryType(GeometryType::cube, Base::dim) << "!");
-  }
-};
-
-#endif // CUBESURFACEEXTRACTOR_HH_
+#endif // GENERALEDGEEXTRACTOR_HH_

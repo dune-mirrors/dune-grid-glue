@@ -30,6 +30,7 @@
 #include <dune/common/fixedarray.hh>
 #include <dune/grid/common/geometry.hh>
 #include "SurfaceDescriptor.hh"
+#include "generaledgeextractor.hh"
 
 
 
@@ -42,7 +43,7 @@
  * The template parameters
  * @li GV the grid class type
  */
-template<typename GV>
+template<typename GV, int dimG = GV::dimension>
 class SimplicialSurfaceExtractor
 {
 public:
@@ -137,7 +138,7 @@ private:
     {}
 
     CoordinateInfo(unsigned int index_, IndexType vtxindex_)
-      :       vtxindex(vtxindex_), index(index_), num_faces(0), faces(NULL)
+      :       vtxindex(vtxindex_), index(index_)
     {}
 
     /// @brief the index of the parent element (from index set)
@@ -147,14 +148,7 @@ private:
     Coords coord;
 
     /// @brief the index of this coordinate (in internal storage scheme) // NEEDED??
-    unsigned int index : 28;
-
-    /// @brief the number of extracted faces with this coord as corner,
-    /// major purpose is holding the length of the array "faces"
-    unsigned int num_faces : 4;
-
-    /// @brief holds the indices of the faces of which the coordinate is a corner
-    unsigned int* faces;
+    unsigned int index;
   };
 
 
@@ -404,17 +398,6 @@ public:
   }
 
 
-  //	/**
-  //	 * @brief gets index of first face in _indices associated with given element
-  //	 * @return the index if possible, -1 else
-  //	 */
-  //	int firstFaceIndex(const Element& e) const
-  //	{
-  //		typename ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
-  //		return it == this->_elmtInfo.end() ? -1 : it->second->idx;
-  //	}
-
-
   /**
    * @brief gets index of first face as well as the total number of faces that
    * were extracted from this element
@@ -577,39 +560,15 @@ public:
       DUNE_THROW(GridError, "invalid coordinate index");
     return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
   }
-
-
-  /**
-   * @brief gets the indices of all faces with the given coordinate as corner
-   * @param index the index of the coordinate
-   * @param faces array if given index was legal
-   * @param count length of array if successful
-   * @return TRUE <=> if successful
-   * DO NOT MODIFY THE ARRAY'S CONTENT!
-   */
-  bool parentFaces(unsigned int index,  unsigned int const*& faces, unsigned int& count) const
-  {
-    if (index >= this->_coords.size())
-      return false;
-    // index valid
-    faces = this->_coords[index].faces;
-    count = this->_coords[index].num_faces;
-    return true;
-  }
-
 }; // end of class SimplicialSurfaceExtractor
 
 
 
-template<typename GV>
-SimplicialSurfaceExtractor<GV>::~SimplicialSurfaceExtractor()
+template<typename GV, int dimG>
+SimplicialSurfaceExtractor<GV, dimG>::~SimplicialSurfaceExtractor()
 {
   // only the objects that have been allocated manually have to be
   // deallocated manually again
-  // free all the manually allocated memory
-  for (unsigned int i = 0; i < this->_coords.size(); ++i)
-    if (this->_coords[i].faces != NULL)
-      delete this->_coords[i].faces;
   for (typename VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
@@ -620,16 +579,12 @@ SimplicialSurfaceExtractor<GV>::~SimplicialSurfaceExtractor()
 
 
 
-template<typename GV>
-void SimplicialSurfaceExtractor<GV>::clear()
+template<typename GV, int dimG>
+void SimplicialSurfaceExtractor<GV, dimG>::clear()
 {
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
   {
-    // free all the manually allocated memory
-    for (unsigned int i = 0; i < this->_coords.size(); ++i)
-      if (this->_coords[i].faces != NULL)
-        delete this->_coords[i].faces;
     vector<CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
@@ -652,8 +607,8 @@ void SimplicialSurfaceExtractor<GV>::clear()
 
 
 
-template<typename GV>
-void SimplicialSurfaceExtractor<GV>::update(const ElementDescriptor<GV>& descr)
+template<typename GV, int dimG>
+void SimplicialSurfaceExtractor<GV, dimG>::update(const ElementDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -776,38 +731,6 @@ void SimplicialSurfaceExtractor<GV>::update(const ElementDescriptor<GV>& descr)
     current->coord = it1->second->p->geometry().corner(0);
   }
 
-
-  // now add the vertices' parent faces in the _vertexFaces map.
-  // therefore iterate over all indices in the _index array...
-  {
-    vector<unsigned int> refcount(this->_coords.size(), 0);
-
-    // for each coordinate count the references in the _indices array
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-        refcount[this->_faces[i].corners[j].idx]++;
-
-    // allocate the right amount of storage for each vertex's references
-    for (unsigned int i = 0; i < this->_coords.size(); ++i)
-    {
-      // allocate an array and initialize its first element with its length
-      this->_coords[i].num_faces = refcount[i];
-      this->_coords[i].faces = new unsigned int[refcount[i]];
-      refcount[i] = 0;                   // used as "pointer" in next loop
-    }
-
-    // add the references
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-    {
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-      {
-        unsigned int ref = this->_faces[i].corners[j].idx;
-        this->_coords[ref].faces[refcount[ref]] = i;
-        refcount[ref]++;
-      }
-    }
-  }
-
   //	const char prefix[] = "SimplicialSurfaceExtractor: ";
   //
   //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
@@ -840,8 +763,8 @@ void SimplicialSurfaceExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 }
 
 
-template<typename GV>
-void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
+template<typename GV, int dimG>
+void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -963,37 +886,6 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
   }
 
 
-  // now add the vertices' parent faces in the _vertexFaces map.
-  // therefore iterate over all indices in the _index array...
-  {
-    vector<unsigned int> refcount(this->_coords.size(), 0);
-
-    // for each coordinate count the references in the _indices array
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-        refcount[this->_faces[i].corners[j].idx]++;
-
-    // allocate the right amount of storage for each vertex's references
-    for (unsigned int i = 0; i < this->_coords.size(); ++i)
-    {
-      // allocate an array and initialize its first element with its length
-      this->_coords[i].num_faces = refcount[i];
-      this->_coords[i].faces = new unsigned int[refcount[i]];
-      refcount[i] = 0;                   // used as "pointer" in next loop
-    }
-
-    // add the references
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-    {
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-      {
-        unsigned int ref = this->_faces[i].corners[j].idx;
-        this->_coords[ref].faces[refcount[ref]] = i;
-        refcount[ref]++;
-      }
-    }
-  }
-
   //	const char prefix[] = "SimplicialSurfaceExtractor: ";
   //
   //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
@@ -1027,8 +919,8 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 }
 
 
-template<typename GV>
-inline void SimplicialSurfaceExtractor<GV>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
+template<typename GV, int dimG>
+inline void SimplicialSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
 {
   array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
@@ -1037,8 +929,8 @@ inline void SimplicialSurfaceExtractor<GV>::globalCoords(unsigned int index, con
 }
 
 
-template<typename GV>
-inline void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
+template<typename GV, int dimG>
+inline void SimplicialSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
 {
   array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
@@ -1048,8 +940,8 @@ inline void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, cons
 }
 
 
-template<typename GV>
-inline void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
+template<typename GV, int dimG>
+inline void SimplicialSurfaceExtractor<GV, dimG>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->localCoords(index, bcoords, ecoords);
   //	wcoords = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().global(ecoords);
@@ -1057,9 +949,9 @@ inline void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int in
 }
 
 
-template<typename GV>
+template<typename GV, int dimG>
 template<typename CoordContainer>
-void SimplicialSurfaceExtractor<GV>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
+void SimplicialSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
 {
   array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
@@ -1069,9 +961,9 @@ void SimplicialSurfaceExtractor<GV>::globalCoords(unsigned int index, const Coor
 }
 
 
-template<typename GV>
+template<typename GV, int dimG>
 template<typename CoordContainer>
-void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
+void SimplicialSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
 {
   array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
@@ -1082,9 +974,9 @@ void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, const Coord
 }
 
 
-template<typename GV>
+template<typename GV, int dimG>
 template<typename CoordContainer>
-void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
+void SimplicialSurfaceExtractor<GV, dimG>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
 {
   array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
@@ -1097,6 +989,35 @@ void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, co
     wcoords[i] = eptr->geometry().global(ecoords[i]);
   }
 }
+
+
+/*   S P E C I A L I Z A T I O N   F O R   2 D   G R I D S   */
+template<typename GV>
+class SimplicialSurfaceExtractor<GV, 2> : public GeneralEdgeExtractor<GV>
+{
+private:
+
+  typedef GeneralEdgeExtractor<GV>  Base;
+
+
+public:
+
+  /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
+
+  enum
+  {
+    cube_corners = 1 << (Base::dim-1)
+  };
+
+
+  /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
+
+  SimplicialSurfaceExtractor(const GV& gv) : Base(gv)
+  {
+    STDOUTLN("This is SimplicialSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << GeometryType(GeometryType::cube, Base::dim) << "!");
+  }
+};
+
 
 
 #endif // SIMPLICIALSURFACEEXTRACTOR_HH_
