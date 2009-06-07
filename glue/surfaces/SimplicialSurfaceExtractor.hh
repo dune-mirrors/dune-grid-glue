@@ -225,26 +225,6 @@ private:
   const GeometryType _codim0element;
 
 
-protected:
-
-  /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
-
-  /**
-   * @brief except from the GridView initializes all member variables with null values
-   *
-   * Enables the use of this class for other line types, i.e. by
-   * inheriting this class and using this constructor the class
-   * can be used with cube-style lines, too.
-   * @param gv the grid view object to work with
-   * @param gt the exptected face-GeometryType
-   */
-  SimplicialSurfaceExtractor(const GV& gv, const GeometryType& gt) :
-    _gv(gv), _codim0element(gt)
-  {
-    STDOUTLN("This is SimplicialSurfaceExtractor (protected constructor) on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
-  }
-
-
 public:
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */

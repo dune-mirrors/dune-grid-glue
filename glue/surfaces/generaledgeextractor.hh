@@ -217,10 +217,6 @@ private:
   ElementInfoMap _elmtInfo;
 
 
-  /// @brief geometry type of the surface patches
-  const GeometryType _codim0element;
-
-
 public:
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
@@ -231,7 +227,7 @@ public:
    */
   GeneralEdgeExtractor(const GV& gv) : _gv(gv)
   {
-    STDOUTLN("This is GeneralEdgeExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
+    STDOUTLN("This is GeneralEdgeExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space!");
   }
 
 
@@ -617,6 +613,8 @@ void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
         // watch next element
         bool added = false;
 
+        GeometryType gt = elit->geometry().type();
+
         // iterate over all intersections of codim 1
         for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
         {
@@ -647,7 +645,7 @@ void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
             for (int i = 0; i < simplex_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              int vertex_number = orientedSubface<dim>(this->_codim0element, num_in_parent, i);
+              int vertex_number = orientedSubface<dim>(gt, num_in_parent, i);
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template entity<dim>(vertex_number));
@@ -789,6 +787,8 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         eindex = this->indexSet().template index<0>(*elit);
         this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, boundary_faces.size());
 
+        GeometryType gt = elit->geometry().type();
+
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
         for (typename set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
@@ -800,7 +800,7 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           for (int i = 0; i < simplex_corners; ++i)
           {
             // get the number of the vertex in the parent element
-            int vertex_number = orientedSubface<dim>(this->_codim0element, *sit, i);
+            int vertex_number = orientedSubface<dim>(gt, *sit, i);
 
             // get the vertex pointer and the index from the index set
             VertexPtr vptr(elit->template entity<dim>(vertex_number));
@@ -898,7 +898,7 @@ inline void GeneralEdgeExtractor<GV>::globalCoords(unsigned int index, const Coo
   array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, wcoords, simplex_corners);
+  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, wcoords, dimw);
 }
 
 
@@ -907,9 +907,10 @@ inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const Coor
 {
   array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
+  GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
   for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, ecoords, simplex_corners);
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
+  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
 }
 
 
@@ -940,8 +941,9 @@ inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const Coor
 {
   array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
+  GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
   for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   for (int i = 0; i < size; ++i)
     interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
 }
@@ -953,9 +955,10 @@ inline void GeneralEdgeExtractor<GV>::localAndGlobalCoords(unsigned int index, c
 {
   array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
+  GeometryType gt = eptr->geometry().type();
   unsigned int num_in_self = this->numberInSelf(index);
   for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   for (int i = 0; i < size; ++i)
   {
     interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
