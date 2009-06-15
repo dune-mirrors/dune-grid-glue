@@ -22,7 +22,7 @@
 #define SIMPLEXGEOMETRY_HH_
 
 #include <dune/common/static_assert.hh>
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
 #include <dune/grid/genericgeometry/geometrytraits.hh>
 #include <dune/grid/genericgeometry/cornermapping.hh>
