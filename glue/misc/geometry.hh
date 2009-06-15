@@ -21,7 +21,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
 
 using namespace Dune;

@@ -22,7 +22,7 @@
 
 #include <vector>
 #include <dune/common/fvector.hh>
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 #include <dune/grid/genericgeometry/misc.hh>
 #include "SurfaceDescriptor.hh"
 

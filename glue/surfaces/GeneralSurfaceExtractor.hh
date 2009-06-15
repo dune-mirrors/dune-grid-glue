@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 #include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/common/geometry.hh>
 #include "SurfaceDescriptor.hh"
