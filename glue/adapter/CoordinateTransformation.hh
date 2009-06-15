@@ -13,19 +13,24 @@
  */
 /**
  * @file CoordinateTransformation.hh
- * @brief Simple class for uniform transformations of vertices.
+ * @brief Simple class for transformations of vertices.
  */
 
-#ifndef COORDINATETRANSFORMATION_HH_
-#define COORDINATETRANSFORMATION_HH_
+#ifndef COORDINATETRANSFORMATION_HH
+#define COORDINATETRANSFORMATION_HH
 
-
+/** \brief Base class for vertex transformations
+    \tparam dim The grid dimension
+    \tparam ctype The type used for coordinates
+ */
 template<int dim, typename ctype = double>
 class CoordinateTransformation
 {
 public:
+  /** \brief The type used for coordinate vectors */
   typedef Dune::FieldVector<ctype, dim> Coords;
 
+  /** \brief Map a point to a new position */
   virtual const Coords operator()(const Coords& c) const = 0;
 
 };
