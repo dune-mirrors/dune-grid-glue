@@ -6,7 +6,6 @@ surfaces_HEADERS = GridExtractor.hh\
 	GridExtractorConcept.hh\
 	ExtractorSelector.hh\
 	GeneralSurfaceExtractor.hh\
-	GridMeshTraits.hh\
 	SimplicialManifoldExtractor.hh\
 	SimplicialMeshExtractor.hh\
 	SimplicialSurfaceExtractor.hh\
