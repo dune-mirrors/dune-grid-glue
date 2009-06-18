@@ -236,7 +236,9 @@ public:
   SimplicialSurfaceExtractor(const GV& gv) :
     _gv(gv), _codim0element(Dune::GeometryType::simplex, dim)
   {
-    STDOUTLN("This is SimplicialSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
+    std::cout << "This is SimplicialSurfaceExtractor on a <" << GV::dimension
+              << "," << GV::dimensionworld << "> grid working in "
+              << dimw << " space expecting faces of type " << _codim0element << "!" << std::endl;
   }
 
 
