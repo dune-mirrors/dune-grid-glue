@@ -26,6 +26,7 @@ AC_CONFIG_FILES([Makefile
   glue/merging/Makefile
   glue/misc/Makefile
   glue/surfaces/Makefile
+  glue/test/Makefile
   doc/Makefile
   doc/doxygen/Makefile
   doc/doxygen/Doxyfile
