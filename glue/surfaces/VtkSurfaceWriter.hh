@@ -22,6 +22,7 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include <cstring>
 
 #include "../adapter/GridGlueVtkWriter.hh"
 
@@ -46,7 +47,7 @@ public:
 
   void setFilename(const char* name)
   {
-    if (strlen(name) > 0)
+    if (std::strlen(name) > 0)
       this->_filename = name;
   }
 
