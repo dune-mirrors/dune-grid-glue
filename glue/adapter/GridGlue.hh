@@ -253,7 +253,7 @@ protected:
     for (unsigned int i = 0; i < this->_sm.nSimplices(); ++i)
       this->_intersections[i] = RemoteIntersectionImpl(this, i);
 
-    STDOUTLN("GridGlue::updateIntersections : The number of overlaps is " << this->_sm.nSimplices());
+    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << this->_sm.nSimplices() << std::endl;
   }
 
 
@@ -493,7 +493,7 @@ GridGlue<GET1, GET2, SM>::GridGlue(const DomainGridView& gv1, const TargetGridVi
     _builder(*const_cast<GridGlue<GET1, GET2, SM>*>(this)),
     NULL_INTERSECTION(this, -1), _intersections(0, NULL_INTERSECTION)
 {
-  STDOUTLN("GridGlue: Constructor succeeded!");
+  std::cout << "GridGlue: Constructor succeeded!" << std::endl;
 }
 
 

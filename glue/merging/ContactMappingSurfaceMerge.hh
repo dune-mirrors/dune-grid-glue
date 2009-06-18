@@ -553,7 +553,7 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
 
 
 
-    STDOUTLN("Building merged grid... (wait for finish!)");
+    std::cout << "Building merged grid... (wait for finish!)" << std::endl;
     // compute the merged grid using the contact mapping class' functionality
 
     // Hack: recopy data to match new interface of psurface library
@@ -582,7 +582,7 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
                     target_coords_blocked, target_segments_blocked,
                     this->_maxdist, this->_domnormals);
 
-    STDOUTLN("Finished building merged grid!");
+    std::cout << "Finished building merged grid!" << std::endl;
 
     {
       // get the representation from the contact mapping object

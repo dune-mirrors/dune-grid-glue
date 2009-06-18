@@ -673,7 +673,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const ElementDescriptor<GV>& desc
             switch (face_corners)
             {
             case 3 :
-              STDOUTLN("adding TRI...");
+              std::cout << "adding TRI..." << std::endl;
               // we have a triangle here
 
               // add a new face to the temporary collection
@@ -715,7 +715,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const ElementDescriptor<GV>& desc
               simplex_index++;
               break;
             case 4 :
-              STDOUTLN("adding QUAD...");
+              std::cout << "adding QUAD..." << std::endl;
               // we have a quadrilateral here
               VertexPtr* vptrs[4];
               unsigned int vertex_indices[4];
@@ -904,7 +904,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
           switch (face_corners)
           {
           case 3 :
-            STDOUTLN("adding TRI...");
+            std::cout << "adding TRI..." << std::endl;
             // we have a triangle here
 
             // add a new face to the temporary collection
@@ -946,7 +946,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
             simplex_index++;
             break;
           case 4 :
-            STDOUTLN("adding QUAD...");
+            std::cout << "adding QUAD..." << std::endl;
             // we have a quadrilateral here
             VertexPtr* vptrs[4];
             unsigned int vertex_indices[4];

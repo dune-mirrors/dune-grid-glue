@@ -243,7 +243,10 @@ public:
   CubeSurfaceExtractor(const GV& gv) :
     _gv(gv), _codim0element(GeometryType::cube, dim)
   {
-    STDOUTLN("This is CubeSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
+    std::cout << "This is CubeSurfaceExtractor on a <"
+              << GV::dimension << "," << GV::dimensionworld
+              << "> grid working in " << dimw
+              << " space expecting faces of type " << _codim0element << "!" << std::endl;
   }
 
 
