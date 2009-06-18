@@ -53,13 +53,13 @@ public:
   template<typename K>
   void writeSurface(const std::vector<K>& coords, const std::vector<unsigned int>& indices, int corners, int dim)
   {
-    ofstream fos;
+    std::ofstream fos;
     char buffer[64];
     sprintf(buffer, "%s.vtk", this->_filename);
     fos.open(buffer);
-    fos << setprecision(8) << setw(1);
+    fos << std::setprecision(8) << std::setw(1);
     // write preamble
-    fos << "# vtk DataFile Version 2.0\nFilename: " << buffer << "\nASCII" << endl;
+    fos << "# vtk DataFile Version 2.0\nFilename: " << buffer << "\nASCII" << std::endl;
     this->writePoints(coords, dim, fos);
     const int polycount = indices.size()/corners;
     int corner_count[polycount];
@@ -73,13 +73,13 @@ public:
   template<typename K, typename T>
   void writeSurfaceElementData(const std::vector<K>& coords, const std::vector<unsigned int>& indices, int corners, const std::vector<T>& data, const char* dataname, int dim)
   {
-    ofstream fos;
+    std::ofstream fos;
     char buffer[64];
     sprintf(buffer, "%s.vtk", this->_filename);
     fos.open(buffer);
-    fos << setprecision(8) << setw(1);
+    fos << std::setprecision(8) << std::setw(1);
     // write preamble
-    fos << "# vtk DataFile Version 2.0\nFilename: " << buffer << "\nASCII" << endl;
+    fos << "# vtk DataFile Version 2.0\nFilename: " << buffer << "\nASCII" << std::endl;
     this->writePoints(coords, dim, fos);
     const int polycount = indices.size()/corners;
     int corner_count[polycount];
@@ -94,13 +94,13 @@ public:
   template<typename K, typename T>
   void writeSurfaceVertexData(const std::vector<K>& coords, const std::vector<unsigned int>& indices, int corners, const std::vector<T>& data, const char* dataname, int dim)
   {
-    ofstream fos;
+    std::ofstream fos;
     char buffer[64];
     sprintf(buffer, "%s.vtk", this->_filename);
     fos.open(buffer);
-    fos << std::setprecision(8) << setw(1);
+    fos << std::setprecision(8) << std::setw(1);
     // write preamble
-    fos << "# vtk DataFile Version 2.0\nFilename: " << buffer << "\nASCII" << endl;
+    fos << "# vtk DataFile Version 2.0\nFilename: " << buffer << "\nASCII" << std::endl;
     this->writePoints(coords, dim, fos);
     const int polycount = indices.size()/corners;
     int corner_count[polycount];
@@ -114,10 +114,10 @@ public:
 protected:
 
   template<typename K>
-  void writePoints(const std::vector<K>& coords, int dim, ofstream& fos)
+  void writePoints(const std::vector<K>& coords, int dim, std::ofstream& fos)
   {
     int coord_count = coords.size() / dim;
-    fos << "DATASET POLYDATA\nPOINTS " << coord_count*(dim == 2 ? 2 : 1) << " " << TypeNames[Nametraits<K>::nameidx] << endl;
+    fos << "DATASET POLYDATA\nPOINTS " << coord_count*(dim == 2 ? 2 : 1) << " " << TypeNames[Nametraits<K>::nameidx] << std::endl;
     const K* current = &coords[0];
     for (int i = 0; i < coord_count; ++i)
     {
@@ -131,11 +131,11 @@ protected:
     }
   }
 
-  void writePolygons(const std::vector<unsigned int>& indices, const int* corners, int ncorners, int dim, ofstream& fos)
+  void writePolygons(const std::vector<unsigned int>& indices, const int* corners, int ncorners, int dim, std::ofstream& fos)
   {
     if (dim == 2)
     {
-      fos << "POLYGONS " << indices.size()/2 << " " << 5*(indices.size() / 2) << endl;
+      fos << "POLYGONS " << indices.size()/2 << " " << 5*(indices.size() / 2) << std::endl;
       for (unsigned int i = 0; i < indices.size(); i += 2)
         fos << "4 " << 2*indices[i] << " " << 2*indices[i+1] << " " << 2*indices[i+1]+1 << " "<< 2*indices[i]+1 << std::endl;
 
@@ -144,7 +144,7 @@ protected:
       //			for (int i = 0; i < ncorners; ++i)
       //				sum += (corners[i] > 2 ? corners[i] : 3);
       //
-      //			fos << "POLYGONS " << ncorners << " " << sum << endl;
+      //			fos << "POLYGONS " << ncorners << " " << sum << std::endl;
       //			int index = 0;
       //			for (int i = 0; i < ncorners; ++i)
       //			{
@@ -157,7 +157,7 @@ protected:
       //
       //				for (int j = 0; j < corners[i]; ++j)
       //					fos << " " << indices[index++];
-      //				fos << endl;
+      //				fos << std::endl;
       //			}
     }
     else
@@ -165,43 +165,43 @@ protected:
       int sum = ncorners;
       for (int i = 0; i < ncorners; ++i)
         sum += corners[i];
-      fos << "POLYGONS " << ncorners << " " << sum << endl;
+      fos << "POLYGONS " << ncorners << " " << sum << std::endl;
       int index = 0;
       for (int i = 0; i < ncorners; ++i)
       {
         fos << corners[i];
         for (int j = 0; j < corners[i]; ++j)
           fos << " " << indices[index++];
-        fos << endl;
+        fos << std::endl;
       }
     }
   }
 
   template<typename T>
-  void writeCellData(const std::vector<T>& data, const char* dataname, int dim, ofstream& fos)
+  void writeCellData(const std::vector<T>& data, const char* dataname, int dim, std::ofstream& fos)
   {
-    fos << "CELL_DATA " << data.size()*(dim == 2 ? 2 : 1) << endl;
-    fos << "SCALARS " << dataname << " " << TypeNames[Nametraits<T>::nameidx] << " 1" << endl;
-    fos << "LOOKUP_TABLE default" << endl;
+    fos << "CELL_DATA " << data.size()*(dim == 2 ? 2 : 1) << std::endl;
+    fos << "SCALARS " << dataname << " " << TypeNames[Nametraits<T>::nameidx] << " 1" << std::endl;
+    fos << "LOOKUP_TABLE default" << std::endl;
     for (unsigned int i = 0; i < data.size(); ++i)
     {
-      fos << data[i] << endl;
+      fos << data[i] << std::endl;
       if (dim == 2)
-        fos << data[i] << endl;
+        fos << data[i] << std::endl;
     }
   }
 
   template<typename T>
-  void writePointData(const std::vector<T>& data, const char* dataname, int dim, ofstream& fos)
+  void writePointData(const std::vector<T>& data, const char* dataname, int dim, std::ofstream& fos)
   {
-    fos << "POINT_DATA " << data.size()*(dim == 2 ? 2 : 1) << endl;
-    fos << "SCALARS " << dataname << " " << TypeNames[Nametraits<T>::nameidx] << " 1" << endl;
-    fos << "LOOKUP_TABLE default" << endl;
+    fos << "POINT_DATA " << data.size()*(dim == 2 ? 2 : 1) << std::endl;
+    fos << "SCALARS " << dataname << " " << TypeNames[Nametraits<T>::nameidx] << " 1" << std::endl;
+    fos << "LOOKUP_TABLE default" << std::endl;
     for (unsigned int i = 0; i < data.size(); ++i)
     {
-      fos << data[i] << endl;
+      fos << data[i] << std::endl;
       if (dim == 2)
-        fos << data[i] << endl;
+        fos << data[i] << std::endl;
     }
   }
 

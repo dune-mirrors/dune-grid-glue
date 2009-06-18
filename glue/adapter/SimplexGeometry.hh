@@ -48,15 +48,15 @@
  */
 template<typename G, bool is_manifold = false>
 struct LocalSimplexGeometryTraits
-  : public GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld - static_cast<int>(is_manifold), true>
+  : public Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld - static_cast<int>(is_manifold), true>
 {
-  typedef typename GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld - static_cast<int>(is_manifold), true> Base;
+  typedef typename Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld - static_cast<int>(is_manifold), true> Base;
 
   /// @brief we only talk about simplices here!
   static const bool hybrid = false;
 
   /// @brief since non-hybrid, an element type can be specified
-  static const GeometryType::BasicType dunetype = GeometryType::simplex;
+  static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
 
   /**
    * Note:
@@ -68,8 +68,8 @@ struct LocalSimplexGeometryTraits
   template<class Topology>
   struct Mapping
   {
-    typedef GenericGeometry::CoordStorage<typename Base::CoordTraits, Topology, Base::dimWorld>                        CornerStorage;
-    typedef GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
+    typedef Dune::GenericGeometry::CoordStorage<typename Base::CoordTraits, Topology, Base::dimWorld>                        CornerStorage;
+    typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
   };
 
   // caching configuration chosen in base class is fine
@@ -78,7 +78,7 @@ struct LocalSimplexGeometryTraits
 
 /**
  * @class SimplexGeometryTraits
- * @brief tweaked geometry traits passed to GenericGeometry::BasicGeometry
+ * @brief tweaked geometry traits passed to Dune::GenericGeometry::BasicGeometry
  *
  * This geometry traits class configures BasicGeometry to use only affine mappings
  * for simplicial (i.e. especially non-hybrid) grid structures.
@@ -92,14 +92,14 @@ struct LocalSimplexGeometryTraits
  */
 template<typename G>
 struct GlobalSimplexGeometryTraits
-  : public GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, true>
+  : public Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, true>
 {
-  typedef typename GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, true> Base;
+  typedef typename Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, true> Base;
 
   /// @brief we only talk about simplices here!
   static const bool hybrid = false;
 
-  static const GeometryType::BasicType dunetype = GeometryType::simplex;
+  static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
 
   /**
    * Note:
@@ -110,8 +110,8 @@ struct GlobalSimplexGeometryTraits
   template<class Topology>
   struct Mapping
   {
-    typedef GenericGeometry::CoordStorage<typename Base::CoordTraits, Topology, Base::dimWorld>                        CornerStorage;
-    typedef GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
+    typedef Dune::GenericGeometry::CoordStorage<typename Base::CoordTraits, Topology, Base::dimWorld>                        CornerStorage;
+    typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
   };
 
   // caching configuration chosen in base class is fine
@@ -130,11 +130,11 @@ struct GlobalSimplexGeometryTraits
  * for the case of exclusively simplicial geometries.
  */
 template<int mydim, int coorddim, typename G>
-class SimplexGeometry : public GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<G> >
+class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<G> >
 {
   typedef SimplexGeometry<mydim, coorddim, G> This;
 
-  typedef GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<G> > Base;
+  typedef Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<G> > Base;
 
   enum { simplex_corners = coorddim + static_cast<int>(mydim == coorddim) };
 
@@ -145,9 +145,9 @@ protected:
   template<bool>
   struct CommonNormalComputer
   {
-    static FieldVector<typename G::ctype, coorddim> outerNormal(const This& geom, const FieldVector<typename G::ctype, mydim>& local)
+    static Dune::FieldVector<typename G::ctype, coorddim> outerNormal(const This& geom, const Dune::FieldVector<typename G::ctype, mydim>& local)
     {
-      FieldVector<typename G::ctype, coorddim> result = geom.corner(1);
+      Dune::FieldVector<typename G::ctype, coorddim> result = geom.corner(1);
       if (coorddim == 2)
       {
         result -= geom.corner(0);
@@ -158,7 +158,7 @@ protected:
       }
       else if (coorddim == 3)
       {
-        FieldVector<typename G::ctype, coorddim> v0 = geom.corner(2), v1 = geom.corner(0);
+        Dune::FieldVector<typename G::ctype, coorddim> v0 = geom.corner(2), v1 = geom.corner(0);
         // tris edge vectors (pos. oriented)
         v0 -= geom.corner(1);
         v1 -= geom.corner(1);
@@ -168,7 +168,7 @@ protected:
         result[2] = v0[0]*v1[1] - v0[1]*v1[0];
       }
       else
-        DUNE_THROW(NotImplemented, "dimension not implemented!");
+        DUNE_THROW(Dune::NotImplemented, "dimension not implemented!");
       return result;
     }
   };
@@ -180,9 +180,9 @@ protected:
   template<bool>
   struct LiftingNormalComputer
   {
-    static FieldVector<typename G::ctype, coorddim + 1> outerNormal(const SimplexGeometry<mydim, coorddim, G>& geom, const FieldVector<typename G::ctype, mydim>& local)
+    static Dune::FieldVector<typename G::ctype, coorddim + 1> outerNormal(const SimplexGeometry<mydim, coorddim, G>& geom, const Dune::FieldVector<typename G::ctype, mydim>& local)
     {
-      FieldVector<typename G::ctype, coorddim + 1> result(0.0);
+      Dune::FieldVector<typename G::ctype, coorddim + 1> result(0.0);
       if (coorddim == 1)
       {
         result[1] = geom.corner(0)[0] - geom.corner(1)[0];
@@ -190,7 +190,7 @@ protected:
       }
       else if (coorddim == 2)
       {
-        FieldVector<typename G::ctype, coorddim> v0 = geom.corner(2), v1 = geom.corner(0);
+        Dune::FieldVector<typename G::ctype, coorddim> v0 = geom.corner(2), v1 = geom.corner(0);
         // tris edge vectors (pos. oriented)
         v0 -= geom.corner(1);
         v1 -= geom.corner(1);
@@ -199,18 +199,18 @@ protected:
         return result;
       }
       else
-        DUNE_THROW(NotImplemented, "dimension not implemented");
+        DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
     }
   };
 
-  typedef GenericGeometry::ProtectedIf<mydim == coorddim, LiftingNormalComputer, CommonNormalComputer> NormalComputer;
+  typedef Dune::GenericGeometry::ProtectedIf<mydim == coorddim, LiftingNormalComputer, CommonNormalComputer> NormalComputer;
 
 public:
 
   typedef typename Base::Mapping Mapping;
 
   template< class CoordVector>
-  SimplexGeometry(const GeometryType &type, const CoordVector &coords) : Base(type, coords)
+  SimplexGeometry(const Dune::GeometryType &type, const CoordVector &coords) : Base(type, coords)
   {}
 
 
@@ -229,7 +229,7 @@ public:
    * @param type the geometry type of this subface, i.e. most likely a simplex in 1D or 2D
    * @param coordinates The corner coordinates in DUNE numbering
    */
-  void setup(const GeometryType& type, const array<FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
+  void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
   {
     // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
     Base::operator=(Base(type, coordinates));
@@ -250,7 +250,7 @@ public:
   }
 
 
-  const FieldVector<typename G::ctype, coorddim + static_cast<int>(coorddim==mydim)> outerNormal(const FieldVector<typename G::ctype, mydim>& local) const
+  const Dune::FieldVector<typename G::ctype, coorddim + static_cast<int>(coorddim==mydim)> outerNormal(const Dune::FieldVector<typename G::ctype, mydim>& local) const
   {
     return This::NormalComputer::outerNormal(*this, local);
   }
@@ -271,9 +271,10 @@ public:
  * the global geometry maps to the world coordinate space, i.e. 1D->2D resp. 2D->3D.
  */
 template<int mydim, int coorddim, typename G>
-class LocalSimplexGeometry : public GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<G, (coorddim < static_cast<int>(G::dimensionworld))> >
+class LocalSimplexGeometry
+  : public Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<G, (coorddim < static_cast<int>(G::dimensionworld))> >
 {
-  typedef GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<G, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
+  typedef Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<G, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
 
   enum { simplex_corners = coorddim + static_cast<int>(mydim == coorddim) };
 
@@ -283,7 +284,7 @@ public:
 
 
   template< class CoordVector>
-  LocalSimplexGeometry(const GeometryType &type, const CoordVector &coords) : Base(type, coords)
+  LocalSimplexGeometry(const Dune::GeometryType &type, const CoordVector &coords) : Base(type, coords)
   {}
 
 
@@ -302,7 +303,7 @@ public:
    * @param type the geometry type of this subface, i.e. most likely a simplex in 1D or 2D
    * @param coordinates The corner coordinates in DUNE numbering
    */
-  void setup(const GeometryType& type, const array<FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
+  void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
   {
     //		STDOUTLN("LocalSimplexGeometry: trying to set up");
     // set up base class

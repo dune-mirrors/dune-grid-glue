@@ -180,8 +180,8 @@ private:
   };
 
 
-  typedef map<IndexType, ElementInfo* >  ElementInfoMap;
-  typedef map<IndexType, VertexInfo* >   VertexInfoMap;
+  typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
+  typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
 
 
   /************************** MEMBER VARIABLES ************************/
@@ -196,10 +196,10 @@ private:
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the extracted faces
-  vector<FaceInfo>         _faces;
+  std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  vector<CoordinateInfo>   _coords;
+  std::vector<CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
@@ -216,7 +216,7 @@ private:
   ElementInfoMap _elmtInfo;
 
   /// @brief geometry type of the surface patches
-  const GeometryType _codim0element;
+  const Dune::GeometryType _codim0element;
 
 
 public:
@@ -228,7 +228,7 @@ public:
    * @param gv the grid view object to work with
    */
   CubeMeshExtractor(const GV& gv) :
-    _gv(gv), _codim0element(GeometryType::cube, dim)
+    _gv(gv), _codim0element(Dune::GeometryType::cube, dim)
   {
     STDOUTLN("This is CubeMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
   }
@@ -284,7 +284,7 @@ public:
    * dimension lifting the newly introduced dimension is set to 0. This is always
    * the last coordinate, i.e. y in 2D and z in 3D.
    */
-  void getCoords(vector<FieldVector<ctype, dimw> >& coords) const
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
   {
     coords.resize(this->_coords.size());
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -310,7 +310,7 @@ public:
    * Deallocation is done in this class.
    * @return the _indices array
    */
-  void getFaces(vector<SimplexTopology>& faces) const
+  void getFaces(std::vector<SimplexTopology>& faces) const
   {
     faces.resize(this->_faces.size());
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
@@ -398,7 +398,7 @@ public:
    * @param bcoords the barycentric coordinates
    * @param wcoords to be filled with world coordinates
    */
-  void globalCoords(unsigned int index, const FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const;
+  void globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const;
 
 
   /**
@@ -410,7 +410,7 @@ public:
    * @param bcoords the barycentric coordinates
    * @param ecoords to be filled with element coordinates
    */
-  void localCoords(unsigned int index, const FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const;
+  void localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const;
 
 
   /**
@@ -421,7 +421,7 @@ public:
    * @param ecoords to be filled with element coordinates
    * @param wcoords to be filled with world coordinates
    */
-  void localAndGlobalCoords(unsigned int index, const FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const;
+  void localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const;
 
 
   /**
@@ -486,7 +486,7 @@ public:
   const ElementPtr& element(unsigned int index) const
   {
     if (index >= this->_faces.size())
-      DUNE_THROW(GridError, "invalid face index");
+      DUNE_THROW(Dune::GridError, "invalid face index");
     return (this->_elmtInfo.find(this->_faces[index].self))->second->p;
   }
 
@@ -500,7 +500,7 @@ public:
   const VertexPtr& vertex(unsigned int index) const
   {
     if (index >= this->_coords.size())
-      DUNE_THROW(GridError, "invalid coordinate index");
+      DUNE_THROW(Dune::GridError, "invalid coordinate index");
     return (this->_vtxInfo.find(this->_coords[index].self))->second->p;
   }
 
@@ -556,11 +556,11 @@ void CubeMeshExtractor<GV, rect, dimG>::clear()
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
       if (this->_coords[i].faces != NULL)
         delete this->_coords[i].faces;
-    vector<CoordinateInfo> dummy;
+    std::vector<CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
-    vector<FaceInfo> dummy;
+    std::vector<FaceInfo> dummy;
     this->_faces.swap(dummy);
   }
 
@@ -598,7 +598,7 @@ void CubeMeshExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& desc
 
     // a temporary container where newly acquired face
     // information can be stored at first
-    deque<FaceInfo> temp_faces;
+    std::deque<FaceInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -606,7 +606,7 @@ void CubeMeshExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& desc
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
       if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->geometry().type());
+        DUNE_THROW(Dune::GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->geometry().type());
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
@@ -686,7 +686,7 @@ void CubeMeshExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& desc
   // now add the vertices' parent faces in the _vertexFaces map.
   // therefore iterate over all indices in the _index array...
   {
-    vector<unsigned int> refcount(this->_coords.size(), 0);
+    std::vector<unsigned int> refcount(this->_coords.size(), 0);
 
     // for each coordinate count the references in the _indices array
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
@@ -748,18 +748,18 @@ void CubeMeshExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& desc
 
 
 template<typename GV, bool rect, int dimG>
-inline void CubeMeshExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const
+inline void CubeMeshExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const
 {
   // only interpolate barycentric in the given triangle => for flat quads this is exact!
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i]].coord;
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dim> >(corners, bcoords, wcoords, dim);
+  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dim> >(corners, bcoords, wcoords, dim);
 }
 
 
 template<typename GV, bool rect, int dimG>
-inline void CubeMeshExtractor<GV, rect, dimG>::localCoords(unsigned int index, const FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const
+inline void CubeMeshExtractor<GV, rect, dimG>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const
 {
   Coords wcoords;
   this->localAndGlobalCoords(index, bcoords, ecoords, wcoords);
@@ -767,7 +767,7 @@ inline void CubeMeshExtractor<GV, rect, dimG>::localCoords(unsigned int index, c
 
 
 template<typename GV, bool rect, int dimG>
-inline void CubeMeshExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const
+inline void CubeMeshExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->globalCoords(index, bcoords, wcoords);
   ecoords = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().local(wcoords);
@@ -778,11 +778,11 @@ template<typename GV, bool rect, int dimG>
 template<typename CoordContainerB, typename CoordContainerW>
 void CubeMeshExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerW &wcoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i]].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<simplex_corners, ctype, FieldVector<ctype, dim> >(corners, bcoords[i], wcoords[i], dim);
+    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dim> >(corners, bcoords[i], wcoords[i], dim);
 }
 
 
@@ -829,9 +829,9 @@ public:
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
 
   CubeMeshExtractor(const GV& gv) :
-    Base(gv, GeometryType(GeometryType::cube, Base::dim))
+    Base(gv, Dune::GeometryType(Dune::GeometryType::cube, Base::dim))
   {
-    STDOUTLN("This is CubeMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << GeometryType(GeometryType::cube, Base::dim) << "!");
+    STDOUTLN("This is CubeMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << Dune::GeometryType(Dune::GeometryType::cube, Base::dim) << "!");
   }
 };
 

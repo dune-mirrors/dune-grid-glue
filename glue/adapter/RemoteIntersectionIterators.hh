@@ -305,7 +305,7 @@ namespace RemoteIntersectionInterface
          Maps a point in local intersection coords on domain intersection to a
          point in target intersection local coordinates.
        */
-      FieldVector<ctype, mydim> neighborLocals(const FieldVector<ctype, mydim> &selflocal) const
+      Dune::FieldVector<ctype, mydim> neighborLocals(const Dune::FieldVector<ctype, mydim> &selflocal) const
       {
         return this->realIterator.dereference().targetLocals(selflocal);
       }
@@ -316,14 +316,14 @@ namespace RemoteIntersectionInterface
          Maps a point in local intersection coords on target intersection to a
          point in domain intersection local coordinates.
        */
-      FieldVector<ctype, mydim> selfLocals(const FieldVector<ctype, mydim> &neighborlocal) const
+      Dune::FieldVector<ctype, mydim> selfLocals(const Dune::FieldVector<ctype, mydim> &neighborlocal) const
       {
         return this->realIterator.dereference().domainLocals(neighborlocal);
       }
 
 
       /** \brief obtain the type of reference element for this intersection */
-      GeometryType type() const
+      Dune::GeometryType type() const
       {
         return this->realIterator.dereference().type();
       }
@@ -474,7 +474,7 @@ namespace RemoteIntersectionInterface
          Maps a point in local intersection coords on target intersection to a
          point in domain intersection local coordinates.
        */
-      FieldVector<ctype, mydim> neighborLocals(const FieldVector<ctype, mydim> &selflocal) const
+      Dune::FieldVector<ctype, mydim> neighborLocals(const Dune::FieldVector<ctype, mydim> &selflocal) const
       {
         return this->realIterator.dereference().domainLocals(selflocal);
       }
@@ -485,14 +485,14 @@ namespace RemoteIntersectionInterface
          Maps a point in local intersection coords on domain intersection to a
          point in target intersection local coordinates.
        */
-      FieldVector<ctype, mydim> selfLocals(const FieldVector<ctype, mydim> &neighborlocal) const
+      Dune::FieldVector<ctype, mydim> selfLocals(const Dune::FieldVector<ctype, mydim> &neighborlocal) const
       {
         return this->realIterator.dereference().targetLocals(neighborlocal);
       }
 
 
       /** \brief obtain the type of reference element for this intersection */
-      GeometryType type() const
+      Dune::GeometryType type() const
       {
         return this->realIterator.dereference().type();
       }

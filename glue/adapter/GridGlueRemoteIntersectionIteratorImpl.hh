@@ -65,7 +65,7 @@ public:
   RemoteIntersection& dereference() const
   {
     if (this->_index == this->_glue->NULL_INTERSECTION._index)
-      DUNE_THROW(GridError, "dereferencing end iterator");
+      DUNE_THROW(Dune::GridError, "dereferencing end iterator");
     return this->_intersection;
   }
 
@@ -121,7 +121,7 @@ private:
 
 public:
 
-  DomainIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const vector<unsigned int>& parts_)
+  DomainIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const std::vector<unsigned int>& parts_)
     : _glue(intersectionImpl_._glue),
       _intersection(intersectionImpl_),
       _index(intersectionImpl_._index),
@@ -161,7 +161,7 @@ public:
   RemoteIntersection& dereference() const
   {
     if (this->_index == this->_glue->NULL_INTERSECTION._index)
-      DUNE_THROW(GridError, "dereferencing end iterator");
+      DUNE_THROW(Dune::GridError, "dereferencing end iterator");
     return this->_intersection;
   }
 
@@ -222,7 +222,7 @@ private:
 
 public:
 
-  TargetIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const vector<unsigned int>& parts_)
+  TargetIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const std::vector<unsigned int>& parts_)
     : _glue(intersectionImpl_._glue),
       _intersection(intersectionImpl_),
       _index(intersectionImpl_._index),
@@ -263,7 +263,7 @@ public:
   RemoteIntersection& dereference() const
   {
     if (this->_index == this->_glue->NULL_INTERSECTION._index)
-      DUNE_THROW(GridError, "dereferencing end iterator");
+      DUNE_THROW(Dune::GridError, "dereferencing end iterator");
     return this->_intersection;
   }
 

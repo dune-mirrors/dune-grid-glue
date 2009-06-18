@@ -25,7 +25,7 @@
    (Specialization for two "non-surface" grids, i.e. meshes, manifolds) */
 
 template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, ExtractorType type1, ExtractorType type2>
+template<typename BGET1, typename BGET2, typename BSM, ExtractorClassification::ExtractorType type1, ExtractorClassification::ExtractorType type2>
 class GridGlue<GET1, GET2, SM>::BuilderImpl
 {
 private:
@@ -95,7 +95,7 @@ public:
         this->_glue._domext.update(*this->_domelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no domain surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no domain surface descriptor set" << std::endl;
         return false;
       }
 
@@ -104,26 +104,26 @@ public:
         this->_glue._tarext.update(*this->_tarelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no target surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no target surface descriptor set" << std::endl;
         return false;
       }
 
       // clear the contents from the current intersections array
       {
-        vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
+        std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
         this->_glue._intersections.swap(dummy);
       }
 
-      vector<typename Parent::ctype> domcoords;
-      vector<unsigned int> domfaces;
-      vector<typename Parent::ctype> tarcoords;
-      vector<unsigned int> tarfaces;
+      std::vector<typename Parent::ctype> domcoords;
+      std::vector<unsigned int> domfaces;
+      std::vector<typename Parent::ctype> tarcoords;
+      std::vector<unsigned int> tarfaces;
 
       // retrieve the coordinate and topology information from the extractors
       // and apply transformations if necessary
       {
-        vector<typename Parent::Coords> tempcoords;
-        vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
+        std::vector<typename Parent::Coords> tempcoords;
+        std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
 
         this->_glue._domext.getCoords(tempcoords);
         domcoords.resize(Parent::dimw*tempcoords.size());
@@ -211,7 +211,7 @@ public:
     }
     catch (...)
     {
-      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << endl;
+      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
 
     }
     // reaching this point is only possible after an exception has been thrown
@@ -321,7 +321,7 @@ public:
         this->_glue._domext.update(*this->_domelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no domain surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no domain surface descriptor set" << std::endl;
         return false;
       }
 
@@ -332,27 +332,27 @@ public:
         this->_glue._tarext.update(*this->_tarelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no target surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no target surface descriptor set" << std::endl;
         return false;
       }
 
       // clear the contents from the current intersections array
       {
-        vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
+        std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
         this->_glue._intersections.swap(dummy);
       }
 
-      vector<typename Parent::ctype> domcoords;
-      vector<unsigned int> domfaces;
-      vector<typename Parent::ctype> tarcoords;
-      vector<unsigned int> tarfaces;
+      std::vector<typename Parent::ctype> domcoords;
+      std::vector<unsigned int> domfaces;
+      std::vector<typename Parent::ctype> tarcoords;
+      std::vector<unsigned int> tarfaces;
 
 
       // retrieve the coordinate and topology information from the extractors
       // and apply transformations if necessary
       {
-        vector<typename Parent::Coords> tempcoords;
-        vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
+        std::vector<typename Parent::Coords> tempcoords;
+        std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
 
         this->_glue._domext.getCoords(tempcoords);
         domcoords.resize(Parent::dimw*tempcoords.size());
@@ -439,7 +439,7 @@ public:
     }
     catch (...)
     {
-      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << endl;
+      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
 
     }
     // reaching this point is only possible after an exception has been thrown
@@ -452,7 +452,7 @@ public:
 /*   (Specialization for a "surface" and a "non-surface" grid (order!)     */
 
 template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, ExtractorType type2>
+template<typename BGET1, typename BGET2, typename BSM, ExtractorClassification::ExtractorType type2>
 class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, ExtractorClassification::surface, type2>
 {
 private:
@@ -532,7 +532,7 @@ public:
         this->_glue._domext.update(*this->_domelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no domain surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no domain surface descriptor set" << std::endl;
         return false;
       }
 
@@ -541,26 +541,26 @@ public:
         this->_glue._tarext.update(*this->_tarelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no target surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no target surface descriptor set" << std::endl;
         return false;
       }
 
       // clear the contents from the current intersections array
       {
-        vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
+        std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
         this->_glue._intersections.swap(dummy);
       }
 
-      vector<typename Parent::ctype> domcoords;
-      vector<unsigned int> domfaces;
-      vector<typename Parent::ctype> tarcoords;
-      vector<unsigned int> tarfaces;
+      std::vector<typename Parent::ctype> domcoords;
+      std::vector<unsigned int> domfaces;
+      std::vector<typename Parent::ctype> tarcoords;
+      std::vector<unsigned int> tarfaces;
 
       // retrieve the coordinate and topology information from the extractors
       // and apply transformations if necessary
       {
-        vector<typename Parent::Coords> tempcoords;
-        vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
+        std::vector<typename Parent::Coords> tempcoords;
+        std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
 
         this->_glue._domext.getCoords(tempcoords);
         domcoords.resize(Parent::dimw*tempcoords.size());
@@ -649,7 +649,7 @@ public:
     }
     catch (...)
     {
-      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << endl;
+      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
 
     }
     // reaching this point is only possible after an exception has been thrown
@@ -662,7 +662,7 @@ public:
 /*  (Specialization for a "non-surface" and a "surface" grid (order!)     */
 
 template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, ExtractorType type1>
+template<typename BGET1, typename BGET2, typename BSM, ExtractorClassification::ExtractorType type1>
 class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, type1, ExtractorClassification::surface>
 {
 private:
@@ -740,7 +740,7 @@ public:
         this->_glue._domext.update(*this->_domelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no domain surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no domain surface descriptor set" << std::endl;
         return false;
       }
 
@@ -751,26 +751,26 @@ public:
         this->_glue._tarext.update(*this->_tarelmntdescr);
       else
       {
-        cerr << "GridGlue::Builder : no target surface descriptor set" << endl;
+        std::cerr << "GridGlue::Builder : no target surface descriptor set" << std::endl;
         return false;
       }
 
       // clear the contents from the current intersections array
       {
-        vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
+        std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
         this->_glue._intersections.swap(dummy);
       }
 
-      vector<typename Parent::ctype> domcoords;
-      vector<unsigned int> domfaces;
-      vector<typename Parent::ctype> tarcoords;
-      vector<unsigned int> tarfaces;
+      std::vector<typename Parent::ctype> domcoords;
+      std::vector<unsigned int> domfaces;
+      std::vector<typename Parent::ctype> tarcoords;
+      std::vector<unsigned int> tarfaces;
 
       // retrieve the coordinate and topology information from the extractors
       // and apply transformations if necessary
       {
-        vector<typename Parent::Coords> tempcoords;
-        vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
+        std::vector<typename Parent::Coords> tempcoords;
+        std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
 
         this->_glue._domext.getCoords(tempcoords);
         domcoords.resize(Parent::dimw*tempcoords.size());
@@ -859,7 +859,7 @@ public:
     }
     catch (...)
     {
-      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << endl;
+      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
 
     }
     // reaching this point is only possible after an exception has been thrown

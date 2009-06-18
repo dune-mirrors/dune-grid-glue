@@ -183,8 +183,8 @@ private:
   };
 
 
-  typedef map<IndexType, ElementInfo* >  ElementInfoMap;
-  typedef map<IndexType, VertexInfo* >   VertexInfoMap;
+  typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
+  typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
 
 
   /************************** MEMBER VARIABLES ************************/
@@ -199,10 +199,10 @@ private:
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the extracted faces
-  vector<FaceInfo>         _faces;
+  std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  vector<CoordinateInfo>   _coords;
+  std::vector<CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
@@ -220,7 +220,7 @@ private:
 
 
   /// @brief geometry type of the surface patches
-  const GeometryType _codim0element;
+  const Dune::GeometryType _codim0element;
 
 
 public:
@@ -233,7 +233,7 @@ public:
    * @param gv the grid view object to work with
    */
   CubeManifoldExtractor(const GV& gv) :
-    _gv(gv), _codim0element(GeometryType::cube, dim)
+    _gv(gv), _codim0element(Dune::GeometryType::cube, dim)
   {
     STDOUTLN("This is CubeManifoldExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
   }
@@ -287,7 +287,7 @@ public:
    * @param coords a vector that will be resized (!) and filled with the coordinates,
    * note that the single components are written consecutively
    */
-  void getCoords(vector<FieldVector<ctype, dimw> >& coords) const
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
   {
     coords.resize(this->_coords.size());
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -309,7 +309,7 @@ public:
    * Deallocation is done in this class.
    * @return the _indices array
    */
-  void getFaces(vector<SimplexTopology>& faces) const
+  void getFaces(std::vector<SimplexTopology>& faces) const
   {
     faces.resize(this->_faces.size());
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
@@ -409,7 +409,7 @@ public:
    * @param bcoords the barycentric coordinates
    * @param ecoords to be filled with element coordinates
    */
-  void localCoords(unsigned int index, const Coords &bcoords, FieldVector<ctype, dim> &ecoords) const;
+  void localCoords(unsigned int index, const Coords &bcoords, Dune::FieldVector<ctype, dim> &ecoords) const;
 
 
   /**
@@ -420,7 +420,7 @@ public:
    * @param ecoords to be filled with element coordinates
    * @param wcoords to be filled with world coordinates
    */
-  void localAndGlobalCoords(unsigned int index, const Coords &bcoords, FieldVector<ctype, dim> &ecoords, Coords &wcoords) const;
+  void localAndGlobalCoords(unsigned int index, const Coords &bcoords, Dune::FieldVector<ctype, dim> &ecoords, Coords &wcoords) const;
 
 
   /**
@@ -485,7 +485,7 @@ public:
   const ElementPtr& element(unsigned int index) const
   {
     if (index >= this->_faces.size())
-      DUNE_THROW(GridError, "invalid face index");
+      DUNE_THROW(Dune::GridError, "invalid face index");
     return (this->_elmtInfo.find(this->_faces[index].self))->second->p;
   }
 
@@ -499,7 +499,7 @@ public:
   const VertexPtr& vertex(unsigned int index) const
   {
     if (index >= this->_coords.size())
-      DUNE_THROW(GridError, "invalid coordinate index");
+      DUNE_THROW(Dune::GridError, "invalid coordinate index");
     return (this->_vtxInfo.find(this->_coords[index].self))->second->p;
   }
 
@@ -555,11 +555,11 @@ void CubeManifoldExtractor<GV, rect, dimG>::clear()
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
       if (this->_coords[i].faces != NULL)
         delete this->_coords[i].faces;
-    vector<CoordinateInfo> dummy;
+    std::vector<CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
-    vector<FaceInfo> dummy;
+    std::vector<FaceInfo> dummy;
     this->_faces.swap(dummy);
   }
 
@@ -597,7 +597,7 @@ void CubeManifoldExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& 
 
     // a temporary container where newly acquired face
     // information can be stored at first
-    deque<FaceInfo> temp_faces;
+    std::deque<FaceInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -605,7 +605,7 @@ void CubeManifoldExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& 
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
       if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->geometry().type());
+        DUNE_THROW(Dune::GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->geometry().type());
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
@@ -686,7 +686,7 @@ void CubeManifoldExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& 
   // now add the vertices' parent faces in the _vertexFaces map.
   // therefore iterate over all indices in the _index array...
   {
-    vector<unsigned int> refcount(this->_coords.size(), 0);
+    std::vector<unsigned int> refcount(this->_coords.size(), 0);
 
     // for each coordinate count the references in the _indices array
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
@@ -751,15 +751,15 @@ template<typename GV, bool rect, int dimG>
 inline void CubeManifoldExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
 {
   // only interpolate barycentric in the given triangle => for flat quads this is exact!
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i]].coord;
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dim> >(corners, bcoords, wcoords, dim);
+  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dim> >(corners, bcoords, wcoords, dim);
 }
 
 
 template<typename GV, bool rect, int dimG>
-inline void CubeManifoldExtractor<GV, rect, dimG>::localCoords(unsigned int index, const Coords &bcoords, FieldVector<ctype, dim> &ecoords) const
+inline void CubeManifoldExtractor<GV, rect, dimG>::localCoords(unsigned int index, const Coords &bcoords, Dune::FieldVector<ctype, dim> &ecoords) const
 {
   Coords wcoords;
   this->localAndGlobalCoords(index, bcoords, ecoords, wcoords);
@@ -767,7 +767,7 @@ inline void CubeManifoldExtractor<GV, rect, dimG>::localCoords(unsigned int inde
 
 
 template<typename GV, bool rect, int dimG>
-inline void CubeManifoldExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, FieldVector<ctype, dim> &ecoords, Coords &wcoords) const
+inline void CubeManifoldExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Dune::FieldVector<ctype, dim> &ecoords, Coords &wcoords) const
 {
   this->globalCoords(index, bcoords, wcoords);
   ecoords = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().local(wcoords);
@@ -778,11 +778,11 @@ template<typename GV, bool rect, int dimG>
 template<typename CoordContainer>
 void CubeManifoldExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i]].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<simplex_corners, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
+    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
 }
 
 
@@ -829,9 +829,9 @@ public:
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
 
   CubeManifoldExtractor(const GV& gv) :
-    Base(gv, GeometryType(GeometryType::cube, Base::dim))
+    Base(gv, Dune::GeometryType(Dune::GeometryType::cube, Base::dim))
   {
-    STDOUTLN("This is CubeManifoldExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << GeometryType(GeometryType::cube, Base::dim) << "!");
+    STDOUTLN("This is CubeManifoldExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << Dune::GeometryType(Dune::GeometryType::cube, Base::dim) << "!");
   }
 };
 

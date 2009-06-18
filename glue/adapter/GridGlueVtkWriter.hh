@@ -25,6 +25,7 @@
 #include <vector>
 #include <list>
 
+#include <dune/common/geometrytype.hh>
 #include "../misc/geometry.hh"
 
 
@@ -73,17 +74,17 @@ public:
 
     typedef typename Glue::ctype ctype;
 
-    GeometryType gt(GeometryType::simplex, dimw);
+    Dune::GeometryType gt(Dune::GeometryType::simplex, dimw);
 
-    typedef list<int> FaceList;
+    typedef std::list<int> FaceList;
     FaceList faces, parts, face_corners;
     typename FaceList::iterator faceit, facecornerit;
 
-    ofstream fgrid, fmerged;
+    std::ofstream fgrid, fmerged;
 
-    string fngrid(filename_trunk);
+    std::string fngrid(filename_trunk);
     fngrid += "-domain.vtk";
-    string fnmerged(filename_trunk);
+    std::string fnmerged(filename_trunk);
     fnmerged += "-overlaps-domain.vtk";
 
     fgrid.open(fngrid.c_str());
@@ -100,12 +101,12 @@ public:
 
     const DomainGridView& domgv = glue.domainGridView();
     // remember the entities that have been mapped
-    list<DomainEPtr> domeptrs(0, (DomainEPtr) domgv.template begin<0>());
+    std::list<DomainEPtr> domeptrs(0, (DomainEPtr) domgv.template begin<0>());
 
     int overlaps = 0, parents = 0, face_corner_count = 0;
 
-    fgrid << "# vtk DataFile Version 2.0\nFilename: " << fngrid << "\nASCII" << endl;
-    fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << endl;
+    fgrid << "# vtk DataFile Version 2.0\nFilename: " << fngrid << "\nASCII" << std::endl;
+    fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
 
     // count the points and the polygons
     for (DomainIter pit = domgv.template begin<0>(); pit != domgv.template end<0>(); ++pit)
@@ -144,12 +145,12 @@ public:
     // WRITE POINTS
     // ----------------
 
-    fgrid << "DATASET POLYDATA\nPOINTS " << (dimw == 2 ? parents*4 : face_corner_count) << " " << TypeNames[Nametraits<ctype>::nameidx] << endl;
-    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dimw == 2 ? 4 : 3) << " " << TypeNames[Nametraits<ctype>::nameidx] << endl;
+    fgrid << "DATASET POLYDATA\nPOINTS " << (dimw == 2 ? parents*4 : face_corner_count) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dimw == 2 ? 4 : 3) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     faceit = faces.begin();
     facecornerit = face_corners.begin();
-    for (typename list<DomainEPtr>::const_iterator pit = domeptrs.begin(); pit != domeptrs.end(); ++pit, ++faceit)
+    for (typename std::list<DomainEPtr>::const_iterator pit = domeptrs.begin(); pit != domeptrs.end(); ++pit, ++faceit)
     {
       // write the domain element
       if (dimw == 2)
@@ -159,16 +160,16 @@ public:
           fgrid << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0\n"
                 << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
                 << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
+                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
         }
         else                         // full-dimensional grid
         {
-          GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->geometry().type();
           for (int i = 0; i < 2; ++i)
           {
             int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, i);
             fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
-                  << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << endl;
+                  << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
           }
         }
       }
@@ -180,23 +181,23 @@ public:
           for (int i = 0; i < 3; ++i)
           {
             if (i == 2 && (*facecornerit) == 4)
-              fgrid << (*pit)->geometry().corner(3) << (pad ? " 0" : "  ") << endl;
-            fgrid << (*pit)->geometry().corner(i) << (pad ? " 0" : "  ") << endl;
+              fgrid << (*pit)->geometry().corner(3) << (pad ? " 0" : "  ") << std::endl;
+            fgrid << (*pit)->geometry().corner(i) << (pad ? " 0" : "  ") << std::endl;
           }
         }
         else                         // full-dimensional grid
         {
-          GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->geometry().type();
           // write 3 or 4 points, depending on face geometry
           for (int i = 0; i < 3; ++i)
           {
             if (i == 2 && (*facecornerit) == 4)
             {
               int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, 3);
-              fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << endl;
+              fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
             }
             int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << endl;
+            fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
           }
         }
         facecornerit++;
@@ -210,11 +211,11 @@ public:
           fmerged << domisit->intersectionDomainGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
                   << domisit->intersectionDomainGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
                   << domisit->intersectionDomainGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                  << domisit->intersectionDomainGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
+                  << domisit->intersectionDomainGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
         }
         else                         // dimw == 3
           for (int i = 0; i < 3; ++i)
-            fmerged << domisit->intersectionDomainGlobal().corner(i) << (pad ? " 0" : "  ") << endl;
+            fmerged << domisit->intersectionDomainGlobal().corner(i) << (pad ? " 0" : "  ") << std::endl;
       }
     }
 
@@ -223,18 +224,18 @@ public:
 
     if (dimw == 2)
     {
-      fgrid << "POLYGONS " << parents << " " << 5*parents << endl;
-      fmerged << "POLYGONS " << overlaps << " " << 5*overlaps << endl;
+      fgrid << "POLYGONS " << parents << " " << 5*parents << std::endl;
+      fmerged << "POLYGONS " << overlaps << " " << 5*overlaps << std::endl;
 
       for (int i = 0; i < 2*parents; i += 2)
-        fgrid << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << endl;
+        fgrid << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
       for (int i = 0; i < 2*overlaps; i += 2)
-        fmerged << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << endl;
+        fmerged << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
     }
     else             // dimw == 3
     {
       fgrid << "POLYGONS " << parents << " " << parents + face_corner_count;
-      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << endl;
+      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << std::endl;
 
       facecornerit = face_corners.begin();
       face_corner_count = 0;
@@ -244,9 +245,9 @@ public:
         for (int i = 0; i < (*facecornerit); ++i, ++face_corner_count)
           fgrid << " " << face_corner_count;
       }
-      fgrid << endl;
+      fgrid << std::endl;
       for (int i = 0; i < overlaps; ++i)
-        fmerged << "3 " << 3*i << " " << 3*i+1 << " " << 3*i+2 << endl;
+        fmerged << "3 " << 3*i << " " << 3*i+1 << " " << 3*i+2 << std::endl;
     }
 
     // WRITE CELL DATA
@@ -254,40 +255,40 @@ public:
     ctype accum = 0.0, delta = 1.0 / (ctype) (parents-1);
     if (dimw == 2)
     {
-      fgrid << "CELL_DATA " << parents << endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fgrid << "LOOKUP_TABLE default" << endl;
+      fgrid << "CELL_DATA " << parents << std::endl;
+      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fgrid << "LOOKUP_TABLE default" << std::endl;
 
-      fmerged << "CELL_DATA " << overlaps << endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fmerged << "LOOKUP_TABLE default" << endl;
+      fmerged << "CELL_DATA " << overlaps << std::endl;
+      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fmerged << "LOOKUP_TABLE default" << std::endl;
 
       for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
       {
         // "encode" the parent with one color...
-        fgrid << accum << endl;
+        fgrid << accum << std::endl;
         // ...and mark all of its merged grid parts with the same color
         for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << endl;
+          fmerged << accum << std::endl;
       }
     }
     else             // dimw == 3
     {
-      fgrid << "CELL_DATA " << parents << endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fgrid << "LOOKUP_TABLE default" << endl;
+      fgrid << "CELL_DATA " << parents << std::endl;
+      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fgrid << "LOOKUP_TABLE default" << std::endl;
 
-      fmerged << "CELL_DATA " << overlaps << endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fmerged << "LOOKUP_TABLE default" << endl;
+      fmerged << "CELL_DATA " << overlaps << std::endl;
+      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fmerged << "LOOKUP_TABLE default" << std::endl;
 
       for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
       {
         // "encode" the parent with one color...
-        fgrid << accum << endl;
+        fgrid << accum << std::endl;
         // ...and mark all of its merged grid parts with the same color
         for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << endl;
+          fmerged << accum << std::endl;
       }
     }
 
@@ -319,10 +320,10 @@ public:
     hyper = dimw > TargetGridType::dimension;
 
     // remember the entities that have been mapped
-    list<TargetEPtr> tareptrs(0, targv.template begin<0>());
+    std::list<TargetEPtr> tareptrs(0, targv.template begin<0>());
 
-    fgrid << "# vtk DataFile Version 2.0\nFilename: " << fngrid << "\nASCII" << endl;
-    fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << endl;
+    fgrid << "# vtk DataFile Version 2.0\nFilename: " << fngrid << "\nASCII" << std::endl;
+    fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
 
     // reset some of the variables
     parents = 0;
@@ -369,12 +370,12 @@ public:
     // WRITE POINTS
     // ----------------
 
-    fgrid << "DATASET POLYDATA\nPOINTS " << (dimw == 2 ? parents*4 : face_corner_count) << " " << TypeNames[Nametraits<ctype>::nameidx] << endl;
-    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dimw == 2 ? 4 : 3) << " " << TypeNames[Nametraits<ctype>::nameidx] << endl;
+    fgrid << "DATASET POLYDATA\nPOINTS " << (dimw == 2 ? parents*4 : face_corner_count) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dimw == 2 ? 4 : 3) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     faceit = faces.begin();
     facecornerit = face_corners.begin();
-    for (typename list<TargetEPtr>::const_iterator pit = tareptrs.begin(); pit != tareptrs.end(); ++pit, ++faceit)
+    for (typename std::list<TargetEPtr>::const_iterator pit = tareptrs.begin(); pit != tareptrs.end(); ++pit, ++faceit)
     {
       // write the target element
       if (dimw == 2)
@@ -384,16 +385,16 @@ public:
           fgrid << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0\n"
                 << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
                 << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
+                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
         }
         else                         // full-dimensional grid
         {
-          GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->geometry().type();
           for (int i = 0; i < 2; ++i)
           {
             int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, i);
             fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
-                  << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << endl;
+                  << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
           }
         }
       }
@@ -405,23 +406,23 @@ public:
           for (int i = 0; i < 3; ++i)
           {
             if (i == 2 && (*facecornerit) == 4)
-              fgrid << (*pit)->geometry().corner(3) << (pad ? " 0" : "  ") << endl;
-            fgrid << (*pit)->geometry().corner(i) << (pad ? " 0" : "  ") << endl;
+              fgrid << (*pit)->geometry().corner(3) << (pad ? " 0" : "  ") << std::endl;
+            fgrid << (*pit)->geometry().corner(i) << (pad ? " 0" : "  ") << std::endl;
           }
         }
         else                         // full-dimensional grid
         {
-          GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->geometry().type();
           // write 3 or 4 points, depending on face geometry
           for (int i = 0; i < 3; ++i)
           {
             if (i == 2 && (*facecornerit) == 4)
             {
               int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, 3);
-              fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << endl;
+              fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
             }
             int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << endl;
+            fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
           }
 
         }
@@ -436,11 +437,11 @@ public:
           fmerged << tarisit->intersectionTargetGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
                   << tarisit->intersectionTargetGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
                   << tarisit->intersectionTargetGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                  << tarisit->intersectionTargetGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << endl;
+                  << tarisit->intersectionTargetGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
         }
         else                         // dimw == 3
           for (int i = 0; i < 3; ++i)
-            fmerged << tarisit->intersectionTargetGlobal().corner(i) << (pad ? " 0" : "  ") << endl;
+            fmerged << tarisit->intersectionTargetGlobal().corner(i) << (pad ? " 0" : "  ") << std::endl;
       }
     }
 
@@ -449,18 +450,18 @@ public:
 
     if (dimw == 2)
     {
-      fgrid << "POLYGONS " << parents << " " << 5*parents << endl;
-      fmerged << "POLYGONS " << overlaps << " " << 5*overlaps << endl;
+      fgrid << "POLYGONS " << parents << " " << 5*parents << std::endl;
+      fmerged << "POLYGONS " << overlaps << " " << 5*overlaps << std::endl;
 
       for (int i = 0; i < 2*parents; i += 2)
-        fgrid << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << endl;
+        fgrid << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
       for (int i = 0; i < 2*overlaps; i += 2)
-        fmerged << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << endl;
+        fmerged << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
     }
     else             // dimw == 3
     {
       fgrid << "POLYGONS " << parents << " " << parents + face_corner_count;
-      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << endl;
+      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << std::endl;
 
       facecornerit = face_corners.begin();
       face_corner_count = 0;
@@ -470,9 +471,9 @@ public:
         for (int i = 0; i < (*facecornerit); ++i, ++face_corner_count)
           fgrid << " " << face_corner_count;
       }
-      fgrid << endl;
+      fgrid << std::endl;
       for (int i = 0; i < overlaps; ++i)
-        fmerged << "3 " << 3*i << " " << 3*i+1 << " " << 3*i+2 << endl;
+        fmerged << "3 " << 3*i << " " << 3*i+1 << " " << 3*i+2 << std::endl;
     }
 
     // WRITE CELL DATA
@@ -481,40 +482,40 @@ public:
     delta = 1.0 / (ctype) (parents-1);
     if (dimw == 2)
     {
-      fgrid << "CELL_DATA " << parents << endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fgrid << "LOOKUP_TABLE default" << endl;
+      fgrid << "CELL_DATA " << parents << std::endl;
+      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fgrid << "LOOKUP_TABLE default" << std::endl;
 
-      fmerged << "CELL_DATA " << overlaps << endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fmerged << "LOOKUP_TABLE default" << endl;
+      fmerged << "CELL_DATA " << overlaps << std::endl;
+      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fmerged << "LOOKUP_TABLE default" << std::endl;
 
       for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
       {
         // "encode" the parent with one color...
-        fgrid << accum << endl;
+        fgrid << accum << std::endl;
         // ...and mark all of its merged grid parts with the same color
         for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << endl;
+          fmerged << accum << std::endl;
       }
     }
     else             // dimw == 3
     {
-      fgrid << "CELL_DATA " << parents << endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fgrid << "LOOKUP_TABLE default" << endl;
+      fgrid << "CELL_DATA " << parents << std::endl;
+      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fgrid << "LOOKUP_TABLE default" << std::endl;
 
-      fmerged << "CELL_DATA " << overlaps << endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << endl;
-      fmerged << "LOOKUP_TABLE default" << endl;
+      fmerged << "CELL_DATA " << overlaps << std::endl;
+      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+      fmerged << "LOOKUP_TABLE default" << std::endl;
 
       for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
       {
         // "encode" the parent with one color...
-        fgrid << accum << endl;
+        fgrid << accum << std::endl;
         // ...and mark all of its merged grid parts with the same color
         for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << endl;
+          fmerged << accum << std::endl;
       }
     }
 

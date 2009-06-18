@@ -38,9 +38,9 @@
  * @return
  */
 template<typename K, int dim>
-inline FieldVector<K, dim-1> barycentricToReference(const FieldVector<K, dim>& bar)
+inline Dune::FieldVector<K, dim-1> barycentricToReference(const Dune::FieldVector<K, dim>& bar)
 {
-  FieldVector<K, dim-1> result;
+  Dune::FieldVector<K, dim-1> result;
   if (dim == 2)
   {
     // use Dune style indexing for edge (0 - 1) where the origin (0)
@@ -56,7 +56,7 @@ inline FieldVector<K, dim-1> barycentricToReference(const FieldVector<K, dim>& b
   }
   else
   {
-    DUNE_THROW(NotImplemented, "dimension not implemented");
+    DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
   }
   return result;
 }
@@ -74,9 +74,9 @@ inline FieldVector<K, dim-1> barycentricToReference(const FieldVector<K, dim>& b
  * @return
  */
 template<typename K, int dim>
-inline FieldVector<K, dim+1> referenceToBarycentric(const FieldVector<K, dim>& ref)
+inline Dune::FieldVector<K, dim+1> referenceToBarycentric(const Dune::FieldVector<K, dim>& ref)
 {
-  FieldVector<K, dim+1> result;
+  Dune::FieldVector<K, dim+1> result;
   if (dim == 1)
   {
     // use Dune style indexing for edge (0 - 1) where the origin (0)
@@ -94,7 +94,7 @@ inline FieldVector<K, dim+1> referenceToBarycentric(const FieldVector<K, dim>& r
   }
   else
   {
-    DUNE_THROW(NotImplemented, "dimension not implemented");
+    DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
   }
   return result;
 }
@@ -106,7 +106,7 @@ inline FieldVector<K, dim+1> referenceToBarycentric(const FieldVector<K, dim>& r
  * @return the "area" between the coordinates
  */
 template<typename K, int dim>
-inline K computeArea(const FieldVector<K, dim>& coords)
+inline K computeArea(const Dune::FieldVector<K, dim>& coords)
 {
   if (dim == 2)
   {
@@ -114,7 +114,7 @@ inline K computeArea(const FieldVector<K, dim>& coords)
   }
   else if (dim == 3)
   {
-    FieldVector<K, dim> normal, v1 = coords[0] - coords[1], v0 = coords[2] - coords[1];
+    Dune::FieldVector<K, dim> normal, v1 = coords[0] - coords[1], v0 = coords[2] - coords[1];
     normal[0] = v0[1]*v1[2] - v0[2]*v1[1];
     normal[1] = v0[2]*v1[0] - v0[0]*v1[2];
     normal[2] = v0[0]*v1[1] - v0[1]*v1[0];
@@ -122,7 +122,7 @@ inline K computeArea(const FieldVector<K, dim>& coords)
   }
   else
   {
-    DUNE_THROW(NotImplemented, "dimension not implemented");
+    DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
   }
 }
 
@@ -136,7 +136,7 @@ inline K computeArea(const FieldVector<K, dim>& coords)
  * @return the interpolated result
  */
 template<typename K>
-inline K interpolateLinear(const FieldVector<K, 2>& values, const K clocal)
+inline K interpolateLinear(const Dune::FieldVector<K, 2>& values, const K clocal)
 {
   return (1.0-clocal)*values[0] + clocal*values[1];
 }
@@ -188,7 +188,7 @@ inline void interpolateLinear(const V& values0, const V& values1, const K clocal
  * @return the interpolated result
  */
 template<typename K>
-inline K interpolateBilinear(const FieldVector<K, 4>& values, const FieldVector<K, 2>& clocal)
+inline K interpolateBilinear(const Dune::FieldVector<K, 4>& values, const Dune::FieldVector<K, 2>& clocal)
 {
   return (1.0-clocal[0])*((1.0-clocal[1])*values[0] + clocal[1]*values[2]) + clocal[0]*((1.0-clocal[1])*values[1] + clocal[1]*values[3]);
 }
@@ -208,7 +208,7 @@ inline K interpolateBilinear(const FieldVector<K, 4>& values, const FieldVector<
  * @return the interpolated result
  */
 template<typename K, typename V>
-inline void interpolateBilinear(const FieldVector<V, 4>& values, const FieldVector<K, 2>& clocal, V& result, const unsigned int datadim = 1)
+inline void interpolateBilinear(const Dune::FieldVector<V, 4>& values, const Dune::FieldVector<K, 2>& clocal, V& result, const unsigned int datadim = 1)
 {
   // evaluate component-wise
   for (unsigned int j = 0; j < datadim; ++j)
@@ -225,7 +225,7 @@ inline void interpolateBilinear(const FieldVector<V, 4>& values, const FieldVect
  * @return the interpolated result
  */
 template<typename K>
-inline K interpolateBilinear(const K value0, const K value1, const K value2, const K value3, const FieldVector<K, 2>& clocal)
+inline K interpolateBilinear(const K value0, const K value1, const K value2, const K value3, const Dune::FieldVector<K, 2>& clocal)
 {
   return (1.0-clocal[0])*((1.0-clocal[1])*value0 + clocal[1]*value2) + clocal[0]*((1.0-clocal[1])*value1 + clocal[1]*value3);
 }
@@ -246,7 +246,7 @@ inline K interpolateBilinear(const K value0, const K value1, const K value2, con
  * @return the interpolated result
  */
 template<typename K, typename V>
-inline void interpolateBilinear(const V& values0, const V& values1, const V& values2, const V& values3, const FieldVector<K, 2>& clocal, V& result, const unsigned int datadim = 1)
+inline void interpolateBilinear(const V& values0, const V& values1, const V& values2, const V& values3, const Dune::FieldVector<K, 2>& clocal, V& result, const unsigned int datadim = 1)
 {
   // evaluate component-wise
   for (unsigned int j = 0; j < datadim; ++j)
@@ -263,10 +263,10 @@ inline void interpolateBilinear(const V& values0, const V& values1, const V& val
  * @return the interpolated result
  */
 template<int dim, typename K>
-inline K interpolateBarycentric(const FieldVector<K, dim>& values, const FieldVector<K, dim>& barc)
+inline K interpolateBarycentric(const Dune::FieldVector<K, dim>& values, const Dune::FieldVector<K, dim>& barc)
 {
   K result = 0.0;
-  for (typename FieldVector<K, dim>::size_type i = 0; i < dim; ++i)
+  for (typename Dune::FieldVector<K, dim>::size_type i = 0; i < dim; ++i)
     result += barc[i]*values[i];
   return result;
 }
@@ -285,13 +285,13 @@ inline K interpolateBarycentric(const FieldVector<K, dim>& values, const FieldVe
  * @return the interpolated result
  */
 template<int dim, typename K, typename V>
-inline void interpolateBarycentric(const array<V, dim>& values, const FieldVector<K, dim>& barc, V& result, const unsigned int datadim = 1)
+inline void interpolateBarycentric(const Dune::array<V, dim>& values, const Dune::FieldVector<K, dim>& barc, V& result, const unsigned int datadim = 1)
 {
   // initialize with zero
   for (unsigned int j = 0; j < datadim; ++j)
     result[j] = 0.0;
   // accumulate the contribution from the simplex corners
-  for (typename FieldVector<K, dim>::size_type i = 0; i < dim; ++i)
+  for (typename Dune::FieldVector<K, dim>::size_type i = 0; i < dim; ++i)
     for (unsigned int j = 0; j < datadim; ++j)
       result[j] += barc[i]*values[i][j];
 }
@@ -304,10 +304,10 @@ inline void interpolateBarycentric(const array<V, dim>& values, const FieldVecto
  * @return the barycentric coordinates (not checked, i.e. invalid if point not in simplex!)
  */
 template<int dim, typename K>
-FieldVector<K, dim+1> barycentric(const array<FieldVector<K, dim>, dim+1>& corners, const FieldVector<K, dim>& p)
+Dune::FieldVector<K, dim+1> barycentric(const Dune::array<Dune::FieldVector<K, dim>, dim+1>& corners, const Dune::FieldVector<K, dim>& p)
 {
-  FieldVector<K, dim+1> result;
-  typedef FieldVector<K, dim> CoordType;
+  Dune::FieldVector<K, dim+1> result;
+  typedef Dune::FieldVector<K, dim> CoordType;
   if (dim == 1)
   {
     // compute the ratio of the "distances"
@@ -342,7 +342,7 @@ FieldVector<K, dim+1> barycentric(const array<FieldVector<K, dim>, dim+1>& corne
   }
   else
   {
-    DUNE_THROW(NotImplemented, "Dimension " << dim << " implementation missing.");
+    DUNE_THROW(Dune::NotImplemented, "Dimension " << dim << " implementation missing.");
   }
   return result;
 }
@@ -355,9 +355,9 @@ FieldVector<K, dim+1> barycentric(const array<FieldVector<K, dim>, dim+1>& corne
  * @return the barycentric coordinates (not checked, i.e. invalid if point not in simplex!)
  */
 template<typename K>
-inline FieldVector<K, 2> barycentric(const FieldVector<K, 2>& corners, const K& p)
+inline Dune::FieldVector<K, 2> barycentric(const Dune::FieldVector<K, 2>& corners, const K& p)
 {
-  FieldVector<K, 2> result;
+  Dune::FieldVector<K, 2> result;
   result[0] = (p - corners[1]) / (corners[0] - corners[1]);
   result[1] = 1.0 - result[0];
   return result;
@@ -372,9 +372,9 @@ inline FieldVector<K, 2> barycentric(const FieldVector<K, 2>& corners, const K& 
  * @return the barycentric coordinates (not checked, i.e. invalid if point not in simplex!)
  */
 template<int dim, typename K>
-FieldVector<K, dim> hyperBarycentric(const Dune::array<FieldVector<K, dim>, dim>& corners, const FieldVector<K, dim>& p)
+Dune::FieldVector<K, dim> hyperBarycentric(const Dune::array<Dune::FieldVector<K, dim>, dim>& corners, const Dune::FieldVector<K, dim>& p)
 {
-  typedef FieldVector<K, dim>  CoordType;
+  typedef Dune::FieldVector<K, dim>  CoordType;
 
   CoordType result(1.0);
   // In both cases projection is done to reduce the dimension of the calculation
@@ -502,7 +502,7 @@ COMPUTE_BARYCENTRIC_COORDS:
   }
   else
   {
-    DUNE_THROW(NotImplemented, "Dimension " << dim << " implementation missing.");
+    DUNE_THROW(Dune::NotImplemented, "Dimension " << dim << " implementation missing.");
   }
   return result;
 }
@@ -525,10 +525,10 @@ COMPUTE_BARYCENTRIC_COORDS:
  * @return a vector with a, b and c
  */
 template<typename K>
-FieldVector<K, 3> getHyperplaneCoeffs(const array<FieldVector<K, 2>, 2>& p, bool normalize = false)
+Dune::FieldVector<K, 3> getHyperplaneCoeffs(const Dune::array<Dune::FieldVector<K, 2>, 2>& p, bool normalize = false)
 {
-  FieldVector<K, 3> coeffs(0.0);
-  FieldVector<K, 2> v = p[1]-p[0];
+  Dune::FieldVector<K, 3> coeffs(0.0);
+  Dune::FieldVector<K, 2> v = p[1]-p[0];
   coeffs[0] = p[1][1]-p[0][1];
   coeffs[1] = -(p[1][0]-p[0][0]);
   // plug in the point to get the offset in coeffs[2]
@@ -562,12 +562,12 @@ FieldVector<K, 3> getHyperplaneCoeffs(const array<FieldVector<K, 2>, 2>& p, bool
  * @return a vector with a, b, c and d
  */
 template<typename K>
-FieldVector<K, 4> getHyperplaneCoeffs(const array<FieldVector<K, 3>, 3>& p, bool normalize = false)
+Dune::FieldVector<K, 4> getHyperplaneCoeffs(const Dune::array<Dune::FieldVector<K, 3>, 3>& p, bool normalize = false)
 {
-  FieldVector<K, 4> coeffs(0.0);
+  Dune::FieldVector<K, 4> coeffs(0.0);
   // compute the cross product from (p[0]-p[1]) and (p[2]-p[1])
-  FieldVector<K, 3> v2 = p[0]-p[1];
-  FieldVector<K, 3> v1 = p[2]-p[1];
+  Dune::FieldVector<K, 3> v2 = p[0]-p[1];
+  Dune::FieldVector<K, 3> v1 = p[2]-p[1];
   coeffs[0] = v1[1]*v2[2]-v1[2]*v2[1];
   coeffs[1] = v1[2]*v2[0]-v1[0]*v2[2];
   coeffs[2] = v1[0]*v2[1]-v1[1]*v2[0];
@@ -587,18 +587,18 @@ FieldVector<K, 4> getHyperplaneCoeffs(const array<FieldVector<K, 3>, 3>& p, bool
 
 
 template<typename K>
-FieldVector<K, 2> computeNormal(const array<FieldVector<K, 2>, 1>& v)
+Dune::FieldVector<K, 2> computeNormal(const Dune::array<Dune::FieldVector<K, 2>, 1>& v)
 {
-  FieldVector<K, 2> result(v[0][1]);
+  Dune::FieldVector<K, 2> result(v[0][1]);
   result[1] = -v[0][0];
   return result;
 }
 
 
 template<typename K>
-FieldVector<K, 3> computeNormal(const array<FieldVector<K, 3>, 2>& v)
+Dune::FieldVector<K, 3> computeNormal(const Dune::array<Dune::FieldVector<K, 3>, 2>& v)
 {
-  FieldVector<K, 3> result(0.0);
+  Dune::FieldVector<K, 3> result(0.0);
   result[0] = v[0][1]*v[1][2] - v[0][2]*v[1][1];
   result[1] = v[0][2]*v[1][0] - v[0][0]*v[1][2];
   result[2] = v[0][0]*v[1][1] - v[0][1]*v[1][0];
@@ -608,9 +608,9 @@ FieldVector<K, 3> computeNormal(const array<FieldVector<K, 3>, 2>& v)
 
 // can not be used to do dimension independent programming (two arguments)
 template<typename K>
-FieldVector<K, 3> computeNormal(const FieldVector<K, 3> &v0, const FieldVector<K, 3> &v1)
+Dune::FieldVector<K, 3> computeNormal(const Dune::FieldVector<K, 3> &v0, const Dune::FieldVector<K, 3> &v1)
 {
-  FieldVector<K, 3> result(0.0);
+  Dune::FieldVector<K, 3> result(0.0);
   result[0] = v0[1]*v1[2] - v0[2]*v1[1];
   result[1] = v0[2]*v1[0] - v0[0]*v1[2];
   result[2] = v0[0]*v1[1] - v0[1]*v1[0];

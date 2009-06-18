@@ -185,8 +185,8 @@ private:
   };
 
 
-  typedef map<IndexType, ElementInfo* >  ElementInfoMap;
-  typedef map<IndexType, VertexInfo* >   VertexInfoMap;
+  typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
+  typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
 
 
   /************************** MEMBER VARIABLES ************************/
@@ -201,10 +201,10 @@ private:
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the extracted faces
-  vector<FaceInfo>         _faces;
+  std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  vector<CoordinateInfo>   _coords;
+  std::vector<CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
@@ -222,7 +222,7 @@ private:
 
 
   /// @brief geometry type of the surface patches
-  const GeometryType _codim0element;
+  const Dune::GeometryType _codim0element;
 
 
 public:
@@ -234,7 +234,7 @@ public:
    * @param gv the grid view object to work with
    */
   SimplicialSurfaceExtractor(const GV& gv) :
-    _gv(gv), _codim0element(GeometryType::simplex, dim)
+    _gv(gv), _codim0element(Dune::GeometryType::simplex, dim)
   {
     STDOUTLN("This is SimplicialSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
   }
@@ -313,7 +313,7 @@ public:
    * @param coords a vector that will be resized (!) and filled with the coordinates,
    * note that the single components are written consecutively
    */
-  void getCoords(vector<FieldVector<ctype, dimw> >& coords) const
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
   {
     coords.resize(this->_coords.size());
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -337,7 +337,7 @@ public:
    * Deallocation is done in this class.
    * @return the _indices array
    */
-  void getFaces(vector<SimplexTopology>& faces) const
+  void getFaces(std::vector<SimplexTopology>& faces) const
   {
     faces.resize(this->_faces.size());
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
@@ -523,7 +523,7 @@ public:
   const ElementPtr& element(unsigned int index) const
   {
     if (index >= this->_faces.size())
-      DUNE_THROW(GridError, "invalid face index");
+      DUNE_THROW(Dune::GridError, "invalid face index");
     return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
   }
 
@@ -537,7 +537,7 @@ public:
   const VertexPtr& vertex(unsigned int index) const
   {
     if (index >= this->_coords.size())
-      DUNE_THROW(GridError, "invalid coordinate index");
+      DUNE_THROW(Dune::GridError, "invalid coordinate index");
     return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
   }
 }; // end of class SimplicialSurfaceExtractor
@@ -565,11 +565,11 @@ void SimplicialSurfaceExtractor<GV, dimG>::clear()
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
   {
-    vector<CoordinateInfo> dummy;
+    std::vector<CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
-    vector<FaceInfo> dummy;
+    std::vector<FaceInfo> dummy;
     this->_faces.swap(dummy);
   }
 
@@ -606,7 +606,7 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const ElementDescriptor<GV>& d
 
     // a temporary container where newly acquired face
     // information can be stored at first
-    deque<FaceInfo> temp_faces;
+    std::deque<FaceInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -614,7 +614,7 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const ElementDescriptor<GV>& d
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
       if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
+        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
@@ -765,7 +765,7 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& desc
 
     // a temporary container where newly acquired face
     // information can be stored at first
-    deque<FaceInfo> temp_faces;
+    std::deque<FaceInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -773,11 +773,11 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& desc
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
       if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
+        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
 
       // remember the indices of the faces that shall become
       // part of the surface
-      set<int> boundary_faces;
+      std::set<int> boundary_faces;
 
       // iterate over all intersections of codim 1 and test if the
       // boundary intersections are to be added to the surface
@@ -798,7 +798,7 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& desc
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
-        for (typename set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
+        for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
           // add a new face to the temporary collection
           temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit));
@@ -902,21 +902,21 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& desc
 template<typename GV, int dimG>
 inline void SimplicialSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, wcoords, simplex_corners);
+  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, wcoords, simplex_corners);
 }
 
 
 template<typename GV, int dimG>
 inline void SimplicialSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, ecoords, simplex_corners);
+  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, ecoords, simplex_corners);
 }
 
 
@@ -933,11 +933,11 @@ template<typename GV, int dimG>
 template<typename CoordContainer>
 void SimplicialSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
+    interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
 }
 
 
@@ -945,12 +945,12 @@ template<typename GV, int dimG>
 template<typename CoordContainer>
 void SimplicialSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
+    interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
 }
 
 
@@ -958,14 +958,14 @@ template<typename GV, int dimG>
 template<typename CoordContainer>
 void SimplicialSurfaceExtractor<GV, dimG>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
   unsigned int num_in_self = this->numberInSelf(index);
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
   for (int i = 0; i < size; ++i)
   {
-    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
+    interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
     wcoords[i] = eptr->geometry().global(ecoords[i]);
   }
 }
@@ -994,7 +994,7 @@ public:
 
   SimplicialSurfaceExtractor(const GV& gv) : Base(gv)
   {
-    STDOUTLN("This is SimplicialSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << GeometryType(GeometryType::cube, Base::dim) << "!");
+    STDOUTLN("This is SimplicialSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << Dune::GeometryType(Dune::GeometryType::cube, Base::dim) << "!");
   }
 };
 

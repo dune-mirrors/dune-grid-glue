@@ -181,8 +181,8 @@ private:
   };
 
 
-  typedef map<IndexType, ElementInfo* >  ElementInfoMap;
-  typedef map<IndexType, VertexInfo* >   VertexInfoMap;
+  typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
+  typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
 
 
   /************************** MEMBER VARIABLES ************************/
@@ -197,10 +197,10 @@ private:
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the extracted faces
-  vector<FaceInfo>         _faces;
+  std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  vector<CoordinateInfo>   _coords;
+  std::vector<CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
@@ -304,7 +304,7 @@ public:
    * @param coords a vector that will be resized (!) and filled with the coordinates,
    * note that the single components are written consecutively
    */
-  void getCoords(vector<FieldVector<ctype, dimw> >& coords) const
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
   {
     coords.resize(this->_coords.size());
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -328,7 +328,7 @@ public:
    * Deallocation is done in this class.
    * @return the _indices array
    */
-  void getFaces(vector<SimplexTopology>& faces) const
+  void getFaces(std::vector<SimplexTopology>& faces) const
   {
     faces.resize(this->_faces.size());
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
@@ -514,7 +514,7 @@ public:
   const ElementPtr& element(unsigned int index) const
   {
     if (index >= this->_faces.size())
-      DUNE_THROW(GridError, "invalid face index");
+      DUNE_THROW(Dune::GridError, "invalid face index");
     return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
   }
 
@@ -528,7 +528,7 @@ public:
   const VertexPtr& vertex(unsigned int index) const
   {
     if (index >= this->_coords.size())
-      DUNE_THROW(GridError, "invalid coordinate index");
+      DUNE_THROW(Dune::GridError, "invalid coordinate index");
     return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
   }
 
@@ -558,11 +558,11 @@ void GeneralEdgeExtractor<GV>::clear()
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
   {
-    vector<CoordinateInfo> dummy;
+    std::vector<CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
-    vector<FaceInfo> dummy;
+    std::vector<FaceInfo> dummy;
     this->_faces.swap(dummy);
   }
 
@@ -599,7 +599,7 @@ void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 
     // a temporary container where newly acquired face
     // information can be stored at first
-    deque<FaceInfo> temp_faces;
+    std::deque<FaceInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -613,7 +613,7 @@ void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
         // watch next element
         bool added = false;
 
-        GeometryType gt = elit->geometry().type();
+        Dune::GeometryType gt = elit->geometry().type();
 
         // iterate over all intersections of codim 1
         for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
@@ -759,7 +759,7 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
     // a temporary container where newly acquired face
     // information can be stored at first
-    deque<FaceInfo> temp_faces;
+    std::deque<FaceInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -768,7 +768,7 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
       // remember the indices of the faces that shall become
       // part of the surface
-      set<int> boundary_faces;
+      std::set<int> boundary_faces;
 
       // iterate over all intersections of codim 1 and test if the
       // boundary intersections are to be added to the surface
@@ -787,11 +787,11 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         eindex = this->indexSet().template index<0>(*elit);
         this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, boundary_faces.size());
 
-        GeometryType gt = elit->geometry().type();
+        Dune::GeometryType gt = elit->geometry().type();
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
-        for (typename set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
+        for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
           // add a new face to the temporary collection
           temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit));
@@ -895,22 +895,22 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 template<typename GV>
 inline void GeneralEdgeExtractor<GV>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, wcoords, dimw);
+  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, wcoords, dimw);
 }
 
 
 template<typename GV>
 inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
-  GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
-  interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
+  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
 }
 
 
@@ -927,11 +927,11 @@ template<typename GV>
 template<typename CoordContainer>
 inline void GeneralEdgeExtractor<GV>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
+    interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
 }
 
 
@@ -939,13 +939,13 @@ template<typename GV>
 template<typename CoordContainer>
 inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
-  GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
+    interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
 }
 
 
@@ -953,15 +953,15 @@ template<typename GV>
 template<typename CoordContainer>
 inline void GeneralEdgeExtractor<GV>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
 {
-  array<Coords, simplex_corners> corners;
+  Dune::array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
-  GeometryType gt = eptr->geometry().type();
+  Dune::GeometryType gt = eptr->geometry().type();
   unsigned int num_in_self = this->numberInSelf(index);
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   for (int i = 0; i < size; ++i)
   {
-    interpolateBarycentric<dimw, ctype, FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
+    interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
     wcoords[i] = eptr->geometry().global(ecoords[i]);
   }
 }

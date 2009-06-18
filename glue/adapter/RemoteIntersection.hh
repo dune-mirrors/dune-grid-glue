@@ -182,7 +182,7 @@ namespace RemoteIntersectionInterface
        Maps a point in local intersection coords on target intersection to a
        point in domain intersection local coordinates.
      */
-    FieldVector<ctype, mydim> domainLocals(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, mydim> domainLocals(const Dune::FieldVector<ctype, mydim> &local) const
     {
       return this->realIntersection.domainLocals(local);
     }
@@ -193,14 +193,14 @@ namespace RemoteIntersectionInterface
        Maps a point in local intersection coords on domain intersection to a
        point in target intersection local coordinates.
      */
-    FieldVector<ctype, mydim> targetLocals(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, mydim> targetLocals(const Dune::FieldVector<ctype, mydim> &local) const
     {
       return this->realIntersection.targetLocals(local);
     }
 
 
     /** \brief obtain the type of reference element for this intersection */
-    GeometryType type() const
+    Dune::GeometryType type() const
     {
       return this->realIntersection.type();
     }
@@ -221,46 +221,46 @@ namespace RemoteIntersectionInterface
 
 
     /** \brief Return an outer normal (length not necessarily 1). */
-    FieldVector<ctype, coorddim>    outerNormalDomain(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, coorddim>      outerNormalDomain(const Dune::FieldVector<ctype, mydim> &local) const
     {
       return this->realIntersection.outerNormalDomain(local);
     }
 
 
     /** \brief Return an outer normal */
-    FieldVector<ctype, coorddim>    unitOuterNormalDomain(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, coorddim>      unitOuterNormalDomain(const Dune::FieldVector<ctype, mydim> &local) const
     {
-      FieldVector<ctype, coorddim> normal = this->realIntersection.outerNormalDomain(local);
+      Dune::FieldVector<ctype, coorddim> normal = this->realIntersection.outerNormalDomain(local);
       normal /= normal.two_norm();
       return normal;
     }
 
 
     /** \brief Return an outer normal (length not necessarily 1) */
-    FieldVector<ctype, coorddim>    integrationOuterNormalDomain(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, coorddim>      integrationOuterNormalDomain(const Dune::FieldVector<ctype, mydim> &local) const
     {
       return this->unitOuterNormalDomain(local) *= this->realIntersection.geometryDomain().integrationElement(local);
     }
 
 
     /** \brief Return an outer normal (length not necessarily 1). */
-    FieldVector<ctype, coorddim>    outerNormalTarget(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, coorddim>      outerNormalTarget(const Dune::FieldVector<ctype, mydim> &local) const
     {
       return this->realIntersection.outerNormalTarget(local);
     }
 
 
     /** \brief Return a unit outer normal of the target intersection */
-    FieldVector<ctype, coorddim>    unitOuterNormalTarget(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, coorddim>      unitOuterNormalTarget(const Dune::FieldVector<ctype, mydim> &local) const
     {
-      FieldVector<ctype, coorddim> normal = this->realIntersection.outerNormalTarget(local);
+      Dune::FieldVector<ctype, coorddim> normal = this->realIntersection.outerNormalTarget(local);
       normal /= normal.two_norm();
       return normal;
     }
 
 
     /** \brief Return an outer normal (length not necessarily 1) */
-    FieldVector<ctype, coorddim>    integrationOuterNormalTarget(const FieldVector<ctype, mydim> &local) const
+    Dune::FieldVector<ctype, coorddim>      integrationOuterNormalTarget(const Dune::FieldVector<ctype, mydim> &local) const
     {
       return this->unitOuterNormalTarget(local) *= this->realIntersection.geometryTarget().integrationElement(local);
     }

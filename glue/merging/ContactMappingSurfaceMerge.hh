@@ -612,8 +612,8 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
         for (j = 0; j < dim; ++j)
           for (k = 0; k < dim; ++k)
           {
-            lower[k] = min(lower[k], corners[j][k]);
-            upper[k] = max(upper[k], corners[j][k]);
+            lower[k] = std::min(lower[k], corners[j][k]);
+            upper[k] = std::max(upper[k], corners[j][k]);
           }
       }
       // increase a little, since "upper" boundary not inside locator domain

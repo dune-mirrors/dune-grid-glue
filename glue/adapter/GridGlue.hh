@@ -81,7 +81,9 @@ private:
   typedef GridGlue<GET1, GET2, SM> This;
 public:
   /** \todo Please doc me! */
-  template<typename BSET1, typename BSET2, typename BSM, ExtractorType type1, ExtractorType type2>
+  template<typename BSET1, typename BSET2, typename BSM,
+      ExtractorClassification::ExtractorType type1,
+      ExtractorClassification::ExtractorType type2>
   class BuilderImpl;
 
   class RemoteIntersectionImpl;
@@ -140,7 +142,7 @@ public:
   typedef typename DomainGridType::ctype ctype;
 
   /** \brief The type used for coordinate vectors */
-  typedef FieldVector<ctype, dimw>                   Coords;
+  typedef Dune::FieldVector<ctype, dimw>                   Coords;
 
   /** \brief The type of transformation used */
   typedef CoordinateTransformation<dimw, ctype>      Transformation;
@@ -235,7 +237,7 @@ private:
   mutable RemoteIntersectionImpl NULL_INTERSECTION;
 
   /// @brief a vector with intersection elements
-  mutable vector<RemoteIntersectionImpl>   _intersections;
+  mutable std::vector<RemoteIntersectionImpl>   _intersections;
 
 
 protected:
@@ -623,8 +625,8 @@ typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET
     if (this->_domext.numberInSelf(first) == num && this->_sm.domainSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
-      vector<unsigned int> global_results;
-      vector<unsigned int> local_results;
+      std::vector<unsigned int> global_results;
+      std::vector<unsigned int> local_results;
 
       // get the remote intersections
       this->_sm.domainSimplexRefined(first, global_results);
@@ -660,8 +662,8 @@ typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET
 
 
   // now accumulate all remote intersections of the element's faces
-  vector<unsigned int> global_results(0, 0);
-  vector<unsigned int> local_results;
+  std::vector<unsigned int> global_results(0, 0);
+  std::vector<unsigned int> local_results;
 
   // iterate over all simplices to check if there is more than one simplix refining the face
   bool found_sth = false;
@@ -700,8 +702,8 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
     if (this->_tarext.numberInSelf(first) == num && this->_sm.targetSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
-      vector<unsigned int> global_results;
-      vector<unsigned int> local_results;
+      std::vector<unsigned int> global_results;
+      std::vector<unsigned int> local_results;
 
       // get the remote intersections
       this->_sm.targetSimplexRefined(first, global_results);
@@ -737,8 +739,8 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
 
 
   // now accumulate all remote intersections of the element's faces
-  vector<unsigned int> global_results(0, 0);
-  vector<unsigned int> local_results;
+  std::vector<unsigned int> global_results(0, 0);
+  std::vector<unsigned int> local_results;
 
   // iterate over all simplices to check if there is more than one simplix refining the face
   bool found_sth = false;

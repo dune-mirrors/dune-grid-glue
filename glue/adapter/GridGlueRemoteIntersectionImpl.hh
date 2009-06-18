@@ -76,9 +76,9 @@ public:
   typedef typename DomainGridType::ctype ctype;
 
 
-  typedef FieldVector<ctype, mydim>      LocalCoords;
+  typedef Dune::FieldVector<ctype, mydim>      LocalCoords;
 
-  typedef FieldVector<ctype, coorddim>   Coords;
+  typedef Dune::FieldVector<ctype, coorddim>   Coords;
 
 
 private:
@@ -103,7 +103,7 @@ private:
 
 public:
 
-  static const GeometryType geometrytype;
+  static const Dune::GeometryType geometrytype;
 
 
   /*   F U N C T I O N A L I T Y   */
@@ -194,7 +194,7 @@ public:
 
 
   // obtain the type of reference element for this intersection
-  GeometryType type() const
+  Dune::GeometryType type() const
   {
     return geometrytype;
   }
@@ -215,13 +215,13 @@ public:
 
 
   // Return an outer normal (length not necessarily 1).
-  Coords outerNormalDomain(const FieldVector<ctype, mydim> &local) const
+  Coords outerNormalDomain(const Dune::FieldVector<ctype, mydim> &local) const
   {
     return this->_domggeom.outerNormal(local);
   }
 
   // Return an outer normal (length not necessarily 1).
-  Coords outerNormalTarget(const FieldVector<ctype, mydim> &local) const
+  Coords outerNormalTarget(const Dune::FieldVector<ctype, mydim> &local) const
   {
     return this->_targgeom.outerNormal(local);
   }
@@ -230,7 +230,7 @@ public:
 
 
 template<typename GET1, typename GET2, typename SM>
-const GeometryType GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::geometrytype(GeometryType::simplex, Parent::dimw-1);
+const Dune::GeometryType GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::geometrytype(Dune::GeometryType::simplex, Parent::dimw-1);
 
 
 template<typename GET1, typename GET2, typename SM>
@@ -259,7 +259,7 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
 
   // the number of simplex corners as well as
   // the number of the coordinate space's dimensions
-  array<Coords, coorddim> corners_barycentric;
+  Dune::array<Coords, coorddim> corners_barycentric;
 
   // initialize the local and the global geometry of the domain
   {
@@ -273,8 +273,8 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
     int face_number = elementcoorddim < coorddim ? 0 : glue->_domext.numberInSelf(glue->_sm.domainParent(index));
 
     // compute the local coordinates with the correct dimension and the global coordinates
-    array<FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
-    array<FieldVector<ctype, DomainGridType::dimensionworld>, coorddim> corners_global;
+    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
+    Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, coorddim> corners_global;
     glue->_domext.localAndGlobalCoords(glue->_sm.domainParent(index), corners_barycentric, corners_local, corners_global, coorddim);
     //		glue->_domext.localCoords(glue->_sm.domainParent(index), corners_barycentric, corners_local, coorddim);
     //		glue->_domext.globalCoords(glue->_sm.domainParent(index), corners_barycentric, corners_global, coorddim);
@@ -296,8 +296,8 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
     int face_number = elementcoorddim < coorddim ? 0 : glue->_tarext.numberInSelf(glue->_sm.targetParent(index));
 
     // compute the local coordinates with the correct dimension and the global coordinates
-    array<FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
-    array<FieldVector<ctype, TargetGridType::dimensionworld>, coorddim> corners_global;
+    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
+    Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, coorddim> corners_global;
     glue->_tarext.localAndGlobalCoords(glue->_sm.targetParent(index), corners_barycentric, corners_local, corners_global, coorddim);
     //		glue->_tarext.localCoords(glue->_sm.targetParent(index), corners_barycentric, corners_local, coorddim);
     //		glue->_tarext.globalCoords(glue->_sm.targetParent(index), corners_barycentric, corners_global, coorddim);

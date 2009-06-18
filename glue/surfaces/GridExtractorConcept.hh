@@ -319,7 +319,7 @@ private:
     }
   };
 
-  typedef GenericGeometry::ProtectedIf<static_cast<int>(dim) == static_cast<int>(dimw), TesterTemplate, Dummy>  FaceDescriptorTester;
+  typedef Dune::GenericGeometry::ProtectedIf<static_cast<int>(dim) == static_cast<int>(dimw), TesterTemplate, Dummy>  FaceDescriptorTester;
   /* ------------------------------------------------------------------------------------------------- */
 
 
@@ -345,9 +345,9 @@ private:
   VertexPtr vptr;
   Element e;
   ElementPtr eptr;
-  array<LocalCoords, simplex_corners>       lcs;
-  array<WorldCoords, simplex_corners>       wcs;
-  array<BarycentricCoords, simplex_corners> bcs;
+  Dune::array<LocalCoords, simplex_corners>       lcs;
+  Dune::array<WorldCoords, simplex_corners>       wcs;
+  Dune::array<BarycentricCoords, simplex_corners> bcs;
 
 
 public:
