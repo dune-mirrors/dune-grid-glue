@@ -31,8 +31,6 @@
 #include "SurfaceDescriptor.hh"
 #include "SimplicialMeshExtractor.hh"
 
-using namespace Dune;
-using namespace std;
 
 
 /**

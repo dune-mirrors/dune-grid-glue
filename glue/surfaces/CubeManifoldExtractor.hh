@@ -31,9 +31,6 @@
 #include "SurfaceDescriptor.hh"
 #include "SimplicialManifoldExtractor.hh"
 
-using namespace Dune;
-using namespace std;
-
 
 /**
  * @class CubeManifoldExtractor

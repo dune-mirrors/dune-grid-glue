@@ -26,8 +26,6 @@
 #include "SurfaceMergeConcept.hh"
 
 
-using namespace std;
-
 
 /**
  * @class SurfaceMerge

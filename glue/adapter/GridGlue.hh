@@ -38,8 +38,6 @@
 #include "CoordinateTransformation.hh"
 
 
-using namespace MeshClassification;
-using namespace ExtractorClassification;
 
 /**
  * @class GridGlue
@@ -57,9 +55,9 @@ template<
     typename GET2,
     typename SM =
       ContactMappingSurfaceMerge<
-        GET1::GridView::dimensionworld + static_cast<int>(GET1::GridView::dimensionworld == static_cast<int>(GET1::dimS)),
-        typename GET1::GridView::Grid::ctype
-        >
+          GET1::GridView::dimensionworld + static_cast<int>(GET1::GridView::dimensionworld == static_cast<int>(GET1::dimS)),
+          typename GET1::GridView::Grid::ctype
+          >
     >
 class GridGlue
 {

@@ -20,9 +20,6 @@
 #define GRIDGLUEBUILDERIMPL_HH_
 
 
-using namespace std;
-using namespace ExtractorClassification;
-
 
 /** \brief   I M P L E M E N T A T I O N   O F   S U B C L A S S   BUILDER IMPL
    (Specialization for two "non-surface" grids, i.e. meshes, manifolds) */

@@ -31,8 +31,6 @@
 
 #include "../misc/geometry.hh"
 
-using namespace Dune;
-
 
 /**
  * @class LocalSimplexGeometryTraits

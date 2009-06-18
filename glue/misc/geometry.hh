@@ -24,8 +24,6 @@
 #include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
 
-using namespace Dune;
-
 
 
 /**

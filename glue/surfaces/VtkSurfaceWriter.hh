@@ -26,8 +26,6 @@
 
 #include "../adapter/GridGlueVtkWriter.hh"
 
-using namespace std;
-
 
 class VtkSurfaceWriter
 {

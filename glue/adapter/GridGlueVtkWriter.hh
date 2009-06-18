@@ -28,8 +28,6 @@
 #include "../misc/geometry.hh"
 
 
-using namespace std;
-
 
 const char TypeNames[][8] = { "double", "float  ", "int    " };
 

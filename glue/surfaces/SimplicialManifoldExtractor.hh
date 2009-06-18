@@ -30,9 +30,6 @@
 
 #include "SurfaceDescriptor.hh"
 
-using namespace Dune;
-using namespace std;
-
 
 /**
  * @class SimplicialManifoldExtractor
