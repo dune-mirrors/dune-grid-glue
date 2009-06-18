@@ -604,8 +604,8 @@ void CubeManifoldExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& 
     {
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
-      if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(Dune::GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->geometry().type());
+      if (elit->type() != this->_codim0element)
+        DUNE_THROW(Dune::GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->type());
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically

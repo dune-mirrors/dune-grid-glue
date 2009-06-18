@@ -615,8 +615,8 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const ElementDescriptor<GV>& d
     {
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
-      if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
+      if (elit->type() != this->_codim0element)
+        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->type());
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
@@ -774,8 +774,8 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& desc
     {
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
-      if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
+      if (elit->type() != this->_codim0element)
+        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->type());
 
       // remember the indices of the faces that shall become
       // part of the surface

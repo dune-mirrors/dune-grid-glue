@@ -633,7 +633,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const ElementDescriptor<GV>& desc
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
     {
-      Dune::GeometryType gt = elit->geometry().type();
+      Dune::GeometryType gt = elit->type();
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
@@ -866,7 +866,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
     {
-      Dune::GeometryType gt = elit->geometry().type();
+      Dune::GeometryType gt = elit->type();
 
       // remember the indices of the faces that shall become
       // part of the surface
@@ -1089,7 +1089,7 @@ inline void GeneralSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, c
     // this is a triangle face
     Dune::array<Coords, simplex_corners> corners;
     unsigned int num_in_self = this->numberInSelf(index);
-    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
+    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     for (int i = 0; i < simplex_corners; ++i)
       corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
     interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
@@ -1139,7 +1139,7 @@ void GeneralSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const Co
     // this is a triangle face
     Dune::array<Coords, simplex_corners> corners;
     unsigned int num_in_self = this->numberInSelf(index);
-    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
+    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     for (int i = 0; i < simplex_corners; ++i)
       corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
     for (int i = 0; i < size; ++i)

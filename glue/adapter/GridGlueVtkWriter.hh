@@ -121,7 +121,7 @@ public:
         {
           // count and remember the corners of this face
           const Dune::ReferenceElement<ctype, dimw>& refElement =
-            Dune::ReferenceElements<ctype, dimw>::general(pit->geometry().type());
+            Dune::ReferenceElements<ctype, dimw>::general(pit->type());
           int size = refElement.size(face, 1, dimw);
           face_corners.push_back(size);
           face_corner_count += size;
@@ -164,7 +164,7 @@ public:
         }
         else                         // full-dimensional grid
         {
-          Dune::GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->type();
           for (int i = 0; i < 2; ++i)
           {
             int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, i);
@@ -187,7 +187,7 @@ public:
         }
         else                         // full-dimensional grid
         {
-          Dune::GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->type();
           // write 3 or 4 points, depending on face geometry
           for (int i = 0; i < 3; ++i)
           {
@@ -346,7 +346,7 @@ public:
         {
           // count and remember the corners of this face
           const Dune::ReferenceElement<ctype, dimw>& refElement =
-            Dune::ReferenceElements<ctype, dimw>::general(pit->geometry().type());
+            Dune::ReferenceElements<ctype, dimw>::general(pit->type());
           int size = refElement.size(face, 1, dimw);
           face_corners.push_back(size);
           face_corner_count += size;
@@ -389,7 +389,7 @@ public:
         }
         else                         // full-dimensional grid
         {
-          Dune::GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->type();
           for (int i = 0; i < 2; ++i)
           {
             int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, i);
@@ -412,7 +412,7 @@ public:
         }
         else                         // full-dimensional grid
         {
-          Dune::GeometryType temp_gt = (*pit)->geometry().type();
+          Dune::GeometryType temp_gt = (*pit)->type();
           // write 3 or 4 points, depending on face geometry
           for (int i = 0; i < 3; ++i)
           {

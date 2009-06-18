@@ -613,7 +613,7 @@ void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
         // watch next element
         bool added = false;
 
-        Dune::GeometryType gt = elit->geometry().type();
+        Dune::GeometryType gt = elit->type();
 
         // iterate over all intersections of codim 1
         for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
@@ -787,7 +787,7 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         eindex = this->indexSet().template index<0>(*elit);
         this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, boundary_faces.size());
 
-        Dune::GeometryType gt = elit->geometry().type();
+        Dune::GeometryType gt = elit->type();
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
@@ -907,7 +907,7 @@ inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const Coor
 {
   Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
-  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
@@ -941,7 +941,7 @@ inline void GeneralEdgeExtractor<GV>::localCoords(unsigned int index, const Coor
 {
   Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
-  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().type();
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   for (int i = 0; i < size; ++i)
@@ -955,7 +955,7 @@ inline void GeneralEdgeExtractor<GV>::localAndGlobalCoords(unsigned int index, c
 {
   Dune::array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
-  Dune::GeometryType gt = eptr->geometry().type();
+  Dune::GeometryType gt = eptr->type();
   unsigned int num_in_self = this->numberInSelf(index);
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);

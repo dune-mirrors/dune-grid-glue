@@ -571,8 +571,8 @@ void SimplicialManifoldExtractor<GV>::update(const ElementDescriptor<GV>& descr)
     {
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
-      if (elit->geometry().type() != this->_codim0element)
-        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->geometry().type());
+      if (elit->type() != this->_codim0element)
+        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->type());
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
