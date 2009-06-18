@@ -41,23 +41,9 @@ template<typename K, int dim>
 inline Dune::FieldVector<K, dim-1> barycentricToReference(const Dune::FieldVector<K, dim>& bar)
 {
   Dune::FieldVector<K, dim-1> result;
-  if (dim == 2)
-  {
-    // use Dune style indexing for edge (0 - 1) where the origin (0)
-    // of the local coords is at corner 0
-    result[0] = bar[1];
-  }
-  else if (dim == 3)
-  {
-    // use Dune style indexing (0 - 1 - 2, ccw) where the origin (0,0)
-    // of the local coords is at corner 0
-    result[0] = bar[1];
-    result[1] = bar[2];
-  }
-  else
-  {
-    DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
-  }
+  for (int i=0; i<dim-1; i++)
+    result[i] = bar[i+1];
+
   return result;
 }
 
@@ -77,25 +63,12 @@ template<typename K, int dim>
 inline Dune::FieldVector<K, dim+1> referenceToBarycentric(const Dune::FieldVector<K, dim>& ref)
 {
   Dune::FieldVector<K, dim+1> result;
-  if (dim == 1)
-  {
-    // use Dune style indexing for edge (0 - 1) where the origin (0)
-    // of the local coords is at corner 0
-    result[1] = ref[0];
-    result[0] = 1.0 - result[1];
+  result[0] = 1.0;
+  for (int i=0; i<dim; i++) {
+    result[i+1] = ref[i];
+    result[0] -= ref[i];
   }
-  else if (dim == 2)
-  {
-    // use Dune style indexing (0 - 1 - 2, ccw) where the origin (0,0)
-    // of the local coords is at corner 0
-    result[1] = ref[0];
-    result[2] = ref[1];
-    result[0] = 1.0 - result[2] - result[1];
-  }
-  else
-  {
-    DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
-  }
+
   return result;
 }
 
