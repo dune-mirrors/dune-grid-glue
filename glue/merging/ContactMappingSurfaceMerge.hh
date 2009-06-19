@@ -45,7 +45,7 @@
 #include <dune/common/fvector.hh>
 
 #include "../misc/geometry.hh"
-#include "../misc/MultiDimOctree.hh"
+#include "../misc/multidimoctree.hh"
 #include <psurface/ContactMapping.h>
 
 

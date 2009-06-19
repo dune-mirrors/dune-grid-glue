@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 /*
- *  Filename:    MultiDimOctree.hh
+ *  Filename:    multidimoctree.hh
  *  Version:     1.0
  *  Created on:  Jan 14, 2009
  *  Author:      Gerrit Buse
@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file MultiDimOctree.hh
+ * @file multidimoctree.hh
  * @brief dimension independent octree functionality
  */
 #ifndef MULTI_DIM_OCTREE_HH
@@ -23,7 +23,7 @@
 #include <vector>
 #include <deque>
 #include <map>
-#include "Box.hh"
+#include "box.hh"
 
 // can be defined if desired
 #ifndef MEMINCREMENT

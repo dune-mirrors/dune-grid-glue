@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 /*
- *  Filename:    Box.hh
+ *  Filename:    box.hh
  *  Version:     1.0
  *  Created on:  Jan 13, 2009
  *  Author:      Gerrit Buse
@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file Box.hh
+ * @file box.hh
  * @brief dimension independent boxes (cubes) used in MultiDimOctree
  */
 
