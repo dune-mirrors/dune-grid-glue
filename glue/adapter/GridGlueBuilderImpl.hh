@@ -246,11 +246,7 @@ private:
 
   Parent& _glue;
 
-  const ElementDescriptor<DomainGridView>*  _domelmntdescr;
-
   const FaceDescriptor<DomainGridView>*     _domfacedescr;
-
-  const ElementDescriptor<TargetGridView>*  _tarelmntdescr;
 
   const FaceDescriptor<TargetGridView>*     _tarfacedescr;
 
@@ -264,37 +260,20 @@ public:
 
   BuilderImpl(Parent& glue_)
     : _glue(glue_),
-      _domelmntdescr(NULL), _domfacedescr(NULL),
-      _tarelmntdescr(NULL), _tarfacedescr(NULL),
+      _domfacedescr(NULL), _tarfacedescr(NULL),
       _domtrafo(NULL),_tartrafo(NULL)
   {}
 
 
   void setDomainFaceDescriptor(const FaceDescriptor<DomainGridView>& descr)
   {
-    this->_domelmntdescr = NULL;
     this->_domfacedescr = &descr;
-  }
-
-
-  void setDomainElementDescriptor(const ElementDescriptor<DomainGridView>& descr)
-  {
-    this->_domfacedescr = NULL;
-    this->_domelmntdescr = &descr;
   }
 
 
   void setTargetFaceDescriptor(const FaceDescriptor<TargetGridView>& descr)
   {
-    this->_tarelmntdescr = NULL;
     this->_tarfacedescr = &descr;
-  }
-
-
-  void setTargetElementDescriptor(const ElementDescriptor<TargetGridView>& descr)
-  {
-    this->_tarfacedescr = NULL;
-    this->_tarelmntdescr = &descr;
   }
 
 
@@ -317,8 +296,6 @@ public:
       // extract the domain surface
       if (this->_domfacedescr != NULL)
         this->_glue._domext.update(*this->_domfacedescr);
-      else if (this->_domelmntdescr != NULL)
-        this->_glue._domext.update(*this->_domelmntdescr);
       else
       {
         std::cerr << "GridGlue::Builder : no domain surface descriptor set" << std::endl;
@@ -328,8 +305,6 @@ public:
       // extract the target surface
       if (this->_tarfacedescr != NULL)
         this->_glue._tarext.update(*this->_tarfacedescr);
-      else if (this->_tarelmntdescr != NULL)
-        this->_glue._tarext.update(*this->_tarelmntdescr);
       else
       {
         std::cerr << "GridGlue::Builder : no target surface descriptor set" << std::endl;
@@ -468,8 +443,6 @@ private:
 
   Parent& _glue;
 
-  const ElementDescriptor<DomainGridView>*  _domelmntdescr;
-
   const FaceDescriptor<DomainGridView>*     _domfacedescr;
 
   const ElementDescriptor<TargetGridView>*  _tarelmntdescr;
@@ -483,7 +456,7 @@ public:
 
   BuilderImpl(Parent& glue_)
     : _glue(glue_),
-      _domelmntdescr(NULL), _domfacedescr(NULL),
+      _domfacedescr(NULL),
       _tarelmntdescr(NULL),
       _domtrafo(NULL),_tartrafo(NULL)
   {}
@@ -491,15 +464,7 @@ public:
 
   void setDomainFaceDescriptor(const FaceDescriptor<DomainGridView>& descr)
   {
-    this->_domelmntdescr = NULL;
     this->_domfacedescr = &descr;
-  }
-
-
-  void setDomainElementDescriptor(const ElementDescriptor<DomainGridView>& descr)
-  {
-    this->_domfacedescr = NULL;
-    this->_domelmntdescr = &descr;
   }
 
 
@@ -528,8 +493,6 @@ public:
       // extract the domain surface
       if (this->_domfacedescr != NULL)
         this->_glue._domext.update(*this->_domfacedescr);
-      else if (this->_domelmntdescr != NULL)
-        this->_glue._domext.update(*this->_domelmntdescr);
       else
       {
         std::cerr << "GridGlue::Builder : no domain surface descriptor set" << std::endl;
@@ -680,8 +643,6 @@ private:
 
   const ElementDescriptor<DomainGridView>*  _domelmntdescr;
 
-  const ElementDescriptor<TargetGridView>*  _tarelmntdescr;
-
   const FaceDescriptor<TargetGridView>*     _tarfacedescr;
 
   const typename Parent::Transformation*    _domtrafo;
@@ -694,7 +655,7 @@ public:
   BuilderImpl(Parent& glue_)
     : _glue(glue_),
       _domelmntdescr(NULL),
-      _tarelmntdescr(NULL), _tarfacedescr(NULL),
+      _tarfacedescr(NULL),
       _domtrafo(NULL),_tartrafo(NULL)
   {}
 
@@ -709,13 +670,6 @@ public:
   {
     this->_tarelmntdescr = NULL;
     this->_tarfacedescr = &descr;
-  }
-
-
-  void setTargetElementDescriptor(const ElementDescriptor<TargetGridView>& descr)
-  {
-    this->_tarfacedescr = NULL;
-    this->_tarelmntdescr = &descr;
   }
 
 
@@ -747,8 +701,6 @@ public:
       // extract the target surface
       if (this->_tarfacedescr != NULL)
         this->_glue._tarext.update(*this->_tarfacedescr);
-      else if (this->_tarelmntdescr != NULL)
-        this->_glue._tarext.update(*this->_tarelmntdescr);
       else
       {
         std::cerr << "GridGlue::Builder : no target surface descriptor set" << std::endl;
