@@ -607,8 +607,8 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& desc
       for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
       {
         // only look at boundary faces
-        if (is->boundary() && descr.contains(elit, is->numberInSelf()))
-          boundary_faces.insert(is->numberInSelf());
+        if (is->boundary() && descr.contains(elit, is->indexInInside()))
+          boundary_faces.insert(is->indexInInside());
       }
 
       // if some face is part of the surface add it!
@@ -633,7 +633,7 @@ void SimplicialSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& desc
             int vertex_number = orientedSubface<dim>(this->_codim0element, *sit, i);
 
             // get the vertex pointer and the index from the index set
-            VertexPtr vptr(elit->template entity<dim>(vertex_number));
+            VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
             IndexType vindex = this->index<dim>(*vptr);
 
             // remember the vertex' number in parent element's vertices

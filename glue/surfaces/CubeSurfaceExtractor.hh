@@ -585,8 +585,6 @@ void CubeSurfaceExtractor<GV, rect, dimG>::clear()
 }
 
 
-
-
 template<typename GV, bool rect, int dimG>
 void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& descr)
 {
@@ -628,8 +626,8 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
       for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
       {
         // only look at boundary faces
-        if (is->boundary() && descr.contains(elit, is->numberInSelf()))
-          boundary_faces.insert(is->numberInSelf());
+        if (is->boundary() && descr.contains(elit, is->indexInInside()))
+          boundary_faces.insert(is->indexInInside());
       }
 
       // if some face is part of the surface add it!
@@ -659,7 +657,7 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
             vertex_numbers[i] = orientedSubface<dim>(this->_codim0element, *sit, i);
 
             // get the vertex pointer and the index from the index set
-            vptrs[i] = new VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
+            vptrs[i] = new VertexPtr(elit->template subEntity<dim>(vertex_numbers[i]));
             IndexType vindex = this->index<dim>(*(*vptrs[i]));
 
             // if the vertex is not yet inserted in the vertex info map
@@ -781,7 +779,7 @@ inline void CubeSurfaceExtractor<GV, rect, dimG>::localCoords(unsigned int index
   if (rect)
   {
     Dune::array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->numberInSelf(index);
+    unsigned int num_in_self = this->indexInInside(index);
     // computing the locals is straight forward for flat rectangles,
     // we only need the triangle's corners in element coordinate
     if (this->_faces[index].first)

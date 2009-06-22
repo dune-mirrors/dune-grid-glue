@@ -636,7 +636,7 @@ void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
             }
 
             // get faces index in parent element
-            const int num_in_parent = is->numberInSelf();
+            const int num_in_parent = is->indexInInside();
 
             // add a new face to the temporary collection
             temp_faces.push_back(FaceInfo(simplex_index, eindex, num_in_parent));
@@ -648,7 +648,7 @@ void GeneralEdgeExtractor<GV>::update(const ElementDescriptor<GV>& descr)
               int vertex_number = orientedSubface<dim>(gt, num_in_parent, i);
 
               // get the vertex pointer and the index from the index set
-              VertexPtr vptr(elit->template entity<dim>(vertex_number));
+              VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
               IndexType vindex = this->index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
@@ -775,8 +775,8 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
       for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
       {
         // only look at boundary faces
-        if (is->boundary() && descr.contains(elit, is->numberInSelf()))
-          boundary_faces.insert(is->numberInSelf());
+        if (is->boundary() && descr.contains(elit, is->indexInInside()))
+          boundary_faces.insert(is->indexInInside());
       }
 
       // if some face is part of the surface add it!
@@ -803,7 +803,7 @@ void GeneralEdgeExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             int vertex_number = orientedSubface<dim>(gt, *sit, i);
 
             // get the vertex pointer and the index from the index set
-            VertexPtr vptr(elit->template entity<dim>(vertex_number));
+            VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
             IndexType vindex = this->index<dim>(*vptr);
 
             // remember the vertex' number in parent element's vertices

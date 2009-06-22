@@ -168,8 +168,8 @@ public:
           for (int i = 0; i < 2; ++i)
           {
             int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
-                  << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
+            fgrid << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
+                  << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
           }
         }
       }
@@ -194,10 +194,10 @@ public:
             if (i == 2 && (*facecornerit) == 4)
             {
               int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, 3);
-              fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
+              fgrid << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
             }
             int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template entity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
+            fgrid << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
           }
         }
         facecornerit++;
@@ -393,8 +393,8 @@ public:
           for (int i = 0; i < 2; ++i)
           {
             int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
-                  << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
+            fgrid << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
+                  << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
           }
         }
       }
@@ -419,10 +419,10 @@ public:
             if (i == 2 && (*facecornerit) == 4)
             {
               int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, 3);
-              fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
+              fgrid << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
             }
             int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template entity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
+            fgrid << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
           }
 
         }

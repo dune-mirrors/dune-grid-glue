@@ -37,8 +37,6 @@
 #include "RemoteIntersectionIterators.hh"
 #include "CoordinateTransformation.hh"
 
-
-
 /**
  * @class GridGlue
  * @brief sequential adapter to couple two grids at specified close together boundaries
@@ -375,29 +373,6 @@ public:
    * @return -1 if there is no face mapped with number >=@c index, else next face's number
    */
   int targetEntityNextFace(const TargetElement& e, int index = 0) const;
-
-#if 0  // if this #if 0 isn't there doxygen gets screwed up
-  //	/**
-  //	 * @brief tells how many faces of an element could be (partially) mapped
-  //	 * @param e the element
-  //	 * @param faces An ALLOCATED array to which the indices of the faces in the Dune
-  //	 * element are written starting at index 0. The user has to choose its size
-  //	 * appropriatly (e.g. the number of faces for this element)
-  //	 * @return the number of (partially) mapped faces for this element
-  //	 */
-  //	int facesMappedToTarget(const DomainElement& e, unsigned int* faces) const;
-  //
-  //
-  //	/**
-  //	 * @brief tells how many faces of an element could be (partially) mapped
-  //	 * @param e the element
-  //	 * @param faces An ALLOCATED array to which the indices of the faces in the Dune
-  //	 * element are written starting at index 0. The user has to choose its size
-  //	 * appropriatly (e.g. the number of faces for this element)
-  //	 * @return the number of (partially) mapped faces for this element
-  //	 */
-  //	int facesMappedToDomain(const TargetElement& e, unsigned int* faces) const;
-#endif
 
   /*   I N T E R S E C T I O N S   A N D   I N T E R S E C T I O N   I T E R A T O R S   */
 
