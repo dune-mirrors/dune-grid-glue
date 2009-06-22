@@ -2,18 +2,18 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 surfacesdir = $(includedir)/dune/glue/surfaces
-surfaces_HEADERS = GridExtractor.hh\
-	GridExtractorConcept.hh\
-	ExtractorSelector.hh\
-	GeneralSurfaceExtractor.hh\
-	SimplicialManifoldExtractor.hh\
-	SimplicialMeshExtractor.hh\
-	SimplicialSurfaceExtractor.hh\
-	CubeManifoldExtractor.hh\
-	CubeMeshExtractor.hh\
-	CubeSurfaceExtractor.hh\
-	SurfaceDescriptor.hh\
-	GridExtractionTraits.hh\
+surfaces_HEADERS = gridextractor.hh\
+	gridextractorconcept.hh\
+	extractorselector.hh\
+	generalsurfaceextractor.hh\
+	simplicialmanifoldextractor.hh\
+	simplicialmeshextractor.hh\
+	simplicialsurfaceextractor.hh\
+	cubemanifoldextractor.hh\
+	cubemeshextractor.hh\
+	cubesurfaceextractor.hh\
+	surfacedescriptor.hh\
+	gridextractiontraits.hh\
 	VtkSurfaceWriter.hh
 
 include $(top_srcdir)/am/global-rules
