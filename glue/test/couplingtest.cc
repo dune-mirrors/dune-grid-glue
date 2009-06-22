@@ -26,8 +26,6 @@ void testCoupling(const GlueType& glue)
 
   for (; rIIt!=rIEndIt; ++rIIt) {
 
-    std::cout << "Hallo Welt!" << std::endl;
-
     // Create a set of test points
     const QuadratureRule<double, dim-1>& quad = QuadratureRules<double, dim-1>::rule(rIIt->type(), 3);
 
@@ -35,8 +33,22 @@ void testCoupling(const GlueType& glue)
 
       Dune::FieldVector<double, dim-1> quadPos = quad[l].position();
 
-      std::cout << rIIt->intersectionDomainGlobal().global(quadPos) << std::endl;
-      std::cout << rIIt->intersectionTargetGlobal().global(quadPos) << std::endl;
+      // Test whether local domain position is consistent with global domain position
+      FieldVector<double,dim> localDomainPos
+        =  rIIt->entityDomain()->geometry().global(rIIt->intersectionDomainLocal().global(quadPos));
+      FieldVector<double,dim> globalDomainPos = rIIt->intersectionDomainGlobal().global(quadPos);
+      FieldVector<double,dim> localTargetPos
+        = rIIt->entityTarget()->geometry().global(rIIt->intersectionTargetLocal().global(quadPos));
+      FieldVector<double,dim> globalTargetPos = rIIt->intersectionTargetGlobal().global(quadPos);
+
+      // Test whether local domain position is consistent with global domain position
+      assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
+
+      // Test whether local target position is consistent with global target position
+      assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
+
+      // Here we assume that the two interface match geometrically:
+      assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
 
     }
 
