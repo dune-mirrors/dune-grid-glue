@@ -451,7 +451,21 @@ public:
     return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
   }
 
+  /*! \brief Communicate information on the MergedGrid of a GridGlue
 
+     Template parameter is a model of Dune::GridGlueCommDataHandleIF
+
+     \param data GridGlueDataHandle
+     \param iftype Interface for which the Communication should take place
+     \param dir Communication direction (Forward means Domain to Target, Backward is the reverse)
+   */
+  template<class DataHandleImp, class DataTypeImp>
+  void communicate (Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+                    Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
+  {
+    CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
+    return;
+  }
 
 };
 
