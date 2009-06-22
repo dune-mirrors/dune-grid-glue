@@ -167,19 +167,23 @@ public:
   /** \brief Pointer type to domain grid vertices */
   typedef typename DomainGridView::Traits::template Codim<DomainGridType::dimension>::EntityPointer DomainVertexPtr;
 
-
+  /** \brief The type of the target grid elements */
   typedef typename TargetGridView::Traits::template Codim<0>::Entity TargetElement;
 
+  /** \brief Pointer type to target grid elements */
   typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetElementPtr;
 
+  /** \brief The type of the target grid vertices */
   typedef typename TargetGridView::Traits::template Codim<TargetGridType::dimension>::Entity TargetVertex;
 
+  /** \brief Pointer type to target grid vertices */
   typedef typename TargetGridView::Traits::template Codim<TargetGridType::dimension>::EntityPointer TargetVertexPtr;
 
-
 #ifdef GRID_GLUE_USE_CONCEPTS
+  /** \todo Please doc me! */
   typedef typename SurfaceMerge<SM>::ModelType Matcher;
 #else
+  /** \todo Please doc me! */
   typedef SM Matcher;
 #endif
 
@@ -211,7 +215,6 @@ public:
 
   /** \todo Please doc me! */
   typedef typename IntersectionIterators::RemoteIntersectionTargetIterator TargetIntersectionIterator;
-
 
 private:
 
@@ -338,22 +341,6 @@ public:
 
 
   /*   F U N C T I O N A L I T Y   */
-
-  //	/**
-  //	 * @brief tells whether a vertex could be mapped
-  //	 * @param v the vertex
-  //	 * @return TRUE <=> if mapped successfully
-  //	 */
-  //	bool vertexMappedToTarget(const DomainVertex& v) const;
-
-
-  //	/**
-  //	 * @brief tells whether a vertex could be mapped
-  //	 * @param v the vertex
-  //	 * @return TRUE <=> if mapped successfully
-  //	 */
-  //	bool vertexMappedToDomain(const TargetVertex& v) const;
-
 
   /**
    * @brief tells whether a codim 0 entity's face(s) (or at least a part)
@@ -482,26 +469,6 @@ GridGlue<GET1, GET2, SM>::GridGlue(const DomainGridView& gv1, const TargetGridVi
 }
 
 
-//template<typename GET1, typename GET2, typename SM>
-//inline bool GridGlue<GET1, GET2, SM>::vertexMappedToTarget(const DomainVertex& v) const
-//{
-//	int index = this->_domext.coordinateIndex(v);
-//	if (index < 0)
-//		return false;
-//	return this->_sm.domainVertexMatched(index);
-//}
-//
-//
-//template<typename GET1, typename GET2, typename SM>
-//inline bool GridGlue<GET1, GET2, SM>::vertexMappedToDomain(const TargetVertex& v) const
-//{
-//	int index = this->_tarext.coordinateIndex(v);
-//	if (index < 0)
-//		return false;
-//	return this->_sm.targetVertexMatched(index);
-//}
-
-
 template<typename GET1, typename GET2, typename SM>
 int GridGlue<GET1, GET2, SM>::domainEntityNextFace(const DomainElement& e, int index) const
 {
@@ -538,54 +505,6 @@ int GridGlue<GET1, GET2, SM>::targetEntityNextFace(const TargetElement& e, int i
   else
     return this->_tarext.numberInSelf(first);             // found, return the face's number
 }
-
-
-//template<typename GET1, typename GET2, typename SM>
-//int GridGlue<GET1, GET2, SM>::facesMappedToTarget(const DomainElement& e, unsigned int* faces) const
-//{
-//	// first check if the element forms a part of the extracted surface
-//	int first, count;
-//	bool in_surface = this->_domext.faceIndices(e, first, count);
-//	if (!in_surface)
-//		return 0;
-//
-//	// now we have found at least one face, but if there is more
-//	// than one face in the map check whether the right one could be mapped
-//	int result = 0;
-//	for (count += first; first < count; ++first)
-//	{
-//		if (this->_sm.domainSimplexMatched(first))
-//			faces[result++] = this->_domext.numberInSelf(first);
-//	}
-//
-//	// no matter how many faces of the element were matched,
-//	// now we have the right index
-//	return result;
-//}
-//
-//
-//template<typename GET1, typename GET2, typename SM>
-//int GridGlue<GET1, GET2, SM>::facesMappedToDomain(const TargetElement& e, unsigned int* faces) const
-//{
-//	// first check if the element forms a part of the extracted surface
-//	int first, count;
-//	bool in_surface = this->_tarext.faceIndices(e, first, count);
-//	if (!in_surface)
-//		return 0;
-//
-//	// now we have found at least one face, but if there is more
-//	// than one face in the map check whether the right one could be mapped
-//	int result = 0;
-//	for (count += first; first < count; ++first)
-//	{
-//		if (this->_sm.targetSimplexMatched(first))
-//			faces[result++] = this->_tarext.numberInSelf(first);
-//	}
-//
-//	// no matter how many faces of the element were matched,
-//	// now we have the right index
-//	return result;
-//}
 
 
 template<typename GET1, typename GET2, typename SM>
@@ -747,8 +666,6 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
   else
     return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
 }
-
-
 
 // include implementation of subclass BuilderImpl
 #include "GridGlueBuilderImpl.hh"
