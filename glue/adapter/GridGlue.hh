@@ -114,7 +114,10 @@ public:
   typedef typename ExtractorSelector<DomGridExtractionTraits>::ExtractorType DomainExtractor;
 
   /** \brief Dimension of the domain extractor */
-  enum { domdim = DomainExtractor::dim };
+  enum {
+    /** \brief Dimension of the domain extractor */
+    domdim = DomainExtractor::dim
+  };
 
 
   /** \brief Grid view of the target grid */
@@ -127,12 +130,19 @@ public:
   typedef typename ExtractorSelector<TarGridExtractionTraits>::ExtractorType TargetExtractor;
 
   /** \brief Dimension of the target extractor */
-  enum { tardim = TargetExtractor::dim };
+  enum {
+    /** \brief Dimension of the target extractor */
+    tardim = TargetExtractor::dim
+  };
 
 
-  /// @brief export the world dimension
-  /// (must be the same for both extractors!)
-  enum { dimw = DomainExtractor::dimw };
+  /** \brief export the world dimension */
+  enum {
+    /** \brief export the world dimension
+
+        (must be the same for both extractors!) */
+    dimw = DomainExtractor::dimw
+  };
 
   /** \brief The type used for coordinates
       \todo maybe use traits class to decide which has more precision (DomainGridType::ctype or TargetGridType::ctype) and then take this one
