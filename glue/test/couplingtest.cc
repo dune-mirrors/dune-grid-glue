@@ -8,8 +8,8 @@
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/common/quadraturerules.hh>
 
-#include <dune/glue/surfaces/SurfaceDescriptor.hh>
-#include <dune/glue/surfaces/GridExtractionTraits.hh>
+#include <dune/glue/surfaces/surfacedescriptor.hh>
+#include <dune/glue/surfaces/gridextractiontraits.hh>
 #include <dune/glue/merging/ContactMappingSurfaceMerge.hh>
 #include <dune/glue/adapter/GridGlue.hh>
 

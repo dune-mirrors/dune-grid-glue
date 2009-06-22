@@ -28,8 +28,8 @@
 #include <dune/common/fvector.hh>
 #include <dune/grid/common/geometry.hh>
 
-#include "SurfaceDescriptor.hh"
-#include "SimplicialManifoldExtractor.hh"
+#include "surfacedescriptor.hh"
+#include "simplicialmanifoldextractor.hh"
 
 
 /**

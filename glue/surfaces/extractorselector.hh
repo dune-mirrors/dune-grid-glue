@@ -23,14 +23,14 @@
 #include "../misc/conceptchecking.hh"
 #include "GridExtractor.hh"
 #endif
-#include "GridExtractionTraits.hh"
-#include "SimplicialMeshExtractor.hh"
-#include "SimplicialManifoldExtractor.hh"
-#include "SimplicialSurfaceExtractor.hh"
-#include "CubeSurfaceExtractor.hh"
-#include "CubeManifoldExtractor.hh"
-#include "CubeMeshExtractor.hh"
-#include "GeneralSurfaceExtractor.hh"
+#include "gridextractiontraits.hh"
+#include "simplicialmeshextractor.hh"
+#include "simplicialmanifoldextractor.hh"
+#include "simplicialsurfaceextractor.hh"
+#include "cubesurfaceextractor.hh"
+#include "cubemanifoldextractor.hh"
+#include "cubemeshextractor.hh"
+#include "generalsurfaceextractor.hh"
 
 
 /**

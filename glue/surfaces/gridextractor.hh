@@ -29,9 +29,9 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
-#include "SurfaceDescriptor.hh"
+#include "surfacedescriptor.hh"
 
-#include "GridExtractorConcept.hh"
+#include "gridextractorconcept.hh"
 #include "../misc/conceptchecking.hh"
 
 
