@@ -6,10 +6,8 @@ surfaces_HEADERS = gridextractor.hh\
 	gridextractorconcept.hh\
 	extractorselector.hh\
 	generalsurfaceextractor.hh\
-	simplicialmanifoldextractor.hh\
 	simplicialmeshextractor.hh\
 	simplicialsurfaceextractor.hh\
-	cubemanifoldextractor.hh\
 	cubemeshextractor.hh\
 	cubesurfaceextractor.hh\
 	surfacedescriptor.hh\
