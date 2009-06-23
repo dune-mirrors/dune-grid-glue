@@ -132,63 +132,6 @@ private:
   };
 
 
-  struct CoordinateInfo
-  {
-    CoordinateInfo()
-    {}
-
-    CoordinateInfo(unsigned int index_, IndexType vtxindex_)
-      :       vtxindex(vtxindex_), index(index_)
-    {}
-
-    /// @brief the index of the parent element (from index set)
-    IndexType vtxindex;
-
-    /// @brief the coordinate
-    Coords coord;
-
-    /// @brief the index of this coordinate (in internal storage scheme) // NEEDED??
-    unsigned int index;
-  };
-
-
-  /**
-   * @class EntityInfo
-   * @brief simple struct holding a vertex pointer and an index
-   */
-  struct VertexInfo
-  {
-    VertexInfo(unsigned int idx_, VertexPtr& p_) : idx(idx_), p(p_)
-    {}
-    unsigned int idx;
-    VertexPtr p;
-  };
-
-
-  /**
-   * @class ElementInfo
-   * @brief simple struct holding an entity pointer and an index
-   */
-  struct ElementInfo
-  {
-    ElementInfo(unsigned int idx_, ElementPtr& p_, unsigned int num_) : idx(idx_), num(num_), p(p_)
-    {}
-
-    /// @brief the index of this element's first face in the internal list of extracted faces
-    unsigned int idx : 28;
-
-    /// @brief the number of extracted faces for this element
-    unsigned int num : 4;
-
-    /// @brief the entity pointer to the element
-    ElementPtr p;
-  };
-
-
-  typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
-  typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
-
-
   /************************** MEMBER VARIABLES ************************/
 
   // these values are filled on surface extraction and can be
@@ -204,21 +147,21 @@ private:
   std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  std::vector<CoordinateInfo>   _coords;
+  std::vector<typename Codim1Extractor<GV,dim>::CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
   /// Maps a vertex' index (from index set) to an object holding the locally
   /// associated index of the vertex' coordinate in _coords and an entity
   /// pointer to the codim<dim> entity.
-  VertexInfoMap _vtxInfo;
+  typename Codim1Extractor<GV,dim>::VertexInfoMap _vtxInfo;
 
   /// @brief a map enabling faster access to elements and faces
   ///
   /// Maps an element's index (from index set) to an object holding the locally
   /// associated index of its first face in _indices (if there are more they are
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  ElementInfoMap _elmtInfo;
+  typename Codim1Extractor<GV,dim>::ElementInfoMap _elmtInfo;
 
 
 public:
@@ -346,7 +289,7 @@ public:
    */
   int coordinateIndex(const Vertex& v) const
   {
-    typename VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
+    typename Codim1Extractor<GV,dim>::VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
     return it == this->_vtxInfo.end() ? -1 : it->second->idx;
   }
 
@@ -361,7 +304,7 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    typename ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
+    typename Codim1Extractor<GV,dim>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
     if (it == this->_elmtInfo.end())
     {
       first = -1;
@@ -538,10 +481,10 @@ GeneralSurfaceExtractor<GV, dimG>::~GeneralSurfaceExtractor()
 {
   // only the objects that have been allocated manually have to be
   // deallocated manually again
-  for (typename VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim1Extractor<GV,dim>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
 }
@@ -553,7 +496,7 @@ void GeneralSurfaceExtractor<GV, dimG>::clear()
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
   {
-    std::vector<CoordinateInfo> dummy;
+    std::vector<typename Codim1Extractor<GV,dim>::CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
@@ -562,10 +505,10 @@ void GeneralSurfaceExtractor<GV, dimG>::clear()
   }
 
   // first free all manually allocated vertex/element info items...
-  for (typename VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim1Extractor<GV,dim>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
   // ...then clear the maps themselves, too
@@ -624,7 +567,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
         eindex = this->indexSet().template index<0>(*elit);
-        this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, 0);
+        this->_elmtInfo[eindex] = new typename Codim1Extractor<GV,dim>::ElementInfo(simplex_index, elit, 0);
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
@@ -662,11 +605,11 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
-              typename VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+              typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
               if (vimit == this->_vtxInfo.end())
               {
                 // insert into the map
-                this->_vtxInfo[vindex] = new VertexInfo(vertex_index, vptr);
+                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV,dim>::VertexInfo(vertex_index, vptr);
                 // remember the vertex as a corner of the current face in temp_faces
                 temp_faces.back().corners[i].idx = vertex_index;
                 // increase the current index
@@ -697,16 +640,16 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
               vertex_numbers[i] = orientedSubface<dim>(gt, *sit, i);
 
               // get the vertex pointer and the index from the index set
-              vptrs[i] = new VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
+              vptrs[i] = new typename Codim1Extractor<GV,dim>::VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
               IndexType vindex = this->index<dim>(*(*vptrs[i]));
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
-              typename VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+              typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
               if (vimit == this->_vtxInfo.end())
               {
                 // insert into the map
-                this->_vtxInfo[vindex] = new VertexInfo(vertex_index, *vptrs[i]);
+                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV,dim>::VertexInfo(vertex_index, *vptrs[i]);
                 // remember this vertex' index
                 vertex_indices[i] = vertex_index;
                 // increase the current index
@@ -760,11 +703,11 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
 
   // now first write the array with the coordinates...
   this->_coords.resize(this->_vtxInfo.size());
-  typename VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
+  typename Codim1Extractor<GV,dim>::VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
   for (; it1 != this->_vtxInfo.end(); ++it1)
   {
     // get a pointer to the associated info object
-    CoordinateInfo* current = &this->_coords[it1->second->idx];
+    typename Codim1Extractor<GV,dim>::CoordinateInfo* current = &this->_coords[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping
