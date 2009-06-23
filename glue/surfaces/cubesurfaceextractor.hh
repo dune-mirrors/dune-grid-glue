@@ -611,29 +611,34 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
             }
           }
 
-          // now introduce the two triangles subdividing the quadrilateral
+          // Currently the extractor splits quadrilaterals into triangles (because psurface)
+          // can only handle triangles). Since this is done manually we cannot handle grids
+          // of dimension higher than 3.
+          dune_static_assert(dim<=3, "CubeSurfaceExtractor only implemented for 1d, 2d, 3d");
+
+          // add a new face to the temporary collection
+          temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 1));
+          for (int i=0; i<dim; i++) {
+            temp_faces.back().corners[i].idx = vertex_indices[i];
+            // remember the vertices' numbers in parent element's vertices
+            temp_faces.back().corners[i].num = vertex_numbers[i];
+          }
+
+          // now introduce the second triangle subdividing the quadrilateral
           // ATTENTION: the order of vertices given by "orientedSubface" corresponds to the order
           // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
+          if (dim==3) {
+            // add a new face to the temporary collection for the second tri
+            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 0));
+            temp_faces.back().corners[0].idx = vertex_indices[3];
+            temp_faces.back().corners[1].idx = vertex_indices[2];
+            temp_faces.back().corners[2].idx = vertex_indices[1];
+            // remember the vertices' numbers in parent element's vertices
+            temp_faces.back().corners[0].num = vertex_numbers[3];
+            temp_faces.back().corners[1].num = vertex_numbers[2];
+            temp_faces.back().corners[2].num = vertex_numbers[1];
+          }
 
-          // add a new face to the temporary collection for the first tri
-          temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 1));
-          temp_faces.back().corners[0].idx = vertex_indices[0];
-          temp_faces.back().corners[1].idx = vertex_indices[1];
-          temp_faces.back().corners[2].idx = vertex_indices[2];
-          // remember the vertices' numbers in parent element's vertices
-          temp_faces.back().corners[0].num = vertex_numbers[0];
-          temp_faces.back().corners[1].num = vertex_numbers[1];
-          temp_faces.back().corners[2].num = vertex_numbers[2];
-
-          // add a new face to the temporary collection for the second tri
-          temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 0));
-          temp_faces.back().corners[0].idx = vertex_indices[3];
-          temp_faces.back().corners[1].idx = vertex_indices[2];
-          temp_faces.back().corners[2].idx = vertex_indices[1];
-          // remember the vertices' numbers in parent element's vertices
-          temp_faces.back().corners[0].num = vertex_numbers[3];
-          temp_faces.back().corners[1].num = vertex_numbers[2];
-          temp_faces.back().corners[2].num = vertex_numbers[1];
         }                         // end loop over found surface parts
       }
     }             // end loop over elements
