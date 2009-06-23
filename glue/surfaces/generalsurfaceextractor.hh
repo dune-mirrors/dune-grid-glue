@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file GeneralSurfaceExtractor.hh
+ * @file
  * @brief grid extractor implementation for hybrid surface grids (tris and/or quads on surface)
  */
 
@@ -24,17 +24,18 @@
 #include <map>
 #include <set>
 #include <algorithm>
+
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/array.hh>
 #include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/common/geometry.hh>
+
 #include "surfacedescriptor.hh"
 #include "generaledgeextractor.hh"
-
+#include <dune/glue/surfaces/codim1extractor.hh>
 
 /**
- * @class GeneralSurfaceExtractor
  * @brief grid extractor implementation for arbitrary surface grids (tris and/or quads on surface)
  *
  * Provides methods that build topology information for given grids.
@@ -43,6 +44,7 @@
  */
 template<typename GV, int dimG = GV::dimension>
 class GeneralSurfaceExtractor
+  : public Codim1Extractor<GV,dimG>
 {
 public:
 
@@ -95,19 +97,6 @@ private:
   /************************** PRIVATE SUBCLASSES **********************/
 
   /**
-   * @class CornerInfo
-   * @brief
-   * Helpful struct holding one index for the coordinate (vertex)
-   * to which it is associated and the element's corner index;
-   */
-  struct CornerInfo
-  {
-    unsigned int idx : 28;           ///< index of the vertex
-    unsigned int num : 4;           ///< element corner
-  };
-
-
-  /**
    * @class FaceInfo
    * @brief simple struct holding some packed information about a codimension 1 entity
    * to its parent codim 0 entity
@@ -139,7 +128,7 @@ private:
     unsigned int category : 2;
 
     /// @brief the corner indices plus the numbers of the vertices in the parent element
-    CornerInfo corners[simplex_corners];
+    typename Codim1Extractor<GV,dimG>::CornerInfo corners[simplex_corners];
   };
 
 

@@ -12,8 +12,8 @@
  *
  */
 /**
- * @file CubeSurfaceExtractor.hh
- * @brief
+ * @file
+ * @brief grid extractor implementation for hypercube surface grids
  */
 
 #ifndef CUBESURFACEEXTRACTOR_HH_
@@ -92,20 +92,9 @@ public:
 
 private:
 
+
+
   /************************** PRIVATE SUBCLASSES **********************/
-
-  /**
-   * @class CornerInfo
-   * @brief
-   * Helpful struct holding one index for the coordinate (vertex)
-   * to which it is associated and the element's corner index;
-   */
-  struct CornerInfo
-  {
-    unsigned int idx : 28;           ///< index of the vertex
-    unsigned int num : 4;           ///< element corner
-  };
-
 
   /**
    * @class FaceInfo
@@ -135,7 +124,7 @@ private:
     unsigned int first : 1;
 
     /// @brief the corner indices plus the numbers of the vertices in the parent element
-    CornerInfo corners[simplex_corners];
+    typename Codim1Extractor<GV,dimG>::CornerInfo corners[simplex_corners];
   };
 
 
