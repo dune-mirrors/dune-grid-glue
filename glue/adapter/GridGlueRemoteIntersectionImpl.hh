@@ -64,13 +64,13 @@ public:
   typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEntityPointer;
 
 
-  typedef LocalSimplexGeometry<mydim, DomainGridView::Traits::template Codim<0>::Geometry::mydimension, DomainGridType> DomainLocalGeometry;
+  typedef LocalSimplexGeometry<mydim, DomainGridView::dimension, DomainGridType> DomainLocalGeometry;
 
-  typedef SimplexGeometry<mydim, DomainGridType::dimensionworld, DomainGridType>                                        DomainGeometry;
+  typedef SimplexGeometry<mydim, DomainGridType::dimensionworld, DomainGridType> DomainGeometry;
 
-  typedef LocalSimplexGeometry<mydim, TargetGridView::Traits::template Codim<0>::Geometry::mydimension, TargetGridType> TargetLocalGeometry;
+  typedef LocalSimplexGeometry<mydim, TargetGridView::dimension, TargetGridType> TargetLocalGeometry;
 
-  typedef SimplexGeometry<mydim, TargetGridType::dimensionworld, TargetGridType>                                        TargetGeometry;
+  typedef SimplexGeometry<mydim, TargetGridType::dimensionworld, TargetGridType> TargetGeometry;
 
 
   typedef typename DomainGridType::ctype ctype;
