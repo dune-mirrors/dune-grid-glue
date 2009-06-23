@@ -15,11 +15,12 @@
 
 using namespace Dune;
 
-const int dim=3;
-
 template <class GlueType>
 void testCoupling(const GlueType& glue)
 {
+  dune_static_assert(GlueType::domdim == GlueType::tardim, "For this test domain and target must have the same dimension");
+
+  const int dim = GlueType::domdim;
 
   typename GlueType::RemoteIntersectionIterator rIIt    = glue.iremotebegin();
   typename GlueType::RemoteIntersectionIterator rIEndIt = glue.iremoteend();
@@ -27,7 +28,7 @@ void testCoupling(const GlueType& glue)
   for (; rIIt!=rIEndIt; ++rIIt) {
 
     // Create a set of test points
-    const QuadratureRule<double, dim-1>& quad = QuadratureRules<double, dim-1>::rule(rIIt->type(), 3);
+    const QuadratureRule<double, GlueType::domdim-1>& quad = QuadratureRules<double, dim-1>::rule(rIIt->type(), 3);
 
     for (unsigned int l=0; l<quad.size(); l++) {
 
@@ -68,6 +69,7 @@ public:
   virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr,
                         unsigned int face) const
   {
+    const int dim = GridView::dimension;
     const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(eptr->type());
 
     int numVertices = refElement.size(face, 1, dim);
@@ -83,7 +85,8 @@ private:
   double sliceCoord_;
 };
 
-int main(int argc, char *argv[]) try
+template <int dim, MeshClassification::MeshType ExtractorClassification>
+void testMatchingCubeGrids()
 {
 
   // ///////////////////////////////////////
@@ -108,11 +111,11 @@ int main(int argc, char *argv[]) try
   //   Set up coupling at their interface
   // ////////////////////////////////////////
 
-  typedef GridType::LevelGridView DomGridView;
-  typedef GridType::LevelGridView TarGridView;
+  typedef typename GridType::LevelGridView DomGridView;
+  typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,false,MeshClassification::cube> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,false,MeshClassification::cube> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,false,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,false,ExtractorClassification> TarTraits;
 
   typedef ContactMappingSurfaceMerge<dim,double> SurfaceMergeImpl;
 
@@ -139,6 +142,23 @@ int main(int argc, char *argv[]) try
   // ///////////////////////////////////////////
 
   testCoupling(glue);
+
+}
+
+int main(int argc, char *argv[]) try
+{
+
+  // Test two unit squares, extract boundaries using the CubeSurfaceExtractor
+  testMatchingCubeGrids<2,MeshClassification::cube>();
+
+  // Test two unit squares, extract boundaries using the GeneralSurfaceExtractor
+  testMatchingCubeGrids<2,MeshClassification::hybrid>();
+
+  // Test two unit cubes, extract boundaries using the CubeSurfaceExtractor
+  testMatchingCubeGrids<3,MeshClassification::cube>();
+
+  // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
+  testMatchingCubeGrids<3,MeshClassification::hybrid>();
 
 }
 catch (Exception e) {
