@@ -175,7 +175,8 @@ public:
   GeneralSurfaceExtractor(const GV& gv) :
     _gv(gv)
   {
-    STDOUTLN("This is GeneralSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space!");
+    std::cout << "This is GeneralSurfaceExtractor on a <" << GV::dimension
+              << "," << GV::dimensionworld << "> grid working in " << dimw << " space!" << std::endl;
   }
 
 
