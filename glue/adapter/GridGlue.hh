@@ -244,7 +244,7 @@ private:
   Builder _builder;
 
 
-  /// @brief an invalid interesection object used as dummy and
+  /// @brief an invalid intersection object used as dummy and
   /// also as recognizable end object of iterations over intersections
   mutable RemoteIntersectionImpl NULL_INTERSECTION;
 
