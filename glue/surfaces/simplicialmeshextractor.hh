@@ -34,7 +34,7 @@
 
 /**
  * @class SimplicialMeshExtractor
- * @brief grid extractor implementation for "flat" simplicial grids
+ * @brief grid extractor implementation for simplicial grids
  *
  * Provides methods that build topology information for given grids.
  * Note that these methods only operate on the grid.
@@ -56,7 +56,7 @@ public:
 
   enum
   {
-    dimw = dim+1
+    dimw = GV::dimensionworld
   };
 
   /// @brief compile time number of corners of surface simplices
