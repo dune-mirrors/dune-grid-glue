@@ -41,7 +41,7 @@
  * The template parameters
  * @li GV the grid class type
  */
-template<typename GV, bool rect = false, int dimG = GV::dimension>
+template<typename GV, bool rect = false>
 class CubeSurfaceExtractor
 {
 public:
@@ -124,7 +124,7 @@ private:
     unsigned int first : 1;
 
     /// @brief the corner indices plus the numbers of the vertices in the parent element
-    typename Codim1Extractor<GV,dimG>::CornerInfo corners[simplex_corners];
+    typename Codim1Extractor<GV>::CornerInfo corners[simplex_corners];
   };
 
 
@@ -143,21 +143,21 @@ private:
   std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  std::vector<typename Codim1Extractor<GV,dim>::CoordinateInfo>   _coords;
+  std::vector<typename Codim1Extractor<GV>::CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
   /// Maps a vertex' index (from index set) to an object holding the locally
   /// associated index of the vertex' coordinate in _coords and an entity
   /// pointer to the codim<dim> entity.
-  typename Codim1Extractor<GV,dim>::VertexInfoMap _vtxInfo;
+  typename Codim1Extractor<GV>::VertexInfoMap _vtxInfo;
 
   /// @brief a map enabling faster access to elements and faces
   ///
   /// Maps an element's index (from index set) to an object holding the locally
   /// associated index of its first face in _indices (if there are more they are
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  typename Codim1Extractor<GV,dim>::ElementInfoMap _elmtInfo;
+  typename Codim1Extractor<GV>::ElementInfoMap _elmtInfo;
 
 
   /// @brief geometry type of the surface patches
@@ -289,7 +289,7 @@ public:
    */
   int coordinateIndex(const Vertex& v) const
   {
-    typename Codim1Extractor<GV,dim>::VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
+    typename Codim1Extractor<GV>::VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
     return it == this->_vtxInfo.end() ? -1 : it->second->idx;
   }
 
@@ -304,7 +304,7 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    typename Codim1Extractor<GV,dim>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
+    typename Codim1Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
     if (it == this->_elmtInfo.end())
     {
       first = -1;
@@ -476,27 +476,27 @@ public:
 
 
 
-template<typename GV, bool rect, int dimG>
-CubeSurfaceExtractor<GV, rect, dimG>::~CubeSurfaceExtractor()
+template<typename GV, bool rect>
+CubeSurfaceExtractor<GV, rect>::~CubeSurfaceExtractor()
 {
   // only the objects that have been allocated manually have to be
   // deallocated manually again
-  for (typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename Codim1Extractor<GV,dim>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
 }
 
 
-template<typename GV, bool rect, int dimG>
-void CubeSurfaceExtractor<GV, rect, dimG>::clear()
+template<typename GV, bool rect>
+void CubeSurfaceExtractor<GV, rect>::clear()
 {
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
   {
-    std::vector<typename Codim1Extractor<GV,dim>::CoordinateInfo> dummy;
+    std::vector<typename Codim1Extractor<GV>::CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
@@ -505,10 +505,10 @@ void CubeSurfaceExtractor<GV, rect, dimG>::clear()
   }
 
   // first free all manually allocated vertex/element info items...
-  for (typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename Codim1Extractor<GV,dim>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
   // ...then clear the maps themselves, too
@@ -517,8 +517,8 @@ void CubeSurfaceExtractor<GV, rect, dimG>::clear()
 }
 
 
-template<typename GV, bool rect, int dimG>
-void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& descr)
+template<typename GV, bool rect>
+void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -568,7 +568,7 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
         eindex = this->indexSet().template index<0>(*elit);
-        this->_elmtInfo[eindex] = new typename Codim1Extractor<GV,dim>::ElementInfo(simplex_index, elit, 2*boundary_faces.size());
+        this->_elmtInfo[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, 2*boundary_faces.size());
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
@@ -589,16 +589,16 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
             vertex_numbers[i] = orientedSubface<dim>(this->_codim0element, *sit, i);
 
             // get the vertex pointer and the index from the index set
-            vptrs[i] = new typename Codim1Extractor<GV,dim>::VertexPtr(elit->template subEntity<dim>(vertex_numbers[i]));
+            vptrs[i] = new typename Codim1Extractor<GV>::VertexPtr(elit->template subEntity<dim>(vertex_numbers[i]));
             IndexType vindex = this->index<dim>(*(*vptrs[i]));
 
             // if the vertex is not yet inserted in the vertex info map
             // it is a new one -> it will be inserted now!
-            typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+            typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
             if (vimit == this->_vtxInfo.end())
             {
               // insert into the map
-              this->_vtxInfo[vindex] = new typename Codim1Extractor<GV,dim>::VertexInfo(vertex_index, *vptrs[i]);
+              this->_vtxInfo[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, *vptrs[i]);
               // remember this vertex' index
               vertex_indices[i] = vertex_index;
               // increase the current index
@@ -647,11 +647,11 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
 
   // now first write the array with the coordinates...
   this->_coords.resize(this->_vtxInfo.size());
-  typename Codim1Extractor<GV,dim>::VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
+  typename Codim1Extractor<GV>::VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
   for (; it1 != this->_vtxInfo.end(); ++it1)
   {
     // get a pointer to the associated info object
-    typename Codim1Extractor<GV,dim>::CoordinateInfo* current = &this->_coords[it1->second->idx];
+    typename Codim1Extractor<GV>::CoordinateInfo* current = &this->_coords[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping
@@ -694,8 +694,8 @@ void CubeSurfaceExtractor<GV, rect, dimG>::update(const FaceDescriptor<GV>& desc
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeSurfaceExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
+template<typename GV, bool rect>
+inline void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
 {
   // only interpolate barycentric in the given triangle => for flat quads this is exact!
   Dune::array<Coords, simplex_corners> corners;
@@ -705,8 +705,8 @@ inline void CubeSurfaceExtractor<GV, rect, dimG>::globalCoords(unsigned int inde
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeSurfaceExtractor<GV, rect, dimG>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
+template<typename GV, bool rect>
+inline void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
 {
   if (rect)
   {
@@ -736,8 +736,8 @@ inline void CubeSurfaceExtractor<GV, rect, dimG>::localCoords(unsigned int index
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeSurfaceExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
+template<typename GV, bool rect>
+inline void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->globalCoords(index, bcoords, wcoords);
   // for rectangles avoid using world coordinates
@@ -748,9 +748,9 @@ inline void CubeSurfaceExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned 
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV, bool rect>
 template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
+void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
 {
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
@@ -760,9 +760,9 @@ void CubeSurfaceExtractor<GV, rect, dimG>::globalCoords(unsigned int index, cons
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV, bool rect>
 template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect, dimG>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
+void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
 {
   if (rect)
   {
@@ -793,9 +793,9 @@ void CubeSurfaceExtractor<GV, rect, dimG>::localCoords(unsigned int index, const
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV, bool rect>
 template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
+void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
 {
   this->globalCoords(index, bcoords, wcoords, size);
   // for rectangles avoid using world coordinates
@@ -810,7 +810,7 @@ void CubeSurfaceExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int ind
 }
 
 
-
+#if 0
 /*   S P E C I A L I Z A T I O N   F O R   2 D   G R I D S   */
 template<typename GV, bool rect>
 class CubeSurfaceExtractor<GV, rect, 2> : public GeneralEdgeExtractor<GV>
@@ -837,5 +837,6 @@ public:
     STDOUTLN("This is CubeSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << Dune::GeometryType(Dune::GeometryType::cube, Base::dim) << "!");
   }
 };
+#endif
 
 #endif // CUBESURFACEEXTRACTOR_HH_

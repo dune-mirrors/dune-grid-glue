@@ -40,7 +40,7 @@
 
    \tparam GV the grid view type
  */
-template<typename GV, int dimG = GV::dimension>
+template<typename GV>
 class Codim1Extractor
 {
   /** \todo This should rather be protected */

@@ -39,12 +39,11 @@
  * @brief grid extractor implementation for arbitrary surface grids (tris and/or quads on surface)
  *
  * Provides methods that build topology information for given grids.
- * The template parameters
- * @li GV the grid class type
+ * \tparam GV the grid class type
  */
-template<typename GV, int dimG = GV::dimension>
+template<typename GV>
 class GeneralSurfaceExtractor
-  : public Codim1Extractor<GV,dimG>
+  : public Codim1Extractor<GV>
 {
 public:
 
@@ -128,7 +127,7 @@ private:
     unsigned int category : 2;
 
     /// @brief the corner indices plus the numbers of the vertices in the parent element
-    typename Codim1Extractor<GV,dimG>::CornerInfo corners[simplex_corners];
+    typename Codim1Extractor<GV>::CornerInfo corners[simplex_corners];
   };
 
 
@@ -147,21 +146,21 @@ private:
   std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  std::vector<typename Codim1Extractor<GV,dim>::CoordinateInfo>   _coords;
+  std::vector<typename Codim1Extractor<GV>::CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
   /// Maps a vertex' index (from index set) to an object holding the locally
   /// associated index of the vertex' coordinate in _coords and an entity
   /// pointer to the codim<dim> entity.
-  typename Codim1Extractor<GV,dim>::VertexInfoMap _vtxInfo;
+  typename Codim1Extractor<GV>::VertexInfoMap _vtxInfo;
 
   /// @brief a map enabling faster access to elements and faces
   ///
   /// Maps an element's index (from index set) to an object holding the locally
   /// associated index of its first face in _indices (if there are more they are
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  typename Codim1Extractor<GV,dim>::ElementInfoMap _elmtInfo;
+  typename Codim1Extractor<GV>::ElementInfoMap _elmtInfo;
 
 
 public:
@@ -289,7 +288,7 @@ public:
    */
   int coordinateIndex(const Vertex& v) const
   {
-    typename Codim1Extractor<GV,dim>::VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
+    typename Codim1Extractor<GV>::VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
     return it == this->_vtxInfo.end() ? -1 : it->second->idx;
   }
 
@@ -304,7 +303,7 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    typename Codim1Extractor<GV,dim>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
+    typename Codim1Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
     if (it == this->_elmtInfo.end())
     {
       first = -1;
@@ -476,27 +475,27 @@ public:
 
 
 
-template<typename GV, int dimG>
-GeneralSurfaceExtractor<GV, dimG>::~GeneralSurfaceExtractor()
+template<typename GV>
+GeneralSurfaceExtractor<GV>::~GeneralSurfaceExtractor()
 {
   // only the objects that have been allocated manually have to be
   // deallocated manually again
-  for (typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename Codim1Extractor<GV,dim>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
 }
 
 
-template<typename GV, int dimG>
-void GeneralSurfaceExtractor<GV, dimG>::clear()
+template<typename GV>
+void GeneralSurfaceExtractor<GV>::clear()
 {
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
   {
-    std::vector<typename Codim1Extractor<GV,dim>::CoordinateInfo> dummy;
+    std::vector<typename Codim1Extractor<GV>::CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
@@ -505,10 +504,10 @@ void GeneralSurfaceExtractor<GV, dimG>::clear()
   }
 
   // first free all manually allocated vertex/element info items...
-  for (typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename Codim1Extractor<GV,dim>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
   // ...then clear the maps themselves, too
@@ -519,8 +518,8 @@ void GeneralSurfaceExtractor<GV, dimG>::clear()
 
 
 
-template<typename GV, int dimG>
-void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
+template<typename GV>
+void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -567,7 +566,7 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
         eindex = this->indexSet().template index<0>(*elit);
-        this->_elmtInfo[eindex] = new typename Codim1Extractor<GV,dim>::ElementInfo(simplex_index, elit, 0);
+        this->_elmtInfo[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, 0);
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
@@ -605,11 +604,11 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
-              typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+              typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
               if (vimit == this->_vtxInfo.end())
               {
                 // insert into the map
-                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV,dim>::VertexInfo(vertex_index, vptr);
+                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, vptr);
                 // remember the vertex as a corner of the current face in temp_faces
                 temp_faces.back().corners[i].idx = vertex_index;
                 // increase the current index
@@ -640,16 +639,16 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
               vertex_numbers[i] = orientedSubface<dim>(gt, *sit, i);
 
               // get the vertex pointer and the index from the index set
-              vptrs[i] = new typename Codim1Extractor<GV,dim>::VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
+              vptrs[i] = new typename Codim1Extractor<GV>::VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
               IndexType vindex = this->index<dim>(*(*vptrs[i]));
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
-              typename Codim1Extractor<GV,dim>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+              typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
               if (vimit == this->_vtxInfo.end())
               {
                 // insert into the map
-                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV,dim>::VertexInfo(vertex_index, *vptrs[i]);
+                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, *vptrs[i]);
                 // remember this vertex' index
                 vertex_indices[i] = vertex_index;
                 // increase the current index
@@ -703,11 +702,11 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
 
   // now first write the array with the coordinates...
   this->_coords.resize(this->_vtxInfo.size());
-  typename Codim1Extractor<GV,dim>::VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
+  typename Codim1Extractor<GV>::VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
   for (; it1 != this->_vtxInfo.end(); ++it1)
   {
     // get a pointer to the associated info object
-    typename Codim1Extractor<GV,dim>::CoordinateInfo* current = &this->_coords[it1->second->idx];
+    typename Codim1Extractor<GV>::CoordinateInfo* current = &this->_coords[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping
@@ -750,8 +749,8 @@ void GeneralSurfaceExtractor<GV, dimG>::update(const FaceDescriptor<GV>& descr)
 }
 
 
-template<typename GV, int dimG>
-inline void GeneralSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
+template<typename GV>
+inline void GeneralSurfaceExtractor<GV>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
 {
   // only interpolate barycentric in the given triangle (=> for flat quads this is exact, not so for non-flat quads!)
   Dune::array<Coords, simplex_corners> corners;
@@ -761,8 +760,8 @@ inline void GeneralSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, 
 }
 
 
-template<typename GV, int dimG>
-inline void GeneralSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
+template<typename GV>
+inline void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
 {
   if (this->_faces[index].category == 0)
   {
@@ -783,8 +782,8 @@ inline void GeneralSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, c
 }
 
 
-template<typename GV, int dimG>
-inline void GeneralSurfaceExtractor<GV, dimG>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
+template<typename GV>
+inline void GeneralSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->globalCoords(index, bcoords, wcoords);
   // for rectangles avoid using world coordinates
@@ -797,9 +796,9 @@ inline void GeneralSurfaceExtractor<GV, dimG>::localAndGlobalCoords(unsigned int
 }
 
 
-template<typename GV, int dimG>
+template<typename GV>
 template<typename CoordContainer>
-void GeneralSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
+void GeneralSurfaceExtractor<GV>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
 {
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
@@ -810,9 +809,9 @@ void GeneralSurfaceExtractor<GV, dimG>::globalCoords(unsigned int index, const C
 }
 
 
-template<typename GV, int dimG>
+template<typename GV>
 template<typename CoordContainer>
-void GeneralSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
+void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
 {
   if (this->_faces[index].category == 0)
   {
@@ -834,9 +833,9 @@ void GeneralSurfaceExtractor<GV, dimG>::localCoords(unsigned int index, const Co
 }
 
 
-template<typename GV, int dimG>
+template<typename GV>
 template<typename CoordContainer>
-void GeneralSurfaceExtractor<GV, dimG>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
+void GeneralSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
 {
   this->globalCoords(index, bcoords, wcoords, size);
   // for triangles
@@ -851,7 +850,7 @@ void GeneralSurfaceExtractor<GV, dimG>::localAndGlobalCoords(unsigned int index,
 }
 
 
-
+#if 0
 /*   S P E C I A L I Z A T I O N   F O R   2 D   G R I D S   */
 template<typename GV>
 class GeneralSurfaceExtractor<GV, 2> : public GeneralEdgeExtractor<GV>
@@ -878,6 +877,6 @@ public:
     STDOUTLN("This is GeneralSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << Dune::GeometryType(Dune::GeometryType::cube, Base::dim) << "!");
   }
 };
-
+#endif
 
 #endif // GENERALSURFACEEXTRACTOR_HH_
