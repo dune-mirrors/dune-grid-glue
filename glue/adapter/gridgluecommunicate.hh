@@ -1,14 +1,14 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_DATAHANDLEIF_HH
-#define DUNE_DATAHANDLEIF_HH
+#ifndef DUNE_GRIDGLUECOMMUNICATE_HH
+#define DUNE_GRIDGLUECOMMUNICATE_HH
 
 /**@file
    @author Christian Engwer
    @brief Describes the parallel communication interface class for Dune::GridGlue
  */
 
-#include <dune/grid/datahandleif.hh>
+#include <dune/grid/common/datahandleif.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
 
 namespace Dune

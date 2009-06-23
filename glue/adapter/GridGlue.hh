@@ -36,6 +36,7 @@
 #include "RemoteIntersection.hh"
 #include "RemoteIntersectionIterators.hh"
 #include "CoordinateTransformation.hh"
+#include "gridgluecommunicate.hh"
 
 /**
  * @class GridGlue
@@ -463,7 +464,7 @@ public:
   void communicate (Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> & data,
                     Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
   {
-    CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
+    // CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
     return;
   }
 
