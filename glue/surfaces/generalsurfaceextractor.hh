@@ -29,6 +29,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/array.hh>
 #include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/geometry.hh>
 
 #include "surfacedescriptor.hh"
@@ -528,7 +529,6 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
   // For each codim 1 intersection check if it is part of the boundary and if so,
   // get its corner vertices, find resp. store them together with their associated index,
   // and remember the indices of the boundary faces' corners.
-
   {
     // several counter for consecutive indexing are needed
     int simplex_index = 0;
@@ -556,8 +556,8 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
       for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
       {
         // only look at boundary faces
-        if (is->boundary() && descr.contains(elit, is->numberInSelf()))
-          boundary_faces.insert(is->numberInSelf());
+        if (is->boundary() && descr.contains(elit, is->indexInInside()))
+          boundary_faces.insert(is->indexInInside());
       }
 
       // if some face is part of the surface add it!
@@ -573,7 +573,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
           // get the corner count of this face
-          const int face_corners = Dune::ReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
+          const int face_corners = Dune::GenericReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
 
           // register the additional face(s)
           this->_elmtInfo[eindex]->num += (face_corners - 2);
@@ -582,7 +582,51 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           // inserted directly whereas a quadrilateral face has to be divided into two triangles
           switch (face_corners)
           {
+          case 2 :
+            assert(dim == 2);
+            std::cout << "adding LINE..." << std::endl;
+            // we have a triangle here
+
+            // add a new face to the temporary collection
+            temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, 0));
+
+            // try for each of the faces vertices whether it is already inserted or not
+            for (int i = 0; i < face_corners; ++i)
+            {
+              // get the number of the vertex in the parent element
+              int vertex_number = orientedSubface<2>(gt, *sit, i);
+
+              // get the vertex pointer and the index from the index set
+              VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
+              IndexType vindex = this->index<dim>(*vptr);
+
+              // remember the vertex' number in parent element's vertices
+              temp_faces.back().corners[i].num = vertex_number;
+
+              // if the vertex is not yet inserted in the vertex info map
+              // it is a new one -> it will be inserted now!
+              typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+              if (vimit == this->_vtxInfo.end())
+              {
+                // insert into the map
+                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, vptr);
+                // remember the vertex as a corner of the current face in temp_faces
+                temp_faces.back().corners[i].idx = vertex_index;
+                // increase the current index
+                vertex_index++;
+              }
+              else
+              {
+                // only insert the index into the simplices array
+                temp_faces.back().corners[i].idx = vimit->second->idx;
+              }
+            }
+
+            // now increase the current face index
+            simplex_index++;
+            break;
           case 3 :
+            assert(dim == 3);
             std::cout << "adding TRI..." << std::endl;
             // we have a triangle here
 
@@ -596,7 +640,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
               int vertex_number = orientedSubface<dim>(gt, *sit, i);
 
               // get the vertex pointer and the index from the index set
-              VertexPtr vptr(elit->template entity<dim>(vertex_number));
+              VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
               IndexType vindex = this->index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
@@ -625,6 +669,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             simplex_index++;
             break;
           case 4 :
+            assert(dim == 3);
             std::cout << "adding QUAD..." << std::endl;
             // we have a quadrilateral here
             VertexPtr* vptrs[4];
@@ -639,7 +684,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
               vertex_numbers[i] = orientedSubface<dim>(gt, *sit, i);
 
               // get the vertex pointer and the index from the index set
-              vptrs[i] = new typename Codim1Extractor<GV>::VertexPtr(elit->template entity<dim>(vertex_numbers[i]));
+              vptrs[i] = new typename Codim1Extractor<GV>::VertexPtr(elit->template subEntity<dim>(vertex_numbers[i]));
               IndexType vindex = this->index<dim>(*(*vptrs[i]));
 
               // if the vertex is not yet inserted in the vertex info map
@@ -686,12 +731,14 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             temp_faces.back().corners[2].num = vertex_numbers[1];
             break;
           default :
-            DUNE_THROW(Dune::NotImplemented, "the extractor does only work for triangle and quadrilateral faces");
+            DUNE_THROW(Dune::NotImplemented, "the extractor does only work for triangle and quadrilateral faces (" << face_corners << " corners)");
             break;
           }
         }                         // end loop over found surface parts
       }
     }             // end loop over elements
+
+    std::cout << "added " << simplex_index << " subfaces\n";
 
     // allocate the array for the face specific information...
     this->_faces.resize(simplex_index);

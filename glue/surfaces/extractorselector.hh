@@ -140,7 +140,7 @@ template<typename GSET>
 template<typename LSET>
 struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, MeshClassification::hybrid>
 {
-  //	typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
+  typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 
