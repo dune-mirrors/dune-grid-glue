@@ -7,12 +7,12 @@
  *  Author:      Gerrit Buse
  *  ---------------------------------
  *  Project:     dune-grid-glue
- *  Description: grid extractor implementation for "flat" cube grids
+ *  Description: grid extractor implementation for cube grids
  *  subversion:  $Id$
  *
  */
 /**
- * @file CubeMeshExtractor.hh
+ * @file
  * @brief
  */
 
@@ -34,8 +34,7 @@
 
 
 /**
- * @class CubeMeshExtractor
- * @brief grid extractor implementation for "flat" cube grids
+ * @brief grid extractor implementation for cube grids
  *
  * Provides methods that build topology information for given grids.
  * Note that these methods only operate on the grid.
@@ -57,7 +56,7 @@ public:
 
   enum
   {
-    dimw = dim+1
+    dimw = GV::dimensionworld
   };
 
   /// @brief compile time number of corners of surface simplices
