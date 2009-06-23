@@ -25,10 +25,8 @@
 #endif
 #include "gridextractiontraits.hh"
 #include "simplicialmeshextractor.hh"
-#include "simplicialmanifoldextractor.hh"
 #include "simplicialsurfaceextractor.hh"
 #include "cubesurfaceextractor.hh"
-#include "cubemanifoldextractor.hh"
 #include "cubemeshextractor.hh"
 #include "generalsurfaceextractor.hh"
 
@@ -211,73 +209,5 @@ struct ExtractorSelector<GSET>::Helper<LSET, 1, 1, 1, MeshClassification::hybrid
 {
   //		typedef GeneralMeshExtractor<typename LSET::GridView>  ExtractorType;
 };
-
-
-
-/*   S P E C I A L I Z A T I O N   F O R   M A N I F O L D   E X T R A C T I O  N   */
-/*   ----------------------------------------------------------------------------   */
-
-
-/*   2D manifold in 3D is directly extracted   */
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, 2, MeshClassification::simplex>
-{
-  typedef SimplicialManifoldExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, 2, MeshClassification::cube>
-{
-  typedef CubeManifoldExtractor<typename LSET::GridView, false>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, 2, MeshClassification::rectangular>
-{
-  typedef CubeManifoldExtractor<typename LSET::GridView, true>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, 2, MeshClassification::hybrid>
-{
-  //		typedef GeneralManifoldExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-
-/*   1D manifold in 2D is directly extracted   */
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, 1, MeshClassification::simplex>
-{
-  typedef SimplicialManifoldExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, 1, MeshClassification::cube>
-{
-  typedef CubeManifoldExtractor<typename LSET::GridView, false>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, 1, MeshClassification::rectangular>
-{
-  typedef CubeManifoldExtractor<typename LSET::GridView, true>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, 1, MeshClassification::hybrid>
-{
-  //		typedef GeneralManifoldExtractor<typename LSET::GridView>  ExtractorType;
-};
-
 
 #endif // EXTRACTORSELECTOR_HH_
