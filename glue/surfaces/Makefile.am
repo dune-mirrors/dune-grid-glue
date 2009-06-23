@@ -14,6 +14,6 @@ surfaces_HEADERS = gridextractor.hh\
 	cubesurfaceextractor.hh\
 	surfacedescriptor.hh\
 	gridextractiontraits.hh\
-	VtkSurfaceWriter.hh
+	vtksurfacewriter.hh
 
 include $(top_srcdir)/am/global-rules
