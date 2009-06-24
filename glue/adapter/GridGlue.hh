@@ -260,7 +260,7 @@ protected:
    */
   void updateIntersections()
   {
-    // build the interesections array again
+    // build the intersections array again
     this->_intersections.resize(this->_sm.nSimplices(), this->NULL_INTERSECTION);
     for (unsigned int i = 0; i < this->_sm.nSimplices(); ++i)
       this->_intersections[i] = RemoteIntersectionImpl(this, i);

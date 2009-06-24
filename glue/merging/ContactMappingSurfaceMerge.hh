@@ -584,13 +584,12 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
 
     std::cout << "Finished building merged grid!" << std::endl;
 
-    {
-      // get the representation from the contact mapping object
-      std::vector<IntersectionPrimitive<float> > overlaps;
-      this->_cm.getOverlaps(overlaps);
-      // initialize the merged grid overlap manager
-      this->_olm.setOverlaps(overlaps);
-    }
+    // get the representation from the contact mapping object
+    std::vector<IntersectionPrimitive<float> > overlaps;
+    this->_cm.getOverlaps(overlaps);
+
+    // initialize the merged grid overlap manager
+    this->_olm.setOverlaps(overlaps);
 
     // introduce a quadtree or octree for fast identification of domain and target
     // vertices in the merged grid
@@ -599,56 +598,56 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
     unsigned int num_olcorners = dim * this->_olm.nOverlaps();
 
     // re-initialize the point locator
+    Coords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
+    // compute the bounding box of the merged grid
+    typename Dune::FieldVector<Coords, dim>::size_type j;
+    typename Coords::size_type k;
+    for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
     {
-      Coords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
-      // compute the bounding box of the merged grid
-      typename Dune::FieldVector<Coords, dim>::size_type j;
-      typename Coords::size_type k;
-      for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
-      {
-        // can work with a reference here since no allocation is done in the next two loops
-        // (should save some calls to constructors)
-        const Dune::FieldVector<Coords, dim>& corners = this->simplexCorners(i);
-        for (j = 0; j < dim; ++j)
-          for (k = 0; k < dim; ++k)
-          {
-            lower[k] = std::min(lower[k], corners[j][k]);
-            upper[k] = std::max(upper[k], corners[j][k]);
-          }
-      }
-      // increase a little, since "upper" boundary not inside locator domain
-      lower -= 0.1;
-      upper += 0.1;
-
-      // get an estimate on how many levels will be needed in the octree,
-      // the default value for max_items/cell is 10, here it will be 8
-      int max_items_per_cell = 8;
-      int levels = 1;
-      while ((num_olcorners / pow((float) (1 << dim), levels)) > max_items_per_cell)
-        levels++;
-      // ...and to be on the safe side
-      levels += 4;
-      this->_olclocator.init(typename Locator::BoxType(lower, upper), levels, max_items_per_cell);
-
-      // now fill the locator...
-
-      // first allocate the data "repository" for the locator's content is be stored outside
-      this->_olcorners.resize(num_olcorners);
-
-      // create geometry "oracle" for the overlap corner structs in the point locator
-      this->_olcgeometry = new OverlapCornerGeometry(this->_olm);
-
-      // insert the data
-      unsigned int current_index = 0;
-      for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
-      {
-        for (int corner = 0; corner < dim; ++corner)
+      // can work with a reference here since no allocation is done in the next two loops
+      // (should save some calls to constructors)
+      const Dune::FieldVector<Coords, dim>& corners = this->simplexCorners(i);
+      for (j = 0; j < dim; ++j)
+        for (k = 0; k < dim; ++k)
         {
-          this->_olcorners[current_index].idx = i;
-          this->_olcorners[current_index].corner = corner;
-          this->_olclocator.insert(&this->_olcorners[current_index], this->_olcgeometry);
-          current_index++;
+          lower[k] = std::min(lower[k], corners[j][k]);
+          upper[k] = std::max(upper[k], corners[j][k]);
         }
+    }
+
+    // increase a little, since "upper" boundary not inside locator domain
+    /** \todo This should be scaling invariant! */
+    lower -= 0.1;
+    upper += 0.1;
+
+    // get an estimate on how many levels will be needed in the octree,
+    // the default value for max_items/cell is 10, here it will be 8
+    int max_items_per_cell = 8;
+    int levels = 1;
+    while ((num_olcorners / pow((float) (1 << dim), levels)) > max_items_per_cell)
+      levels++;
+    // ...and to be on the safe side
+    levels += 4;
+    this->_olclocator.init(typename Locator::BoxType(lower, upper), levels, max_items_per_cell);
+
+    // now fill the locator...
+
+    // first allocate the data "repository" for the locator's content is be stored outside
+    this->_olcorners.resize(num_olcorners);
+
+    // create geometry "oracle" for the overlap corner structs in the point locator
+    this->_olcgeometry = new OverlapCornerGeometry(this->_olm);
+
+    // insert the data
+    unsigned int current_index = 0;
+    for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
+    {
+      for (int corner = 0; corner < dim; ++corner)
+      {
+        this->_olcorners[current_index].idx = i;
+        this->_olcorners[current_index].corner = corner;
+        this->_olclocator.insert(&this->_olcorners[current_index], this->_olcgeometry);
+        current_index++;
       }
     }
 

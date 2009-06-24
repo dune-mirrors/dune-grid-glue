@@ -110,7 +110,7 @@ public:
 
   RemoteIntersectionImpl(const Parent* glue, int index);
 
-
+  /** \brief Copy constructor */
   RemoteIntersectionImpl(const RemoteIntersectionImpl & impl)
     : _glue(impl._glue), _index(impl._index)
       ,
@@ -120,7 +120,7 @@ public:
       _targgeom(impl._targgeom)
   {}
 
-
+  /** \brief Assignment operator */
   RemoteIntersectionImpl& operator=(const RemoteIntersectionImpl& impl)
   {
     this->_glue = impl._glue;
@@ -269,7 +269,7 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementcoorddim = DomainGridType::template Codim<0>::Geometry::mydimension;
 
-    // a face number is only important if dealing with surfaces, not manifolds or meshes
+    // a face number is only important if dealing with surfaces, not meshes
 
     // compute the local coordinates with the correct dimension and the global coordinates
     Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;

@@ -55,7 +55,6 @@ private:
 
 
 /**
- * @class DefaultExtractionTraits
  * @brief default configuration of surface extraction traits,
  * deduced from type of grid and descriptor
  *
