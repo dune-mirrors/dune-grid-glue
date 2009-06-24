@@ -33,7 +33,6 @@
 #include <dune/grid/common/geometry.hh>
 
 #include "surfacedescriptor.hh"
-#include "generaledgeextractor.hh"
 #include <dune/glue/surfaces/codim1extractor.hh>
 
 /**

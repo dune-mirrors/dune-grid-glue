@@ -30,7 +30,6 @@
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
 #include "surfacedescriptor.hh"
-#include "generaledgeextractor.hh"
 
 
 /**
