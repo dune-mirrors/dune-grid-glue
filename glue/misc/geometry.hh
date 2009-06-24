@@ -652,40 +652,10 @@ int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
 template<typename K, int dim>
 Dune::FieldVector<K, dim> cornerLocalInRefElement(const Dune::GeometryType& type, int face, int vertex)
 {
-  unsigned int cornerlocal = 0;
+  unsigned int cornerlocal = orientedSubface<dim>(type, face, vertex);
 
-  const Dune::ReferenceElement<K, dim>& refElement =
-    Dune::ReferenceElements<K, dim>::general(type);
-
-  // Quadrilateral
-  if (type.isQuadrilateral() && (face==0 || face==3))
-    cornerlocal = refElement.subEntity(face,1, (vertex+1)%2, dim);
-
-  // Pyramid, quad face:  turn 0 3 2 1 into 0 3 1 2
-  if (type.isPyramid() && face==0 && vertex>=2)
-    cornerlocal = refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
-
-  // Prism: swap vertices 2 and 3 for all quad faces
-  if (type.isPrism() && face>=1 && face<4 && vertex>=2)
-    cornerlocal = refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
-
-  // Hexahedron:
-  // face 0: 0 2 4 6 --> 2 0 6 4
-  // face 3: 2 3 6 7 --> 3 2 7 6
-  if (type.isHexahedron() && (face==0 || face==3))
-    cornerlocal = refElement.subEntity(face,1, (vertex<2) ? (vertex+1)%2 : ((vertex-1)%2)+2, dim);
-
-
-  // face 4: 0 1 2 3 --> 0 2 1 3
-  if (type.isHexahedron() && face==4)
-  {
-    const int renumber[4] = {0,2,1,3};
-    cornerlocal = refElement.subEntity(face,1, renumber[vertex], dim);
-  }
-
-  cornerlocal = refElement.subEntity(face,1,vertex,dim);
-
-  //	STDOUTLN("cornerLocalInRefElement(" << type << ", " << face << ", " << vertex << ") => cornerlocal=" << cornerlocal << " position=(" << refElement.position(cornerlocal, dim) << ")" );
+  const Dune::ReferenceElement<double,dim>& refElement =
+    Dune::ReferenceElements<double, dim>::general(type);
 
   // return the vertex' center of gravity, i.e. the vertex' location
   return refElement.position(cornerlocal, dim);
