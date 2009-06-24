@@ -29,11 +29,10 @@
 #include <dune/grid/common/geometry.hh>
 
 #include "surfacedescriptor.hh"
-
+#include <dune/glue/surfaces/codim0extractor.hh>
 
 
 /**
- * @class SimplicialMeshExtractor
  * @brief grid extractor implementation for simplicial grids
  *
  * Provides methods that build topology information for given grids.
@@ -43,6 +42,7 @@
  */
 template<typename GV>
 class SimplicialMeshExtractor
+  : public Codim0Extractor<GV>
 {
 public:
 
@@ -113,67 +113,6 @@ private:
   };
 
 
-  struct CoordinateInfo
-  {
-    CoordinateInfo()
-    {}
-
-    CoordinateInfo(unsigned int index_, IndexType vtxindex_)
-      :       self(vtxindex_), index(index_), num_faces(0), faces(NULL)
-    {}
-
-    /// @brief the index of the parent element (from index set)
-    IndexType self;
-
-    /// @brief the coordinate
-    Coords coord;
-
-    /// @brief the index of this coordinate (in internal storage scheme) // NEEDED??
-    unsigned int index : 28;
-
-    /// @brief the number of extracted faces with this coord as corner,
-    /// major purpose is holding the length of the array "faces"
-    unsigned int num_faces : 4;
-
-    /// @brief holds the indices of the faces of which the coordinate is a corner
-    unsigned int* faces;
-  };
-
-
-  /**
-   * @class EntityInfo
-   * @brief simple struct holding a vertex pointer and an index
-   */
-  struct VertexInfo
-  {
-    VertexInfo(unsigned int idx_, VertexPtr& p_) : idx(idx_), p(p_)
-    {}
-    unsigned int idx;
-    VertexPtr p;
-  };
-
-
-  /**
-   * @class ElementInfo
-   * @brief simple struct holding an entity pointer and an index
-   */
-  struct ElementInfo
-  {
-    ElementInfo(unsigned int idx_, ElementPtr& p_) : idx(idx_), p(p_)
-    {}
-
-    /// @brief the index of this element's first face in the internal list of extracted faces
-    unsigned int idx;
-
-    /// @brief the entity pointer to the element
-    ElementPtr p;
-  };
-
-
-  typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
-  typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
-
-
   /************************** MEMBER VARIABLES ************************/
 
   // these values are filled on surface extraction and can be
@@ -189,21 +128,21 @@ private:
   std::vector<FaceInfo>         _faces;
 
   /// @brief all information about the corner vertices of the extracted
-  std::vector<CoordinateInfo>   _coords;
+  std::vector<typename Codim0Extractor<GV>::CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
   /// Maps a vertex' index (from index set) to an object holding the locally
   /// associated index of the vertex' coordinate in _coords and an entity
   /// pointer to the codim<dim> entity.
-  VertexInfoMap _vtxInfo;
+  typename Codim0Extractor<GV>::VertexInfoMap _vtxInfo;
 
   /// @brief a map enabling faster access to elements and faces
   ///
   /// Maps an element's index (from index set) to an object holding the locally
   /// associated index of its first face in _indices (if there are more they are
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  ElementInfoMap _elmtInfo;
+  typename Codim0Extractor<GV>::ElementInfoMap _elmtInfo;
 
   /// @brief geometry type of the surface patches
   const Dune::GeometryType _codim0element;
@@ -225,7 +164,10 @@ protected:
   SimplicialMeshExtractor(const GV& gv, const Dune::GeometryType& gt) :
     _gv(gv), _codim0element(gt)
   {
-    STDOUTLN("This is SimplicialMeshExtractor (protected constructor) on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
+    std::cout << "This is SimplicialMeshExtractor (protected constructor) on a <" << GV::dimension
+              << "," << GV::dimensionworld << "> grid working in " << dimw
+              << " space expecting faces of type " << _codim0element << "!"
+              << std::endl;
   }
 
 
@@ -356,7 +298,7 @@ public:
    */
   int coordinateIndex(const Vertex& v) const
   {
-    typename VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
+    typename Codim0Extractor<GV>::VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
     return it == this->_vtxInfo.end() ? -1 : it->second->idx;
   }
 
@@ -383,7 +325,7 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    typename ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
+    typename Codim0Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
     if (it == this->_elmtInfo.end())
     {
       first = -1;
@@ -504,10 +446,10 @@ SimplicialMeshExtractor<GV>::~SimplicialMeshExtractor()
   for (unsigned int i = 0; i < this->_coords.size(); ++i)
     if (this->_coords[i].faces != NULL)
       delete this->_coords[i].faces;
-  for (typename VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim0Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim0Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
 }
@@ -524,7 +466,7 @@ void SimplicialMeshExtractor<GV>::clear()
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
       if (this->_coords[i].faces != NULL)
         delete this->_coords[i].faces;
-    std::vector<CoordinateInfo> dummy;
+    std::vector<typename Codim0Extractor<GV>::CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
   {
@@ -533,10 +475,10 @@ void SimplicialMeshExtractor<GV>::clear()
   }
 
   // first free all manually allocated vertex/element info items...
-  for (typename VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+  for (typename Codim0Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
-  for (typename ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+  for (typename Codim0Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
   // ...then clear the maps themselves, too
@@ -581,7 +523,7 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       {
         // add an entry to the element info map, the index will be set properly later
         eindex = this->indexSet().template index<0>(*elit);
-        this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit);
+        this->_elmtInfo[eindex] = new typename Codim0Extractor<GV>::ElementInfo(simplex_index, elit);
 
 
         // add a new face to the temporary collection
@@ -594,16 +536,16 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
           // get the vertex pointer and the index from the index set
           // Note that the orientation is always the same for all simplices,
           // i.e. CCW which is 0,1 in 2D and 0,1,2 in 3D
-          VertexPtr vptr(elit->template entity<dim>(i));
+          typename Codim0Extractor<GV>::VertexPtr vptr(elit->template entity<dim>(i));
           IndexType vindex = this->index<dim>(*vptr);
 
           // if the vertex is not yet inserted in the vertex info map
           // it is a new one -> it will be inserted now!
-          typename VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+          typename Codim0Extractor<GV>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
           if (vimit == this->_vtxInfo.end())
           {
             // insert into the map
-            this->_vtxInfo[vindex] = new VertexInfo(vertex_index, vptr);
+            this->_vtxInfo[vindex] = new typename Codim0Extractor<GV>::VertexInfo(vertex_index, vptr);
             // remember the vertex as a corner of the current face in temp_faces
             temp_faces.back().corners[i] = vertex_index;
             // increase the current index
@@ -630,11 +572,11 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 
   // now first write the array with the coordinates...
   this->_coords.resize(this->_vtxInfo.size());
-  typename VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
+  typename Codim0Extractor<GV>::VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
   for (; it1 != this->_vtxInfo.end(); ++it1)
   {
     // get a pointer to the associated info object
-    CoordinateInfo* current = &this->_coords[it1->second->idx];
+    typename Codim0Extractor<GV>::CoordinateInfo* current = &this->_coords[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping
