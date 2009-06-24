@@ -42,6 +42,7 @@
  */
 template<typename GV, bool rect = false>
 class CubeSurfaceExtractor
+  : public Codim1Extractor<GV>
 {
 public:
 
