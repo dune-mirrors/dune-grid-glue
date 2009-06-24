@@ -810,12 +810,13 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
   // read the local coordinates from the overlap's struct,
   // but note that the last coordinate is only stored implicitly
   // (sum must be 1.0, i.e. last is lin. dep.)
+
   Coords result(1.0);
 
   if (dim == 2)
   {
     // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
-    // POSITIVELY oriented  "reverse" barycentric coordinates in the domain parent.
+    // local coordinates in the domain parent triangle.
     // So in order to have a barycentric representation of local corners we just
     // reverse the order of the local coordinates' components.
     result[0] = 1.0 - ip.localCoords[0][corner][0];
@@ -838,6 +839,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
   if (result[dim-1] < 0.0)
     result[dim-1] = 0.0;
 #endif
+
   return result;
 }
 
@@ -847,6 +849,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
+
   // read the local coordinates from the overlap's struct,
   // but note that the last coordinate is only stored implicitly
   // (sum must be 1.0, i.e. last is lin. dep.)
@@ -855,12 +858,11 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
   if (dim == 2)
   {
     // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
-    // NEGATIVELY oriented "reverse" barycentric coordinates in the target parent
-    // (actually this probably is a bug...).
-    // So in order to have a positive orientation of corners we reverse
-    // the numbering of corners as well as the order of components in the coordinates.
-    result[0] = 1.0 - ip.localCoords[1][1-corner][0];
-    result[1] = ip.localCoords[1][1-corner][0];
+    // local coordinates in the target parent face.
+    // So in order to have a barycentric representation of local corners we just
+    // reverse the order of the local coordinates' components.
+    result[0] = 1.0 - ip.localCoords[1][corner][0];
+    result[1] = ip.localCoords[1][corner][0];
   }
   else       // dim == 3
   {
