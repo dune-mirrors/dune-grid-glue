@@ -868,10 +868,9 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
   {
     // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
     // NEGATIVELY oriented barycentric coordinates in the target parent.
-    // So we just reverse the numbering of corners and are done.
     for (int j = 0; j < dim-1; ++j)             // #dimensions of coordinate space
     {
-      result[j] = ip.localCoords[1][2-corner][j];
+      result[j] = ip.localCoords[1][corner][j];
       // assemble the last coordinate
       result[dim-1] -= result[j];
     }
