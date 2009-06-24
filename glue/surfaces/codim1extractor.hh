@@ -49,6 +49,9 @@ public:
   enum {dimworld = GV::dimensionworld};
   enum {dim      = GV::dimension};
 
+  /** \brief This class extracts codim-1 stuff (surfaces) */
+  enum {codim    = 1};
+
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
