@@ -194,14 +194,8 @@ public:
 #else
   /** \todo Please doc me! */
   typedef BuilderImpl<GET1, GET2, SM,
-      ExtractorClassifier<
-          DomainExtractor::GridView::dimension,
-          DomainExtractor::GridView::dimensionworld,
-          DomainExtractor::dimw>::type,
-      ExtractorClassifier<
-          TargetExtractor::GridView::dimension,
-          TargetExtractor::GridView::dimensionworld,
-          TargetExtractor::dimw>::type>
+      ExtractorClassifier<DomainExtractor::codim>::type,
+      ExtractorClassifier<TargetExtractor::codim>::type>
   Builder;
 #endif
 
