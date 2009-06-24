@@ -18,7 +18,7 @@ using namespace Dune;
 template <class GlueType>
 void testCoupling(const GlueType& glue)
 {
-  dune_static_assert(GlueType::domdim == GlueType::tardim, "For this test domain and target must have the same dimension");
+  //dune_static_assert(GlueType::domdim == GlueType::tardim, "For this test domain and target must have the same dimension");
 
   const int dim = GlueType::domdim;
 
@@ -85,6 +85,18 @@ private:
   double sliceCoord_;
 };
 
+/** \brief Returns always true */
+template <class GridView>
+class AllElementsDescriptor
+  : public ElementDescriptor<GridView>
+{
+public:
+  virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr) const
+  {
+    return true;
+  }
+};
+
 template <int dim, MeshClassification::MeshType ExtractorClassification>
 void testMatchingCubeGrids()
 {
@@ -145,6 +157,74 @@ void testMatchingCubeGrids()
 
 }
 
+
+
+template <int dim, MeshClassification::MeshType ExtractorClassification>
+void test1d2dCoupling()
+{
+
+  // ///////////////////////////////////////
+  //   Make a cube grid and a 1d grid
+  // ///////////////////////////////////////
+
+  typedef SGrid<dim,dim> GridType2d;
+
+  FieldVector<int, dim> elements(1);
+  FieldVector<double,dim> lower(0);
+  FieldVector<double,dim> upper(1);
+
+  GridType2d cubeGrid0(elements, lower, upper);
+
+  typedef SGrid<dim-1,dim-1> GridType1d;
+
+  FieldVector<int, dim-1> elements1d(1);
+  FieldVector<double,dim-1> lower1d(0);
+  FieldVector<double,dim-1> upper1d(1);
+
+  GridType1d cubeGrid1(elements1d, lower1d, upper1d);
+
+
+  // ////////////////////////////////////////
+  //   Set up coupling at their interface
+  // ////////////////////////////////////////
+
+  typedef typename GridType2d::LevelGridView DomGridView;
+  typedef typename GridType1d::LevelGridView TarGridView;
+
+  typedef DefaultExtractionTraits<DomGridView,false,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,true,ExtractorClassification> TarTraits;
+
+  typedef ContactMappingSurfaceMerge<dim,double> SurfaceMergeImpl;
+
+  typedef GridGlue<DomTraits,TarTraits, SurfaceMergeImpl> GlueType;
+
+  SurfaceMergeImpl matcher;
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), matcher);
+
+  VerticalFaceDescriptor<DomGridView> domdesc(1);
+  AllElementsDescriptor<TarGridView>  tardesc;
+
+  glue.matcher().setMaxDistance(0.01);
+
+  glue.builder().setDomainFaceDescriptor(domdesc);
+  glue.builder().setTargetElementDescriptor(tardesc);
+
+  if (!glue.builder().build())
+    DUNE_THROW(Dune::GridError, "Gluing failed!");
+
+  std::cout << "Gluing successful!" << std::endl;
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(glue);
+
+}
+
+
+
+
 int main(int argc, char *argv[]) try
 {
 
@@ -159,6 +239,9 @@ int main(int argc, char *argv[]) try
 
   // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
+
+
+  //test1d2dCoupling<2,MeshClassification::cube>();
 
 }
 catch (Exception e) {
