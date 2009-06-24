@@ -897,34 +897,4 @@ void GeneralSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, const
   }
 }
 
-
-#if 0
-/*   S P E C I A L I Z A T I O N   F O R   2 D   G R I D S   */
-template<typename GV>
-class GeneralSurfaceExtractor<GV, 2> : public GeneralEdgeExtractor<GV>
-{
-private:
-
-  typedef GeneralEdgeExtractor<GV>  Base;
-
-
-public:
-
-  /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
-
-  enum
-  {
-    cube_corners = 1 << (Base::dim-1)
-  };
-
-
-  /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
-
-  GeneralSurfaceExtractor(const GV& gv) : Base(gv)
-  {
-    STDOUTLN("This is GeneralSurfaceExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << Base::dimw << " space expecting faces of type " << Dune::GeometryType(Dune::GeometryType::cube, Base::dim) << "!");
-  }
-};
-#endif
-
 #endif // GENERALSURFACEEXTRACTOR_HH_
