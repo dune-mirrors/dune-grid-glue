@@ -40,33 +40,25 @@ namespace ExtractorClassification
   enum ExtractorType
   {
     surface = 0,
-    mesh = 1,
-    manifold = 2
+    mesh = 1
   };
 }
 
 
-template<int dimG, int dimGW, int dimEW>
+template<int codim>
 struct ExtractorClassifier {};
 
-template<int dim>
-struct ExtractorClassifier<dim, dim, dim>
+template<>
+struct ExtractorClassifier<1>
 {
   static const ExtractorClassification::ExtractorType type = ExtractorClassification::surface;
 };
 
-template<int hyperdim, int dimEW>
-struct ExtractorClassifier<hyperdim, hyperdim, dimEW>
+template<>
+struct ExtractorClassifier<0>
 {
   static const ExtractorClassification::ExtractorType type = ExtractorClassification::mesh;
 };
-
-template<int dimGW, int hyperdim>
-struct ExtractorClassifier<hyperdim, dimGW, hyperdim>
-{
-  static const ExtractorClassification::ExtractorType type = ExtractorClassification::manifold;
-};
-
 
 
 /**
@@ -459,8 +451,8 @@ public:
 
 }; // end of class GridExtractor
 
-template<typename Implementation>
-const ExtractorClassification::ExtractorType GridExtractor<Implementation>::type = ExtractorClassifier<GridView::dimension, GridView::dimensionworld, dimw>::type;
+// template<typename Implementation>
+// const ExtractorClassification::ExtractorType GridExtractor<Implementation>::type = ExtractorClassifier<GridView::dimension, GridView::dimensionworld, dimw>::type;
 
 
 #endif // GRIDEXTRACTOR_HH_
