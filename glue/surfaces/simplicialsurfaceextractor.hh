@@ -523,10 +523,6 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
     {
-      // check if there are unwanted geometric shapes
-      // if one appears => exit with error
-      if (elit->type() != this->_codim0element)
-        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->type());
 
       // remember the indices of the faces that shall become
       // part of the surface
@@ -537,8 +533,15 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
       for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
       {
         // only look at boundary faces
-        if (is->boundary() && descr.contains(elit, is->indexInInside()))
+        if (is->boundary() && descr.contains(elit, is->indexInInside())) {
+
+          // Make sure the face is a simplex
+          if (!is->type().isSimplex())
+            DUNE_THROW(Dune::GridError, "found non-simplicial boundary entity: " << is->type());
+
           boundary_faces.insert(is->indexInInside());
+        }
+
       }
 
       // if some face is part of the surface add it!
