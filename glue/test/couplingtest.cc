@@ -175,7 +175,7 @@ void test1d2dCoupling()
 
   GridType2d cubeGrid0(elements, lower, upper);
 
-  typedef SGrid<dim-1,dim-1> GridType1d;
+  typedef SGrid<dim-1,dim> GridType1d;
 
   FieldVector<int, dim-1> elements1d(1);
   FieldVector<double,dim-1> lower1d(0);
@@ -230,6 +230,10 @@ int main(int argc, char *argv[]) try
 
   // Test two unit squares, extract boundaries using the CubeSurfaceExtractor
   testMatchingCubeGrids<2,MeshClassification::cube>();
+
+  // Test two unit squares, extract boundaries using the SimplexSurfaceExtractor
+  // Should work, because the boundary consists of 1d simplices
+  testMatchingCubeGrids<2,MeshClassification::simplex>();
 
   // Test two unit squares, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<2,MeshClassification::hybrid>();
