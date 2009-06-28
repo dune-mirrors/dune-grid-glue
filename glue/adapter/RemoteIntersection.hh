@@ -128,7 +128,6 @@ namespace RemoteIntersectionInterface
       return *this;
     }
 
-
     /*   F U N C T I O N A L I T Y   */
 
     /** \brief return EntityPointer to the Entity on the inside of this intersection.
@@ -265,6 +264,35 @@ namespace RemoteIntersectionInterface
       return this->unitOuterNormalTarget(local) *= this->realIntersection.geometryTarget().integrationElement(local);
     }
 
+    /**
+       \brief is it possible to access the target entity?
+
+       \todo update for parallel
+     */
+    bool hasTarget() const
+    {
+      return true;
+    }
+
+    /**
+       \brief is it possible to access the domain entity?
+
+       \todo update for parallel
+     */
+    bool hasDomain() const
+    {
+      return true;
+    }
+
+#ifdef QUICKHACK_INDEX
+    typedef typename RemoteIntersectionImpl::IndexType IndexType;
+
+    IndexType index() const
+    {
+      return this->realIntersection.index();
+    }
+
+#endif
 
   };
 

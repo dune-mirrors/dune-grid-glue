@@ -237,14 +237,12 @@ private:
   /// @brief the builder utility
   Builder _builder;
 
-
   /// @brief an invalid intersection object used as dummy and
   /// also as recognizable end object of iterations over intersections
   mutable RemoteIntersectionImpl NULL_INTERSECTION;
 
   /// @brief a vector with intersection elements
   mutable std::vector<RemoteIntersectionImpl>   _intersections;
-
 
 protected:
 
@@ -257,7 +255,11 @@ protected:
     // build the intersections array again
     this->_intersections.resize(this->_sm.nSimplices(), this->NULL_INTERSECTION);
     for (unsigned int i = 0; i < this->_sm.nSimplices(); ++i)
-      this->_intersections[i] = RemoteIntersectionImpl(this, i);
+    {
+      RemoteIntersectionImpl ri(this, i);
+      //if (ri.hasTarget() || ri.hasDomain())
+      this->_intersections[i] = ri;
+    }
 
     std::cout << "GridGlue::updateIntersections : The number of overlaps is " << this->_sm.nSimplices() << std::endl;
   }
@@ -462,8 +464,18 @@ public:
     return;
   }
 
-};
+#if QUICKHACK_INDEX
+  /*
+   * @brief return an IndexSet mapping from RemoteIntersection to IndexType
+   */
 
+  // indexset size
+  size_t indexSet_size() const
+  {
+    return _sm.nSimplices();
+  }
+#endif
+};
 
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
 
@@ -606,8 +618,7 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
   // first check if the element forms a part of the extracted surface
   int first, count;
   bool in_surface = this->_tarext.faceIndices(e, first, count);
-  if (!in_surface)
-    return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
+  if (!in_surface) return itargetend();
 
   count += first;
   while (first < count)
@@ -647,8 +658,7 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
   // first check if the element forms a part of the extracted surface
   int first, count;
   bool in_surface = this->_tarext.faceIndices(e, first, count);
-  if (!in_surface)
-    return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
+  if (!in_surface) return itargetend();
 
 
   // now accumulate all remote intersections of the element's faces

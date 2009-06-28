@@ -226,6 +226,15 @@ public:
     return this->_targgeom.outerNormal(local);
   }
 
+#ifdef QUICKHACK_INDEX
+  typedef int IndexType;
+
+  IndexType index() const
+  {
+    return this->_index;
+  }
+
+#endif
 };
 
 
