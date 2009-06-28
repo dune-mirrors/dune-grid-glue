@@ -25,7 +25,7 @@
    (Specialization for two "non-surface" grids, i.e. meshes, manifolds) */
 
 template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, ExtractorClassification::ExtractorType type1, ExtractorClassification::ExtractorType type2>
+template<typename BGET1, typename BGET2, typename BSM, int codim1, int codim2>
 class GridGlue<GET1, GET2, SM>::BuilderImpl
 {
 private:
@@ -229,8 +229,8 @@ class GridGlue<GET1, GET2, SM>::BuilderImpl<
     BGET1,
     BGET2,
     BSM,
-    ExtractorClassification::surface,
-    ExtractorClassification::surface
+    1,  // codim1
+    1   // codim2
     >
 {
 private:
@@ -427,8 +427,8 @@ public:
 /*   (Specialization for a "surface" and a "non-surface" grid (order!)     */
 
 template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, ExtractorClassification::ExtractorType type2>
-class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, ExtractorClassification::surface, type2>
+template<typename BGET1, typename BGET2, typename BSM, int extractorCodim2>
+class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, 1, extractorCodim2>
 {
 private:
 
@@ -625,8 +625,8 @@ public:
 /*  (Specialization for a "non-surface" and a "surface" grid (order!)     */
 
 template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, ExtractorClassification::ExtractorType type1>
-class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, type1, ExtractorClassification::surface>
+template<typename BGET1, typename BGET2, typename BSM, int codim1>
+class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, codim1, 1>
 {
 private:
 

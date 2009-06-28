@@ -35,32 +35,6 @@
 #include "../misc/conceptchecking.hh"
 
 
-namespace ExtractorClassification
-{
-  enum ExtractorType
-  {
-    surface = 0,
-    mesh = 1
-  };
-}
-
-
-template<int codim>
-struct ExtractorClassifier {};
-
-template<>
-struct ExtractorClassifier<1>
-{
-  static const ExtractorClassification::ExtractorType type = ExtractorClassification::surface;
-};
-
-template<>
-struct ExtractorClassifier<0>
-{
-  static const ExtractorClassification::ExtractorType type = ExtractorClassification::mesh;
-};
-
-
 /**
  * @class GridExtractor
  * @brief provides static methods for grid surface extraction
@@ -125,7 +99,7 @@ public:
 
 
   /// @brief a constant classifying this extractor
-  static const ExtractorClassification::ExtractorType type;
+  //static const ExtractorClassification::ExtractorType type;
 
 
 private:

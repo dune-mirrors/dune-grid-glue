@@ -80,9 +80,7 @@ private:
   typedef GridGlue<GET1, GET2, SM> This;
 public:
   /** \todo Please doc me! */
-  template<typename BSET1, typename BSET2, typename BSM,
-      ExtractorClassification::ExtractorType type1,
-      ExtractorClassification::ExtractorType type2>
+  template<typename BSET1, typename BSET2, typename BSM, int codim1, int codim2>
   class BuilderImpl;
 
   class RemoteIntersectionImpl;
@@ -194,8 +192,8 @@ public:
 #else
   /** \todo Please doc me! */
   typedef BuilderImpl<GET1, GET2, SM,
-      ExtractorClassifier<DomainExtractor::codim>::type,
-      ExtractorClassifier<TargetExtractor::codim>::type>
+      DomainExtractor::codim,
+      TargetExtractor::codim>
   Builder;
 #endif
 
