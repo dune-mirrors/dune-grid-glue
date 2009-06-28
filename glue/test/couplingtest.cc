@@ -158,6 +158,67 @@ void testMatchingCubeGrids()
 }
 
 
+template <int dim, MeshClassification::MeshType ExtractorClassification>
+void testNonMatchingCubeGrids()
+{
+
+  // ///////////////////////////////////////
+  //   Make two cube grids
+  // ///////////////////////////////////////
+
+  typedef SGrid<dim,dim> GridType;
+
+  FieldVector<int, dim> elements(2);
+  FieldVector<double,dim> lower(0);
+  FieldVector<double,dim> upper(1);
+
+  GridType cubeGrid0(elements, lower, upper);
+
+  elements = 3;
+  lower[0] += 1;
+  upper[0] += 1;
+
+  GridType cubeGrid1(elements, lower, upper);
+
+
+  // ////////////////////////////////////////
+  //   Set up coupling at their interface
+  // ////////////////////////////////////////
+
+  typedef typename GridType::LevelGridView DomGridView;
+  typedef typename GridType::LevelGridView TarGridView;
+
+  typedef DefaultExtractionTraits<DomGridView,false,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,false,ExtractorClassification> TarTraits;
+
+  typedef ContactMappingSurfaceMerge<dim,double> SurfaceMergeImpl;
+
+  typedef GridGlue<DomTraits,TarTraits, SurfaceMergeImpl> GlueType;
+
+  SurfaceMergeImpl matcher;
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), matcher);
+
+  VerticalFaceDescriptor<DomGridView> domdesc(1);
+  VerticalFaceDescriptor<TarGridView> tardesc(1);
+
+  glue.matcher().setMaxDistance(0.01);
+
+  glue.builder().setDomainFaceDescriptor(domdesc);
+  glue.builder().setTargetFaceDescriptor(tardesc);
+
+  if (!glue.builder().build())
+    DUNE_THROW(Dune::GridError, "Gluing failed!");
+
+  std::cout << "Gluing successful!" << std::endl;
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(glue);
+
+}
+
 
 template <int dim, MeshClassification::MeshType ExtractorClassification>
 void test1d2dCoupling()
@@ -230,19 +291,24 @@ int main(int argc, char *argv[]) try
 
   // Test two unit squares, extract boundaries using the CubeSurfaceExtractor
   testMatchingCubeGrids<2,MeshClassification::cube>();
+  testNonMatchingCubeGrids<2,MeshClassification::cube>();
 
   // Test two unit squares, extract boundaries using the SimplexSurfaceExtractor
   // Should work, because the boundary consists of 1d simplices
   testMatchingCubeGrids<2,MeshClassification::simplex>();
+  testNonMatchingCubeGrids<2,MeshClassification::simplex>();
 
   // Test two unit squares, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<2,MeshClassification::hybrid>();
+  testNonMatchingCubeGrids<2,MeshClassification::hybrid>();
 
   // Test two unit cubes, extract boundaries using the CubeSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::cube>();
+  testNonMatchingCubeGrids<3,MeshClassification::cube>();
 
   // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
+  testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
 
 
   //test1d2dCoupling<2,MeshClassification::cube>();
