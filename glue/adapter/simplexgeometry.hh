@@ -235,21 +235,6 @@ public:
     Base::operator=(Base(type, coordinates));
   }
 
-
-  /**
-   * @brief provided only for reasons of forward compatibility
-   *
-   * BasicGeometry apparently does not support the newly defined
-   * corner access method BasicGeometry::corner(int i) yet.
-   * @param i the index of the corner (not checked!)
-   * @return a copy of the coordinate at corner
-   */
-  const typename Base::GlobalCoordinate corner(int i) const
-  {
-    return this->operator[](i);
-  }
-
-
   const Dune::FieldVector<typename G::ctype, coorddim + static_cast<int>(coorddim==mydim)> outerNormal(const Dune::FieldVector<typename G::ctype, mydim>& local) const
   {
     return This::NormalComputer::outerNormal(*this, local);
@@ -312,20 +297,6 @@ public:
     //		for (int i = 0; i < this->corners(); ++i)
     //			STDOUT(" (" << this->operator[](i) << ")");
     //		STDOUTLN("");
-  }
-
-
-  /**
-   * @brief provided only for reasons of forward compatibility
-   *
-   * BasicGeometry apparently does not support the newly defined
-   * corner access method BasicGeometry::corner(int i) yet.
-   * @param i the index of the corner (not checked!)
-   * @return a copy of the coordinate at corner
-   */
-  const typename Base::GlobalCoordinate corner(int i) const
-  {
-    return this->operator[](i);
   }
 
 };
