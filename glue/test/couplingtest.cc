@@ -10,8 +10,8 @@
 
 #include <dune/glue/surfaces/surfacedescriptor.hh>
 #include <dune/glue/surfaces/gridextractiontraits.hh>
-#include <dune/glue/merging/ContactMappingSurfaceMerge.hh>
-#include <dune/glue/adapter/GridGlue.hh>
+#include <dune/glue/merging/psurfacemerge.hh>
+#include <dune/glue/adapter/gridglue.hh>
 
 using namespace Dune;
 

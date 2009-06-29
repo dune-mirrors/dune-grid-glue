@@ -24,7 +24,7 @@
 #include <vector>
 #include <cstring>
 
-#include "../adapter/GridGlueVtkWriter.hh"
+#include "../adapter/gridgluevtkwriter.hh"
 
 
 class VtkSurfaceWriter

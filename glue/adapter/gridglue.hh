@@ -27,15 +27,15 @@
 #include "../merging/SurfaceMerge.hh"
 #endif
 #include "../surfaces/gridextractor.hh"
-#include "../merging/ContactMappingSurfaceMerge.hh"
+#include "../merging/psurfacemerge.hh"
 #include "../surfaces/vtksurfacewriter.hh"
 #include "../surfaces/gridextractiontraits.hh"
 #include "../surfaces/extractorselector.hh"
 #include "../surfaces/surfacedescriptor.hh"
-#include "SimplexGeometry.hh"
-#include "RemoteIntersection.hh"
-#include "RemoteIntersectionIterators.hh"
-#include "CoordinateTransformation.hh"
+#include "simplexgeometry.hh"
+#include "remoteintersection.hh"
+#include "remoteintersectioniterators.hh"
+#include "coordinatetransformation.hh"
 #include "gridgluecommunicate.hh"
 
 /**
@@ -685,13 +685,13 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
 }
 
 // include implementation of subclass BuilderImpl
-#include "GridGlueBuilderImpl.hh"
+#include "gridgluebuilderimpl.hh"
 
 // include implementation of subclass RemoteIntersectionImpl
-#include "GridGlueRemoteIntersectionImpl.hh"
+#include "gridglueremoteintersectionimpl.hh"
 
 // include implementation of subclasses DomainIntersectionIteratorImpl and TargetIntersectionIteratorImpl
-#include "GridGlueRemoteIntersectionIteratorImpl.hh"
+#include "gridglueremoteintersectioniteratorimpl.hh"
 
 
 #endif // GRIDGLUE_HH_
