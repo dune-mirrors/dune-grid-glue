@@ -15,6 +15,34 @@
 
 using namespace Dune;
 
+template <int dim, class IntersectionIt>
+void testIntersection(const IntersectionIt & rIIt)
+{
+  const QuadratureRule<double, dim-1>& quad = QuadratureRules<double, dim-1>::rule(rIIt->type(), 3);
+
+  for (unsigned int l=0; l<quad.size(); l++) {
+
+    Dune::FieldVector<double, dim-1> quadPos = quad[l].position();
+
+    // Test whether local domain position is consistent with global domain position
+    FieldVector<double,dim> localDomainPos =
+      rIIt->entityDomain()->geometry().global(rIIt->intersectionDomainLocal().global(quadPos));
+    FieldVector<double,dim> globalDomainPos = rIIt->intersectionDomainGlobal().global(quadPos);
+    FieldVector<double,dim> localTargetPos =
+      rIIt->entityTarget()->geometry().global(rIIt->intersectionTargetLocal().global(quadPos));
+    FieldVector<double,dim> globalTargetPos = rIIt->intersectionTargetGlobal().global(quadPos);
+
+    // Test whether local domain position is consistent with global domain position
+    assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
+
+    // Test whether local target position is consistent with global target position
+    assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
+
+    // Here we assume that the two interface match geometrically:
+    assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
+  }
+}
+
 template <class GlueType>
 void testCoupling(const GlueType& glue)
 {
@@ -22,37 +50,77 @@ void testCoupling(const GlueType& glue)
 
   const int dim = GlueType::domdim;
 
+  // ///////////////////////////////////////
+  //   MergedGrid centric
+  // ///////////////////////////////////////
+
   typename GlueType::RemoteIntersectionIterator rIIt    = glue.iremotebegin();
   typename GlueType::RemoteIntersectionIterator rIEndIt = glue.iremoteend();
-
   for (; rIIt!=rIEndIt; ++rIIt) {
-
     // Create a set of test points
-    const QuadratureRule<double, GlueType::domdim-1>& quad = QuadratureRules<double, dim-1>::rule(rIIt->type(), 3);
+    testIntersection<dim, typename GlueType::RemoteIntersectionIterator>(rIIt);
+  }
 
-    for (unsigned int l=0; l<quad.size(); l++) {
+  // ///////////////////////////////////////
+  //   Domain Entity centric
+  // ///////////////////////////////////////
 
-      Dune::FieldVector<double, dim-1> quadPos = quad[l].position();
+  typedef typename GlueType::DomainGridView::template Codim<0>::Iterator DomainIterator;
+  DomainIterator dit = glue.domainGridView().template begin<0>();
+  DomainIterator dend = glue.domainGridView().template end<0>();
+  for (; dit != dend; ++dit)
+  {
 
-      // Test whether local domain position is consistent with global domain position
-      FieldVector<double,dim> localDomainPos
-        =  rIIt->entityDomain()->geometry().global(rIIt->intersectionDomainLocal().global(quadPos));
-      FieldVector<double,dim> globalDomainPos = rIIt->intersectionDomainGlobal().global(quadPos);
-      FieldVector<double,dim> localTargetPos
-        = rIIt->entityTarget()->geometry().global(rIIt->intersectionTargetLocal().global(quadPos));
-      FieldVector<double,dim> globalTargetPos = rIIt->intersectionTargetGlobal().global(quadPos);
-
-      // Test whether local domain position is consistent with global domain position
-      assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
-
-      // Test whether local target position is consistent with global target position
-      assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
-
-      // Here we assume that the two interface match geometrically:
-      assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
-
+    // intersection iterators
+    typename GlueType::DomainIntersectionIterator rIIt    = glue.idomainbegin(*dit);
+    typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
+    for (; rIIt!=rIEndIt; ++rIIt) {
+      assert (rIIt->entityDomain() == dit);
+      testIntersection<dim>(rIIt);
     }
 
+    // face intersection iterators
+    const int num_faces = dit->template count<1>();
+    for (int f=0; f<num_faces; ++f)
+    {
+      typename GlueType::DomainIntersectionIterator rIIt    = glue.idomainbegin(*dit, f);
+      typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
+      for (; rIIt!=rIEndIt; ++rIIt) {
+        assert (rIIt->entityDomain() == dit);
+        testIntersection<dim>(rIIt);
+      }
+    }
+  }
+
+  // ///////////////////////////////////////
+  //   Target Entity centric
+  // ///////////////////////////////////////
+
+  typedef typename GlueType::TargetGridView::template Codim<0>::Iterator TargetIterator;
+  TargetIterator tit = glue.targetGridView().template begin<0>();
+  TargetIterator tend = glue.targetGridView().template end<0>();
+  for (; tit != tend; ++tit)
+  {
+
+    // intersection iterators
+    typename GlueType::TargetIntersectionIterator rIIt    = glue.itargetbegin(*tit);
+    typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
+    for (; rIIt!=rIEndIt; ++rIIt) {
+      assert (rIIt->entityTarget() == tit);
+      testIntersection<dim>(rIIt);
+    }
+
+    // face intersection iterators
+    const int num_faces = tit->template count<1>();
+    for (int f=0; f<num_faces; ++f)
+    {
+      typename GlueType::TargetIntersectionIterator rIIt    = glue.itargetbegin(*tit, f);
+      typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
+      for (; rIIt!=rIEndIt; ++rIIt) {
+        assert (rIIt->entityTarget() == tit);
+        testIntersection<dim>(rIIt);
+      }
+    }
   }
 
 }
@@ -174,7 +242,7 @@ void testNonMatchingCubeGrids()
 
   GridType cubeGrid0(elements, lower, upper);
 
-  elements = 3;
+  elements = 4;
   lower[0] += 1;
   upper[0] += 1;
 
