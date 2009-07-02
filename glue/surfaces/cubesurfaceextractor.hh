@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <dune/common/static_assert.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/array.hh>
@@ -565,10 +566,12 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
       // if some face is part of the surface add it!
       if (boundary_faces.size() != 0)
       {
+        dune_static_assert(dim == 2 || dim == 3, "CubeSurfaceExtractor works only for 2D and 3D");
+        static const int factor = (dim == 2 ? 1 : 2);
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
         eindex = this->indexSet().template index<0>(*elit);
-        this->_elmtInfo[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, 2*boundary_faces.size());
+        this->_elmtInfo[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, factor * boundary_faces.size());
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
