@@ -179,14 +179,16 @@ public:
   }
 
 
-  // direct mapping of local coordinates, i.e. target local -> domain local
+  /** direct mapping of local coordinates, i.e. target local -> domain local */
+  /** \todo Documentation does not match implementation */
   LocalCoords domainLocals(const LocalCoords &local) const
   {
     return barycentricToReference(this->_glue->_sm.domainLocals(this->_index, referenceToBarycentric(local)));
   }
 
 
-  // direct mapping of local coordinates, i.e. domain local -> target local
+  /** \brief direct mapping of local coordinates, i.e. domain local -> target local */
+  /** \todo Documentation does not match implementation */
   LocalCoords targetLocals(const LocalCoords &local) const
   {
     return barycentricToReference(this->_glue->_sm.targetLocals(this->_index, referenceToBarycentric(local)));
