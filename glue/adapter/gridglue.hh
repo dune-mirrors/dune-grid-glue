@@ -142,6 +142,8 @@ public:
         (must be the same for both extractors!) */
     dimw = DomainExtractor::dimw
   };
+  dune_static_assert(DomainExtractor::dimw == TargetExtractor::dimw,
+                     "world dimension must be the same for both extractors!");
 
   /** \brief The type used for coordinates
       \todo maybe use traits class to decide which has more precision (DomainGridType::ctype or TargetGridType::ctype) and then take this one
