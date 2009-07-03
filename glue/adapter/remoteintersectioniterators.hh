@@ -278,70 +278,6 @@ namespace RemoteIntersectionInterface
         return !rhs.realIterator.equals(this->realIterator);
       }
 
-
-      /*! @brief return EntityPointer to the Entity on the inside of this
-         intersection. That is the Entity where we started this .
-       */
-      DomainEntityPointer inside() const
-      {
-        return this->realIterator.dereference().entityDomain();
-      }
-
-
-      /*! @brief return EntityPointer to the Entity on the outside of this
-         intersection. That is the neighboring Entity.
-
-         @warning Don't call this method if there is no neighboring Entity
-         (neighbor() returns false). In this case the result is undefined.
-       */
-      TargetEntityPointer outside() const
-      {
-        return this->realIterator.dereference().entityTarget();
-      }
-
-
-      /*! @brief mapping of local coordinates, i.e. selflocal -> neighborlocal
-
-         Maps a point in local intersection coords on domain intersection to a
-         point in target intersection local coordinates.
-       */
-      Dune::FieldVector<ctype, mydim> neighborLocals(const Dune::FieldVector<ctype, mydim> &selflocal) const
-      {
-        return this->realIterator.dereference().targetLocals(selflocal);
-      }
-
-
-      /*! @brief mapping of local coordinates, i.e. neighborlocal -> selflocal
-
-         Maps a point in local intersection coords on target intersection to a
-         point in domain intersection local coordinates.
-       */
-      Dune::FieldVector<ctype, mydim> selfLocals(const Dune::FieldVector<ctype, mydim> &neighborlocal) const
-      {
-        return this->realIterator.dereference().domainLocals(neighborlocal);
-      }
-
-
-      /** \brief obtain the type of reference element for this intersection */
-      Dune::GeometryType type() const
-      {
-        return this->realIterator.dereference().type();
-      }
-
-
-      //! Local number of codim 1 entity in the inside() Entity where intersection is contained in
-      int numberInSelf() const
-      {
-        return this->realIterator.dereference().numberInDomainEntity();
-      }
-
-
-      //! Local number of codim 1 entity in outside() Entity where intersection is contained in
-      int numberInNeighbor() const
-      {
-        return this->realIterator.dereference().numberInTargetEntity();
-      }
-
     };
 
     class TargetIterator
@@ -447,58 +383,7 @@ namespace RemoteIntersectionInterface
         return !rhs.realIterator.equals(this->realIterator);
       }
 
-
-      /*! @brief return EntityPointer to the Entity on the inside of this
-         intersection. That is the Entity where we started this .
-       */
-      TargetEntityPointer inside() const
-      {
-        return this->realIterator.dereference().entityTarget();
-      }
-
-
-      /*! @brief return EntityPointer to the Entity on the outside of this
-         intersection. That is the neighboring Entity.
-
-         @warning Don't call this method if there is no neighboring Entity
-         (neighbor() returns false). In this case the result is undefined.
-       */
-      DomainEntityPointer outside() const
-      {
-        return this->realIterator.dereference().entityDomain();
-      }
-
-
-      /*! @brief mapping of local coordinates, i.e. selflocal -> neighborlocal
-
-         Maps a point in local intersection coords on target intersection to a
-         point in domain intersection local coordinates.
-       */
-      Dune::FieldVector<ctype, mydim> neighborLocals(const Dune::FieldVector<ctype, mydim> &selflocal) const
-      {
-        return this->realIterator.dereference().domainLocals(selflocal);
-      }
-
-
-      /*! @brief mapping of local coordinates, i.e. neighborlocal -> selflocal
-
-         Maps a point in local intersection coords on domain intersection to a
-         point in target intersection local coordinates.
-       */
-      Dune::FieldVector<ctype, mydim> selfLocals(const Dune::FieldVector<ctype, mydim> &neighborlocal) const
-      {
-        return this->realIterator.dereference().targetLocals(neighborlocal);
-      }
-
-
-      /** \brief obtain the type of reference element for this intersection */
-      Dune::GeometryType type() const
-      {
-        return this->realIterator.dereference().type();
-      }
-
     };
-
 
   public:
 
