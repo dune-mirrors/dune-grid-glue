@@ -175,7 +175,7 @@ namespace RemoteIntersectionInterface
       return this->realIntersection.geometryTarget();
     }
 
-
+#if 0
     /*! @brief mapping of local coordinates, i.e. target -> domain local coords
 
        Maps a point in local intersection coords on target intersection to a
@@ -196,7 +196,9 @@ namespace RemoteIntersectionInterface
     {
       return this->realIntersection.targetLocals(local);
     }
-
+#else
+#warning disabled targetLocals and domainLocals
+#endif
 
     /** \brief obtain the type of reference element for this intersection */
     Dune::GeometryType type() const
