@@ -70,6 +70,8 @@ void testCoupling(const GlueType& glue)
   DomainIterator dend = glue.domainGridView().template end<0>();
   for (; dit != dend; ++dit)
   {
+    int icount = 0;
+    int icount2 = 0;
 
     // intersection iterators
     typename GlueType::DomainIntersectionIterator rIIt    = glue.idomainbegin(*dit);
@@ -77,6 +79,7 @@ void testCoupling(const GlueType& glue)
     for (; rIIt!=rIEndIt; ++rIIt) {
       assert (rIIt->entityDomain() == dit);
       testIntersection<dim>(rIIt);
+      icount++;
     }
 
     // face intersection iterators
@@ -88,8 +91,11 @@ void testCoupling(const GlueType& glue)
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityDomain() == dit);
         testIntersection<dim>(rIIt);
+        icount2++;
       }
     }
+
+    assert(icount == icount2);
   }
 
   // ///////////////////////////////////////
@@ -101,6 +107,8 @@ void testCoupling(const GlueType& glue)
   TargetIterator tend = glue.targetGridView().template end<0>();
   for (; tit != tend; ++tit)
   {
+    int icount = 0;
+    int icount2 = 0;
 
     // intersection iterators
     typename GlueType::TargetIntersectionIterator rIIt    = glue.itargetbegin(*tit);
@@ -108,6 +116,7 @@ void testCoupling(const GlueType& glue)
     for (; rIIt!=rIEndIt; ++rIIt) {
       assert (rIIt->entityTarget() == tit);
       testIntersection<dim>(rIIt);
+      icount++;
     }
 
     // face intersection iterators
@@ -119,8 +128,11 @@ void testCoupling(const GlueType& glue)
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityTarget() == tit);
         testIntersection<dim>(rIIt);
+        icount2++;
       }
     }
+
+    assert(icount == icount2);
   }
 
 }
