@@ -150,11 +150,6 @@ private:
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
   typename Codim1Extractor<GV>::ElementInfoMap _elmtInfo;
 
-
-  /// @brief geometry type of the surface patches
-  const Dune::GeometryType _codim0element;
-
-
 public:
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
@@ -164,11 +159,11 @@ public:
    * @param gv the grid view object to work with
    */
   SimplicialSurfaceExtractor(const GV& gv) :
-    _gv(gv), _codim0element(Dune::GeometryType::simplex, dim)
+    _gv(gv)
   {
     std::cout << "This is SimplicialSurfaceExtractor on a <" << GV::dimension
               << "," << GV::dimensionworld << "> grid working in "
-              << dimw << " space expecting faces of type " << _codim0element << "!" << std::endl;
+              << dimw << " space!" << std::endl;
   }
 
 
@@ -563,7 +558,7 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           for (int i = 0; i < simplex_corners; ++i)
           {
             // get the number of the vertex in the parent element
-            int vertex_number = orientedSubface<dim>(this->_codim0element, *sit, i);
+            int vertex_number = orientedSubface<dim>(elit->type(), *sit, i);
 
             // get the vertex pointer and the index from the index set
             VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
@@ -670,8 +665,9 @@ inline void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, cons
 {
   Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, ecoords, simplex_corners);
 }
 
@@ -703,8 +699,9 @@ void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, const Coord
 {
   Dune::array<Coords, simplex_corners> corners;
   unsigned int num_in_self = this->numberInSelf(index);
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   for (int i = 0; i < size; ++i)
     interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
 }
@@ -717,8 +714,9 @@ void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, co
   Dune::array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
   unsigned int num_in_self = this->numberInSelf(index);
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+    corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
   for (int i = 0; i < size; ++i)
   {
     interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);

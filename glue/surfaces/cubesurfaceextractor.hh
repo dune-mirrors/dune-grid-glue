@@ -160,11 +160,6 @@ private:
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
   typename Codim1Extractor<GV>::ElementInfoMap _elmtInfo;
 
-
-  /// @brief geometry type of the surface patches
-  const Dune::GeometryType _codim0element;
-
-
 public:
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
@@ -174,12 +169,12 @@ public:
    * @param gv the grid view object to work with
    */
   CubeSurfaceExtractor(const GV& gv) :
-    _gv(gv), _codim0element(Dune::GeometryType::cube, dim)
+    _gv(gv)
   {
     std::cout << "This is CubeSurfaceExtractor on a <"
               << GV::dimension << "," << GV::dimensionworld
               << "> grid working in " << dimw
-              << " space expecting faces of type " << _codim0element << "!" << std::endl;
+              << " space!" << std::endl;
   }
 
 
@@ -545,10 +540,6 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
     {
-      // check if there are unwanted geometric shapes
-      // if one appears => exit with error
-      if (elit->type() != this->_codim0element)
-        DUNE_THROW(Dune::GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->type());
 
       // remember the indices of the faces that shall become
       // part of the surface
@@ -559,8 +550,16 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
       for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
       {
         // only look at boundary faces
-        if (is->boundary() && descr.contains(elit, is->indexInInside()))
+        if (is->boundary() && descr.contains(elit, is->indexInInside())) {
+
+          // Make sure the face is a simplex
+          if (!is->type().isCube())
+            DUNE_THROW(Dune::GridError, "found non-simplicial boundary entity: " << is->type());
+
           boundary_faces.insert(is->indexInInside());
+
+        }
+
       }
 
       // if some face is part of the surface add it!
@@ -589,7 +588,7 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
           for (int i = 0; i < cube_corners; ++i)
           {
             // get the number of the vertex in the parent element
-            vertex_numbers[i] = orientedSubface<dim>(this->_codim0element, *sit, i);
+            vertex_numbers[i] = orientedSubface<dim>(elit->type(), *sit, i);
 
             // get the vertex pointer and the index from the index set
             vptrs[i] = new typename Codim1Extractor<GV>::VertexPtr(elit->template subEntity<dim>(vertex_numbers[i]));
@@ -720,19 +719,20 @@ inline void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, cons
   {
     Dune::array<Coords, simplex_corners> corners;
     unsigned int num_in_self = this->indexInInside(index);
+    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     // computing the locals is straight forward for flat rectangles,
     // we only need the triangle's corners in element coordinate
     if (this->_faces[index].first)
     {
       // the triangle's corners are (0 1 2) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
     }
     else
     {
       // the triangle's corners are (3 2 1) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, 3-i);
+        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, 3-i);
     }
     interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
   }
@@ -776,19 +776,20 @@ void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, const Coord
   {
     Dune::array<Coords, simplex_corners> corners;
     unsigned int num_in_self = this->numberInSelf(index);
+    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     // computing the locals is straight forward for flat rectangles,
     // we only need the triangle's corners in element coordinate
     if (this->_faces[index].first)
     {
       // the triangle's corners are (0 1 2) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, i);
+        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
     }
     else
     {
       // the triangle's corners are (3 2 1) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(this->_codim0element, num_in_self, 3-i);
+        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, 3-i);
     }
     for (int i = 0; i < size; ++i)
       interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
