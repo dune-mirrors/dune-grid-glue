@@ -243,19 +243,19 @@ private:
   /* geometric data for both domain and targt */
 
   /// @brief domain coordinates
-  std::vector<Coords>   _domc;
+  std::vector<std::tr1::array<double,dim> >   _domc;
 
   /// @brief target coordinates
-  std::vector<Coords>   _tarc;
+  std::vector<std::tr1::array<double,dim> >   _tarc;
 
 
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
-  std::vector<int>         _domi;
+  std::vector<std::tr1::array<int,dim> >         _domi;
 
   /// @brief target indices (internal copy)
-  std::vector<int>         _tari;
+  std::vector<std::tr1::array<int,dim> >         _tari;
 
 
   /* members associated with the merged grid */
@@ -486,8 +486,6 @@ public:
 
 /* IMPLEMENTATION OF CLASS   C O N T A C T  M A P P I N G  S U R F A C E  M E R G E */
 
-#define WRITE_BINARY(stream,item) stream.write((char*)&item,sizeof(item))
-
 
 template<int dim, typename T>
 bool ContactMappingSurfaceMerge<dim, T>::build(
@@ -501,13 +499,15 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
   {
     // copy domain and target simplices to internal arrays
     // (cannot keep refs since outside modification would destroy information)
-    this->_domi.resize(domain_simplices.size());
-    for (unsigned int i = 0; i < domain_simplices.size(); ++i)
-      this->_domi[i] = domain_simplices[i];
+    this->_domi.resize(domain_simplices.size()/dim);
+    for (unsigned int i = 0; i < domain_simplices.size()/dim; ++i)
+      for (int j=0; j<dim; j++)
+        this->_domi[i][j] = domain_simplices[i*dim+j];
 
-    this->_tari.resize(target_simplices.size());
-    for (unsigned int i = 0; i < target_simplices.size(); ++i)
-      this->_tari[i] = target_simplices[i];
+    this->_tari.resize(target_simplices.size()/dim);
+    for (unsigned int i = 0; i < target_simplices.size()/dim; ++i)
+      for (int j=0; j<dim; j++)
+        this->_tari[i][j] = target_simplices[i*dim+j];
 
     // copy the coordinates to internal arrays of coordinates
     // (again cannot just keep refs and this representation has advantages)
@@ -521,65 +521,11 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
       for (unsigned int j = 0; j < dim; ++j)
         this->_tarc[i][j] = target_coords[i*dim + j];
 
-
-
-
-    //		ofstream fos;
-    //		char buffer[64];
-    //		sprintf(buffer, "/tmp/domain_coords_%d.dat", domain_coords.size());
-    //		fos.open(buffer, std::ios::binary | std::ios::out);
-    //		for (unsigned int i = 0; i < domain_coords.size(); ++i)
-    //			WRITE_BINARY(fos,domain_coords[i]);
-    //		fos.close();
-    //
-    //		sprintf(buffer, "/tmp/domain_indices_%d.dat", this->_domi.size());
-    //		fos.open(buffer, std::ios::binary | std::ios::out);
-    //		for (unsigned int i = 0; i < this->_domi.size(); ++i)
-    //			WRITE_BINARY(fos,this->_domi[i]);
-    //		fos.close();
-    //
-    //		sprintf(buffer, "/tmp/target_coords_%d.dat", target_coords.size());
-    //		fos.open(buffer, std::ios::binary | std::ios::out);
-    //		for (unsigned int i = 0; i < target_coords.size(); ++i)
-    //			WRITE_BINARY(fos,target_coords[i]);
-    //		fos.close();
-    //
-    //		sprintf(buffer, "/tmp/target_indices_%d.dat", this->_tari.size());
-    //		fos.open(buffer, std::ios::binary | std::ios::out);
-    //		for (unsigned int i = 0; i < this->_tari.size(); ++i)
-    //			WRITE_BINARY(fos,this->_tari[i]);
-    //		fos.close();
-
-
-
-
     std::cout << "Building merged grid... (wait for finish!)" << std::endl;
-    // compute the merged grid using the contact mapping class' functionality
 
-    // Hack: recopy data to match new interface of psurface library
-    std::vector<std::tr1::array<double,dim> > domain_coords_blocked(domain_coords.size()/dim);
-    for (size_t i=0; i<domain_coords_blocked.size(); i++)
-      for (int j=0; j<dim; j++)
-        domain_coords_blocked[i][j] = domain_coords[dim*i + j];
-
-    std::vector<std::tr1::array<int,dim> > domain_segments_blocked(this->_domi.size()/dim);
-    for (size_t i=0; i<domain_segments_blocked.size(); i++)
-      for (int j=0; j<dim; j++)
-        domain_segments_blocked[i][j] = this->_domi[dim*i + j];
-
-    std::vector<std::tr1::array<double,dim> > target_coords_blocked(target_coords.size()/dim);
-    for (size_t i=0; i<target_coords_blocked.size(); i++)
-      for (int j=0; j<dim; j++)
-        target_coords_blocked[i][j] = target_coords[dim*i + j];
-
-    std::vector<std::tr1::array<int,dim> > target_segments_blocked(this->_tari.size()/dim);
-    for (size_t i=0; i<target_segments_blocked.size(); i++)
-      for (int j=0; j<dim; j++)
-        target_segments_blocked[i][j] = this->_tari[dim*i + j];
-
-    //this->_cm.build(domain_coords, this->_domi, target_coords, this->_tari, this->_maxdist, this->_domnormals);
-    this->_cm.build(domain_coords_blocked, domain_segments_blocked,
-                    target_coords_blocked, target_segments_blocked,
+    // compute the merged grid using the psurface library
+    this->_cm.build(_domc, _domi,
+                    _tarc, _tari,
                     this->_maxdist, this->_domnormals);
 
     std::cout << "Finished building merged grid!" << std::endl;
