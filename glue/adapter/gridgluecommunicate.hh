@@ -43,7 +43,7 @@ namespace Dune
     void gather (MessageBufferImp& buff, const EntityType& e, const RISType & i) const
     {
       MessageBufferIF<MessageBufferImp> buffIF(buff);
-      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().gather(buffIF,e)));
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().gather(buffIF,e,i)));
     }
 
     /*! unpack data from message buffer to user
@@ -56,7 +56,7 @@ namespace Dune
     void scatter (MessageBufferImp& buff, const EntityType& e, const RISType & i, size_t n)
     {
       MessageBufferIF<MessageBufferImp> buffIF(buff);
-      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().scatter(buffIF,e,n)));
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().scatter(buffIF,e,i,n)));
     }
 
   private:
@@ -70,6 +70,42 @@ namespace Dune
       return static_cast<const DataHandleImp &>(*this);
     }
   }; // end class CommDataHandleIF
+
+  /**
+   * Streaming MessageBuffer for the GridGlue communication
+   */
+  template<typename DT>
+  class GridGlueMessageBuffer {
+  public:
+    // Constructor
+    GridGlueMessageBuffer (DT *p)
+    {
+      a=p;
+      i=0;
+      j=0;
+    }
+
+    // write data to message buffer, acts like a stream !
+    template<class Y>
+    void write (const Y& data)
+    {
+      dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
+      a[i++] = data;
+    }
+
+    // read data from message buffer, acts like a stream !
+    template<class Y>
+    void read (Y& data) const
+    {
+      dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
+      data = a[j++];
+    }
+
+  private:
+    DT *a;
+    int i;
+    mutable int j;
+  };
 
 } // end namespace Dune
 #endif

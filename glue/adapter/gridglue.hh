@@ -118,7 +118,6 @@ public:
     domdim = DomainExtractor::dim
   };
 
-
   /** \brief Grid view of the target grid */
   typedef typename TarGridExtractionTraits::GridView TargetGridView;
 
@@ -461,7 +460,97 @@ public:
                     Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
   {
     // CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
-    return;
+
+    typedef Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> DataHandle;
+    typedef typename DataHandle::DataType DataType;
+
+    RemoteIntersectionIterator rit = iremotebegin();
+    RemoteIntersectionIterator ritend = iremoteend();
+
+    // get comm buffer size
+    int ssz = 0;
+    int rsz = 0;
+    for (; rit != ritend; ++rit)
+    {
+      if (true)       // TODO: verify interfacetype
+      {
+        ssz += data.size(rit);
+      }
+      if (true)
+      {
+        rsz += data.size(rit);
+      }
+    }
+
+    // allocate send/receive buffer
+    DataType* sendbuffer = new DataType[ssz];
+    DataType* receivebuffer = new DataType[rsz];
+
+    // gather
+    Dune::GridGlueMessageBuffer<DataType> gatherbuffer(sendbuffer);
+    for (rit = iremotebegin(); rit != ritend; ++rit)
+    {
+      if (true)       // TODO: verify interfacetype
+      {
+        /*
+           we need to have to variants depending on the communication direction.
+         */
+        if (dir == Dune::ForwardCommunication)
+        {
+          /*
+             dir : Forward (domain -> target)
+           */
+          data.gather(gatherbuffer, rit->entityDomain(), *rit);
+        }
+        else         // (dir == Dune::BackwardCommunication)
+        {
+          /*
+             dir : Backward (target -> domain)
+           */
+          data.gather(gatherbuffer, rit->entityTarget(), *rit);
+        }
+      }
+    }
+
+#warning ONLY SEQUENTIAL
+    // TODO: communication
+    assert(ssz == rsz);
+    for (int i=0; i<ssz; i++)
+      receivebuffer[i] = sendbuffer[i];
+
+    // scatter
+    Dune::GridGlueMessageBuffer<DataType> scatterbuffer(receivebuffer);
+    for (rit = iremotebegin(); rit != ritend; ++rit)
+    {
+      if (true)       // TODO: verify interfacetype
+      {
+        /*
+           we need to have to variants depending on the communication direction.
+         */
+        if (dir == Dune::ForwardCommunication)
+        {
+          /*
+             dir : Forward (domain -> target)
+             TODO: communicate size
+           */
+          data.scatter(scatterbuffer, rit->entityTarget(), *rit,
+                       data.size(rit));
+        }
+        else         // (dir == Dune::BackwardCommunication)
+        {
+          /*
+             dir : Backward (target -> domain)
+             TODO: communicate size
+           */
+          data.scatter(scatterbuffer, rit->entityDomain(), *rit,
+                       data.size(rit));
+        }
+      }
+    }
+
+    // cleanup pointers
+    delete[] sendbuffer;
+    delete[] receivebuffer;
   }
 
 #if QUICKHACK_INDEX
