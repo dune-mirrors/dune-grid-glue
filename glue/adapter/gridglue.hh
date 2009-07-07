@@ -472,13 +472,19 @@ public:
     int rsz = 0;
     for (; rit != ritend; ++rit)
     {
-      if (true)       // TODO: verify interfacetype
+      if (dir == Dune::ForwardCommunication)
       {
-        ssz += data.size(rit);
+        if (rit->hasDomain())
+          ssz += data.size(*rit);
+        if (rit->hasTarget())
+          rsz += data.size(*rit);
       }
-      if (true)
+      else
       {
-        rsz += data.size(rit);
+        if (rit->hasTarget())
+          ssz += data.size(*rit);
+        if (rit->hasDomain())
+          rsz += data.size(*rit);
       }
     }
 
@@ -490,25 +496,25 @@ public:
     Dune::GridGlueMessageBuffer<DataType> gatherbuffer(sendbuffer);
     for (rit = iremotebegin(); rit != ritend; ++rit)
     {
-      if (true)       // TODO: verify interfacetype
+      // TODO: verify interfacetype
+      /*
+         we need to have to variants depending on the communication direction.
+       */
+      if (dir == Dune::ForwardCommunication)
       {
         /*
-           we need to have to variants depending on the communication direction.
+           dir : Forward (domain -> target)
          */
-        if (dir == Dune::ForwardCommunication)
-        {
-          /*
-             dir : Forward (domain -> target)
-           */
+        if (rit->hasDomain())
           data.gather(gatherbuffer, rit->entityDomain(), *rit);
-        }
-        else         // (dir == Dune::BackwardCommunication)
-        {
-          /*
-             dir : Backward (target -> domain)
-           */
+      }
+      else       // (dir == Dune::BackwardCommunication)
+      {
+        /*
+           dir : Backward (target -> domain)
+         */
+        if (rit->hasTarget())
           data.gather(gatherbuffer, rit->entityTarget(), *rit);
-        }
       }
     }
 
@@ -522,29 +528,29 @@ public:
     Dune::GridGlueMessageBuffer<DataType> scatterbuffer(receivebuffer);
     for (rit = iremotebegin(); rit != ritend; ++rit)
     {
-      if (true)       // TODO: verify interfacetype
+      // TODO: verify interfacetype
+      /*
+         we need to have to variants depending on the communication direction.
+       */
+      if (dir == Dune::ForwardCommunication)
       {
         /*
-           we need to have to variants depending on the communication direction.
+           dir : Forward (domain -> target)
+           TODO: communicate size
          */
-        if (dir == Dune::ForwardCommunication)
-        {
-          /*
-             dir : Forward (domain -> target)
-             TODO: communicate size
-           */
+        if (rit->hasTarget())
           data.scatter(scatterbuffer, rit->entityTarget(), *rit,
-                       data.size(rit));
-        }
-        else         // (dir == Dune::BackwardCommunication)
-        {
-          /*
-             dir : Backward (target -> domain)
-             TODO: communicate size
-           */
+                       data.size(*rit));
+      }
+      else       // (dir == Dune::BackwardCommunication)
+      {
+        /*
+           dir : Backward (target -> domain)
+           TODO: communicate size
+         */
+        if (rit->hasDomain())
           data.scatter(scatterbuffer, rit->entityDomain(), *rit,
-                       data.size(rit));
-        }
+                       data.size(*rit));
       }
     }
 

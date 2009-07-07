@@ -101,9 +101,11 @@ namespace Dune
       data = a[j++];
     }
 
+    size_t counter() const { return i; }
+
   private:
     DT *a;
-    int i;
+    size_t i;
     mutable int j;
   };
 
