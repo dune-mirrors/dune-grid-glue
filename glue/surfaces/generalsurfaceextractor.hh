@@ -88,46 +88,10 @@ public:
   typedef typename GV::IndexSet IndexSet;
   typedef typename IndexSet::IndexType IndexType;
 
+  // import typedefs from base class
+  typedef typename Codim1Extractor<GV>::FaceInfo FaceInfo;
 
 private:
-
-  /************************** PRIVATE SUBCLASSES **********************/
-
-  /**
-   * @class FaceInfo
-   * @brief simple struct holding some packed information about a codimension 1 entity
-   * to its parent codim 0 entity
-   */
-  struct FaceInfo
-  {
-    FaceInfo()
-    {}
-
-    FaceInfo(unsigned int index_, IndexType parent_, unsigned int num_in_parent_, unsigned int category_)
-      :       parent(parent_), index(index_), num_in_parent(num_in_parent_), category(category_)
-    {}
-
-    /// @brief the index of the parent element (from index set)
-    IndexType parent;
-
-    /// @brief the index of this face (in internal storage scheme) // NEEDED??
-    unsigned int index : 27;
-
-    /// @brief the number of the face in the parent element
-    unsigned int num_in_parent : 3;
-
-    /// @brief flag telling whether this is the first of two triangles
-    /// refining the associated face or a even a triangle face
-    ///
-    /// 0: triangle face
-    /// 1: first of two tris refining a quadrilateral
-    /// 2: second of two tris refining a quadrilateral
-    unsigned int category : 2;
-
-    /// @brief the corner indices plus the numbers of the vertices in the parent element
-    typename Codim1Extractor<GV>::CornerInfo corners[simplex_corners];
-  };
-
 
   /************************** MEMBER VARIABLES ************************/
 
@@ -483,7 +447,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             // we have a triangle here
 
             // add a new face to the temporary collection
-            temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, 0));
+            temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, FaceInfo::triangle));
 
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < face_corners; ++i)
@@ -526,7 +490,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             // we have a triangle here
 
             // add a new face to the temporary collection
-            temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, 0));
+            temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, FaceInfo::triangle));
 
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < simplex_corners; ++i)
@@ -606,7 +570,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
 
             // add a new face to the temporary collection for the first tri
-            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 1));
+            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, FaceInfo::first));
             temp_faces.back().corners[0].idx = vertex_indices[0];
             temp_faces.back().corners[1].idx = vertex_indices[1];
             temp_faces.back().corners[2].idx = vertex_indices[2];
@@ -616,7 +580,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             temp_faces.back().corners[2].num = vertex_numbers[2];
 
             // add a new face to the temporary collection for the second tri
-            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 2));
+            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, FaceInfo::second));
             temp_faces.back().corners[0].idx = vertex_indices[3];
             temp_faces.back().corners[1].idx = vertex_indices[2];
             temp_faces.back().corners[2].idx = vertex_indices[1];

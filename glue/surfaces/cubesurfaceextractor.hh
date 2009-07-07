@@ -88,44 +88,10 @@ public:
   typedef typename GV::IndexSet IndexSet;
   typedef typename IndexSet::IndexType IndexType;
 
+  // import typedefs from base class
+  typedef typename Codim1Extractor<GV>::FaceInfo FaceInfo;
 
 private:
-
-
-
-  /************************** PRIVATE SUBCLASSES **********************/
-
-  /**
-   * @class FaceInfo
-   * @brief simple struct holding some packed information about a codimension 1 entity
-   * to its parent codim 0 entity
-   */
-  struct FaceInfo
-  {
-    FaceInfo()
-    {}
-
-    FaceInfo(unsigned int index_, IndexType parent_, unsigned int num_in_parent_, unsigned int first_)
-      :       parent(parent_), index(index_), num_in_parent(num_in_parent_), first(first_)
-    {}
-
-    /// @brief the index of the parent element (from index set)
-    IndexType parent;
-
-    /// @brief the index of this face (in internal storage scheme) // NEEDED??
-    unsigned int index : 27;
-
-    /// @brief the number of the face in the parent element
-    unsigned int num_in_parent : 4;
-
-    /// @brief flag telling whether this is the first of two triangles
-    /// refining the associated face
-    unsigned int first : 1;
-
-    /// @brief the corner indices plus the numbers of the vertices in the parent element
-    typename Codim1Extractor<GV>::CornerInfo corners[simplex_corners];
-  };
-
 
   /************************** MEMBER VARIABLES ************************/
 
@@ -515,7 +481,8 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
           dune_static_assert(dim<=3, "CubeSurfaceExtractor only implemented for 1d, 2d, 3d");
 
           // add a new face to the temporary collection
-          temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 1));
+          temp_faces.push_back(
+            FaceInfo(simplex_index++, eindex, *sit, FaceInfo::first));
           for (int i=0; i<dim; i++) {
             temp_faces.back().corners[i].idx = vertex_indices[i];
             // remember the vertices' numbers in parent element's vertices
@@ -527,7 +494,8 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
           // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
           if (dim==3) {
             // add a new face to the temporary collection for the second tri
-            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, 0));
+            temp_faces.push_back(
+              FaceInfo(simplex_index++, eindex, *sit, FaceInfo::second));
             temp_faces.back().corners[0].idx = vertex_indices[3];
             temp_faces.back().corners[1].idx = vertex_indices[2];
             temp_faces.back().corners[2].idx = vertex_indices[1];
@@ -564,36 +532,6 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
     current->coord = it1->second->p->geometry().corner(0);
   }
 
-
-  //	const char prefix[] = "CubeSurfaceExtractor: ";
-  //
-  //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
-  //	for (unsigned int i = 0; i < this->_coords.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "vtxindex=" << this->_coords[i].vtxindex << " index=" << this->_coords[i].index
-  //					<< " coord=(" << this->_coords[i].coord << ") num_faces=" << this->_coords[i].num_faces
-  //					<< " faces={");
-  //			for (unsigned int j = 0; j < this->_coords[i].num_faces; ++j)
-  //				STDOUT(" " << this->_coords[i].faces[j]);
-  //			STDOUTLN("}");
-  //		}
-  //	}
-  //
-  //	STDOUTLN("\n" << prefix << "Extracted faces (size=" << this->_faces.size() << ")");
-  //	for (unsigned int i = 0; i < this->_faces.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "parent=" << this->_faces[i].parent << " index=" << this->_faces[i].index
-  //					<< " nip=" << this->_faces[i].num_in_parent << " corners={");
-  //			for (unsigned int j = 0; j < simplex_corners; ++j)
-  //				STDOUT("(" << this->_faces[i].corners[j].idx << ", " << this->_faces[i].corners[j].num << ")");
-  //			STDOUTLN("}");
-  //		}
-  //
-  //	}
 }
 
 
@@ -675,7 +613,7 @@ void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, const Coord
     Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     // computing the locals is straight forward for flat rectangles,
     // we only need the triangle's corners in element coordinate
-    if (this->_faces[index].first)
+    if (this->_faces[index].category == 1)
     {
       // the triangle's corners are (0 1 2) using face indices
       for (int i = 0; i < simplex_corners; ++i)

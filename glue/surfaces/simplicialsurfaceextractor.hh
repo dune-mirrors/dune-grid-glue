@@ -84,38 +84,10 @@ public:
   typedef typename GV::IndexSet IndexSet;
   typedef typename IndexSet::IndexType IndexType;
 
+  // import typedefs from base class
+  typedef typename Codim1Extractor<GV>::FaceInfo FaceInfo;
 
 private:
-
-  /************************** PRIVATE SUBCLASSES **********************/
-
-  /**
-   * @class FaceInfo
-   * @brief simple struct holding some packed information about a codimension 1 entity
-   * to its parent codim 0 entity
-   */
-  struct FaceInfo
-  {
-    FaceInfo()
-    {}
-
-    FaceInfo(unsigned int index_, IndexType parent_, unsigned int num_in_parent_)
-      :       parent(parent_), index(index_), num_in_parent(num_in_parent_)
-    {}
-
-    /// @brief the index of the parent element (from index set)
-    IndexType parent;
-
-    /// @brief the index of this face (in internal storage scheme) // NEEDED??
-    unsigned int index : 28;
-
-    /// @brief the number of the face in the parent element
-    unsigned int num_in_parent : 4;
-
-    /// @brief the corner indices plus the numbers of the vertices in the parent element
-    typename Codim1Extractor<GV>::CornerInfo corners[simplex_corners];
-  };
-
 
   /************************** MEMBER VARIABLES ************************/
 
@@ -446,7 +418,7 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
           // add a new face to the temporary collection
-          temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit));
+          temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, FaceInfo::triangle));
 
           // try for each of the faces vertices whether it is already inserted or not
           for (int i = 0; i < simplex_corners; ++i)
