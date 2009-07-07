@@ -53,7 +53,7 @@ template<
     typename GET1,
     typename GET2,
     typename SM =
-      ContactMappingSurfaceMerge<
+      PSurfaceMerge<
           GET1::GridView::dimensionworld + static_cast<int>(GET1::GridView::dimensionworld == static_cast<int>(GET1::dimS)),
           typename GET1::GridView::Grid::ctype
           >

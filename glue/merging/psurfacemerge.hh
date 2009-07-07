@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 /*
- *  Filename:    ContactMappingSurfaceMerge.hh
+ *  Filename:    PSurfaceMerge.hh
  *  Version:     1.0
  *  Created on:  Jan 25, 2009
  *  Author:      Gerrit Buse
@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file ContactMappingSurfaceMerge.hh
+ * @file PSurfaceMerge.hh
  * @brief
  * Standard implementation of the SurfaceMerge concept for the use in 2d and 3d.
  * Uses psurface routines to compute the merged grid  and provides access to it
@@ -24,8 +24,8 @@
  * improvements in the mapping either.
  */
 
-#ifndef CONTACTMAPPINGSURFACEMERGE_HH_
-#define CONTACTMAPPINGSURFACEMERGE_HH_
+#ifndef PSURFACEMERGE_HH_
+#define PSURFACEMERGE_HH_
 
 
 // This flag can be set to avoid illegal barycentric coordinates.
@@ -55,7 +55,7 @@
    \tparam T Type used for coordinates
  */
 template<int dim, typename T = double>
-class ContactMappingSurfaceMerge
+class PSurfaceMerge
 {
 public:
 
@@ -296,13 +296,13 @@ protected:
 
 public:
 
-  ContactMappingSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
+  PSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
     _maxdist(max_distance), _eps(1E-10),
     _olclocator(typename Locator::BoxType(Coords(0.0), Coords(1.0))), _olcgeometry(NULL), _domnormals(domain_normals)
   {}
 
 
-  ~ContactMappingSurfaceMerge()
+  ~PSurfaceMerge()
   {
     if (this->_olcgeometry != NULL)
       delete this->_olcgeometry;
@@ -488,7 +488,7 @@ public:
 
 
 template<int dim, typename T>
-bool ContactMappingSurfaceMerge<dim, T>::build(
+bool PSurfaceMerge<dim, T>::build(
   const std::vector<T>& domain_coords,
   const std::vector<unsigned int>& domain_simplices,
   const std::vector<T>& target_coords,
@@ -601,7 +601,7 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
   }
   catch (...)
   {
-    std::cerr << "ContactMappingSurfaceMerge: Unknown exception occurred!" << std::endl;
+    std::cerr << "PSurfaceMerge: Unknown exception occurred!" << std::endl;
   }
   // only arriving here after exception
   return false;
@@ -609,14 +609,14 @@ bool ContactMappingSurfaceMerge<dim, T>::build(
 
 
 template<int dim, typename T>
-inline unsigned int ContactMappingSurfaceMerge<dim, T>::nSimplices() const
+inline unsigned int PSurfaceMerge<dim, T>::nSimplices() const
 {
   return this->_olm.nOverlaps();
 }
 
 
 template<int dim, typename T>
-inline bool ContactMappingSurfaceMerge<dim, T>::domainSimplexMatched(unsigned int idx) const
+inline bool PSurfaceMerge<dim, T>::domainSimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstDomainParent" is in the valid range
   return (this->_olm.firstDomainParent(idx) < this->_olm.nOverlaps());
@@ -624,7 +624,7 @@ inline bool ContactMappingSurfaceMerge<dim, T>::domainSimplexMatched(unsigned in
 
 
 template<int dim, typename T>
-inline bool ContactMappingSurfaceMerge<dim, T>::targetSimplexMatched(unsigned int idx) const
+inline bool PSurfaceMerge<dim, T>::targetSimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstTargetParent" is in the valid range
   return (this->_olm.firstTargetParent(idx) < this->_olm.nOverlaps());
@@ -632,7 +632,7 @@ inline bool ContactMappingSurfaceMerge<dim, T>::targetSimplexMatched(unsigned in
 
 
 //template<int dim, typename T>
-//bool ContactMappingSurfaceMerge<dim, T>::domainVertexMatched(unsigned int idx) const
+//bool PSurfaceMerge<dim, T>::domainVertexMatched(unsigned int idx) const
 //{
 //	// TODO think about implementation similar to targetVertexMatched below...
 //	Coords lower(-this->_eps), upper(this->_eps);
@@ -644,7 +644,7 @@ inline bool ContactMappingSurfaceMerge<dim, T>::targetSimplexMatched(unsigned in
 //
 //
 //template<int dim, typename T>
-//bool ContactMappingSurfaceMerge<dim, T>::targetVertexMatched(unsigned int idx) const
+//bool PSurfaceMerge<dim, T>::targetVertexMatched(unsigned int idx) const
 //{
 //	Coords lower(-this->_eps - this->_maxdist), upper(this->_eps + this->_maxdist);
 //	lower += this->_tarc[idx];
@@ -672,14 +672,14 @@ inline bool ContactMappingSurfaceMerge<dim, T>::targetSimplexMatched(unsigned in
 
 
 template<int dim, typename T>
-inline unsigned int ContactMappingSurfaceMerge<dim, T>::domainParent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, T>::domainParent(unsigned int idx) const
 {
   return this->_olm.domain(idx).tris[0];
 }
 
 
 template<int dim, typename T>
-inline unsigned int ContactMappingSurfaceMerge<dim, T>::targetParent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, T>::targetParent(unsigned int idx) const
 {
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
   return this->_olm.domain(idx).tris[1];
@@ -687,7 +687,7 @@ inline unsigned int ContactMappingSurfaceMerge<dim, T>::targetParent(unsigned in
 
 
 template<int dim, typename T>
-bool ContactMappingSurfaceMerge<dim, T>::domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
+bool PSurfaceMerge<dim, T>::domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
   unsigned int first = this->_olm.firstDomainParent(idx);
   unsigned int count = 0;
@@ -711,7 +711,7 @@ bool ContactMappingSurfaceMerge<dim, T>::domainSimplexRefined(unsigned int idx, 
 
 
 template<int dim, typename T>
-bool ContactMappingSurfaceMerge<dim, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
+bool PSurfaceMerge<dim, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
   unsigned int first = this->_olm.firstTargetParent(idx);
   unsigned int count = 0;
@@ -735,7 +735,7 @@ bool ContactMappingSurfaceMerge<dim, T>::targetSimplexRefined(unsigned int idx, 
 
 
 template<int dim, typename T>
-Dune::FieldVector<typename ContactMappingSurfaceMerge<dim, T>::Coords, dim> ContactMappingSurfaceMerge<dim, T>::simplexCorners(unsigned int idx) const
+Dune::FieldVector<typename PSurfaceMerge<dim, T>::Coords, dim> PSurfaceMerge<dim, T>::simplexCorners(unsigned int idx) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
@@ -749,7 +749,7 @@ Dune::FieldVector<typename ContactMappingSurfaceMerge<dim, T>::Coords, dim> Cont
 
 
 template<int dim, typename T>
-typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<dim, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
@@ -791,7 +791,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 
 
 template<int dim, typename T>
-typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<dim, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
@@ -831,8 +831,8 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 
 
 template<int dim, typename T>
-typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<dim, T>::targetLocals(
-  unsigned int idx, const typename ContactMappingSurfaceMerge<dim, T>::Coords &local) const
+typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::targetLocals(
+  unsigned int idx, const typename PSurfaceMerge<dim, T>::Coords &local) const
 {
   // this does not really depend on the particular simplex here,
   // but maybe in some other implementation and since this is
@@ -846,8 +846,8 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 
 
 template<int dim, typename T>
-typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<dim, T>::domainLocals(
-  unsigned int idx, const typename ContactMappingSurfaceMerge<dim, T>::Coords &local) const
+typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::domainLocals(
+  unsigned int idx, const typename PSurfaceMerge<dim, T>::Coords &local) const
 {
   // this does not really depend on the particular simplex here,
   // but maybe in some other implementation and since this is
@@ -863,7 +863,7 @@ typename ContactMappingSurfaceMerge<dim, T>::Coords ContactMappingSurfaceMerge<d
 /* IMPLEMENTATION OF   O V E R L A P  M A N A G E R  SUBCLASS */
 
 template<int dim, typename T>
-void ContactMappingSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered)
+void PSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered)
 {
   this->domOrder.resize(unordered.size());
   this->tarOrder.resize(unordered.size(), NULL);
@@ -926,7 +926,7 @@ void ContactMappingSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::
 
 
 template<int dim, typename T>
-unsigned int ContactMappingSurfaceMerge<dim, T>::OverlapManager::firstDomainParent(unsigned int parent) const
+unsigned int PSurfaceMerge<dim, T>::OverlapManager::firstDomainParent(unsigned int parent) const
 {
   // perform a binary search for a simplex overlap with the given parent
   unsigned int first = 0, last = this->domOrder.size(), p = last/2;
@@ -954,7 +954,7 @@ unsigned int ContactMappingSurfaceMerge<dim, T>::OverlapManager::firstDomainPare
 
 
 template<int dim, typename T>
-unsigned int ContactMappingSurfaceMerge<dim, T>::OverlapManager::firstTargetParent(unsigned int parent) const
+unsigned int PSurfaceMerge<dim, T>::OverlapManager::firstTargetParent(unsigned int parent) const
 {
   // perform a binary search for a simplex overlap with the given parent
   unsigned int first = 0, last = this->domOrder.size(), p = last/2;
@@ -981,4 +981,4 @@ unsigned int ContactMappingSurfaceMerge<dim, T>::OverlapManager::firstTargetPare
 }
 
 
-#endif // CONTACTMAPPINGSURFACEMERGE_HH_
+#endif // PSURFACEMERGE_HH_
