@@ -58,6 +58,8 @@ public:
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
+  typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
+
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
 
   // index sets and index types
@@ -131,8 +133,122 @@ public:
   typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
 
 
+  /************************** MEMBER VARIABLES ************************/
+
+  /// @brief the grid object to extract the surface from
+  const GV&                                       _gv;
+
+
+  /*        Geometrical and Topological Information                */
+
+  /// @brief all information about the corner vertices of the extracted
+  std::vector<CoordinateInfo>   _coords;
+
+  /// @brief a map enabling faster access to vertices and coordinates
+  ///
+  /// Maps a vertex' index (from index set) to an object holding the locally
+  /// associated index of the vertex' coordinate in _coords and an entity
+  /// pointer to the codim<dim> entity.
+  VertexInfoMap _vtxInfo;
+
+  /// @brief a map enabling faster access to elements and faces
+  ///
+  /// Maps an element's index (from index set) to an object holding the locally
+  /// associated index of its first face in _indices (if there are more they are
+  /// positioned consecutively) and an entity pointer to the codim<0> entity.
+  ElementInfoMap _elmtInfo;
+
+
+public:
+
+  /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
+
+  /**
+   * @brief Constructor
+   * @param gv the grid view object to work with
+   */
+  Codim1Extractor(const GV& gv)
+    :  _gv(gv)
+  {}
+
+  /** \brief Destructor frees allocated memory */
+  ~Codim1Extractor();
+
+
+  /*  G E T T E R S  */
+
+  /**
+   * @brief getter for the coordinates array
+   * @param coords a vector that will be resized (!) and filled with the coordinates,
+   * note that the single components are written consecutively
+   */
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
+  {
+    coords.resize(_coords.size());
+    for (unsigned int i = 0; i < _coords.size(); ++i)
+      coords[i] = _coords[i].coord;
+  }
+
+
+  /**
+   * @brief getter for the count of coordinates
+   * @return the count
+   */
+  unsigned int nCoords() const
+  {
+    return _coords.size();
+  }
+
+
+  /**
+   * @brief getter for internally used index set (grid's index set)
+   * @return the index set
+   */
+  const IndexSet& indexSet() const
+  {
+    return _gv.indexSet();
+  }
+
+
+  /**
+   * @brief getter for the index of an entity of codim cc
+   * @return the index specified by the grid's index set
+   */
+  template<int cc>
+  IndexType index(const typename GV::Traits::template Codim<cc>::Entity& e) const
+  {
+    return indexSet().template index<cc>(e);
+  }
+
+
+  /**
+   * @brief gets index of coordinate in _coords associated with given vertex
+   * @return the index if possible, -1 else
+   */
+  int coordinateIndex(const Vertex& v) const
+  {
+    typename VertexInfoMap::const_iterator it = _vtxInfo.find(index<dim>(v));
+    return (it == _vtxInfo.end()) ? -1 : it->second->idx;
+  }
+
+
 
 };
+
+
+template<typename GV>
+Codim1Extractor<GV>::~GeneralSurfaceExtractor()
+{
+  // only the objects that have been allocated manually have to be
+  // deallocated manually again
+  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
+    if (it->second != NULL)
+      delete it->second;
+  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
+    if (it->second != NULL)
+      delete it->second;
+}
+
 
 
 

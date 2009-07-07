@@ -77,8 +77,6 @@ public:
   typedef Dune::array<unsigned int, simplex_corners>               SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
-  typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
-  typedef typename GV::Traits::template Codim<dim>::Iterator VertexIter;
 
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   typedef typename GV::Traits::template Codim<0>::Entity Element;
@@ -134,31 +132,10 @@ private:
   // these values are filled on surface extraction and can be
   // asked by the corresponding getters
 
-  /// @brief the grid object to extract the surface from
-  const GV&                                           _gv;
-
-
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the extracted faces
   std::vector<FaceInfo>         _faces;
-
-  /// @brief all information about the corner vertices of the extracted
-  std::vector<typename Codim1Extractor<GV>::CoordinateInfo>   _coords;
-
-  /// @brief a map enabling faster access to vertices and coordinates
-  ///
-  /// Maps a vertex' index (from index set) to an object holding the locally
-  /// associated index of the vertex' coordinate in _coords and an entity
-  /// pointer to the codim<dim> entity.
-  typename Codim1Extractor<GV>::VertexInfoMap _vtxInfo;
-
-  /// @brief a map enabling faster access to elements and faces
-  ///
-  /// Maps an element's index (from index set) to an object holding the locally
-  /// associated index of its first face in _indices (if there are more they are
-  /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  typename Codim1Extractor<GV>::ElementInfoMap _elmtInfo;
 
 public:
 
@@ -168,21 +145,14 @@ public:
    * @brief except from the GridView initializes all member variables with null values
    * @param gv the grid view object to work with
    */
-  CubeSurfaceExtractor(const GV& gv) :
-    _gv(gv)
+  CubeSurfaceExtractor(const GV& gv)
+    : Codim1Extractor<GV>(gv)
   {
     std::cout << "This is CubeSurfaceExtractor on a <"
               << GV::dimension << "," << GV::dimensionworld
               << "> grid working in " << dimw
               << " space!" << std::endl;
   }
-
-
-  /**
-   * @brief default destructor, frees memory
-   */
-  ~CubeSurfaceExtractor();
-
 
   /**
    * ASSUMPTION:
@@ -215,34 +185,6 @@ public:
   void clear();
 
 
-  /*  S E T T E R S  */
-
-
-  /*  G E T T E R S  */
-
-  /**
-   * @brief getter for the coordinates array
-   * @param coords a vector that will be resized (!) and filled with the coordinates,
-   * note that the single components are written consecutively
-   */
-  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
-  {
-    coords.resize(this->_coords.size());
-    for (unsigned int i = 0; i < this->_coords.size(); ++i)
-      coords[i] = this->_coords[i].coord;
-  }
-
-
-  /**
-   * @brief getter for the count of coordinates
-   * @return the count
-   */
-  unsigned int nCoords() const
-  {
-    return this->_coords.size();
-  }
-
-
   /**
    * @brief getter for the indices array
    * It is strongly recommended not to modify its contents.
@@ -259,38 +201,6 @@ public:
 
 
   /**
-   * @brief getter for internally used index set (grid's index set)
-   * @return the index set
-   */
-  const IndexSet& indexSet() const
-  {
-    return this->_gv.indexSet();
-  }
-
-
-  /**
-   * @brief getter for the index of an entity of codim cc
-   * @return the index specified by the grid's index set
-   */
-  template<int cc>
-  IndexType index(const typename GV::Traits::template Codim<cc>::Entity& e) const
-  {
-    return this->indexSet().template index<cc>(e);
-  }
-
-
-  /**
-   * @brief gets index of coordinate in _coords associated with given vertex
-   * @return the index if possible, -1 else
-   */
-  int coordinateIndex(const Vertex& v) const
-  {
-    typename Codim1Extractor<GV>::VertexInfoMap::const_iterator it = this->_vtxInfo.find(this->index<dim>(v));
-    return it == this->_vtxInfo.end() ? -1 : it->second->idx;
-  }
-
-
-  /**
    * @brief gets index of first face as well as the total number of faces that
    * were extracted from this element
    * @param e the element
@@ -300,7 +210,7 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    typename Codim1Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
+    typename Codim1Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->template index<0>(e));
     if (it == this->_elmtInfo.end())
     {
       first = -1;
@@ -473,20 +383,6 @@ public:
 
 
 template<typename GV, bool rect>
-CubeSurfaceExtractor<GV, rect>::~CubeSurfaceExtractor()
-{
-  // only the objects that have been allocated manually have to be
-  // deallocated manually again
-  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-}
-
-
-template<typename GV, bool rect>
 void CubeSurfaceExtractor<GV, rect>::clear()
 {
   // this is an inofficial way on how to free the memory allocated
@@ -592,7 +488,7 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
 
             // get the vertex pointer and the index from the index set
             vptrs[i] = new typename Codim1Extractor<GV>::VertexPtr(elit->template subEntity<dim>(vertex_numbers[i]));
-            IndexType vindex = this->index<dim>(*(*vptrs[i]));
+            IndexType vindex = this->template index<dim>(*(*vptrs[i]));
 
             // if the vertex is not yet inserted in the vertex info map
             // it is a new one -> it will be inserted now!
