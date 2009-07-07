@@ -273,7 +273,7 @@ namespace RemoteIntersectionInterface
      */
     bool hasTarget() const
     {
-      return true;
+      return this->realIntersection.hasTarget();
     }
 
     /**
@@ -283,7 +283,7 @@ namespace RemoteIntersectionInterface
      */
     bool hasDomain() const
     {
-      return true;
+      return this->realIntersection.hasDomain();
     }
 
 #ifdef QUICKHACK_INDEX

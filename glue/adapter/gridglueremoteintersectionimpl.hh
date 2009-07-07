@@ -112,8 +112,7 @@ public:
 
   /** \brief Copy constructor */
   RemoteIntersectionImpl(const RemoteIntersectionImpl & impl)
-    : _glue(impl._glue), _index(impl._index)
-      ,
+    : _glue(impl._glue), _index(impl._index),
       _domlgeom(impl._domlgeom),
       _domggeom(impl._domggeom),
       _tarlgeom(impl._tarlgeom),
@@ -194,6 +193,15 @@ public:
     return barycentricToReference(this->_glue->_sm.targetLocals(this->_index, referenceToBarycentric(local)));
   }
 
+  bool hasTarget() const
+  {
+    return true;
+  }
+
+  bool hasDomain() const
+  {
+    return true;
+  }
 
   // obtain the type of reference element for this intersection
   Dune::GeometryType type() const
