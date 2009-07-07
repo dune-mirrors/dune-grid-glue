@@ -72,7 +72,7 @@ public:
 
   void increment()
   {
-    if (++this->_index < static_cast<int>(this->_glue->_sm.nSimplices()))
+    if (++this->_index < static_cast<int>(this->_glue->_merg.nSimplices()))
       this->_intersection = this->_glue->_intersections[this->_index];
     else
       this->_index = this->_glue->NULL_INTERSECTION._index;
@@ -128,10 +128,10 @@ public:
       _domain_parent(0),
       _current(0)
   {
-    if (this->_index < 0 || static_cast<int>(this->_glue->_sm.nSimplices()) <= this->_index)
+    if (this->_index < 0 || static_cast<int>(this->_glue->_merg.nSimplices()) <= this->_index)
       return;
 
-    this->_domain_parent = this->_glue->_sm.domainParent(this->_index);
+    this->_domain_parent = this->_glue->_merg.domainParent(this->_index);
     this->_parts.resize(parts_.size());
     copy(parts_.begin(), parts_.end(), this->_parts.begin());
   }
@@ -144,10 +144,10 @@ public:
       _domain_parent(0),
       _current(0)
   {
-    if (this->_index < 0 || static_cast<int>(this->_glue->_sm.nSimplices()) <= this->_index)
+    if (this->_index < 0 || static_cast<int>(this->_glue->_merg.nSimplices()) <= this->_index)
       return;
 
-    this->_domain_parent = this->_glue->_sm.domainParent(this->_index);
+    this->_domain_parent = this->_glue->_merg.domainParent(this->_index);
   }
 
 
@@ -229,10 +229,10 @@ public:
       _target_parent(0),
       _current(0)
   {
-    if (this->_index < 0 || static_cast<int>(this->_glue->_sm.nSimplices()) <= this->_index)
+    if (this->_index < 0 || static_cast<int>(this->_glue->_merg.nSimplices()) <= this->_index)
       return;
 
-    this->_target_parent = this->_glue->_sm.targetParent(this->_index);
+    this->_target_parent = this->_glue->_merg.targetParent(this->_index);
     this->_parts.resize(parts_.size());
     copy(parts_.begin(), parts_.end(), this->_parts.begin());
   }
@@ -245,10 +245,10 @@ public:
       _target_parent(0),
       _current(0)
   {
-    if (this->_index < 0 || static_cast<int>(this->_glue->_sm.nSimplices()) <= this->_index)
+    if (this->_index < 0 || static_cast<int>(this->_glue->_merg.nSimplices()) <= this->_index)
       return;
 
-    this->_target_parent = this->_glue->_sm.targetParent(this->_index);
+    this->_target_parent = this->_glue->_merg.targetParent(this->_index);
   }
 
   //	GridGlueTargetIntersectionIterator& operator=(RemoteIntersectionImpl& intersectionImpl_)

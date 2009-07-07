@@ -181,11 +181,13 @@ public:
 
 #ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
-  typedef typename SurfaceMerge<SM>::ModelType Matcher;
+  typedef typename SurfaceMerge<SM>::ModelType Merger;
 #else
   /** \todo Please doc me! */
-  typedef SM Matcher;
+  typedef SM Merger;
 #endif
+  /** \deprecated This typedef will soon be removed */
+  typedef Merger Matcher;
 
 #ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
@@ -228,9 +230,9 @@ private:
 
   /// @brief the surface merging utility
 #ifdef GRID_GLUE_USE_CONCEPTS
-  SurfaceMerge<Matcher>        _sm;
+  SurfaceMerge<Merger>         _merg;
 #else
-  Matcher                      &_sm;
+  Merger                       &_merg;
 #endif
 
   /// @brief the builder utility
@@ -252,15 +254,15 @@ protected:
   void updateIntersections()
   {
     // build the intersections array again
-    this->_intersections.resize(this->_sm.nSimplices(), this->NULL_INTERSECTION);
-    for (unsigned int i = 0; i < this->_sm.nSimplices(); ++i)
+    this->_intersections.resize(this->_merg.nSimplices(), this->NULL_INTERSECTION);
+    for (unsigned int i = 0; i < this->_merg.nSimplices(); ++i)
     {
       RemoteIntersectionImpl ri(this, i);
       //if (ri.hasTarget() || ri.hasDomain())
       this->_intersections[i] = ri;
     }
 
-    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << this->_sm.nSimplices() << std::endl;
+    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << this->_merg.nSimplices() << std::endl;
   }
 
 
@@ -278,7 +280,7 @@ public:
    * @param matcher The matcher object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
-  GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Matcher &matcher);
+  GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger &merger);
 
 
   /*  S E T T E R S  */
@@ -319,22 +321,27 @@ public:
   /**
    * @brief getter for the surface matcher utility
    *
-   * This grants access to the surface matcher. This Matcher class has to be a model
+   * This grants access to the surface merger. This Merger class has to be a model
    * of the SurfaceMergeConcept, but since different implementations of matchers
    * may provide different configuration possibilities this part has to remain
    * implementation specific. Through this getter one can retrieve the internal
    * matcher and configure it before its "build" member is called.
    * @return a (non-const) reference the object
    */
-  Matcher& matcher()
+  Merger& merger()
   {
 #ifdef GRID_GLUE_USE_CONCEPTS
-    return this->_sm.getImplementation();
+    return this->_merg.getImplementation();
 #else
-    return this->_sm;
+    return this->_merg;
 #endif
   }
 
+  /** \deprecated this method will soon be removed, use merger() */
+  Merger& matcher()
+  {
+    return merger();
+  }
 
   /*   F U N C T I O N A L I T Y   */
 
@@ -567,7 +574,7 @@ public:
   // indexset size
   size_t indexSet_size() const
   {
-    return _sm.nSimplices();
+    return _merg.nSimplices();
   }
 #endif
 };
@@ -575,9 +582,9 @@ public:
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
 
 template<typename GET1, typename GET2, typename SM>
-GridGlue<GET1, GET2, SM>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Matcher &matcher)
+GridGlue<GET1, GET2, SM>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger &merger)
   : _domgv(gv1), _targv(gv2),
-    _domext(gv1), _tarext(gv2), _sm(matcher),
+    _domext(gv1), _tarext(gv2), _merg(merger),
     _builder(*const_cast<GridGlue<GET1, GET2, SM>*>(this)),
     NULL_INTERSECTION(this, -1), _intersections(0, NULL_INTERSECTION)
 {
@@ -595,7 +602,7 @@ int GridGlue<GET1, GET2, SM>::domainEntityNextFace(const DomainElement& e, int i
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count && (this->_domext.numberInSelf(first) < index || !this->_sm.domainSimplexMatched(first)))
+  while (first < count && (this->_domext.numberInSelf(first) < index || !this->_merg.domainSimplexMatched(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
@@ -614,7 +621,7 @@ int GridGlue<GET1, GET2, SM>::targetEntityNextFace(const TargetElement& e, int i
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count && (this->_tarext.numberInSelf(first) < index || !this->_sm.targetSimplexMatched(first)))
+  while (first < count && (this->_tarext.numberInSelf(first) < index || !this->_merg.targetSimplexMatched(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
@@ -642,15 +649,15 @@ typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET
   count += first;
   while (first < count)
   {
-    if (this->_domext.numberInSelf(first) == num && this->_sm.domainSimplexMatched(first))
+    if (this->_domext.numberInSelf(first) == num && this->_merg.domainSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
       std::vector<unsigned int> local_results;
 
       // get the remote intersections
-      this->_sm.domainSimplexRefined(first, global_results);
-      while (++first < count && this->_domext.numberInSelf(first) == num && this->_sm.domainSimplexRefined(first, local_results))
+      this->_merg.domainSimplexRefined(first, global_results);
+      while (++first < count && this->_domext.numberInSelf(first) == num && this->_merg.domainSimplexRefined(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
@@ -690,7 +697,7 @@ typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET
   count += first;
   while (first < count)
   {
-    if (this->_sm.domainSimplexRefined(first, local_results))
+    if (this->_merg.domainSimplexRefined(first, local_results))
     {
       if (local_results.size() > 0)
         found_sth = true;
@@ -718,15 +725,15 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
   count += first;
   while (first < count)
   {
-    if (this->_tarext.numberInSelf(first) == num && this->_sm.targetSimplexMatched(first))
+    if (this->_tarext.numberInSelf(first) == num && this->_merg.targetSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
       std::vector<unsigned int> local_results;
 
       // get the remote intersections
-      this->_sm.targetSimplexRefined(first, global_results);
-      while (++first < count && this->_tarext.numberInSelf(first) == num && this->_sm.targetSimplexRefined(first, local_results))
+      this->_merg.targetSimplexRefined(first, global_results);
+      while (++first < count && this->_tarext.numberInSelf(first) == num && this->_merg.targetSimplexRefined(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
@@ -765,7 +772,7 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
   count += first;
   while (first < count)
   {
-    if (this->_sm.targetSimplexRefined(first, local_results))
+    if (this->_merg.targetSimplexRefined(first, local_results))
     {
       if (local_results.size() > 0)
         found_sth = true;

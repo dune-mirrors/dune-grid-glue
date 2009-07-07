@@ -135,14 +135,14 @@ public:
   // return EntityPointer to the Entity on the inside of this intersection. That is the Entity where we started this .
   DomainEntityPointer entityDomain() const
   {
-    return this->_glue->_domext.element(this->_glue->_sm.domainParent(this->_index));
+    return this->_glue->_domext.element(this->_glue->_merg.domainParent(this->_index));
   }
 
 
   // return EntityPointer to the Entity on the outside of this intersection. That is the neighboring Entity.
   TargetEntityPointer entityTarget() const
   {
-    return this->_glue->_tarext.element(this->_glue->_sm.targetParent(this->_index));
+    return this->_glue->_tarext.element(this->_glue->_merg.targetParent(this->_index));
   }
 
 
@@ -182,7 +182,7 @@ public:
   /** \todo Documentation does not match implementation */
   LocalCoords domainLocals(const LocalCoords &local) const
   {
-    return barycentricToReference(this->_glue->_sm.domainLocals(this->_index, referenceToBarycentric(local)));
+    return barycentricToReference(this->_glue->_merg.domainLocals(this->_index, referenceToBarycentric(local)));
   }
 
 
@@ -190,7 +190,7 @@ public:
   /** \todo Documentation does not match implementation */
   LocalCoords targetLocals(const LocalCoords &local) const
   {
-    return barycentricToReference(this->_glue->_sm.targetLocals(this->_index, referenceToBarycentric(local)));
+    return barycentricToReference(this->_glue->_merg.targetLocals(this->_index, referenceToBarycentric(local)));
   }
 
   bool hasTarget() const
@@ -213,14 +213,14 @@ public:
   // Local number of codim 1 entity in the inside() Entity where intersection is contained in.
   int numberInDomainEntity() const
   {
-    return this->_glue->_domext.numberInSelf(this->_glue->_sm.domainParent(this->_index));
+    return this->_glue->_domext.numberInSelf(this->_glue->_merg.domainParent(this->_index));
   }
 
 
   // Local number of codim 1 entity in outside() Entity where intersection is contained in.
   int numberInTargetEntity() const
   {
-    return this->_glue->_tarext.numberInSelf(this->_glue->_sm.targetParent(this->_index));
+    return this->_glue->_tarext.numberInSelf(this->_glue->_merg.targetParent(this->_index));
   }
 
 
@@ -258,11 +258,11 @@ bool GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::conforming() const
   std::vector<unsigned int> results;
   // first check the domain side
   bool is_conforming =
-    this->_glue->_sm.domainSimplexRefined(this->_glue->_sm.domainParent(this->_index), results) && results.size() == 1;
+    this->_glue->_merg.domainSimplexRefined(this->_glue->_merg.domainParent(this->_index), results) && results.size() == 1;
   results.resize(0);
   // now check the target side
   if (is_conforming)
-    return this->_glue->_sm.targetSimplexRefined(this->_glue->_sm.targetParent(this->_index), results) && results.size() == 1;
+    return this->_glue->_merg.targetSimplexRefined(this->_glue->_merg.targetParent(this->_index), results) && results.size() == 1;
   return false;
 }
 
@@ -273,7 +273,7 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
 {
   // if an invalid index is given do not proceed!
   // (happens when the parent GridGlue initializes the "end"-Intersection)
-  if (0 > index || index >= static_cast<int>(glue->_sm.nSimplices()))
+  if (0 > index || index >= static_cast<int>(glue->_merg.nSimplices()))
     return;
 
   // the number of simplex corners as well as
@@ -283,7 +283,7 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
   // initialize the local and the global geometry of the domain
   {
     for (int i = 0; i < coorddim; ++i)
-      corners_barycentric[i] = glue->_sm.domainParentLocal(index, i);
+      corners_barycentric[i] = glue->_merg.domainParentLocal(index, i);
 
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementcoorddim = DomainGridType::template Codim<0>::Geometry::mydimension;
@@ -293,7 +293,7 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
     // compute the local coordinates with the correct dimension and the global coordinates
     Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
     Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, coorddim> corners_global;
-    glue->_domext.localAndGlobalCoords(glue->_sm.domainParent(index), corners_barycentric, corners_local, corners_global, coorddim);
+    glue->_domext.localAndGlobalCoords(glue->_merg.domainParent(index), corners_barycentric, corners_local, corners_global, coorddim);
 
     // set the corners of the geometries
     this->_domlgeom.setup(geometrytype, corners_local);
@@ -303,7 +303,7 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
   // do the same for the local and the global geometry of the target
   {
     for (int i = 0; i < coorddim; ++i)
-      corners_barycentric[i] = glue->_sm.targetParentLocal(index, i);
+      corners_barycentric[i] = glue->_merg.targetParentLocal(index, i);
 
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementcoorddim = TargetGridType::template Codim<0>::Geometry::mydimension;
@@ -313,7 +313,7 @@ GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const P
     // compute the local coordinates with the correct dimension and the global coordinates
     Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
     Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, coorddim> corners_global;
-    glue->_tarext.localAndGlobalCoords(glue->_sm.targetParent(index), corners_barycentric, corners_local, corners_global, coorddim);
+    glue->_tarext.localAndGlobalCoords(glue->_merg.targetParent(index), corners_barycentric, corners_local, corners_global, coorddim);
 
     // set the corners of the geometries
     this->_tarlgeom.setup(geometrytype, corners_local);
