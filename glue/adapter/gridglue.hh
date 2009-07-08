@@ -186,8 +186,6 @@ public:
   /** \todo Please doc me! */
   typedef SM Merger;
 #endif
-  /** \deprecated This typedef will soon be removed */
-  typedef Merger Matcher;
 
 #ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
@@ -335,12 +333,6 @@ public:
 #else
     return this->_merg;
 #endif
-  }
-
-  /** \deprecated this method will soon be removed, use merger() */
-  Merger& matcher()
-  {
-    return merger();
   }
 
   /*   F U N C T I O N A L I T Y   */
