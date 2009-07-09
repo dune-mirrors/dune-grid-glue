@@ -443,7 +443,6 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           {
           case 2 :
             assert(dim == 2);
-            std::cout << "adding LINE..." << std::endl;
             // we have a triangle here
 
             // add a new face to the temporary collection
@@ -486,7 +485,6 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             break;
           case 3 :
             assert(dim == 3);
-            std::cout << "adding TRI..." << std::endl;
             // we have a triangle here
 
             // add a new face to the temporary collection
@@ -529,7 +527,6 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             break;
           case 4 :
             assert(dim == 3);
-            std::cout << "adding QUAD..." << std::endl;
             // we have a quadrilateral here
             VertexPtr* vptrs[4];
             unsigned int vertex_indices[4];
