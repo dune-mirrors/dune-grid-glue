@@ -464,23 +464,6 @@ public:
    */
   Coords targetParentLocal(unsigned int idx, unsigned int corner) const;
 
-  /**
-   * @brief get the simplex local coordinates in target view (oriented)
-   * for a point in domain view local coordinates
-   * @param idx the index of the merged grid simplex
-   * @param local barycentric coordinates in oriented domain view of the simplex
-   * @return barycentric coordinates in oriented target view of the simplex
-   */
-  Coords targetLocals(unsigned int idx, const Coords &local) const;
-
-  /**
-   * @brief get the simplex local coordinates in domain view (oriented)
-   * for a point in target view local coordinates
-   * @param idx the index of the merged grid simplex
-   * @param local barycentric coordinates in oriented target view of the simplex
-   * @return barycentric coordinates in oriented domain view of the simplex
-   */
-  Coords domainLocals(unsigned int idx, const Coords &local) const;
 };
 
 
@@ -826,36 +809,6 @@ typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::targetParentLocal(
   if (result[dim-1] < 0.0)
     result[dim-1] = 0.0;
 #endif
-  return result;
-}
-
-
-template<int dim, typename T>
-typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::targetLocals(
-  unsigned int idx, const typename PSurfaceMerge<dim, T>::Coords &local) const
-{
-  // this does not really depend on the particular simplex here,
-  // but maybe in some other implementation and since this is
-  // an interface function...
-  Coords result;
-
-  for (int i = 0; i < dim; ++i)
-    result[i] = local[dim-1-i];
-  return result;
-}
-
-
-template<int dim, typename T>
-typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::domainLocals(
-  unsigned int idx, const typename PSurfaceMerge<dim, T>::Coords &local) const
-{
-  // this does not really depend on the particular simplex here,
-  // but maybe in some other implementation and since this is
-  // an interface function...
-  Coords result;
-
-  for (int i = 0; i < dim; ++i)
-    result[i] = local[dim-1-i];
   return result;
 }
 

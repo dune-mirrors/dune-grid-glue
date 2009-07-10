@@ -175,31 +175,6 @@ namespace RemoteIntersectionInterface
       return this->realIntersection.geometryTarget();
     }
 
-#if 0
-    /*! @brief mapping of local coordinates, i.e. target -> domain local coords
-
-       Maps a point in local intersection coords on target intersection to a
-       point in domain intersection local coordinates.
-     */
-    Dune::FieldVector<ctype, mydim> domainLocals(const Dune::FieldVector<ctype, mydim> &local) const
-    {
-      return this->realIntersection.domainLocals(local);
-    }
-
-
-    /*! @brief mapping of local coordinates, i.e. domain -> target local coords
-
-       Maps a point in local intersection coords on domain intersection to a
-       point in target intersection local coordinates.
-     */
-    Dune::FieldVector<ctype, mydim> targetLocals(const Dune::FieldVector<ctype, mydim> &local) const
-    {
-      return this->realIntersection.targetLocals(local);
-    }
-#else
-#warning disabled targetLocals and domainLocals
-#endif
-
     /** \brief obtain the type of reference element for this intersection */
     Dune::GeometryType type() const
     {

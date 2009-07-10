@@ -111,16 +111,6 @@ struct SurfaceMergeConcept
     this->_c = this->_sm.targetParentLocal(this->_index , this->_index);
 
 
-    /*
-     * @brief get the simplex local coordinates in target/domain view (oriented)
-     * for a point in domain/target view local coordinates
-     * @param idx the index of the merged grid simplex
-     * @param local barycentric coordinates in oriented domain/target view of the simplex
-     * @return barycentric coordinates in oriented target/domain view of the simplex
-     */
-    this->_c = this->_sm.targetLocals(this->_index, this->_c);
-    this->_c = this->_sm.domainLocals(this->_index, this->_c);
-
     // implicit: the model class has to have a default destructor
   }
 

@@ -263,32 +263,6 @@ public:
     return this->realimpl.targetParentLocal(idx, corner);
   }
 
-
-  /**
-   * @brief get the simplex local coordinates in target view (oriented)
-   * for a point in domain view local coordinates
-   * @param idx the index of the merged grid simplex
-   * @param local barycentric coordinates in oriented domain view of the simplex
-   * @return barycentric coordinates in oriented target view of the simplex
-   */
-  Coords targetLocals(unsigned int idx, const Coords &local) const
-  {
-    return this->realimpl.targetLocals(idx, local);
-  }
-
-
-  /**
-   * @brief get the simplex local coordinates in domain view (oriented)
-   * for a point in target view local coordinates
-   * @param idx the index of the merged grid simplex
-   * @param local barycentric coordinates in oriented target view of the simplex
-   * @return barycentric coordinates in oriented domain view of the simplex
-   */
-  Coords domainLocals(unsigned int idx, const Coords &local) const
-  {
-    return this->realimpl.domainLocals(idx, local);
-  }
-
 };
 
 #endif // SURFACEMERGE_HH_
