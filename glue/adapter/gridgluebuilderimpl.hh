@@ -122,7 +122,7 @@ public:
   }
 
 
-  bool build()
+  void build()
   {
     // setup the domain surface extractor
     if (this->_domelmntdescr != NULL)
@@ -186,9 +186,6 @@ public:
 
     // the intersections need to be recomputed
     this->_glue.updateIntersections();
-
-    // success depends on whether the merged grid is empty or not
-    return this->_glue._merg.nSimplices() != 0;
   }
 };
 
@@ -261,7 +258,7 @@ public:
   }
 
 
-  bool build()
+  void build()
   {
     try
     {
@@ -269,19 +266,13 @@ public:
       if (this->_domfacedescr != NULL)
         this->_glue._domext.update(*this->_domfacedescr);
       else
-      {
-        std::cerr << "GridGlue::Builder : no domain surface descriptor set" << std::endl;
-        return false;
-      }
+        DUNE_THROW(Dune::GridError, "GridGlue::Builder : no domain surface descriptor set");
 
       // extract the target surface
       if (this->_tarfacedescr != NULL)
         this->_glue._tarext.update(*this->_tarfacedescr);
       else
-      {
-        std::cerr << "GridGlue::Builder : no target surface descriptor set" << std::endl;
-        return false;
-      }
+        DUNE_THROW(Dune::GridError, "GridGlue::Builder : no target surface descriptor set");
 
       // clear the contents from the current intersections array
       {
@@ -377,8 +368,6 @@ public:
       // the intersections need to be recomputed
       this->_glue.updateIntersections();
 
-      // success depends on whether the merged grid is empty or not
-      return this->_glue._merg->nSimplices() != 0;
     }
     catch (Dune::Exception &e)
     {
@@ -389,8 +378,7 @@ public:
       std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
 
     }
-    // reaching this point is only possible after an exception has been thrown
-    return false;
+
   }
 };
 
@@ -458,7 +446,7 @@ public:
   }
 
 
-  bool build()
+  void build()
   {
     try
     {
@@ -575,8 +563,6 @@ public:
       // the intersections need to be recomputed
       this->_glue.updateIntersections();
 
-      // success depends on whether the merged grid is empty or not
-      return this->_glue._merg.nSimplices() != 0;
     }
     catch (Dune::Exception &e)
     {
@@ -587,8 +573,7 @@ public:
       std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
 
     }
-    // reaching this point is only possible after an exception has been thrown
-    return false;
+
   }
 };
 
@@ -657,7 +642,7 @@ public:
   }
 
 
-  bool build()
+  void build()
   {
     try
     {
@@ -774,8 +759,6 @@ public:
       // the intersections need to be recomputed
       this->_glue.updateIntersections();
 
-      // success depends on whether the merged grid is empty or not
-      return this->_glue._merg.nSimplices() != 0;
     }
     catch (Dune::Exception &e)
     {
@@ -786,8 +769,7 @@ public:
       std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
 
     }
-    // reaching this point is only possible after an exception has been thrown
-    return false;
+
   }
 };
 

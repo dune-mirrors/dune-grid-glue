@@ -224,8 +224,7 @@ void testMatchingCubeGrids()
   glue.builder().setDomainFaceDescriptor(domdesc);
   glue.builder().setTargetFaceDescriptor(tardesc);
 
-  if (!glue.builder().build())
-    DUNE_THROW(Dune::GridError, "Gluing failed!");
+  glue.builder().build();
 
   std::cout << "Gluing successful!" << std::endl;
 
@@ -286,8 +285,7 @@ void testNonMatchingCubeGrids()
   glue.builder().setDomainFaceDescriptor(domdesc);
   glue.builder().setTargetFaceDescriptor(tardesc);
 
-  if (!glue.builder().build())
-    DUNE_THROW(Dune::GridError, "Gluing failed!");
+  glue.builder().build();
 
   std::cout << "Gluing successful!" << std::endl;
 
