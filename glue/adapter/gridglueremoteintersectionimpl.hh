@@ -23,13 +23,13 @@
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   REMOTE INTERSECTION IMPL   */
 
 
-template<typename GET1, typename GET2, typename SM>
-class GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl
+template<typename GET1, typename GET2>
+class GridGlue<GET1, GET2>::RemoteIntersectionImpl
 {
 
 private:
 
-  typedef GridGlue<GET1, GET2, SM> Parent;
+  typedef GridGlue<GET1, GET2> Parent;
 
   friend class Parent::RemoteIntersectionIteratorImpl;
 
@@ -248,12 +248,12 @@ public:
 };
 
 
-template<typename GET1, typename GET2, typename SM>
-const Dune::GeometryType GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::geometrytype(Dune::GeometryType::simplex, Parent::dimw-1);
+template<typename GET1, typename GET2>
+const Dune::GeometryType GridGlue<GET1, GET2>::RemoteIntersectionImpl::geometrytype(Dune::GeometryType::simplex, Parent::dimw-1);
 
 
-template<typename GET1, typename GET2, typename SM>
-bool GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::conforming() const
+template<typename GET1, typename GET2>
+bool GridGlue<GET1, GET2>::RemoteIntersectionImpl::conforming() const
 {
   std::vector<unsigned int> results;
   // first check the domain side
@@ -267,8 +267,8 @@ bool GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::conforming() const
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-GridGlue<GET1, GET2, SM>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Parent* glue, int index)
+template<typename GET1, typename GET2>
+GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Parent* glue, int index)
   : _glue(glue), _index(index)
 {
   // if an invalid index is given do not proceed!

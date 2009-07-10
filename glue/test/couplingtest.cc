@@ -211,7 +211,7 @@ void testMatchingCubeGrids()
 
   typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
 
-  typedef GridGlue<DomTraits,TarTraits, SurfaceMergeImpl> GlueType;
+  typedef GridGlue<DomTraits,TarTraits> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -273,7 +273,7 @@ void testNonMatchingCubeGrids()
 
   typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
 
-  typedef GridGlue<DomTraits,TarTraits, SurfaceMergeImpl> GlueType;
+  typedef GridGlue<DomTraits,TarTraits> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -337,7 +337,7 @@ void test1d2dCoupling()
 
   typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
 
-  typedef GridGlue<DomTraits,TarTraits, SurfaceMergeImpl> GlueType;
+  typedef GridGlue<DomTraits,TarTraits> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), merger);
@@ -389,7 +389,6 @@ int main(int argc, char *argv[]) try
   // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
-
 
   //test1d2dCoupling<2,MeshClassification::cube>();
 

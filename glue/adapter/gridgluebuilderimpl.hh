@@ -24,13 +24,13 @@
 /** \brief   I M P L E M E N T A T I O N   O F   S U B C L A S S   BUILDER IMPL
    (Specialization for two "non-surface" grids, i.e. meshes, manifolds) */
 
-template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, int codim1, int codim2>
-class GridGlue<GET1, GET2, SM>::BuilderImpl
+template<typename GET1, typename GET2>
+template<typename BGET1, typename BGET2, int codim1, int codim2>
+class GridGlue<GET1, GET2>::BuilderImpl
 {
 private:
 
-  typedef GridGlue<GET1, GET2, SM>  Parent;
+  typedef GridGlue<GET1, GET2>  Parent;
 
   typedef typename Parent::DomainGridView DomainGridView;
 
@@ -196,19 +196,18 @@ public:
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   BUILDER IMPL   */
 /*   (Specialization for two "surface" grids)                             */
 
-template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM>
-class GridGlue<GET1, GET2, SM>::BuilderImpl<
+template<typename GET1, typename GET2>
+template<typename BGET1, typename BGET2>
+class GridGlue<GET1, GET2>::BuilderImpl<
     BGET1,
     BGET2,
-    BSM,
     1,  // codim1
     1   // codim2
     >
 {
 private:
 
-  typedef GridGlue<GET1, GET2, SM>  Parent;
+  typedef GridGlue<GET1, GET2>  Parent;
 
   typedef typename Parent::DomainGridView DomainGridView;
 
@@ -399,13 +398,13 @@ public:
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   BUILDER IMPL    */
 /*   (Specialization for a "surface" and a "non-surface" grid (order!)     */
 
-template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, int extractorCodim2>
-class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, 1, extractorCodim2>
+template<typename GET1, typename GET2>
+template<typename BGET1, typename BGET2, int extractorCodim2>
+class GridGlue<GET1, GET2>::BuilderImpl<BGET1, BGET2, 1, extractorCodim2>
 {
 private:
 
-  typedef GridGlue<GET1, GET2, SM>  Parent;
+  typedef GridGlue<GET1, GET2>  Parent;
 
   typedef typename Parent::DomainGridView DomainGridView;
 
@@ -597,13 +596,13 @@ public:
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   BUILDER IMPL   */
 /*  (Specialization for a "non-surface" and a "surface" grid (order!)     */
 
-template<typename GET1, typename GET2, typename SM>
-template<typename BGET1, typename BGET2, typename BSM, int codim1>
-class GridGlue<GET1, GET2, SM>::BuilderImpl<BGET1, BGET2, BSM, codim1, 1>
+template<typename GET1, typename GET2>
+template<typename BGET1, typename BGET2, int extractorCodim1>
+class GridGlue<GET1, GET2>::BuilderImpl<BGET1, BGET2, extractorCodim1, 1>
 {
 private:
 
-  typedef GridGlue<GET1, GET2, SM>  Parent;
+  typedef GridGlue<GET1, GET2>  Parent;
 
   typedef typename Parent::DomainGridView DomainGridView;
 

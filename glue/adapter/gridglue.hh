@@ -49,15 +49,7 @@
  * has to be a model of GridExtractionTraitsConcept
  * @tparam SM the surface merging class, has to be a model of the SurfaceMergeConcept
  */
-template<
-    typename GET1,
-    typename GET2,
-    typename SM =
-      PSurfaceMerge<
-          GET1::GridView::dimensionworld + static_cast<int>(GET1::GridView::dimensionworld == static_cast<int>(GET1::dimS)),
-          typename GET1::GridView::Grid::ctype
-          >
-    >
+template<typename GET1, typename GET2>
 class GridGlue
 {
 private:
@@ -77,10 +69,10 @@ private:
 
   /*   P R I V A T E   T Y P E S   */
 
-  typedef GridGlue<GET1, GET2, SM> This;
+  typedef GridGlue<GET1, GET2> This;
 public:
   /** \todo Please doc me! */
-  template<typename BSET1, typename BSET2, typename BSM, int codim1, int codim2>
+  template<typename BSET1, typename BSET2, int codim1, int codim2>
   class BuilderImpl;
 
   class RemoteIntersectionImpl;
@@ -182,17 +174,14 @@ public:
 #ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
   typedef typename SurfaceMerge<SM>::ModelType Merger;
-#else
-  /** \todo Please doc me! */
-  typedef SM Merger;
 #endif
 
 #ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
-  typedef BuilderImpl<GET1, GET2, SM, DomainExtractor::type, TargetExtractor::type>  Builder;
+  typedef BuilderImpl<GET1, GET2, DomainExtractor::type, TargetExtractor::type>  Builder;
 #else
   /** \todo Please doc me! */
-  typedef BuilderImpl<GET1, GET2, SM,
+  typedef BuilderImpl<GET1, GET2,
       DomainExtractor::codim,
       TargetExtractor::codim>
   Builder;
@@ -230,7 +219,7 @@ private:
 #ifdef GRID_GLUE_USE_CONCEPTS
   SurfaceMerge<Merger>         _merg;
 #else
-  Merger*                _merg;
+  Merger<typename DomainGridType::ctype,DomainGridType::dimension>*                _merg;
 #endif
 
   /// @brief the builder utility
@@ -278,7 +267,7 @@ public:
    * @param matcher The matcher object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
-  GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger);
+  GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger<typename DomainGridType::ctype,DomainGridType::dimension>* merger);
   /*  S E T T E R S  */
 
 
@@ -324,7 +313,7 @@ public:
    * matcher and configure it before its "build" member is called.
    * @return a (non-const) reference the object
    */
-  const Merger* merger()
+  const Merger<typename DomainGridType::ctype,DomainGridType::dimension>* merger()
   {
 #ifdef GRID_GLUE_USE_CONCEPTS
     return this->_merg.getImplementation();
@@ -571,19 +560,19 @@ public:
 
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
 
-template<typename GET1, typename GET2, typename SM>
-GridGlue<GET1, GET2, SM>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger)
+template<typename GET1, typename GET2>
+GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger<typename DomainGridType::ctype,DomainGridType::dimension>* merger)
   : _domgv(gv1), _targv(gv2),
     _domext(gv1), _tarext(gv2), _merg(merger),
-    _builder(*const_cast<GridGlue<GET1, GET2, SM>*>(this)),
+    _builder(*const_cast<GridGlue<GET1, GET2>*>(this)),
     NULL_INTERSECTION(this, -1), _intersections(0, NULL_INTERSECTION)
 {
   std::cout << "GridGlue: Constructor succeeded!" << std::endl;
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-int GridGlue<GET1, GET2, SM>::domainEntityNextFace(const DomainElement& e, int index) const
+template<typename GET1, typename GET2>
+int GridGlue<GET1, GET2>::domainEntityNextFace(const DomainElement& e, int index) const
 {
   int first, count;
   // first check if the element forms a part of the extracted surface
@@ -601,8 +590,8 @@ int GridGlue<GET1, GET2, SM>::domainEntityNextFace(const DomainElement& e, int i
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-int GridGlue<GET1, GET2, SM>::targetEntityNextFace(const TargetElement& e, int index) const
+template<typename GET1, typename GET2>
+int GridGlue<GET1, GET2>::targetEntityNextFace(const TargetElement& e, int index) const
 {
   int first, count;
   // first check if the element forms a part of the extracted surface
@@ -620,15 +609,15 @@ int GridGlue<GET1, GET2, SM>::targetEntityNextFace(const TargetElement& e, int i
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-typename GridGlue<GET1, GET2, SM>::RemoteIntersectionIterator GridGlue<GET1, GET2, SM>::iremotebegin() const
+template<typename GET1, typename GET2>
+typename GridGlue<GET1, GET2>::RemoteIntersectionIterator GridGlue<GET1, GET2>::iremotebegin() const
 {
   return RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->_intersections[0]));
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET2, SM>::idomainbegin(const DomainElement& e, int num) const
+template<typename GET1, typename GET2>
+typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::idomainbegin(const DomainElement& e, int num) const
 {
   // first check if the element forms a part of the extracted surface
   int first, count;
@@ -668,8 +657,8 @@ typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET2, SM>::idomainbegin(const DomainElement& e) const
+template<typename GET1, typename GET2>
+typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::idomainbegin(const DomainElement& e) const
 {
   // first check if the element forms a part of the extracted surface
   int first, count;
@@ -704,8 +693,8 @@ typename GridGlue<GET1, GET2, SM>::DomainIntersectionIterator GridGlue<GET1, GET
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET2, SM>::itargetbegin(const TargetElement& e, int num) const
+template<typename GET1, typename GET2>
+typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::itargetbegin(const TargetElement& e, int num) const
 {
   // first check if the element forms a part of the extracted surface
   int first, count;
@@ -744,8 +733,8 @@ typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET
 }
 
 
-template<typename GET1, typename GET2, typename SM>
-typename GridGlue<GET1, GET2, SM>::TargetIntersectionIterator GridGlue<GET1, GET2, SM>::itargetbegin(const TargetElement& e) const
+template<typename GET1, typename GET2>
+typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::itargetbegin(const TargetElement& e) const
 {
   // first check if the element forms a part of the extracted surface
   int first, count;

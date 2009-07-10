@@ -22,12 +22,12 @@
 
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   REMOTE INTERSECTION ITERATOR IMPL   */
 
-template<typename GET1, typename GET2, typename SM>
-class GridGlue<GET1, GET2, SM>::RemoteIntersectionIteratorImpl
+template<typename GET1, typename GET2>
+class GridGlue<GET1, GET2>::RemoteIntersectionIteratorImpl
 {
 private:
 
-  typedef GridGlue<GET1, GET2, SM> Parent;
+  typedef GridGlue<GET1, GET2> Parent;
 
   //	typedef RemoteIntersectionTempl<Parent>  RemoteIntersectionImpl;
 
@@ -89,15 +89,12 @@ public:
 
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   DOMAIN INTERSECTION ITERATOR IMPL   */
 
-template<typename GET1, typename GET2, typename SM>
-class GridGlue<GET1, GET2, SM>::DomainIntersectionIteratorImpl
+template<typename GET1, typename GET2>
+class GridGlue<GET1, GET2>::DomainIntersectionIteratorImpl
 {
 private:
 
-  typedef GridGlue<GET1, GET2, SM> Parent;
-
-  //	typedef RemoteIntersectionTempl<Parent>  RemoteIntersectionImpl;
-
+  typedef GridGlue<GET1, GET2> Parent;
 
 public:
 
@@ -192,12 +189,12 @@ public:
 
 
 
-template<typename GET1, typename GET2, typename SM>
-class GridGlue<GET1, GET2, SM>::TargetIntersectionIteratorImpl
+template<typename GET1, typename GET2>
+class GridGlue<GET1, GET2>::TargetIntersectionIteratorImpl
 {
 private:
 
-  typedef GridGlue<GET1, GET2, SM> Parent;
+  typedef GridGlue<GET1, GET2> Parent;
 
 
 public:
