@@ -24,7 +24,6 @@
 
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"
-#include "../merging/SurfaceMerge.hh"
 #endif
 #include "../surfaces/gridextractor.hh"
 #include "../merging/psurfacemerge.hh"
@@ -216,11 +215,7 @@ private:
   TargetExtractor _tarext;
 
   /// @brief the surface merging utility
-#ifdef GRID_GLUE_USE_CONCEPTS
-  SurfaceMerge<Merger>         _merg;
-#else
-  Merger<typename DomainGridType::ctype,DomainGridType::dimension>*                _merg;
-#endif
+  Merger<typename DomainGridType::ctype,DomainGridType::dimension>* _merg;
 
   /// @brief the builder utility
   Builder _builder;
