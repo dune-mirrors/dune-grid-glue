@@ -67,11 +67,14 @@ public:
 
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
+  typedef Dune::array<unsigned int, simplex_corners>               SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
 
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
+  typedef typename GV::Traits::template Codim<0>::Entity Element;
+  typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
 
   // index sets and index types
   typedef typename GV::IndexSet IndexSet;
@@ -126,14 +129,14 @@ public:
    */
   struct ElementInfo
   {
-    ElementInfo(unsigned int idx_, ElementPtr& p_, unsigned int num_) : idx(idx_), num(num_), p(p_)
+    ElementInfo(unsigned int idx_, ElementPtr& p_, unsigned int f_) : idx(idx_), faces(f_), p(p_)
     {}
 
     /// @brief the index of this element's first face in the internal list of extracted faces
     unsigned int idx : 28;
 
     /// @brief the number of extracted faces for this element
-    unsigned int num : 4;
+    unsigned int faces : 4;
 
     /// @brief the entity pointer to the element
     ElementPtr p;
@@ -229,6 +232,38 @@ public:
   /** \brief Destructor frees allocated memory */
   ~Codim1Extractor();
 
+  /*  F U N C T I O N A L I T Y  */
+
+  /**
+   * @brief delete everything build up so far and free the memory
+   */
+  void clear()
+  {
+    // this is an inofficial way on how to free the memory allocated
+    // by a std::vector
+    {
+      std::vector<typename Codim1Extractor<GV>::CoordinateInfo> dummy;
+      this->_coords.swap(dummy);
+    }
+    {
+      std::vector<FaceInfo> dummy;
+      this->_faces.swap(dummy);
+    }
+
+    // first free all manually allocated vertex/element info items...
+    for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin();
+         it != this->_vtxInfo.end(); ++it)
+      if (it->second != NULL)
+        delete it->second;
+    for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin();
+         it != this->_elmtInfo.end(); ++it)
+      if (it->second != NULL)
+        delete it->second;
+    // ...then clear the maps themselves, too
+    this->_vtxInfo.clear();
+    this->_elmtInfo.clear();
+  }
+
 
   /*  G E T T E R S  */
 
@@ -256,6 +291,56 @@ public:
 
 
   /**
+   * @brief getter for the indices array
+   * It is strongly recommended not to modify its contents.
+   * Deallocation is done in this class.
+   * @return the _indices array
+   */
+  void getFaces(std::vector<SimplexTopology>& faces) const
+  {
+    faces.resize(this->_faces.size());
+    for (unsigned int i = 0; i < this->_faces.size(); ++i)
+      for (unsigned int j = 0; j < simplex_corners; ++j)
+        faces[i][j] = this->_faces[i].corners[j].idx;
+  }
+
+
+  /**
+   * @brief gets index of first face as well as the total number of faces that
+   * were extracted from this element
+   * @param e the element
+   * @param first will contain the first index if found, else -1
+   * @param count will contain the number of faces if found, else 0
+   * @return success
+   */
+  bool faceIndices(const Element& e, int& first, int& count) const
+  {
+    typename Codim1Extractor<GV>::ElementInfoMap::const_iterator it =
+      this->_elmtInfo.find(this->indexSet().template index<0>(e));
+    if (it == this->_elmtInfo.end())
+    {
+      first = -1;
+      count = 0;
+      return false;
+    }
+    // the iterator is valid, fill the out params
+    first = it->second->idx;
+    count = it->second->faces;
+    return true;
+  }
+
+
+  /**
+   * @brief gets the number face in the parent element
+   * @param index the index of the face
+   * @return if failed -1, else the index
+   */
+  int numberInSelf(unsigned int index) const
+  {
+    return index < this->_faces.size() ? this->_faces[index].num_in_parent : -1;
+  }
+
+  /**
    * @brief getter for internally used index set (grid's index set)
    * @return the index set
    */
@@ -265,6 +350,7 @@ public:
   }
 
 
+#if 0
   /**
    * @brief getter for the index of an entity of codim cc
    * @return the index specified by the grid's index set
@@ -287,7 +373,6 @@ public:
   }
 
 
-
   /**
    * @brief gets for each vertex corner of given face (by index) the number of
    * the vertex in parent element's ordering
@@ -300,6 +385,7 @@ public:
     return (index >= this->_faces.size() || corner >= simplex_corners) ?
            -1 : this->_faces[index].corners[corner].num;
   }
+#endif
 
   /**
    * @brief gets the parent element for a given face index,
@@ -314,7 +400,7 @@ public:
     return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
   }
 
-
+#if 0
   /**
    * @brief gets the vertex for a given coordinate index
    * throws an exception if index not valid
@@ -327,21 +413,14 @@ public:
       DUNE_THROW(Dune::GridError, "invalid coordinate index");
     return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
   }
-
+#endif
 };
 
 
 template<typename GV>
-Codim1Extractor<GV>::~GeneralSurfaceExtractor()
+Codim1Extractor<GV>::~Codim1Extractor()
 {
-  // only the objects that have been allocated manually have to be
-  // deallocated manually again
-  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
+  clear();
 }
 
 

@@ -74,12 +74,10 @@ public:
 
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimw>                           Coords;
-  typedef Dune::array<unsigned int, simplex_corners>               SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
-  typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
 
   typedef typename GV::IntersectionIterator IsIter;
@@ -132,62 +130,6 @@ public:
    * @param descr a descriptor that "selects" the faces to add to the surface
    */
   void update(const FaceDescriptor<GV>& descr);
-
-
-  /**
-   * @brief delete everything build up so far and free the memory
-   */
-  void clear();
-
-
-  /**
-   * @brief getter for the indices array
-   * It is strongly recommended not to modify its contents.
-   * Deallocation is done in this class.
-   * @return the _indices array
-   */
-  void getFaces(std::vector<SimplexTopology>& faces) const
-  {
-    faces.resize(this->_faces.size());
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-        faces[i][j] = this->_faces[i].corners[j].idx;
-  }
-
-
-  /**
-   * @brief gets index of first face as well as the total number of faces that
-   * were extracted from this element
-   * @param e the element
-   * @param first will contain the first index if found, else -1
-   * @param count will contain the number of faces if found, else 0
-   * @return success
-   */
-  bool faceIndices(const Element& e, int& first, int& count) const
-  {
-    typename Codim1Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->template index<0>(e));
-    if (it == this->_elmtInfo.end())
-    {
-      first = -1;
-      count = 0;
-      return false;
-    }
-    // the iterator is valid, fill the out params
-    first = it->second->idx;
-    count = it->second->num;
-    return true;
-  }
-
-
-  /**
-   * @brief gets the number face in the parent element
-   * @param index the index of the face
-   * @return if failed -1, else the index
-   */
-  int numberInSelf(unsigned int index) const
-  {
-    return index < this->_faces.size() ? this->_faces[index].num_in_parent : -1;
-  }
 
 
   /**
@@ -268,35 +210,6 @@ public:
 
 
 template<typename GV>
-void GeneralSurfaceExtractor<GV>::clear()
-{
-  // this is an inofficial way on how to free the memory allocated
-  // by a std::vector
-  {
-    std::vector<typename Codim1Extractor<GV>::CoordinateInfo> dummy;
-    this->_coords.swap(dummy);
-  }
-  {
-    std::vector<FaceInfo> dummy;
-    this->_faces.swap(dummy);
-  }
-
-  // first free all manually allocated vertex/element info items...
-  for (typename Codim1Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-  for (typename Codim1Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-  // ...then clear the maps themselves, too
-  this->_vtxInfo.clear();
-  this->_elmtInfo.clear();
-}
-
-
-
-
-template<typename GV>
 void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 {
   // free everything there is in this object
@@ -353,7 +266,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           const int face_corners = Dune::GenericReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
 
           // register the additional face(s)
-          this->_elmtInfo[eindex]->num += (face_corners - 2);
+          this->_elmtInfo[eindex]->faces += (face_corners - 2);
 
           // now we only have to care about the 3D case, i.e. a triangle face can be
           // inserted directly whereas a quadrilateral face has to be divided into two triangles
@@ -374,7 +287,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
-              IndexType vindex = this->template index<dim>(*vptr);
+              IndexType vindex = this->indexSet().template index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
               temp_faces.back().corners[i].num = vertex_number;
@@ -416,7 +329,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
-              IndexType vindex = this->template index<dim>(*vptr);
+              IndexType vindex = this->indexSet().template index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
               temp_faces.back().corners[i].num = vertex_number;
@@ -446,7 +359,6 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           case 4 :
             assert(dim == 3);
             // we have a quadrilateral here
-            VertexPtr* vptrs[4];
             unsigned int vertex_indices[4];
             unsigned int vertex_numbers[4];
 
@@ -458,8 +370,8 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
               vertex_numbers[i] = orientedSubface<dim>(gt, *sit, i);
 
               // get the vertex pointer and the index from the index set
-              vptrs[i] = new typename Codim1Extractor<GV>::VertexPtr(elit->template subEntity<dim>(vertex_numbers[i]));
-              IndexType vindex = this->template index<dim>(*(*vptrs[i]));
+              VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
+              IndexType vindex = this->indexSet().template index<dim>(*vptr);
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
@@ -467,7 +379,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
               if (vimit == this->_vtxInfo.end())
               {
                 // insert into the map
-                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, *vptrs[i]);
+                this->_vtxInfo[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, vptr);
                 // remember this vertex' index
                 vertex_indices[i] = vertex_index;
                 // increase the current index
@@ -537,36 +449,6 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     current->coord = it1->second->p->geometry().corner(0);
   }
 
-
-  //	const char prefix[] = "GeneralSurfaceExtractor: ";
-  //
-  //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
-  //	for (unsigned int i = 0; i < this->_coords.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "vtxindex=" << this->_coords[i].vtxindex << " index=" << this->_coords[i].index
-  //					<< " coord=(" << this->_coords[i].coord << ") num_faces=" << this->_coords[i].num_faces
-  //					<< " faces={");
-  //			for (unsigned int j = 0; j < this->_coords[i].num_faces; ++j)
-  //				STDOUT(" " << this->_coords[i].faces[j]);
-  //			STDOUTLN("}");
-  //		}
-  //	}
-  //
-  //	STDOUTLN("\n" << prefix << "Extracted faces (size=" << this->_faces.size() << ")");
-  //	for (unsigned int i = 0; i < this->_faces.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "parent=" << this->_faces[i].parent << " index=" << this->_faces[i].index
-  //					<< " nip=" << this->_faces[i].num_in_parent << " corners={");
-  //			for (unsigned int j = 0; j < simplex_corners; ++j)
-  //				STDOUT("(" << this->_faces[i].corners[j].idx << ", " << this->_faces[i].corners[j].num << ")");
-  //			STDOUTLN("}");
-  //		}
-  //
-  //	}
 }
 
 
