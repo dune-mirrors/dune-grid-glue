@@ -2,8 +2,8 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 mergingdir = $(includedir)/dune/glue/merging
-merging_HEADERS = ContactMappingSurfaceMerge.hh\
-	SurfaceMerge.hh\
-	SurfaceMergeConcept.hh
+merging_HEADERS = psurfacemerge.hh\
+	surfacemerge.hh\
+	surfacemergeconcept.hh
 
 include $(top_srcdir)/am/global-rules
