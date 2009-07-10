@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file PSurfaceMerge.hh
+ * @file
  * @brief
  * Standard implementation of the SurfaceMerge concept for the use in 2d and 3d.
  * Uses psurface routines to compute the merged grid  and provides access to it
@@ -24,8 +24,8 @@
  * improvements in the mapping either.
  */
 
-#ifndef PSURFACEMERGE_HH_
-#define PSURFACEMERGE_HH_
+#ifndef PSURFACEMERGE_HH
+#define PSURFACEMERGE_HH
 
 
 // This flag can be set to avoid illegal barycentric coordinates.
@@ -44,8 +44,10 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
 
-#include "../misc/geometry.hh"
-#include "../misc/multidimoctree.hh"
+#include <dune/glue/misc/geometry.hh>
+#include <dune/glue/misc/multidimoctree.hh>
+#include <dune/glue/merging/merger.hh>
+
 #include <psurface/ContactMapping.h>
 
 
@@ -56,6 +58,7 @@
  */
 template<int dim, typename T = double>
 class PSurfaceMerge
+  : public Merger<T,dim>
 {
 public:
 
@@ -353,17 +356,13 @@ public:
    * the simplices are just written to this array one after another
    * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
    * @param target_simplices just like with the domain_simplices and domain_coords
-   * @param epsilon the estimate maximum deformation for the contact oracle
-   * @param obsDirections If given this function is used to compute the normals for the vertices of domain and target.
-   * Otherwise the default algorithm is used to compute them.
    * @return TRUE <=> build successful and merged grid not empty
    */
-  bool build(
-    const std::vector<T>& domain_coords,
-    const std::vector<unsigned int>& domain_simplices,
-    const std::vector<T>& target_coords,
-    const std::vector<unsigned int>& target_simplices
-    );
+  bool build(const std::vector<T>& domain_coords,
+             const std::vector<unsigned int>& domain_simplices,
+             const std::vector<T>& target_coords,
+             const std::vector<unsigned int>& target_simplices
+             );
 
 
   /*   Q U E S T I O N I N G   T H E   M E R G E D   G R I D   */

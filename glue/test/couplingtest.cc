@@ -214,12 +214,12 @@ void testMatchingCubeGrids()
   typedef GridGlue<DomTraits,TarTraits, SurfaceMergeImpl> GlueType;
 
   SurfaceMergeImpl merger;
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), merger);
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
   VerticalFaceDescriptor<DomGridView> domdesc(1);
   VerticalFaceDescriptor<TarGridView> tardesc(1);
 
-  glue.merger().setMaxDistance(0.01);
+  merger.setMaxDistance(0.01);
 
   glue.builder().setDomainFaceDescriptor(domdesc);
   glue.builder().setTargetFaceDescriptor(tardesc);
@@ -276,12 +276,12 @@ void testNonMatchingCubeGrids()
   typedef GridGlue<DomTraits,TarTraits, SurfaceMergeImpl> GlueType;
 
   SurfaceMergeImpl merger;
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), merger);
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
   VerticalFaceDescriptor<DomGridView> domdesc(1);
   VerticalFaceDescriptor<TarGridView> tardesc(1);
 
-  glue.merger().setMaxDistance(0.01);
+  merger.setMaxDistance(0.01);
 
   glue.builder().setDomainFaceDescriptor(domdesc);
   glue.builder().setTargetFaceDescriptor(tardesc);

@@ -373,13 +373,13 @@ public:
 #endif // WRITE_TO_VTK
 
       // start the actual build process
-      this->_glue._merg.build(domcoords, domfaces, tarcoords, tarfaces);
+      this->_glue._merg->build(domcoords, domfaces, tarcoords, tarfaces);
 
       // the intersections need to be recomputed
       this->_glue.updateIntersections();
 
       // success depends on whether the merged grid is empty or not
-      return this->_glue._merg.nSimplices() != 0;
+      return this->_glue._merg->nSimplices() != 0;
     }
     catch (Dune::Exception &e)
     {
