@@ -396,20 +396,6 @@ public:
    */
   bool targetSimplexMatched(unsigned int idx) const;
 
-  //	/**
-  //	 * @brief check if given domain vertex could be matched in the merged grid
-  //	 * @param idx the index of the domain vertex
-  //	 * @return TRUE <=> contained in merged grid
-  //	 */
-  //	bool domainVertexMatched(unsigned int idx) const;
-  //
-  //	/**
-  //	 * @brief check if given target vertex could be matched in the merged grid
-  //	 * @param idx the index of the target vertex
-  //	 * @return TRUE <=> contained in merged grid
-  //	 */
-  //	bool targetVertexMatched(unsigned int idx) const;
-
 
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
 
