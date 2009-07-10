@@ -66,6 +66,11 @@ public:
     simplex_corners = dim
   };
 
+  enum
+  {
+    cube_corners = 1 << (dim-1)
+  };
+
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
@@ -86,18 +91,6 @@ public:
 
   // import typedefs from base class
   typedef typename Codim1Extractor<GV>::FaceInfo FaceInfo;
-
-private:
-
-  /************************** MEMBER VARIABLES ************************/
-
-  // these values are filled on surface extraction and can be
-  // asked by the corresponding getters
-
-  /*        Geometrical and Topological Information                */
-
-  /// @brief all information about the extracted faces
-  std::vector<FaceInfo>         _faces;
 
 public:
 
@@ -200,20 +193,6 @@ public:
 
 
   /**
-   * @brief this is a dummy
-   *
-   * Only required to ensure uniform interfaces with other extractors.
-   * @param index the index of the face
-   * @param coords local face coords
-   * @return @c coords
-   */
-  Coords toFaceCoords(unsigned int index, const Coords &coords) const
-  {
-    return coords;
-  }
-
-
-  /**
    * @brief for given barycentric coords in a simplex compute world coordinates
    *
    * If both are to be computed, element and world coordinates, then use the
@@ -286,46 +265,6 @@ public:
   template<typename CoordContainer>
   void localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const;
 
-
-  /**
-   * @brief gets for each vertex corner of given face (by index) the number of
-   * the vertex in parent element's ordering
-   * @param index the face's index
-   * @param corner the index of the corner
-   * @return -1 <=> index invalid or array not filled, else index
-   */
-  int numCornerInParent(unsigned int index, unsigned int corner) const
-  {
-    return (index >= this->_faces.size() || corner >= simplex_corners) ?
-           -1 : this->_faces[index].corners[corner].num;
-  }
-
-  /**
-   * @brief gets the parent element for a given face index,
-   * throws an exception if index not valid
-   * @param index the index of the face
-   * @return a reference to the element's stored pointer
-   */
-  const ElementPtr& element(unsigned int index) const
-  {
-    if (index >= this->_faces.size())
-      DUNE_THROW(Dune::GridError, "invalid face index");
-    return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
-  }
-
-
-  /**
-   * @brief gets the vertex for a given coordinate index
-   * throws an exception if index not valid
-   * @param index the index of the coordinate
-   * @return a reference to the vertex' stored pointer
-   */
-  const VertexPtr& vertex(unsigned int index) const
-  {
-    if (index >= this->_coords.size())
-      DUNE_THROW(Dune::GridError, "invalid coordinate index");
-    return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
-  }
 }; // end of class SimplicialSurfaceExtractor
 
 

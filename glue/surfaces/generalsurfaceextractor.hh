@@ -91,18 +91,6 @@ public:
   // import typedefs from base class
   typedef typename Codim1Extractor<GV>::FaceInfo FaceInfo;
 
-private:
-
-  /************************** MEMBER VARIABLES ************************/
-
-  // these values are filled on surface extraction and can be
-  // asked by the corresponding getters
-
-  /*        Geometrical and Topological Information                */
-
-  /// @brief all information about the extracted faces
-  std::vector<FaceInfo>         _faces;
-
 public:
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
@@ -202,35 +190,6 @@ public:
   }
 
 
-  //	/**
-  //	 * @brief transforms local triangle coordinates to quadrilateral coordinates
-  //	 *
-  //	 * Necessary because quadrilaterals on the surface are internally subdivided
-  //	 * to triangles which are ordinarily accessed with the usual local coordinates.
-  //	 * But if the geometry of the face or the element is about to be used the
-  //	 * triangle coordinates first have to be transformed to quadrilateral coordinates.
-  //	 * @param index the index of the face
-  //	 * @param coords barycentric coords
-  //	 * @return @c local face coords
-  //	 */
-  //	Dune::FieldVector<dimw-1> toFaceCoords(unsigned int index, const Coords &coords) const
-  //	{
-  //		// nothing to do for the first triangle
-  //		if (this->_faces[index].first == 1)
-  //			return coords;
-  //
-  //		// it is a "2nd" face => corners (3 2 1) i.e. ((1 1) (0 1) (1 0))
-  //		Coords result;
-  //		ctype first_coord = 1.0 - result[0] - result[1];
-  //		// point 1 = (1 0)  ->  (0 1)
-  //		// point 2 = (0 1)  ->  (1 0)
-  //		// point 3 = (0 0)  ->  (1 1)
-  //		result[0] = 1.0-coords[0];
-  //		result[1] = 1.0-coords[1];
-  //		return result;
-  //	}
-
-
   /**
    * @brief for given barycentric coords in a simplex compute world coordinates
    *
@@ -303,47 +262,6 @@ public:
    */
   template<typename CoordContainer>
   void localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const;
-
-
-  /**
-   * @brief gets for each vertex corner of given face (by index) the number of
-   * the vertex in parent element's ordering
-   * @param index the face's index
-   * @param corner the index of the corner
-   * @return -1 <=> index invalid or array not filled, else index
-   */
-  int numCornerInParent(unsigned int index, unsigned int corner) const
-  {
-    return (index >= this->_faces.size() || corner >= simplex_corners) ?
-           -1 : this->_faces[index].corners[corner].num;
-  }
-
-  /**
-   * @brief gets the parent element for a given face index,
-   * throws an exception if index not valid
-   * @param index the index of the face
-   * @return a reference to the element's stored pointer
-   */
-  const ElementPtr& element(unsigned int index) const
-  {
-    if (index >= this->_faces.size())
-      DUNE_THROW(Dune::GridError, "invalid face index");
-    return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
-  }
-
-
-  /**
-   * @brief gets the vertex for a given coordinate index
-   * throws an exception if index not valid
-   * @param index the index of the coordinate
-   * @return a reference to the vertex' stored pointer
-   */
-  const VertexPtr& vertex(unsigned int index) const
-  {
-    if (index >= this->_coords.size())
-      DUNE_THROW(Dune::GridError, "invalid coordinate index");
-    return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
-  }
 
 }; // end of class GeneralSurfaceExtractor
 

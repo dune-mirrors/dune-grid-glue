@@ -52,6 +52,17 @@ public:
   /** \brief This class extracts codim-1 stuff (surfaces) */
   enum {codim    = 1};
 
+  /// @brief compile time number of corners of surface simplices
+  enum
+  {
+    simplex_corners = dim
+  };
+
+  enum
+  {
+    cube_corners = 1 << (dim-1)
+  };
+
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
@@ -180,11 +191,13 @@ public:
   /// @brief the grid object to extract the surface from
   const GV&                                       _gv;
 
-
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the corner vertices of the extracted
   std::vector<CoordinateInfo>   _coords;
+
+  /// @brief all information about the extracted faces
+  std::vector<FaceInfo>         _faces;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
@@ -274,6 +287,46 @@ public:
   }
 
 
+
+  /**
+   * @brief gets for each vertex corner of given face (by index) the number of
+   * the vertex in parent element's ordering
+   * @param index the face's index
+   * @param corner the index of the corner
+   * @return -1 <=> index invalid or array not filled, else index
+   */
+  int numCornerInParent(unsigned int index, unsigned int corner) const
+  {
+    return (index >= this->_faces.size() || corner >= simplex_corners) ?
+           -1 : this->_faces[index].corners[corner].num;
+  }
+
+  /**
+   * @brief gets the parent element for a given face index,
+   * throws an exception if index not valid
+   * @param index the index of the face
+   * @return a reference to the element's stored pointer
+   */
+  const ElementPtr& element(unsigned int index) const
+  {
+    if (index >= this->_faces.size())
+      DUNE_THROW(Dune::GridError, "invalid face index");
+    return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
+  }
+
+
+  /**
+   * @brief gets the vertex for a given coordinate index
+   * throws an exception if index not valid
+   * @param index the index of the coordinate
+   * @return a reference to the vertex' stored pointer
+   */
+  const VertexPtr& vertex(unsigned int index) const
+  {
+    if (index >= this->_coords.size())
+      DUNE_THROW(Dune::GridError, "invalid coordinate index");
+    return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
+  }
 
 };
 
