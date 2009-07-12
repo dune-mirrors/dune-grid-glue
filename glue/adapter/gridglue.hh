@@ -170,10 +170,8 @@ public:
   /** \brief Pointer type to target grid vertices */
   typedef typename TargetGridView::Traits::template Codim<TargetGridType::dimension>::EntityPointer TargetVertexPtr;
 
-#ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
-  typedef typename SurfaceMerge<SM>::ModelType Merger;
-#endif
+  typedef ::Merger<typename DomainGridType::ctype,DomainGridType::dimension>                         Merger;
 
 #ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
@@ -215,7 +213,7 @@ private:
   TargetExtractor _tarext;
 
   /// @brief the surface merging utility
-  Merger<typename DomainGridType::ctype,DomainGridType::dimension>* _merg;
+  Merger* _merg;
 
   /// @brief the builder utility
   Builder _builder;
@@ -262,7 +260,7 @@ public:
    * @param matcher The matcher object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
-  GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger<typename DomainGridType::ctype,DomainGridType::dimension>* merger);
+  GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger);
   /*  S E T T E R S  */
 
 
@@ -308,7 +306,7 @@ public:
    * matcher and configure it before its "build" member is called.
    * @return a (non-const) reference the object
    */
-  const Merger<typename DomainGridType::ctype,DomainGridType::dimension>* merger()
+  const Merger* merger()
   {
 #ifdef GRID_GLUE_USE_CONCEPTS
     return this->_merg.getImplementation();
@@ -540,10 +538,9 @@ public:
     delete[] receivebuffer;
   }
 
-#if QUICKHACK_INDEX
-  /*
-   * @brief return an IndexSet mapping from RemoteIntersection to IndexType
-   */
+#if QUICKHACK_INDE    /*
+                       * @brief return an IndexSet mapping from RemoteIntersection to IndexType
+                       */
 
   // indexset size
   size_t indexSet_size() const
@@ -556,7 +553,7 @@ public:
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
 
 template<typename GET1, typename GET2>
-GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger<typename DomainGridType::ctype,DomainGridType::dimension>* merger)
+GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger)
   : _domgv(gv1), _targv(gv2),
     _domext(gv1), _tarext(gv2), _merg(merger),
     _builder(*const_cast<GridGlue<GET1, GET2>*>(this)),
