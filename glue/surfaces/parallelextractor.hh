@@ -81,8 +81,10 @@ private:
   std::vector<SimplexTopology> _cells;
   std::vector<GlobalID> _globalId;
 
+public:
+
   // methods
-  bool trymap (unsigned int global, unsigned int & local) const
+  bool contains (unsigned int global, unsigned int & local) const
   {
     std::map<unsigned int, unsigned int>::iterrator i = _global2local.find(global);
     if (i != data.end())
@@ -92,8 +94,6 @@ private:
     }
     return false;
   }
-
-public:
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
 
@@ -207,7 +207,7 @@ public:
   int numberInSelf(unsigned int index) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.numberInSelf(l_index);
   }
@@ -232,7 +232,7 @@ public:
   const ElementPtr& element(unsigned int index) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.element(l_index);
   }
@@ -247,7 +247,7 @@ public:
   const VertexPtr& vertex(unsigned int index) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.vertex(l_index);
   }
@@ -265,7 +265,7 @@ public:
   void globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.globalCoords(l_index, bcoords, wcoords);
   }
@@ -283,7 +283,7 @@ public:
   void localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.localCoords(l_index, bcoords, ecoords);
   }
@@ -300,7 +300,7 @@ public:
   void localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords);
   }
@@ -319,7 +319,7 @@ public:
   void globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.globalCoords(l_index, bcoords, wcoords, size);
   }
@@ -338,7 +338,7 @@ public:
   void localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.localCoords(l_index, bcoords, ecoords, size);
   }
@@ -357,7 +357,7 @@ public:
   void localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
   {
     int l_index = 0;
-    bool have = trymap(index, l_index);
+    bool have = contains(index, l_index);
     assert(have);
     return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords, size);
   }

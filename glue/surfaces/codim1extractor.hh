@@ -350,6 +350,12 @@ public:
   }
 
 
+  bool contains (unsigned int global, unsigned int & local) const
+  {
+    local = global;
+    return true;
+  }
+
 #if 0
   /**
    * @brief getter for the index of an entity of codim cc

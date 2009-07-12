@@ -195,12 +195,14 @@ public:
 
   bool hasTarget() const
   {
-    return true;
+    unsigned int localindex;
+    return this->_glue->_tarext.contains(this->_glue->_merg->domainParent(this->_index), localindex);
   }
 
   bool hasDomain() const
   {
-    return true;
+    unsigned int localindex;
+    return this->_glue->_domext.contains(this->_glue->_merg->domainParent(this->_index), localindex);
   }
 
   // obtain the type of reference element for this intersection
