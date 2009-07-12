@@ -538,9 +538,10 @@ public:
     delete[] receivebuffer;
   }
 
-#if QUICKHACK_INDE    /*
-                       * @brief return an IndexSet mapping from RemoteIntersection to IndexType
-                       */
+#if QUICKHACK_INDEX
+  /*
+   * @brief return an IndexSet mapping from RemoteIntersection to IndexType
+   */
 
   // indexset size
   size_t indexSet_size() const
