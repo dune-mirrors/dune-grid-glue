@@ -173,16 +173,8 @@ public:
   /** \todo Please doc me! */
   typedef ::Merger<typename DomainGridType::ctype,DomainGridType::dimension>                         Merger;
 
-#ifdef GRID_GLUE_USE_CONCEPTS
   /** \todo Please doc me! */
-  typedef BuilderImpl<GET1, GET2, DomainExtractor::type, TargetExtractor::type>  Builder;
-#else
-  /** \todo Please doc me! */
-  typedef BuilderImpl<GET1, GET2,
-      DomainExtractor::codim,
-      TargetExtractor::codim>
-  Builder;
-#endif
+  typedef BuilderImpl<GET1, GET2, DomainExtractor::codim, TargetExtractor::codim>                    Builder;
 
   /** \brief Type of remote intersection objects */
   typedef RemoteIntersectionInterface::RemoteIntersection<RemoteIntersectionImpl>    RemoteIntersection;
