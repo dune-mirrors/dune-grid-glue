@@ -356,9 +356,8 @@ public:
    * the simplices are just written to this array one after another
    * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
    * @param target_simplices just like with the domain_simplices and domain_coords
-   * @return TRUE <=> build successful and merged grid not empty
    */
-  bool build(const std::vector<T>& domain_coords,
+  void build(const std::vector<T>& domain_coords,
              const std::vector<unsigned int>& domain_simplices,
              const std::vector<T>& target_coords,
              const std::vector<unsigned int>& target_simplices
@@ -456,123 +455,112 @@ public:
 
 
 template<int dim, typename T>
-bool PSurfaceMerge<dim, T>::build(
+void PSurfaceMerge<dim, T>::build(
   const std::vector<T>& domain_coords,
   const std::vector<unsigned int>& domain_simplices,
   const std::vector<T>& target_coords,
   const std::vector<unsigned int>& target_simplices
   )
 {
-  try
+  // copy domain and target simplices to internal arrays
+  // (cannot keep refs since outside modification would destroy information)
+  this->_domi.resize(domain_simplices.size()/dim);
+  for (unsigned int i = 0; i < domain_simplices.size()/dim; ++i)
+    for (int j=0; j<dim; j++)
+      this->_domi[i][j] = domain_simplices[i*dim+j];
+
+  this->_tari.resize(target_simplices.size()/dim);
+  for (unsigned int i = 0; i < target_simplices.size()/dim; ++i)
+    for (int j=0; j<dim; j++)
+      this->_tari[i][j] = target_simplices[i*dim+j];
+
+  // copy the coordinates to internal arrays of coordinates
+  // (again cannot just keep refs and this representation has advantages)
+  this->_domc.resize(domain_coords.size() / dim);
+  for (unsigned int i = 0; i < this->_domc.size(); ++i)
+    for (unsigned int j = 0; j < dim; ++j)
+      this->_domc[i][j] = domain_coords[i*dim + j];
+
+  this->_tarc.resize(target_coords.size() / dim);
+  for (unsigned int i = 0; i < this->_tarc.size(); ++i)
+    for (unsigned int j = 0; j < dim; ++j)
+      this->_tarc[i][j] = target_coords[i*dim + j];
+
+  std::cout << "Building merged grid... (wait for finish!)" << std::endl;
+
+  // compute the merged grid using the psurface library
+  this->_cm.build(_domc, _domi,
+                  _tarc, _tari,
+                  this->_maxdist, this->_domnormals);
+
+  std::cout << "Finished building merged grid!" << std::endl;
+
+  // get the representation from the contact mapping object
+  std::vector<IntersectionPrimitive<float> > overlaps;
+  this->_cm.getOverlaps(overlaps);
+
+  // initialize the merged grid overlap manager
+  this->_olm.setOverlaps(overlaps);
+
+  // introduce a quadtree or octree for fast identification of domain and target
+  // vertices in the merged grid
+
+  // compute the total numbers of overlap simplex corners
+  unsigned int num_olcorners = dim * this->_olm.nOverlaps();
+
+  // re-initialize the point locator
+  Coords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
+  // compute the bounding box of the merged grid
+  typename Dune::FieldVector<Coords, dim>::size_type j;
+  typename Coords::size_type k;
+  for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
   {
-    // copy domain and target simplices to internal arrays
-    // (cannot keep refs since outside modification would destroy information)
-    this->_domi.resize(domain_simplices.size()/dim);
-    for (unsigned int i = 0; i < domain_simplices.size()/dim; ++i)
-      for (int j=0; j<dim; j++)
-        this->_domi[i][j] = domain_simplices[i*dim+j];
-
-    this->_tari.resize(target_simplices.size()/dim);
-    for (unsigned int i = 0; i < target_simplices.size()/dim; ++i)
-      for (int j=0; j<dim; j++)
-        this->_tari[i][j] = target_simplices[i*dim+j];
-
-    // copy the coordinates to internal arrays of coordinates
-    // (again cannot just keep refs and this representation has advantages)
-    this->_domc.resize(domain_coords.size() / dim);
-    for (unsigned int i = 0; i < this->_domc.size(); ++i)
-      for (unsigned int j = 0; j < dim; ++j)
-        this->_domc[i][j] = domain_coords[i*dim + j];
-
-    this->_tarc.resize(target_coords.size() / dim);
-    for (unsigned int i = 0; i < this->_tarc.size(); ++i)
-      for (unsigned int j = 0; j < dim; ++j)
-        this->_tarc[i][j] = target_coords[i*dim + j];
-
-    std::cout << "Building merged grid... (wait for finish!)" << std::endl;
-
-    // compute the merged grid using the psurface library
-    this->_cm.build(_domc, _domi,
-                    _tarc, _tari,
-                    this->_maxdist, this->_domnormals);
-
-    std::cout << "Finished building merged grid!" << std::endl;
-
-    // get the representation from the contact mapping object
-    std::vector<IntersectionPrimitive<float> > overlaps;
-    this->_cm.getOverlaps(overlaps);
-
-    // initialize the merged grid overlap manager
-    this->_olm.setOverlaps(overlaps);
-
-    // introduce a quadtree or octree for fast identification of domain and target
-    // vertices in the merged grid
-
-    // compute the total numbers of overlap simplex corners
-    unsigned int num_olcorners = dim * this->_olm.nOverlaps();
-
-    // re-initialize the point locator
-    Coords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
-    // compute the bounding box of the merged grid
-    typename Dune::FieldVector<Coords, dim>::size_type j;
-    typename Coords::size_type k;
-    for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
-    {
-      // can work with a reference here since no allocation is done in the next two loops
-      // (should save some calls to constructors)
-      const Dune::FieldVector<Coords, dim>& corners = this->simplexCorners(i);
-      for (j = 0; j < dim; ++j)
-        for (k = 0; k < dim; ++k)
-        {
-          lower[k] = std::min(lower[k], corners[j][k]);
-          upper[k] = std::max(upper[k], corners[j][k]);
-        }
-    }
-
-    // increase a little, since "upper" boundary not inside locator domain
-    /** \todo This should be scaling invariant! */
-    lower -= 0.1;
-    upper += 0.1;
-
-    // get an estimate on how many levels will be needed in the octree,
-    // the default value for max_items/cell is 10, here it will be 8
-    int max_items_per_cell = 8;
-    int levels = 1;
-    while ((num_olcorners / pow((float) (1 << dim), levels)) > max_items_per_cell)
-      levels++;
-    // ...and to be on the safe side
-    levels += 4;
-    this->_olclocator.init(typename Locator::BoxType(lower, upper), levels, max_items_per_cell);
-
-    // now fill the locator...
-
-    // first allocate the data "repository" for the locator's content is be stored outside
-    this->_olcorners.resize(num_olcorners);
-
-    // create geometry "oracle" for the overlap corner structs in the point locator
-    this->_olcgeometry = new OverlapCornerGeometry(this->_olm);
-
-    // insert the data
-    unsigned int current_index = 0;
-    for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
-    {
-      for (int corner = 0; corner < dim; ++corner)
+    // can work with a reference here since no allocation is done in the next two loops
+    // (should save some calls to constructors)
+    const Dune::FieldVector<Coords, dim>& corners = this->simplexCorners(i);
+    for (j = 0; j < dim; ++j)
+      for (k = 0; k < dim; ++k)
       {
-        this->_olcorners[current_index].idx = i;
-        this->_olcorners[current_index].corner = corner;
-        this->_olclocator.insert(&this->_olcorners[current_index], this->_olcgeometry);
-        current_index++;
+        lower[k] = std::min(lower[k], corners[j][k]);
+        upper[k] = std::max(upper[k], corners[j][k]);
       }
-    }
+  }
 
-    return true;
-  }
-  catch (...)
+  // increase a little, since "upper" boundary not inside locator domain
+  /** \todo This should be scaling invariant! */
+  lower -= 0.1;
+  upper += 0.1;
+
+  // get an estimate on how many levels will be needed in the octree,
+  // the default value for max_items/cell is 10, here it will be 8
+  int max_items_per_cell = 8;
+  int levels = 1;
+  while ((num_olcorners / pow((float) (1 << dim), levels)) > max_items_per_cell)
+    levels++;
+  // ...and to be on the safe side
+  levels += 4;
+  this->_olclocator.init(typename Locator::BoxType(lower, upper), levels, max_items_per_cell);
+
+  // now fill the locator...
+
+  // first allocate the data "repository" for the locator's content is be stored outside
+  this->_olcorners.resize(num_olcorners);
+
+  // create geometry "oracle" for the overlap corner structs in the point locator
+  this->_olcgeometry = new OverlapCornerGeometry(this->_olm);
+
+  // insert the data
+  unsigned int current_index = 0;
+  for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
   {
-    std::cerr << "PSurfaceMerge: Unknown exception occurred!" << std::endl;
+    for (int corner = 0; corner < dim; ++corner)
+    {
+      this->_olcorners[current_index].idx = i;
+      this->_olcorners[current_index].corner = corner;
+      this->_olclocator.insert(&this->_olcorners[current_index], this->_olcgeometry);
+      current_index++;
+    }
   }
-  // only arriving here after exception
-  return false;
 }
 
 

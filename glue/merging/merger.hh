@@ -26,7 +26,7 @@ public:
    * @param target_simplices just like with the domain_simplices and domain_coords
    * @return TRUE <=> build successful and merged grid not empty
    */
-  virtual bool build(const std::vector<ctype>& domain_coords,
+  virtual void build(const std::vector<ctype>& domain_coords,
                      const std::vector<unsigned int>& domain_simplices,
                      const std::vector<ctype>& target_coords,
                      const std::vector<unsigned int>& target_simplices) = 0;
