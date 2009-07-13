@@ -260,125 +260,111 @@ public:
 
   void build()
   {
-    try
+    // extract the domain surface
+    if (this->_domfacedescr != NULL)
+      this->_glue._domext.update(*this->_domfacedescr);
+    else
+      DUNE_THROW(Dune::GridError, "GridGlue::Builder : no domain surface descriptor set");
+
+    // extract the target surface
+    if (this->_tarfacedescr != NULL)
+      this->_glue._tarext.update(*this->_tarfacedescr);
+    else
+      DUNE_THROW(Dune::GridError, "GridGlue::Builder : no target surface descriptor set");
+
+    // clear the contents from the current intersections array
     {
-      // extract the domain surface
-      if (this->_domfacedescr != NULL)
-        this->_glue._domext.update(*this->_domfacedescr);
-      else
-        DUNE_THROW(Dune::GridError, "GridGlue::Builder : no domain surface descriptor set");
+      std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
+      this->_glue._intersections.swap(dummy);
+    }
 
-      // extract the target surface
-      if (this->_tarfacedescr != NULL)
-        this->_glue._tarext.update(*this->_tarfacedescr);
-      else
-        DUNE_THROW(Dune::GridError, "GridGlue::Builder : no target surface descriptor set");
+    std::vector<typename Parent::ctype> domcoords;
+    std::vector<unsigned int> domfaces;
+    std::vector<typename Parent::ctype> tarcoords;
+    std::vector<unsigned int> tarfaces;
 
-      // clear the contents from the current intersections array
+
+    // retrieve the coordinate and topology information from the extractors
+    // and apply transformations if necessary
+    {
+      std::vector<typename Parent::Coords> tempcoords;
+      std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
+
+      this->_glue._domext.getCoords(tempcoords);
+      domcoords.resize(Parent::dimw*tempcoords.size());
+      typename Parent::ctype* currentc = &domcoords[0];
+      if (this->_domtrafo != NULL)
       {
-        std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
-        this->_glue._intersections.swap(dummy);
+        for (unsigned int i = 0; i < tempcoords.size(); ++i)
+        {
+          typename Parent::Coords temp = (*this->_domtrafo)(tempcoords[i]);
+          for (int j = 0; j < Parent::dimw; ++j, ++currentc)
+            *currentc = temp[j];
+        }
+      }
+      else
+      {
+        for (unsigned int i = 0; i < tempcoords.size(); ++i)
+          for (int j = 0; j < Parent::dimw; ++j, ++currentc)
+            *currentc = tempcoords[i][j];
       }
 
-      std::vector<typename Parent::ctype> domcoords;
-      std::vector<unsigned int> domfaces;
-      std::vector<typename Parent::ctype> tarcoords;
-      std::vector<unsigned int> tarfaces;
+      this->_glue._domext.getFaces(tempfaces);
+      domfaces.resize(Parent::DomainExtractor::simplex_corners*tempfaces.size());
+      unsigned int* currentf = &domfaces[0];
+      for (unsigned int i = 0; i < tempfaces.size(); ++i)
+        for (int j = 0; j < Parent::DomainExtractor::simplex_corners; ++j, ++currentf)
+          *currentf = tempfaces[i][j];
 
-
-      // retrieve the coordinate and topology information from the extractors
-      // and apply transformations if necessary
+      this->_glue._tarext.getCoords(tempcoords);
+      tarcoords.resize(Parent::dimw*tempcoords.size());
+      currentc = &tarcoords[0];
+      if (this->_tartrafo != NULL)
       {
-        std::vector<typename Parent::Coords> tempcoords;
-        std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
-
-        this->_glue._domext.getCoords(tempcoords);
-        domcoords.resize(Parent::dimw*tempcoords.size());
-        typename Parent::ctype* currentc = &domcoords[0];
-        if (this->_domtrafo != NULL)
+        for (unsigned int i = 0; i < tempcoords.size(); ++i)
         {
-          for (unsigned int i = 0; i < tempcoords.size(); ++i)
-          {
-            typename Parent::Coords temp = (*this->_domtrafo)(tempcoords[i]);
-            for (int j = 0; j < Parent::dimw; ++j, ++currentc)
-              *currentc = temp[j];
-          }
+          typename Parent::Coords temp = (*this->_tartrafo)(tempcoords[i]);
+          for (int j = 0; j < Parent::dimw; ++j, ++currentc)
+            *currentc = temp[j];
         }
-        else
-        {
-          for (unsigned int i = 0; i < tempcoords.size(); ++i)
-            for (int j = 0; j < Parent::dimw; ++j, ++currentc)
-              *currentc = tempcoords[i][j];
-        }
-
-        this->_glue._domext.getFaces(tempfaces);
-        domfaces.resize(Parent::DomainExtractor::simplex_corners*tempfaces.size());
-        unsigned int* currentf = &domfaces[0];
-        for (unsigned int i = 0; i < tempfaces.size(); ++i)
-          for (int j = 0; j < Parent::DomainExtractor::simplex_corners; ++j, ++currentf)
-            *currentf = tempfaces[i][j];
-
-        this->_glue._tarext.getCoords(tempcoords);
-        tarcoords.resize(Parent::dimw*tempcoords.size());
-        currentc = &tarcoords[0];
-        if (this->_tartrafo != NULL)
-        {
-          for (unsigned int i = 0; i < tempcoords.size(); ++i)
-          {
-            typename Parent::Coords temp = (*this->_tartrafo)(tempcoords[i]);
-            for (int j = 0; j < Parent::dimw; ++j, ++currentc)
-              *currentc = temp[j];
-          }
-        }
-        else
-        {
-          for (unsigned int i = 0; i < tempcoords.size(); ++i)
-            for (int j = 0; j < Parent::dimw; ++j, ++currentc)
-              *currentc = tempcoords[i][j];
-        }
-
-        this->_glue._tarext.getFaces(tempfaces);
-        tarfaces.resize(Parent::TargetExtractor::simplex_corners*tempfaces.size());
-        currentf = &tarfaces[0];
-        for (unsigned int i = 0; i < tempfaces.size(); ++i)
-          for (int j = 0; j < Parent::TargetExtractor::simplex_corners; ++j, ++currentf)
-            *currentf = tempfaces[i][j];
       }
+      else
+      {
+        for (unsigned int i = 0; i < tempcoords.size(); ++i)
+          for (int j = 0; j < Parent::dimw; ++j, ++currentc)
+            *currentc = tempcoords[i][j];
+      }
+
+      this->_glue._tarext.getFaces(tempfaces);
+      tarfaces.resize(Parent::TargetExtractor::simplex_corners*tempfaces.size());
+      currentf = &tarfaces[0];
+      for (unsigned int i = 0; i < tempfaces.size(); ++i)
+        for (int j = 0; j < Parent::TargetExtractor::simplex_corners; ++j, ++currentf)
+          *currentf = tempfaces[i][j];
+    }
 
 #ifdef WRITE_TO_VTK
-      const int dimw = Parent::dimw;
-      const char prefix[] = "Builder<surface, surface::build() : ";
-      const char domainsurf[] = "/tmp/vtk-domain-test";
-      const char targetsurf[] = "/tmp/vtk-target-test";
+    const int dimw = Parent::dimw;
+    const char prefix[] = "Builder<surface, surface::build() : ";
+    const char domainsurf[] = "/tmp/vtk-domain-test";
+    const char targetsurf[] = "/tmp/vtk-target-test";
 
-      STDOUTLN(prefix << "Writing domain surface to '" << domainsurf << ".vtk'...");
-      VtkSurfaceWriter vtksw(domainsurf);
-      vtksw.writeSurface(domcoords, domfaces, dimw, dimw);
-      STDOUTLN(prefix << "Done writing domain surface!");
+    STDOUTLN(prefix << "Writing domain surface to '" << domainsurf << ".vtk'...");
+    VtkSurfaceWriter vtksw(domainsurf);
+    vtksw.writeSurface(domcoords, domfaces, dimw, dimw);
+    STDOUTLN(prefix << "Done writing domain surface!");
 
-      STDOUTLN(prefix << "Writing target surface to '" << targetsurf << ".vtk'...");
-      vtksw.setFilename(targetsurf);
-      vtksw.writeSurface(tarcoords, tarfaces, dimw, dimw);
-      STDOUTLN(prefix << "Done writing target surface!");
+    STDOUTLN(prefix << "Writing target surface to '" << targetsurf << ".vtk'...");
+    vtksw.setFilename(targetsurf);
+    vtksw.writeSurface(tarcoords, tarfaces, dimw, dimw);
+    STDOUTLN(prefix << "Done writing target surface!");
 #endif // WRITE_TO_VTK
 
-      // start the actual build process
-      this->_glue._merg->build(domcoords, domfaces, tarcoords, tarfaces);
+    // start the actual build process
+    this->_glue._merg->build(domcoords, domfaces, tarcoords, tarfaces);
 
-      // the intersections need to be recomputed
-      this->_glue.updateIntersections();
-
-    }
-    catch (Dune::Exception &e)
-    {
-      std::cerr << "GridGlue::Builder::build : Dune reported error: " << e << std::endl;
-    }
-    catch (...)
-    {
-      std::cerr << "GridGlue::Builder::build : Unknown exception occurred!" << std::endl;
-
-    }
-
+    // the intersections need to be recomputed
+    this->_glue.updateIntersections();
   }
 };
 
