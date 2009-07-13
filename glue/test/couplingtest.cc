@@ -221,8 +221,8 @@ void testMatchingCubeGrids()
 
   merger.setMaxDistance(0.01);
 
-  glue.builder().setDomainFaceDescriptor(domdesc);
-  glue.builder().setTargetFaceDescriptor(tardesc);
+  glue.builder().setDomainDescriptor(domdesc);
+  glue.builder().setTargetDescriptor(tardesc);
 
   glue.builder().build();
 
@@ -282,8 +282,8 @@ void testNonMatchingCubeGrids()
 
   merger.setMaxDistance(0.01);
 
-  glue.builder().setDomainFaceDescriptor(domdesc);
-  glue.builder().setTargetFaceDescriptor(tardesc);
+  glue.builder().setDomainDescriptor(domdesc);
+  glue.builder().setTargetDescriptor(tardesc);
 
   glue.builder().build();
 
@@ -345,8 +345,8 @@ void test1d2dCoupling()
 
   glue.merger().setMaxDistance(0.01);
 
-  glue.builder().setDomainFaceDescriptor(domdesc);
-  glue.builder().setTargetElementDescriptor(tardesc);
+  glue.builder().setDomainDescriptor(domdesc);
+  glue.builder().setTargetDescriptor(tardesc);
 
   if (!glue.builder().build())
     DUNE_THROW(Dune::GridError, "Gluing failed!");
