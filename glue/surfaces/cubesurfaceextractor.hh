@@ -78,7 +78,8 @@ public:
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
-  typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
+  static const Dune::PartitionIteratorType PType = Dune::All_Partition;
+  typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
 
   typedef typename GV::IntersectionIterator IsIter;
 
@@ -236,9 +237,9 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
     std::deque<FaceInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
-    for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
+    for (ElementIter elit = this->_gv.template begin<0, PType>();
+         elit != this->_gv.template end<0, PType>(); ++elit)
     {
-
       // remember the indices of the faces that shall become
       // part of the surface
       std::set<int> boundary_faces;
@@ -257,7 +258,6 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
           boundary_faces.insert(is->indexInInside());
 
         }
-
       }
 
       // if some face is part of the surface add it!
