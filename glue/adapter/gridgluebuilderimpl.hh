@@ -58,7 +58,7 @@ private:
 
   typedef typename ExtractorTypeTraits<DomainGridView, codim1>::Type DomainDescriptor;
 
-  typedef typename ExtractorTypeTraits<DomainGridView, codim2>::Type TargetDescriptor;
+  typedef typename ExtractorTypeTraits<TargetGridView, codim2>::Type TargetDescriptor;
 
   const DomainDescriptor*                   _domelmntdescr;
 
@@ -87,6 +87,7 @@ private:
       for (size_t i = 0; i < tempcoords.size(); ++i)
       {
         typename Parent::Coords temp = (*trafo)(tempcoords[i]);
+        std::cout << "coords: " << temp << "\n";
         for (size_t j = 0; j < Parent::dimw; ++j)
           coords.push_back(temp[j]);
       }
@@ -94,8 +95,11 @@ private:
     else
     {
       for (unsigned int i = 0; i < tempcoords.size(); ++i)
+      {
+        std::cout << "coords: " << tempcoords[i] << "\n";
         for (size_t j = 0; j < Parent::dimw; ++j)
           coords.push_back(tempcoords[i][j]);
+      }
     }
 
     ext.getFaces(tempfaces);

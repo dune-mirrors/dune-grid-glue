@@ -132,7 +132,7 @@ public:
         (must be the same for both extractors!) */
     dimw = DomainExtractor::dimw
   };
-  dune_static_assert(DomainExtractor::dimw == TargetExtractor::dimw,
+  dune_static_assert((int)DomainExtractor::dimw == (int)TargetExtractor::dimw,
                      "world dimension must be the same for both extractors!");
 
   /** \brief The type used for coordinates
