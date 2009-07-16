@@ -29,6 +29,7 @@
 #include "cubesurfaceextractor.hh"
 #include "cubemeshextractor.hh"
 #include "generalsurfaceextractor.hh"
+#include "parallelextractor.hh"
 
 
 /**
@@ -67,17 +68,47 @@ private:
   struct Helper
   {};
 
+  template<typename EXTR, bool parallel>
+  struct ParallelHelper
+  {};
 
 public:
 
   /// @brief export the type of the deduced extractor
 #ifdef GRID_GLUE_USE_CONCEPTS
-  typedef GridExtractor<typename Helper<GSET, GSET::GridView::dimension, GSET::dimS, GSET::mesh>::ExtractorType>  ExtractorType;
+  typedef
+  typename ParallelHelper<
+      typename Helper<GSET, GSET::GridView::dimension, GSET::dimS, GSET::mesh>::ExtractorType,
+      GSET::parallel
+      >::ExtractorType
+  _ExtractorType;
+  typedef GridExtractor<_ExtractorType>  ExtractorType;
 #else
-  typedef typename Helper<GSET, GSET::GridView::dimension, GSET::dimS, GSET::mesh>::ExtractorType ExtractorType;
+  typedef
+  typename ParallelHelper<
+      typename Helper<GSET, GSET::GridView::dimension, GSET::dimS, GSET::mesh>::ExtractorType,
+      GSET::parallel
+      >::ExtractorType
+  ExtractorType;
 #endif
 };
 
+/*   S P E C I A L I Z A T I O N   F O R   P A R A L L E L    E X T R A C T O R   */
+/*   --------------------------------------------------------------------------   */
+
+template<typename GSET>
+template<typename EXTR>
+struct ExtractorSelector<GSET>::ParallelHelper<EXTR, false>
+{
+  typedef EXTR ExtractorType;
+};
+
+template<typename GSET>
+template<typename EXTR>
+struct ExtractorSelector<GSET>::ParallelHelper<EXTR, true>
+{
+  typedef ParallelExtractor<EXTR> ExtractorType;
+};
 
 /*   S P E C I A L I Z A T I O N   F O R   S U R F A C E   E X T R A C T I O  N   */
 /*   --------------------------------------------------------------------------   */

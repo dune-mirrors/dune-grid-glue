@@ -67,7 +67,7 @@ private:
  * deducing the "right" specialization of the GridMeshTraits struct is not possible for the compiler!
  * Remove the explicit MeshType argument in that case and you're fine.
  */
-template<typename GV, bool extract_mesh = false, MeshClassification::MeshType mtype = MeshClassification::hybrid>
+template<typename GV, bool extract_mesh = false, MeshClassification::MeshType mtype = MeshClassification::hybrid, bool par=false>
 struct DefaultExtractionTraits
 {
   /// @brief the grid's type
@@ -78,6 +78,9 @@ struct DefaultExtractionTraits
 
   /// @brief determines the type of the extractor used
   static const MeshClassification::MeshType mesh = mtype;
+
+  /// @brief is this a parallel mesh?
+  static const bool parallel = par;
 };
 
 

@@ -50,16 +50,17 @@ public:
   // retrieve typedefs etc. from LocalExtractor
   enum { dimworld = LX::dimworld };
   enum { dim      = LX::dim };
+  enum { dimw     = LX::dimw };
   enum { codim    = LX::codim };
+  enum { simplex_corners = LX::simplex_corners };
 
-  typedef LX::GridView GridView;
-  typedef LX::Coords Coords;
-  typedef LX::GridView GridView;
-  typedef LX::GridView GridView;
+  typedef typename LX::GridView GV;
+  typedef typename LX::GridView GridView;
+  typedef typename LX::Coords Coords;
 
   typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dimworld>                       Coords;
-  typedef Dune::array<unsigned int, simplex_corners>               SimplexTopology;
+  typedef typename LX::SimplexTopology SimplexTopology;
+  typedef typename LX::FaceInfo FaceInfo;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
@@ -72,22 +73,25 @@ public:
   typedef typename GV::IndexSet IndexSet;
   typedef typename IndexSet::IndexType IndexType;
 
+  typedef typename GV::Grid::GlobalIdSet::IdType GlobalId;
+
 private:
 
-  LX & _lx;
+  LX _lx;
+  std::vector<unsigned int>  _local2global;
   std::map<unsigned int, unsigned int>  _global2local;
   // global data
   std::vector<Coords> _coords;
-  std::vector<SimplexTopology> _cells;
-  std::vector<GlobalID> _globalId;
+  std::vector<SimplexTopology> _faces;
+  std::vector<GlobalId> _globalId;
 
 public:
 
   // methods
   bool contains (unsigned int global, unsigned int & local) const
   {
-    std::map<unsigned int, unsigned int>::iterrator i = _global2local.find(global);
-    if (i != data.end())
+    std::map<unsigned int, unsigned int>::const_iterator i = _global2local.find(global);
+    if (i != _global2local.end())
     {
       local = i->second;
       return true;
@@ -101,8 +105,8 @@ public:
    * @brief Constructor
    * @param gv the grid view object to work with
    */
-  ParallelExtractor(const LX& lx)
-    :  _lx(lx)
+  ParallelExtractor(const GV& gv)
+    :  _lx(gv)
   {}
 
   /** \brief Destructor frees allocated memory */
@@ -118,8 +122,8 @@ public:
    */
   void clear()
   {
-    map.clear();
-    assert(false);     // actually it would be a bit strange to call clear of the parallel extractor.
+    _lx.clear();
+    _global2local.clear();
   }
 
   // TODO: doku, get Descriptor Type from LX
@@ -185,17 +189,13 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    typename Codim1Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->template index<0>(e));
-    if (it == this->_elmtInfo.end())
+    if (_lx.faceIndices(e, first, count))
     {
-      first = -1;
-      count = 0;
-      return false;
+      // convert local index to global index
+      first = _local2global[first];
+      return true;
     }
-    // the iterator is valid, fill the out params
-    first = it->second->idx;
-    count = it->second->faces;
-    return true;
+    return false;
   }
 
 
@@ -206,7 +206,7 @@ public:
    */
   int numberInSelf(unsigned int index) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.numberInSelf(l_index);
@@ -231,7 +231,7 @@ public:
    */
   const ElementPtr& element(unsigned int index) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.element(l_index);
@@ -246,7 +246,7 @@ public:
    */
   const VertexPtr& vertex(unsigned int index) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.vertex(l_index);
@@ -264,7 +264,7 @@ public:
    */
   void globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.globalCoords(l_index, bcoords, wcoords);
@@ -282,7 +282,7 @@ public:
    */
   void localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.localCoords(l_index, bcoords, ecoords);
@@ -299,7 +299,7 @@ public:
    */
   void localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords);
@@ -318,7 +318,7 @@ public:
   template<typename CoordContainer>
   void globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.globalCoords(l_index, bcoords, wcoords, size);
@@ -356,7 +356,7 @@ public:
   template<typename CoordContainer>
   void localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
   {
-    int l_index = 0;
+    unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
     return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords, size);
