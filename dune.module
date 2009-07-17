@@ -6,4 +6,4 @@ Module: dune-grid-glue
 Version: 0.1
 Maintainer: elchupacabra@gmx.de
 #depending on
-Depends: dune-common dune-grid
+Depends: dune-common dune-grid dune-istl

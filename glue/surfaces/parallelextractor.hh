@@ -29,8 +29,8 @@
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
 
-
-
+#include <dune/common/collectivecommunication.hh>
+#include <stdlib.h>
 
 /**
  * @brief provides static methods for grid surface extraction
@@ -58,6 +58,7 @@ public:
   typedef typename LX::GridView GridView;
   typedef typename LX::Coords Coords;
 
+  typedef typename GV::Grid Grid;
   typedef typename GV::Grid::ctype ctype;
   typedef typename LX::SimplexTopology SimplexTopology;
   typedef typename LX::FaceInfo FaceInfo;
@@ -75,28 +76,68 @@ public:
 
   typedef typename GV::Grid::GlobalIdSet::IdType GlobalId;
 
+  // types for the global setup
+  struct GlobalCoordInfo
+  {
+    Coords c;
+    GlobalId i;
+    bool valid;
+
+    GlobalCoordInfo() : valid(false) {}
+
+    bool operator < (const GlobalCoordInfo & other) const
+    {
+      return valid && (!other.valid || i < other.i);
+      if (!valid) return false;
+      if (!other.valid) return true;
+      return i < other.i;
+    }
+
+    bool operator == (const GlobalCoordInfo & other) const
+    {
+      return (! valid && ! other.valid) || i == other.i;
+    }
+  };
+  typedef Dune::array<GlobalId, simplex_corners> GlobalSimplexTopology;
+  struct GlobalFaceInfo
+  {
+    GlobalSimplexTopology v;
+    GlobalId i;
+    bool valid;
+
+    GlobalFaceInfo() : valid(false) {}
+
+    bool operator < (const GlobalFaceInfo & other) const
+    {
+      if (!valid) return false;
+      if (!other.valid) return true;
+      return i < other.i;
+    }
+
+    bool operator == (const GlobalFaceInfo & other) const
+    {
+      return (! valid && ! other.valid) || i == other.i;
+    }
+  };
+
 private:
 
+  const GV& _gv;
   LX _lx;
   std::vector<unsigned int>  _local2global;
-  std::map<unsigned int, unsigned int>  _global2local;
+  std::vector<unsigned int>  _global2local;
   // global data
   std::vector<Coords> _coords;
   std::vector<SimplexTopology> _faces;
-  std::vector<GlobalId> _globalId;
+  std::vector<GlobalId> _faceId;
 
 public:
 
   // methods
   bool contains (unsigned int global, unsigned int & local) const
   {
-    std::map<unsigned int, unsigned int>::const_iterator i = _global2local.find(global);
-    if (i != _global2local.end())
-    {
-      local = i->second;
-      return true;
-    }
-    return false;
+    local = _global2local[global];
+    return (local != (unsigned int)(-1));
   }
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
@@ -106,7 +147,7 @@ public:
    * @param gv the grid view object to work with
    */
   ParallelExtractor(const GV& gv)
-    :  _lx(gv)
+    :  _gv(gv), _lx(gv)
   {}
 
   /** \brief Destructor frees allocated memory */
@@ -130,13 +171,124 @@ public:
   template<typename Descriptor>
   void update(const Descriptor& descr)
   {
+    // setup local extractor
     _lx.update(descr);
-    _lx.getCoords(_coords);
-    _lx.getFaces(_faces);
 
-    // TODO: communicate coordinates
-    // TODO: communicate elements
-    // TODO: set parallel info for elements
+    // obtain local data
+    std::vector<GlobalCoordInfo> localCoordInfos;
+    std::vector<GlobalFaceInfo> localFaceInfos;
+
+    // get vertex data
+    {
+      std::vector<Coords> coords;
+      _lx.getCoords(coords);
+      localCoordInfos.resize(coords.size());
+      for (unsigned int i=0; i<coords.size(); i++)
+      {
+        localCoordInfos[i].c = coords[i];
+        localCoordInfos[i].i = _gv.grid().globalIdSet().id(* _lx.vertex(i));
+        localCoordInfos[i].valid = true;
+      }
+    }
+
+    // get face data
+    {
+      std::vector<SimplexTopology> faces;
+      _lx.getFaces(faces);
+      localFaceInfos.resize(faces.size());
+      for (unsigned int i=0; i<faces.size(); i++)
+      {
+        for (int v=0; v<simplex_corners; v++)
+        {
+          localFaceInfos[i].v[v] = localCoordInfos[faces[i][v]].i;
+        }
+        localFaceInfos[i].i = _gv.grid().globalIdSet().id(* _lx.element(i));
+        localFaceInfos[i].valid = true;
+      }
+    }
+
+    // merge parallel data
+    std::vector<GlobalCoordInfo> mergedCoordInfos;
+    std::vector<GlobalFaceInfo>  mergedFaceInfos;
+
+    // communicate coordinates
+    // TODO: use more efficient communication
+    typedef typename Grid::CollectiveCommunication Comm;
+    const Comm & comm = _gv.grid().comm();
+
+    size_t mergedCoordLocalSize = localCoordInfos.size();
+    mergedCoordLocalSize = comm.max(mergedCoordLocalSize) + 2;
+    size_t mergedCoordSize = mergedCoordLocalSize * comm.size();;
+    mergedCoordInfos.resize(mergedCoordSize);
+    MPI_Allgather(&localCoordInfos[0], localCoordInfos.size(),
+                  Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(),
+                  &mergedCoordInfos[0], mergedCoordLocalSize,
+                  Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(), comm);
+
+    // communicate faces
+    // TODO: use more efficient communication
+    size_t mergedFaceLocalSize = localFaceInfos.size();
+    mergedFaceLocalSize = comm.max(mergedFaceLocalSize);
+    size_t mergedFaceSize = mergedFaceLocalSize * comm.size();
+    mergedFaceInfos.resize(mergedFaceSize);
+    MPI_Allgather(&localFaceInfos[0], localFaceInfos.size(),
+                  Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(),
+                  &mergedFaceInfos[0], mergedFaceLocalSize,
+                  Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(), comm);
+
+    // sort and shrink vectors
+    {
+      std::sort(mergedCoordInfos.begin(), mergedCoordInfos.end());
+      typename std::vector<GlobalCoordInfo>::iterator where =
+        std::unique(mergedCoordInfos.begin(), mergedCoordInfos.end());
+      --where;
+      while(where->valid == false) --where;
+      ++where;
+      mergedCoordInfos.erase(where, mergedCoordInfos.end());
+    }
+    assert(mergedCoordInfos.front().valid == true);
+    mergedCoordSize = mergedCoordInfos.size();
+
+    std::sort(mergedFaceInfos.begin(), mergedFaceInfos.end());
+    {
+      typename std::vector<GlobalFaceInfo>::iterator where =
+        std::unique(mergedFaceInfos.begin(), mergedFaceInfos.end());
+      --where;
+      while(where->valid == false) --where;
+      ++where;
+      mergedFaceInfos.erase(where, mergedFaceInfos.end());
+    }
+    mergedFaceSize = mergedFaceInfos.size();
+
+    // setup parallel coords and faces
+    {
+      std::map<GlobalId, unsigned int> coordIndex;       // quick access to vertex index, give an ID
+      _coords.resize(mergedCoordSize);
+      _faces.resize(mergedFaceSize);
+      _faceId.resize(mergedFaceSize);
+
+      for (size_t c=0; c<mergedCoordSize; ++c)
+      {
+        coordIndex[mergedCoordInfos[c].i] = c;
+        _coords[c] = mergedCoordInfos[c].c;
+      }
+
+      for (size_t f=0; f<mergedFaceSize; ++f)
+      {
+        for (size_t c=0; c<simplex_corners; ++c)
+          _faces[f][c] = coordIndex[mergedFaceInfos[f].v[c]];
+        _faceId[f] = mergedFaceInfos[f].i;
+      }
+    }
+
+    // TODO: setup local/global mappings
+    _global2local.resize(localFaceInfos.size());
+    _local2global.resize(localFaceInfos.size());
+    for (unsigned int i = 0; i<localFaceInfos.size(); i++)
+    {
+      _local2global[i] = i;
+      _global2local[i] = i;
+    }
   };
 
   /*  G E T T E R S  */

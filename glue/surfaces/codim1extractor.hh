@@ -406,7 +406,7 @@ public:
     return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
   }
 
-#if 0
+#if 1
   /**
    * @brief gets the vertex for a given coordinate index
    * throws an exception if index not valid
