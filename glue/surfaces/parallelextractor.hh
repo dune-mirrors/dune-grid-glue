@@ -208,86 +208,113 @@ public:
     }
 
     // merge parallel data
-    std::vector<GlobalCoordInfo> mergedCoordInfos;
-    std::vector<GlobalFaceInfo>  mergedFaceInfos;
+    std::vector<GlobalCoordInfo> globalCoordInfos;
+    std::vector<GlobalFaceInfo>  globalFaceInfos;
 
     // communicate coordinates
     // TODO: use more efficient communication
     typedef typename Grid::CollectiveCommunication Comm;
     const Comm & comm = _gv.grid().comm();
 
-    size_t mergedCoordLocalSize = localCoordInfos.size();
-    mergedCoordLocalSize = comm.max(mergedCoordLocalSize) + 2;
-    size_t mergedCoordSize = mergedCoordLocalSize * comm.size();;
-    mergedCoordInfos.resize(mergedCoordSize);
+    size_t globalCoordLocalSize = localCoordInfos.size();
+    globalCoordLocalSize = comm.max(globalCoordLocalSize) + 2;
+    size_t globalCoordSize = globalCoordLocalSize * comm.size();;
+    globalCoordInfos.resize(globalCoordSize);
     MPI_Allgather(&localCoordInfos[0], localCoordInfos.size(),
                   Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(),
-                  &mergedCoordInfos[0], mergedCoordLocalSize,
+                  &globalCoordInfos[0], globalCoordLocalSize,
                   Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(), comm);
 
     // communicate faces
     // TODO: use more efficient communication
-    size_t mergedFaceLocalSize = localFaceInfos.size();
-    mergedFaceLocalSize = comm.max(mergedFaceLocalSize);
-    size_t mergedFaceSize = mergedFaceLocalSize * comm.size();
-    mergedFaceInfos.resize(mergedFaceSize);
+    size_t globalFaceLocalSize = localFaceInfos.size();
+    globalFaceLocalSize = comm.max(globalFaceLocalSize);
+    size_t globalFaceSize = globalFaceLocalSize * comm.size();
+    globalFaceInfos.resize(globalFaceSize);
     MPI_Allgather(&localFaceInfos[0], localFaceInfos.size(),
                   Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(),
-                  &mergedFaceInfos[0], mergedFaceLocalSize,
+                  &globalFaceInfos[0], globalFaceLocalSize,
                   Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(), comm);
 
     // sort and shrink vectors
     {
-      std::sort(mergedCoordInfos.begin(), mergedCoordInfos.end());
+      std::sort(globalCoordInfos.begin(), globalCoordInfos.end());
       typename std::vector<GlobalCoordInfo>::iterator where =
-        std::unique(mergedCoordInfos.begin(), mergedCoordInfos.end());
+        std::unique(globalCoordInfos.begin(), globalCoordInfos.end());
       --where;
       while(where->valid == false) --where;
       ++where;
-      mergedCoordInfos.erase(where, mergedCoordInfos.end());
+      globalCoordInfos.erase(where, globalCoordInfos.end());
     }
-    assert(mergedCoordInfos.front().valid == true);
-    mergedCoordSize = mergedCoordInfos.size();
+    assert(globalCoordInfos.front().valid == true);
+    globalCoordSize = globalCoordInfos.size();
 
-    std::sort(mergedFaceInfos.begin(), mergedFaceInfos.end());
+    std::sort(globalFaceInfos.begin(), globalFaceInfos.end());
     {
       typename std::vector<GlobalFaceInfo>::iterator where =
-        std::unique(mergedFaceInfos.begin(), mergedFaceInfos.end());
+        std::unique(globalFaceInfos.begin(), globalFaceInfos.end());
       --where;
       while(where->valid == false) --where;
       ++where;
-      mergedFaceInfos.erase(where, mergedFaceInfos.end());
+      globalFaceInfos.erase(where, globalFaceInfos.end());
     }
-    mergedFaceSize = mergedFaceInfos.size();
+    globalFaceSize = globalFaceInfos.size();
 
     // setup parallel coords and faces
     {
       std::map<GlobalId, unsigned int> coordIndex;       // quick access to vertex index, give an ID
-      _coords.resize(mergedCoordSize);
-      _faces.resize(mergedFaceSize);
-      _faceId.resize(mergedFaceSize);
+      _coords.resize(globalCoordSize);
+      _faces.resize(globalFaceSize);
+      _faceId.resize(globalFaceSize);
 
-      for (size_t c=0; c<mergedCoordSize; ++c)
+      for (size_t c=0; c<globalCoordSize; ++c)
       {
-        coordIndex[mergedCoordInfos[c].i] = c;
-        _coords[c] = mergedCoordInfos[c].c;
+        coordIndex[globalCoordInfos[c].i] = c;
+        _coords[c] = globalCoordInfos[c].c;
       }
 
-      for (size_t f=0; f<mergedFaceSize; ++f)
+      for (size_t f=0; f<globalFaceSize; ++f)
       {
         for (size_t c=0; c<simplex_corners; ++c)
-          _faces[f][c] = coordIndex[mergedFaceInfos[f].v[c]];
-        _faceId[f] = mergedFaceInfos[f].i;
+          _faces[f][c] = coordIndex[globalFaceInfos[f].v[c]];
+        _faceId[f] = globalFaceInfos[f].i;
       }
     }
 
-    // TODO: setup local/global mappings
-    _global2local.resize(localFaceInfos.size());
-    _local2global.resize(localFaceInfos.size());
-    for (unsigned int i = 0; i<localFaceInfos.size(); i++)
+    // setup local/global mappings
     {
-      _local2global[i] = i;
-      _global2local[i] = i;
+      // create a temporary map for quick lookup
+      std::map<GlobalId, unsigned int> globalIndex;
+      for (size_t f=0; f<globalFaceInfos.size(); ++f)
+      {
+        globalIndex[globalFaceInfos[f].i] = f;
+      }
+      // "copy" map to _local2global
+      _local2global.resize(localFaceInfos.size());
+      for (unsigned int i = 0; i<localFaceInfos.size(); i++)
+      {
+        _local2global[i] = globalIndex[localFaceInfos[i].i];
+      }
+    }
+    {
+      // create a temporary map for quick lookup
+      std::map<GlobalId, unsigned int> localIndex;
+      for (size_t f=0; f<localFaceInfos.size(); ++f)
+      {
+        localIndex[localFaceInfos[f].i] = f;
+      }
+      // "copy" map to _global2local
+      // not all entries are contained in the map, if not the entry is "-1"
+      _global2local.resize(globalFaceInfos.size());
+      for (unsigned int i = 0; i<globalFaceInfos.size(); i++)
+      {
+        typename std::map<GlobalId, unsigned int>::iterator where =
+          localIndex.find(globalFaceInfos[i].i);
+        if (where != localIndex.end())
+          _global2local[i] = where->second;
+        else
+          _global2local[i] = (unsigned int)-1;
+      }
     }
   };
 

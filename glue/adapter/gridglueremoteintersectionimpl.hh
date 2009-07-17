@@ -295,11 +295,16 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     // compute the local coordinates with the correct dimension and the global coordinates
     Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
     Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, coorddim> corners_global;
-    glue->_domext.localAndGlobalCoords(glue->_merg->domainParent(index), corners_barycentric, corners_local, corners_global, coorddim);
 
-    // set the corners of the geometries
-    this->_domlgeom.setup(geometrytype, corners_local);
-    this->_domggeom.setup(geometrytype, corners_global);
+    unsigned int unused;
+    if (glue->_domext.contains(glue->_merg->domainParent(index), unused))
+    {
+      glue->_domext.localAndGlobalCoords(glue->_merg->domainParent(index), corners_barycentric, corners_local, corners_global, coorddim);
+
+      // set the corners of the geometries
+      this->_domlgeom.setup(geometrytype, corners_local);
+      this->_domggeom.setup(geometrytype, corners_global);
+    }
   }
 
   // do the same for the local and the global geometry of the target
@@ -315,11 +320,17 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     // compute the local coordinates with the correct dimension and the global coordinates
     Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
     Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, coorddim> corners_global;
-    glue->_tarext.localAndGlobalCoords(glue->_merg->targetParent(index), corners_barycentric, corners_local, corners_global, coorddim);
 
-    // set the corners of the geometries
-    this->_tarlgeom.setup(geometrytype, corners_local);
-    this->_targgeom.setup(geometrytype, corners_global);
+    unsigned int globalIndex = glue->_merg->domainParent(index);
+    unsigned int unused;
+    if (glue->_tarext.contains(globalIndex, unused))
+    {
+      glue->_tarext.localAndGlobalCoords(globalIndex, corners_barycentric, corners_local, corners_global, coorddim);
+
+      // set the corners of the geometries
+      this->_tarlgeom.setup(geometrytype, corners_local);
+      this->_targgeom.setup(geometrytype, corners_global);
+    }
   }
 }
 
