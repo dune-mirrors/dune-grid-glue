@@ -34,6 +34,16 @@ namespace Dune
 
   public:
 
+    /*! how many objects of type DataType have to be sent for a given intersection
+       Note: Only the sender side needs to know this size.
+     */
+    template<class RISType>
+    size_t size (RISType& i) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().size(i)));
+      return asImp().size(i);
+    }
+
     /** @brief pack data from user to message buffer
         @param buff message buffer provided by the grid
         @param e entity for which date should be packed to buffer
