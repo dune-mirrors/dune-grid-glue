@@ -37,6 +37,8 @@
 #include "coordinatetransformation.hh"
 #include "gridgluecommunicate.hh"
 
+#include <dune/istl/communicator.hh>
+
 /**
  * @class GridGlue
  * @brief sequential adapter to couple two grids at specified close together boundaries
@@ -210,6 +212,15 @@ private:
   /// @brief the builder utility
   Builder _builder;
 
+  /// @brief number of intersections
+  unsigned int _index_sz;
+
+  /// @brief number of domain intersections
+  unsigned int _dindex_sz;
+
+  /// @brief number of target intersections
+  unsigned int _tindex_sz;
+
   /// @brief an invalid intersection object used as dummy and
   /// also as recognizable end object of iterations over intersections
   mutable RemoteIntersectionImpl NULL_INTERSECTION;
@@ -227,11 +238,21 @@ protected:
   {
     // build the intersections array again
     this->_intersections.resize(this->_merg->nSimplices(), this->NULL_INTERSECTION);
+    _index_sz = 0;
+    _dindex_sz = 0;
+    _tindex_sz = 0;
     for (unsigned int i = 0; i < this->_merg->nSimplices(); ++i)
     {
       RemoteIntersectionImpl ri(this, i);
-      //if (ri.hasTarget() || ri.hasDomain())
-      this->_intersections[i] = ri;
+      if ((ri.hasTarget() || ri.hasDomain()))
+      {
+        if (ri.hasDomain())
+          ri.domainIndex() = _dindex_sz++;
+        if (ri.hasTarget())
+          ri.targetIndex() = _tindex_sz++;
+        ri.index() = _index_sz;
+        this->_intersections[_index_sz++] = ri;
+      }
     }
 
     std::cout << "GridGlue::updateIntersections : The number of overlaps is " << this->_merg->nSimplices() << std::endl;
@@ -439,25 +460,8 @@ public:
     RemoteIntersectionIterator ritend = iremoteend();
 
     // get comm buffer size
-    int ssz = 0;
-    int rsz = 0;
-    for (; rit != ritend; ++rit)
-    {
-      if (dir == Dune::ForwardCommunication)
-      {
-        if (rit->hasDomain())
-          ssz += data.size(*rit);
-        if (rit->hasTarget())
-          rsz += data.size(*rit);
-      }
-      else
-      {
-        if (rit->hasTarget())
-          ssz += data.size(*rit);
-        if (rit->hasDomain())
-          rsz += data.size(*rit);
-      }
-    }
+    int ssz = this->indexSet_size() * 10;     // times data per intersection
+    int rsz = this->indexSet_size() * 10;
 
     // allocate send/receive buffer
     DataType* sendbuffer = new DataType[ssz];
@@ -477,7 +481,9 @@ public:
            dir : Forward (domain -> target)
          */
         if (rit->hasDomain())
+        {
           data.gather(gatherbuffer, rit->entityDomain(), *rit);
+        }
       }
       else       // (dir == Dune::BackwardCommunication)
       {
@@ -485,7 +491,9 @@ public:
            dir : Backward (target -> domain)
          */
         if (rit->hasTarget())
+        {
           data.gather(gatherbuffer, rit->entityTarget(), *rit);
+        }
       }
     }
 
@@ -538,7 +546,17 @@ public:
   // indexset size
   size_t indexSet_size() const
   {
-    return _merg->nSimplices();
+    return _index_sz;
+  }
+
+  size_t domainIndexSet_size() const
+  {
+    return _dindex_sz;
+  }
+
+  size_t targetIndexSet_size() const
+  {
+    return _tindex_sz;
   }
 #endif
 };
@@ -550,7 +568,7 @@ GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& 
   : _domgv(gv1), _targv(gv2),
     _domext(gv1), _tarext(gv2), _merg(merger),
     _builder(*const_cast<GridGlue<GET1, GET2>*>(this)),
-    NULL_INTERSECTION(this, -1), _intersections(0, NULL_INTERSECTION)
+    NULL_INTERSECTION(this), _intersections(0, NULL_INTERSECTION)
 {
   std::cout << "GridGlue: Constructor succeeded!" << std::endl;
 }
