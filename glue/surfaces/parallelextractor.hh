@@ -95,7 +95,7 @@ public:
 
     bool operator == (const GlobalCoordInfo & other) const
     {
-      return (! valid && ! other.valid) || i == other.i;
+      return (! valid && ! other.valid) || (valid && other.valid && i == other.i);
     }
   };
   typedef Dune::array<GlobalId, simplex_corners> GlobalSimplexTopology;
@@ -116,7 +116,7 @@ public:
 
     bool operator == (const GlobalFaceInfo & other) const
     {
-      return (! valid && ! other.valid) || i == other.i;
+      return (! valid && ! other.valid) || (valid && other.valid && i == other.i);
     }
   };
 
