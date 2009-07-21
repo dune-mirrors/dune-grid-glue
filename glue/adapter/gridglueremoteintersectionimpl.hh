@@ -178,25 +178,10 @@ public:
   }
 
 
-  /** direct mapping of local coordinates, i.e. target local -> domain local */
-  /** \todo Documentation does not match implementation */
-  LocalCoords domainLocals(const LocalCoords &local) const
-  {
-    return barycentricToReference(this->_glue->_merg->domainLocals(this->_index, referenceToBarycentric(local)));
-  }
-
-
-  /** \brief direct mapping of local coordinates, i.e. domain local -> target local */
-  /** \todo Documentation does not match implementation */
-  LocalCoords targetLocals(const LocalCoords &local) const
-  {
-    return barycentricToReference(this->_glue->_merg->targetLocals(this->_index, referenceToBarycentric(local)));
-  }
-
   bool hasTarget() const
   {
     unsigned int localindex;
-    return this->_glue->_tarext.contains(this->_glue->_merg->domainParent(this->_index), localindex);
+    return this->_glue->_tarext.contains(this->_glue->_merg->targetParent(this->_index), localindex);
   }
 
   bool hasDomain() const
@@ -296,10 +281,11 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
     Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, coorddim> corners_global;
 
+    unsigned int domainIndex = glue->_merg->domainParent(index);
     unsigned int unused;
-    if (glue->_domext.contains(glue->_merg->domainParent(index), unused))
+    if (glue->_domext.contains(domainIndex, unused))
     {
-      glue->_domext.localAndGlobalCoords(glue->_merg->domainParent(index), corners_barycentric, corners_local, corners_global, coorddim);
+      glue->_domext.localAndGlobalCoords(domainIndex, corners_barycentric, corners_local, corners_global, coorddim);
 
       // set the corners of the geometries
       this->_domlgeom.setup(geometrytype, corners_local);
@@ -321,11 +307,11 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
     Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, coorddim> corners_global;
 
-    unsigned int globalIndex = glue->_merg->domainParent(index);
+    unsigned int targetIndex = glue->_merg->targetParent(index);
     unsigned int unused;
-    if (glue->_tarext.contains(globalIndex, unused))
+    if (glue->_tarext.contains(targetIndex, unused))
     {
-      glue->_tarext.localAndGlobalCoords(globalIndex, corners_barycentric, corners_local, corners_global, coorddim);
+      glue->_tarext.localAndGlobalCoords(targetIndex, corners_barycentric, corners_local, corners_global, coorddim);
 
       // set the corners of the geometries
       this->_tarlgeom.setup(geometrytype, corners_local);
