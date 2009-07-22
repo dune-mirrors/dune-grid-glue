@@ -24,7 +24,6 @@ public:
    * the simplices are just written to this array one after another
    * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
    * @param target_simplices just like with the domain_simplices and domain_coords
-   * @return TRUE <=> build successful and merged grid not empty
    */
   virtual void build(const std::vector<ctype>& domain_coords,
                      const std::vector<unsigned int>& domain_simplices,
