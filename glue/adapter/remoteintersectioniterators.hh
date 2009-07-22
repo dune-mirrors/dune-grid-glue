@@ -25,17 +25,13 @@
 #endif
 #include "remoteintersection.hh"
 
-
 namespace RemoteIntersectionInterface
 {
 
   /** \brief Iterator over remote intersections */
   template<typename RemoteIntersectionImpl,
-      typename IndependentIteratorImpl,
-      typename DomainIteratorImpl,
-      typename TargetIteratorImpl
-      >
-  class RemoteIntersectionIterators
+      typename RemoteIntersectionIteratorImpl>
+  class RemoteIntersectionIterator
   {
   private:
     /*   C H E C K   C O N C E P T S   */
@@ -44,354 +40,116 @@ namespace RemoteIntersectionInterface
     typedef RemoteIntersectionImpl RemoteIntersectionImplType;
     CLASS_REQUIRE(RemoteIntersectionImplType, RemoteIntersectionConcept);
 
-    typedef IndependentIteratorImpl IndependentIteratorImplType;
-    CLASS_REQUIRE(IndependentIteratorImplType, RemoteIntersectionIteratorConcept);
-
-    typedef DomainIteratorImpl DomainIteratorImplType;
-    CLASS_REQUIRE(DomainIteratorImplType, RemoteIntersectionIteratorConcept);
-
-    typedef TargetIteratorImpl TargetIteratorImplType;
-    CLASS_REQUIRE(TargetIteratorImplType, RemoteIntersectionIteratorConcept);
+    typedef RemoteIntersectionIteratorImpl RemoteIntersectionIteratorImplType;
+    CLASS_REQUIRE(RemoteIntersectionIteratorImplType, RemoteIntersectionIteratorConcept);
 #else
     typedef RemoteIntersectionImpl RemoteIntersectionImplType;
 
-    typedef IndependentIteratorImpl IndependentIteratorImplType;
-
-    typedef DomainIteratorImpl DomainIteratorImplType;
-
-    typedef TargetIteratorImpl TargetIteratorImplType;
+    typedef RemoteIntersectionIteratorImpl RemoteIntersectionIteratorImplType;
 #endif
 
   public:
 
     typedef RemoteIntersection<RemoteIntersectionImpl>  ThisRemoteIntersection;
 
-    /** \todo Please doc me! */
-    class IndependentIterator
+    enum { coorddim = RemoteIntersectionImpl::coorddim };
+
+    enum { mydim = RemoteIntersectionImpl::mydim };
+
+
+    typedef typename RemoteIntersectionImpl::DomainGridView DomainGridView;
+
+    typedef typename DomainGridView::Grid DomainGridType;
+
+    typedef typename RemoteIntersectionImpl::TargetGridView TargetGridView;
+
+    typedef typename TargetGridView::Grid TargetGridType;
+
+
+    typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainEntity;
+
+    typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainEntityPointer;
+
+    typedef typename TargetGridView::Traits::template Codim<0>::Entity TargetEntity;
+
+    typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEntityPointer;
+
+
+    typedef typename RemoteIntersectionImpl::DomainLocalGeometry DomainLocalGeometry;
+
+    typedef typename RemoteIntersectionImpl::DomainGeometry DomainGeometry;
+
+    typedef typename RemoteIntersectionImpl::TargetLocalGeometry TargetLocalGeometry;
+
+    typedef typename RemoteIntersectionImpl::TargetGeometry TargetGeometry;
+
+
+    typedef typename RemoteIntersectionImpl::ctype ctype;
+
+
+  private:
+
+    RemoteIntersectionIteratorImplType realIterator;
+
+
+  protected:
+
+    RemoteIntersectionIteratorImplType& getImpl()
     {
+      return this->realIterator;
+    }
 
-    public:
-
-      enum { coorddim = RemoteIntersectionImpl::coorddim };
-
-      enum { mydim = RemoteIntersectionImpl::mydim };
-
-
-      typedef typename RemoteIntersectionImpl::DomainGridView DomainGridView;
-
-      typedef typename DomainGridView::Grid DomainGridType;
-
-      typedef typename RemoteIntersectionImpl::TargetGridView TargetGridView;
-
-      typedef typename TargetGridView::Grid TargetGridType;
-
-
-      typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainEntity;
-
-      typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainEntityPointer;
-
-      typedef typename TargetGridView::Traits::template Codim<0>::Entity TargetEntity;
-
-      typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEntityPointer;
-
-
-      typedef typename RemoteIntersectionImpl::DomainLocalGeometry DomainLocalGeometry;
-
-      typedef typename RemoteIntersectionImpl::DomainGeometry DomainGeometry;
-
-      typedef typename RemoteIntersectionImpl::TargetLocalGeometry TargetLocalGeometry;
-
-      typedef typename RemoteIntersectionImpl::TargetGeometry TargetGeometry;
-
-
-      typedef typename RemoteIntersectionImpl::ctype ctype;
-
-
-    private:
-
-      IndependentIteratorImplType realIterator;
-
-
-    protected:
-
-      IndependentIteratorImplType& getImpl()
-      {
-        return this->realIterator;
-      }
-
-
-    public:
-
-      /**
-       * @brief copy constructor
-       * @param iter the iterator to copy
-       */
-      IndependentIterator(const IndependentIterator& iter) : realIterator(iter.realIterator)
-      {}
-
-
-      /**
-       * @brief only constructor to build a "new" iterator
-       * @param iter the iterator to initialize from
-       */
-      IndependentIterator(const IndependentIteratorImplType& iter) : realIterator(iter)
-      {}
-
-
-      /** \brief Dereferencing operator. */
-      const ThisRemoteIntersection& operator*() const
-      {
-        return this->realIterator.dereference();
-      }
-
-
-      /** \brief Pointer operator. */
-      const ThisRemoteIntersection* operator->() const
-      {
-        return &this->realIterator.dereference();
-      }
-
-
-      /** \brief Increment operator. */
-      IndependentIterator& operator++()
-      {
-        this->realIterator.increment();
-        return *this;
-      }
-
-
-      bool operator==(const IndependentIterator& rhs) const
-      {
-        return rhs.realIterator.equals(this->realIterator);
-      }
-
-
-      bool operator!=(const IndependentIterator& rhs) const
-      {
-        return !rhs.realIterator.equals(this->realIterator);
-      }
-
-    };
-
-
-    class DomainIterator
-    {
-
-    public:
-
-      enum { coorddim = RemoteIntersectionImpl::coorddim };
-
-      enum { mydim = RemoteIntersectionImpl::mydim };
-
-
-      typedef typename RemoteIntersectionImpl::DomainGridView DomainGridView;
-
-      typedef typename DomainGridView::Grid DomainGridType;
-
-      typedef typename RemoteIntersectionImpl::TargetGridView TargetGridView;
-
-      typedef typename TargetGridView::Grid TargetGridType;
-
-
-      typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainEntity;
-
-      typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainEntityPointer;
-
-      typedef typename TargetGridView::Traits::template Codim<0>::Entity TargetEntity;
-
-      typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEntityPointer;
-
-
-      typedef typename RemoteIntersectionImpl::DomainLocalGeometry DomainLocalGeometry;
-
-      typedef typename RemoteIntersectionImpl::DomainGeometry DomainGeometry;
-
-      typedef typename RemoteIntersectionImpl::TargetLocalGeometry TargetLocalGeometry;
-
-      typedef typename RemoteIntersectionImpl::TargetGeometry TargetGeometry;
-
-
-      typedef typename RemoteIntersectionImpl::ctype ctype;
-
-
-    private:
-
-      DomainIteratorImpl realIterator;
-
-
-    protected:
-
-      DomainIteratorImpl& getImpl()
-      {
-        return this->realIterator;
-      }
-
-
-    public:
-
-      /**
-       * @brief copy constructor
-       * @param iter the iterator to copy
-       */
-      DomainIterator(const DomainIterator& iter) : realIterator(iter.realIterator)
-      {}
-
-
-      /**
-       * @brief only constructor to build a "new" iterator
-       * @param iter the iterator to initialize from
-       */
-      DomainIterator(const DomainIteratorImpl& iter) : realIterator(iter)
-      {}
-
-
-      /** \brief Dereferencing operator. */
-      const ThisRemoteIntersection& operator*() const
-      {
-        return this->realIterator.dereference();
-      }
-
-
-      /** \brief Pointer operator. */
-      const ThisRemoteIntersection* operator->() const
-      {
-        return &this->realIterator.dereference();
-      }
-
-
-      /** \brief Increment operator. */
-      DomainIterator& operator++()
-      {
-        this->realIterator.increment();
-        return *this;
-      }
-
-
-      bool operator==(const DomainIterator& rhs) const
-      {
-        return rhs.realIterator.equals(this->realIterator);
-      }
-
-
-      bool operator!=(const DomainIterator& rhs) const
-      {
-        return !rhs.realIterator.equals(this->realIterator);
-      }
-
-    };
-
-    class TargetIterator
-    {
-    public:
-
-      enum { coorddim = RemoteIntersectionImpl::coorddim };
-
-      enum { mydim = RemoteIntersectionImpl::mydim };
-
-
-      typedef typename RemoteIntersectionImpl::DomainGridView DomainGridView;
-
-      typedef typename DomainGridView::Grid DomainGridType;
-
-      typedef typename RemoteIntersectionImpl::TargetGridView TargetGridView;
-
-      typedef typename TargetGridView::Grid TargetGridType;
-
-
-      typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainEntity;
-
-      typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainEntityPointer;
-
-      typedef typename TargetGridView::Traits::template Codim<0>::Entity TargetEntity;
-
-      typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEntityPointer;
-
-
-      typedef typename RemoteIntersectionImpl::DomainLocalGeometry DomainLocalGeometry;
-
-      typedef typename RemoteIntersectionImpl::DomainGeometry DomainGeometry;
-
-      typedef typename RemoteIntersectionImpl::TargetLocalGeometry TargetLocalGeometry;
-
-      typedef typename RemoteIntersectionImpl::TargetGeometry TargetGeometry;
-
-
-      typedef typename RemoteIntersectionImpl::ctype ctype;
-
-
-    private:
-
-      TargetIteratorImpl realIterator;
-
-
-    protected:
-
-
-      TargetIteratorImpl& getImpl()
-      {
-        return this->realIterator;
-      }
-
-    public:
-
-      /**
-       * @brief copy constructor
-       * @param iter the iterator to copy
-       */
-      TargetIterator(const TargetIterator& iter) : realIterator(iter.realIterator)
-      {}
-
-
-      /**
-       * @brief only constructor to build a "new" iterator
-       * @param iter the iterator to initialize from
-       */
-      TargetIterator(const TargetIteratorImpl& iter) : realIterator(iter)
-      {}
-
-
-      /** \brief Dereferencing operator. */
-      const ThisRemoteIntersection& operator*() const
-      {
-        return this->realIterator.dereference();
-      }
-
-
-      /** \brief Pointer operator. */
-      const ThisRemoteIntersection* operator->() const
-      {
-        return &this->realIterator.dereference();
-      }
-
-
-      /** \brief Increment operator. */
-      TargetIterator& operator++()
-      {
-        this->realIterator.increment();
-        return *this;
-      }
-
-
-      bool operator==(const TargetIterator& rhs) const
-      {
-        return rhs.realIterator.equals(this->realIterator);
-      }
-
-
-      bool operator!=(const TargetIterator& rhs) const
-      {
-        return !rhs.realIterator.equals(this->realIterator);
-      }
-
-    };
 
   public:
 
-    typedef DomainIterator RemoteIntersectionDomainIterator;
+    /**
+     * @brief copy constructor
+     * @param iter the iterator to copy
+     */
+    RemoteIntersectionIterator(const RemoteIntersectionIterator& iter) : realIterator(iter.realIterator)
+    {}
 
-    typedef TargetIterator RemoteIntersectionTargetIterator;
 
-    typedef IndependentIterator RemoteIntersectionIterator;
+    /**
+     * @brief only constructor to build a "new" iterator
+     * @param iter the iterator to initialize from
+     */
+    RemoteIntersectionIterator(const RemoteIntersectionIteratorImplType& iter) : realIterator(iter)
+    {}
+
+
+    /** \brief Dereferencing operator. */
+    const ThisRemoteIntersection& operator*() const
+    {
+      return this->realIterator.dereference();
+    }
+
+
+    /** \brief Pointer operator. */
+    const ThisRemoteIntersection* operator->() const
+    {
+      return &this->realIterator.dereference();
+    }
+
+
+    /** \brief Increment operator. */
+    RemoteIntersectionIterator& operator++()
+    {
+      this->realIterator.increment();
+      return *this;
+    }
+
+
+    bool operator==(const RemoteIntersectionIterator& rhs) const
+    {
+      return rhs.realIterator.equals(this->realIterator);
+    }
+
+
+    bool operator!=(const RemoteIntersectionIterator& rhs) const
+    {
+      return !rhs.realIterator.equals(this->realIterator);
+    }
 
   };
 

@@ -84,14 +84,6 @@ public:
 
   class TargetIntersectionIteratorImpl;
 
-  typedef RemoteIntersectionInterface::RemoteIntersectionIterators<
-      RemoteIntersectionImpl,
-      RemoteIntersectionIteratorImpl,
-      DomainIntersectionIteratorImpl,
-      TargetIntersectionIteratorImpl
-      > IntersectionIterators;
-
-
 public:
 
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
@@ -182,13 +174,16 @@ public:
   typedef RemoteIntersectionInterface::RemoteIntersection<RemoteIntersectionImpl>    RemoteIntersection;
 
   /** \brief Type of the iterator that iterates over remove intersections */
-  typedef typename IntersectionIterators::RemoteIntersectionIterator RemoteIntersectionIterator;
+  typedef RemoteIntersectionInterface::RemoteIntersectionIterator<RemoteIntersectionImpl, RemoteIntersectionIteratorImpl>
+  RemoteIntersectionIterator;
 
   /** \todo Please doc me! */
-  typedef typename IntersectionIterators::RemoteIntersectionDomainIterator DomainIntersectionIterator;
+  typedef RemoteIntersectionInterface::RemoteIntersectionIterator<RemoteIntersectionImpl, DomainIntersectionIteratorImpl>
+  DomainIntersectionIterator;
 
   /** \todo Please doc me! */
-  typedef typename IntersectionIterators::RemoteIntersectionTargetIterator TargetIntersectionIterator;
+  typedef RemoteIntersectionInterface::RemoteIntersectionIterator<RemoteIntersectionImpl, TargetIntersectionIteratorImpl>
+  TargetIntersectionIterator;
 
 private:
 
@@ -255,7 +250,9 @@ protected:
       }
     }
 
-    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << this->_merg->nSimplices() << std::endl;
+    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << _index_sz
+              << " with " << _dindex_sz << " domain and "
+              << " with " << _tindex_sz << " target entities" << std::endl;
   }
 
 
@@ -321,11 +318,7 @@ public:
    */
   const Merger* merger()
   {
-#ifdef GRID_GLUE_USE_CONCEPTS
-    return this->_merg.getImplementation();
-#else
     return this->_merg;
-#endif
   }
 
   /*   F U N C T I O N A L I T Y   */

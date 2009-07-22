@@ -25,7 +25,7 @@
 
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"
-#include "RemoteIntersectionConcepts.hh"
+#include "remoteIntersectionconcepts.hh"
 #endif
 
 namespace RemoteIntersectionInterface
