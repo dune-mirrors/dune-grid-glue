@@ -11,6 +11,8 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
 
+#include <dune/istl/communicator.hh>
+
 namespace Dune
 {
 
@@ -87,6 +89,8 @@ namespace Dune
   template<typename DT>
   class GridGlueMessageBuffer {
   public:
+    typedef DT value_type;
+
     // Constructor
     GridGlueMessageBuffer (DT *p)
     {
@@ -117,6 +121,132 @@ namespace Dune
     DT *a;
     size_t i;
     mutable int j;
+  };
+
+  //// CommPolicy
+
+  template<typename GG>
+  struct TargetSide
+  {
+    const GG & gridglue;
+  };
+
+  template<typename GG>
+  struct DomainSide
+  {
+    const GG & gridglue;
+  };
+
+  template<typename GG>
+  struct CommPolicy< DomainSide<GG> >
+  {
+    typedef PartitionType IndexedTypeFlag;
+    typedef unsigned int IndexedType;
+
+    size_t getSize (const GG&, int index)
+    {
+      return 1;
+    }
+  };
+
+  template <typename GG, class DataHandleImp, class DataTypeImp>
+  struct GridGlueCommInfo
+  {
+    typedef DataTypeImp value_type;
+    typedef GG GridGlue;
+
+    const GridGlue * gridglue;
+    GridGlueCommDataHandleIF<DataHandleImp, DataTypeImp> * data;
+    Dune::CommunicationDirection dir;
+  };
+
+  // forward gather scatter to use defined class
+  class GridGlueForwardOperator
+  {
+  public:
+    template<class CommInfo>
+    static const typename CommInfo::value_type& gather(const CommInfo& commInfo, std::size_t i)
+    {
+      typedef typename CommInfo::value_type DataType;
+      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
+      static DataType buffer[10];
+      GridGlueMessageBuffer<DataType> mbuffer(buffer);
+
+      // extract GridGlue objects...
+      typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
+      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+
+      // read from target
+      assert(ris.hasTarget());
+      commInfo.data->gather(mbuffer, ris.entityDomain(), ris);
+
+      // return _the_ value
+      return buffer[0];
+    }
+
+    template<class CommInfo, class DataType>
+    static void scatter(CommInfo& commInfo, const DataType& v, std::size_t i)
+    {
+      typedef typename CommInfo::value_type DataType;
+      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
+      DataType buffer[10];
+      GridGlueMessageBuffer<DataType> mbuffer(buffer);
+
+      // extract GridGlue objects...
+      typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
+      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+
+      // fill buffer
+      mbuffer.write(v);
+
+      // write to domain
+      assert(ris.hasDomain());
+      commInfo.data->scatter(mbuffer, ris.entityTarget(), ris, 1);
+    }
+  };
+
+  class GridGlueBackwardOperator
+  {
+  public:
+    template<class CommInfo>
+    static const typename CommInfo::value_type& gather(const CommInfo& commInfo, std::size_t i)
+    {
+      typedef typename CommInfo::value_type DataType;
+      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
+      static DataType buffer[10];
+      GridGlueMessageBuffer<DataType> mbuffer(buffer);
+
+      // extract GridGlue objects...
+      typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
+      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+
+      // read from target
+      assert(ris.hasTarget());
+      commInfo.data->gather(mbuffer, ris.entityDomain(), ris);
+
+      // return _the_ value
+      return buffer[0];
+    }
+
+    template<class CommInfo, class DataType>
+    static void scatter(CommInfo& commInfo, const DataType& v, std::size_t i)
+    {
+      typedef typename CommInfo::value_type DataType;
+      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
+      DataType buffer[10];
+      GridGlueMessageBuffer<DataType> mbuffer(buffer);
+
+      // extract GridGlue objects...
+      typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
+      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+
+      // fill buffer
+      mbuffer.write(v);
+
+      // write to domain
+      assert(ris.hasDomain());
+      commInfo.data->scatter(mbuffer, ris.entityTarget(), ris, 1);
+    }
   };
 
 } // end namespace Dune

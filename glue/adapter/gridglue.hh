@@ -87,6 +87,9 @@ public:
 
   class TargetIntersectionIteratorImpl;
 
+  friend class Dune::GridGlueForwardOperator;
+  friend class Dune::GridGlueBackwardOperator;
+
 public:
 
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
@@ -448,6 +451,12 @@ public:
   void communicate (Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> & data,
                     Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
   {
+    typedef Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> DataHandle;
+    typedef typename DataHandle::DataType DataType;
+
+    RemoteIntersectionIterator rit = iremotebegin();
+    RemoteIntersectionIterator ritend = iremoteend();
+
     // TODO: create ParallelIndexSet & RemoteIndices during updateIntersections
 
     typedef unsigned int GlobalId;
@@ -459,19 +468,19 @@ public:
     PIndexSet target_is;
     domain_is.beginResize();
     target_is.beginResize();
+    for (rit = iremotebegin(); rit != ritend; ++rit)
     {
-      RemoteIntersectionIterator rit = iremotebegin();
-      RemoteIntersectionIterator ritend = iremoteend();
-      for (rit = iremotebegin(); rit != ritend; ++rit)
+      if (rit->hasDomain())
       {
-        if (rit->hasDomain())
-        {
-          domain_is.add (rit->globalIndex(), LocalIndex(rit->domainIndex(), rit->entityDomain()->partitionType()) ) ;
-        }
-        if (rit->hasTarget())
-        {
-          target_is.add (rit->globalIndex(), LocalIndex(rit->targetIndex(), rit->entityTarget()->partitionType()) ) ;
-        }
+        domain_is.add (rit->globalIndex(),
+                       LocalIndex(rit->index(), rit->entityDomain()->partitionType()) ) ;
+        // LocalIndex(rit->domainIndex(), rit->entityDomain()->partitionType()) ) ;
+      }
+      if (rit->hasTarget())
+      {
+        target_is.add (rit->globalIndex(),
+                       LocalIndex(rit->index(), rit->entityTarget()->partitionType()) ) ;
+        // LocalIndex(rit->targetIndex(), rit->entityTarget()->partitionType()) ) ;
       }
     }
     domain_is.endResize () ;
@@ -491,20 +500,27 @@ public:
     Dune::Interface < PIndexSet > interface;
     interface.build (remoteIndices, InteriorFlags(), InteriorFlags() );
 
-#if 0
     // TODO: comm policy
+
+    // setup communication info (class needed to tunnel all info to the operator)
+    typedef Dune::GridGlueCommInfo<GridGlue,DataHandleImp,DataTypeImp> CommInfo;
+    CommInfo commInfo;
+    commInfo.gridglue = this;
+    commInfo.data = &data;
+    commInfo.dir = dir;
 
     // create communicator
     Dune::BufferedCommunicator<PIndexSet> bComm ;
-    // TODO: where do the buffers s, t come from?
-    bComm.build(s, t, interface);
+    // TODO: use variable size version
+    bComm.template build< CommInfo >(interface);
 
+#if 0
     // do communication
     // choose communication direction.
     if (dir == Dune::ForwardCommunication)
-      bComm.forward< GridGlueForwardOperator >(domainbuf, targetbuf, data);
+      bComm.forward< Dune::GridGlueForwardOperator >(commInfo, commInfo);
     else
-      bComm.backward< GridGlueBackwardOperator >(domainbuf, targetbuf, data);
+      bComm.backward< Dune::GridGlueBackwardOperator >(commInfo, commInfo);
 
     return;
 #endif
@@ -512,12 +528,6 @@ public:
     //
 
     // CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
-
-    typedef Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> DataHandle;
-    typedef typename DataHandle::DataType DataType;
-
-    RemoteIntersectionIterator rit = iremotebegin();
-    RemoteIntersectionIterator ritend = iremoteend();
 
     // get comm buffer size
     int ssz = this->indexSet_size() * 10;     // times data per intersection
