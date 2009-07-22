@@ -255,6 +255,11 @@ public:
     return this->_index;
   }
 
+  IndexType globalIndex() const
+  {
+    return this->_mergeindex;
+  }
+
   IndexType domainIndex() const
   {
     assert(this->_domainindex != (IndexType)-1);

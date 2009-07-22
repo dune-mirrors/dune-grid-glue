@@ -37,6 +37,8 @@
 #include "coordinatetransformation.hh"
 #include "gridgluecommunicate.hh"
 
+#include <dune/istl/indexset.hh>
+#include <dune/istl/plocalindex.hh>
 #include <dune/istl/communicator.hh>
 
 /**
@@ -440,10 +442,36 @@ public:
      \param iftype Interface for which the Communication should take place
      \param dir Communication direction (Forward means Domain to Target, Backward is the reverse)
    */
+  // local index may contain overlap etc. info
+  enum Flags { domain = 1, target = 2, both = 3 };
+  //
   template<class DataHandleImp, class DataTypeImp>
   void communicate (Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> & data,
                     Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
   {
+    typedef Dune::ParallelLocalIndex < Flags > LocalIndex;
+
+    // setup parallel indexset
+    typedef Dune::ParallelIndexSet < unsigned int , LocalIndex > PIndexSet ;
+    PIndexSet pis;
+    pis.beginResize();
+    {
+      RemoteIntersectionIterator rit = iremotebegin();
+      RemoteIntersectionIterator ritend = iremoteend();
+      for (rit = iremotebegin(); rit != ritend; ++rit)
+      {
+        int flag = 0;
+        flag += rit->hasDomain() ? domain : 0;
+        flag += rit->hasTarget() ? target : 0;
+        pis.add (rit->globalIndex(), LocalIndex(rit->index(), (Flags)flag) ) ;
+      }
+    }
+    pis.endResize () ;
+
+    // setup communication interfaces
+
+    //
+
     // CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
 
     typedef Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> DataHandle;

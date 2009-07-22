@@ -269,6 +269,11 @@ namespace RemoteIntersectionInterface
       return this->realIntersection.index();
     }
 
+    IndexType globalIndex() const
+    {
+      return this->realIntersection.globalIndex();
+    }
+
 #endif
 
   };
