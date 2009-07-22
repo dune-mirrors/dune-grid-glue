@@ -39,6 +39,7 @@
 
 #include <dune/istl/indexset.hh>
 #include <dune/istl/plocalindex.hh>
+#include <dune/istl/remoteindices.hh>
 #include <dune/istl/communicator.hh>
 
 /**
@@ -442,33 +443,71 @@ public:
      \param iftype Interface for which the Communication should take place
      \param dir Communication direction (Forward means Domain to Target, Backward is the reverse)
    */
-  // local index may contain overlap etc. info
-  enum Flags { domain = 1, target = 2, both = 3 };
-  //
+
   template<class DataHandleImp, class DataTypeImp>
   void communicate (Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> & data,
                     Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
   {
-    typedef Dune::ParallelLocalIndex < Flags > LocalIndex;
+    // TODO: create ParallelIndexSet & RemoteIndices during updateIntersections
+
+    typedef unsigned int GlobalId;
+    typedef Dune::ParallelLocalIndex<Dune::PartitionType> LocalIndex;
 
     // setup parallel indexset
-    typedef Dune::ParallelIndexSet < unsigned int , LocalIndex > PIndexSet ;
-    PIndexSet pis;
-    pis.beginResize();
+    typedef Dune::ParallelIndexSet <GlobalId, LocalIndex > PIndexSet;
+    PIndexSet domain_is;
+    PIndexSet target_is;
+    domain_is.beginResize();
+    target_is.beginResize();
     {
       RemoteIntersectionIterator rit = iremotebegin();
       RemoteIntersectionIterator ritend = iremoteend();
       for (rit = iremotebegin(); rit != ritend; ++rit)
       {
-        int flag = 0;
-        flag += rit->hasDomain() ? domain : 0;
-        flag += rit->hasTarget() ? target : 0;
-        pis.add (rit->globalIndex(), LocalIndex(rit->index(), (Flags)flag) ) ;
+        if (rit->hasDomain())
+        {
+          domain_is.add (rit->globalIndex(), LocalIndex(rit->domainIndex(), rit->entityDomain()->partitionType()) ) ;
+        }
+        if (rit->hasTarget())
+        {
+          target_is.add (rit->globalIndex(), LocalIndex(rit->targetIndex(), rit->entityTarget()->partitionType()) ) ;
+        }
       }
     }
-    pis.endResize () ;
+    domain_is.endResize () ;
+    target_is.endResize () ;
+
+    // setup remote index information
+    // TODO: where to get te comm?!
+    MPI_Comm comm = MPI_COMM_WORLD;
+    Dune::RemoteIndices<PIndexSet> remoteIndices (domain_is, target_is, comm) ;
+    remoteIndices.rebuild<true>();
 
     // setup communication interfaces
+    // TODO: support all kinds of interfaces, currently we only use owner->owner
+    typedef Dune::EnumItem <Dune::PartitionType, Dune::InteriorEntity> InteriorFlags;
+    typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::OverlapEntity>  InteriorOverlapFlags;
+    typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::GhostEntity>  AllFlags;
+    Dune::Interface < PIndexSet > interface;
+    interface.build (remoteIndices, InteriorFlags(), InteriorFlags() );
+
+#if 0
+    // TODO: comm policy
+
+    // create communicator
+    Dune::BufferedCommunicator<PIndexSet> bComm ;
+    // TODO: where do the buffers s, t come from?
+    bComm.build(s, t, interface);
+
+    // do communication
+    // choose communication direction.
+    if (dir == Dune::ForwardCommunication)
+      bComm.forward< GridGlueForwardOperator >(domainbuf, targetbuf, data);
+    else
+      bComm.backward< GridGlueBackwardOperator >(domainbuf, targetbuf, data);
+
+    return;
+#endif
 
     //
 
