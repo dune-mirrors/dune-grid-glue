@@ -498,7 +498,7 @@ public:
     typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::OverlapEntity>  InteriorOverlapFlags;
     typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::GhostEntity>  AllFlags;
     Dune::Interface < PIndexSet > interface;
-    interface.build (remoteIndices, InteriorFlags(), InteriorFlags() );
+    interface.build (remoteIndices, InteriorFlags(), AllFlags() );
 
     // TODO: comm policy
 
@@ -514,7 +514,7 @@ public:
     // TODO: use variable size version
     bComm.template build< CommInfo >(interface);
 
-#if 0
+#if 1
     // do communication
     // choose communication direction.
     if (dir == Dune::ForwardCommunication)
