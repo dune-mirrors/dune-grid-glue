@@ -176,8 +176,8 @@ namespace Dune
       typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
       RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
 
-      // read from target
-      assert(ris.hasTarget());
+      // read from domain
+      assert(ris.hasDomain());
       commInfo.data->gather(mbuffer, ris.entityDomain(), ris);
 
       // return _the_ value
@@ -199,8 +199,8 @@ namespace Dune
       // fill buffer
       mbuffer.write(v);
 
-      // write to domain
-      assert(ris.hasDomain());
+      // write to target
+      assert(ris.hasTarget());
       commInfo.data->scatter(mbuffer, ris.entityTarget(), ris, 1);
     }
   };
@@ -222,7 +222,7 @@ namespace Dune
 
       // read from target
       assert(ris.hasTarget());
-      commInfo.data->gather(mbuffer, ris.entityDomain(), ris);
+      commInfo.data->gather(mbuffer, ris.entityTarget(), ris);
 
       // return _the_ value
       return buffer[0];
@@ -245,7 +245,7 @@ namespace Dune
 
       // write to domain
       assert(ris.hasDomain());
-      commInfo.data->scatter(mbuffer, ris.entityTarget(), ris, 1);
+      commInfo.data->scatter(mbuffer, ris.entityDomain(), ris, 1);
     }
   };
 
