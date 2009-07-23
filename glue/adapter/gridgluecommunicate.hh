@@ -169,107 +169,95 @@ namespace Dune
     /**
      * @brief Each intersection can communicate a different number of objects.
      */
-    typedef SizeOne IndexedTypeFlag;
-    //typedef VariableSize IndexedTypeFlag;
+    //typedef SizeOne IndexedTypeFlag;
+    typedef VariableSize IndexedTypeFlag;
 
     /**
      * @brief Get the number of objects at an intersection.
      */
     static int getSize(const Type& commInfo, size_t i)
     {
-      assert(false);
       // get RemoteIntersection
       typedef typename Type::GridGlue::RemoteIntersection RemoteIntersection;
       RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
 
-      assert(commInfo.data->size(ris) == 1);
       // ask data handle for size
       return commInfo.data->size(ris);
     }
   };
 
   // forward gather scatter to use defined class
-  class GridGlueForwardOperator
+  template<int dir>
+  class GridGlueCommunicationOperator
   {
   public:
     template<class CommInfo>
-    static const typename CommInfo::value_type& gather(const CommInfo& commInfo, std::size_t i)
+    static const typename CommInfo::DataType& gather(const CommInfo& commInfo, size_t i, size_t j = 0)
     {
-      typedef typename CommInfo::value_type DataType;
-      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
-      static DataType buffer[10];
-      GridGlueMessageBuffer<DataType> mbuffer(buffer);
-
-      // extract GridGlue objects...
+      // get RemoteIntersection
       typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
       RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
 
-      // read from domain
-      assert(ris.hasDomain());
-      commInfo.data->gather(mbuffer, ris.entityDomain(), ris);
+      // fill buffer if we have a new intersection
+      if (j == 0)
+      {
+        commInfo.mbuffer.clear();
+        if (dir == Dune::ForwardCommunication)
+        {
+          // read from domain
+          assert(ris.hasDomain());
+          commInfo.data->gather(commInfo.mbuffer, ris.entityDomain(), ris);
+        }
+        else     // (dir == Dune::BackwardCommunication)
+        {
+          // read from target
+          assert(ris.hasTarget());
+          commInfo.data->gather(commInfo.mbuffer, ris.entityTarget(), ris);
+        }
+      }
 
-      // return _the_ value
-      return buffer[0];
-    }
-
-    template<class CommInfo, class DataType>
-    static void scatter(CommInfo& commInfo, const DataType& v, std::size_t i)
-    {
-      typedef typename CommInfo::value_type DataType;
-      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
-      DataType buffer[10];
-      GridGlueMessageBuffer<DataType> mbuffer(buffer);
-
-      // extract GridGlue objects...
-      typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
-      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
-
-      // fill buffer
-      mbuffer.write(v);
-
-      // write to target
-      assert(ris.hasTarget());
-      commInfo.data->scatter(mbuffer, ris.entityTarget(), ris, 1);
-    }
-  };
-
-  class GridGlueBackwardOperator
-  {
-  public:
-    template<class CommInfo>
-    static const typename CommInfo::value_type& gather(const CommInfo& commInfo, std::size_t i)
-    {
-      // extract GridGlue objects...
-      typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
-      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
-
-      commInfo.mbuffer.clear();
-
-      // read from target
-      assert(ris.hasTarget());
-      commInfo.data->gather(commInfo.mbuffer, ris.entityTarget(), ris);
-
-      // return _the_ value
-      return commInfo.buffer[0];
+      // return the j'th value in the buffer
+      return commInfo.buffer[j];
     }
 
     template<class CommInfo>
-    static void scatter(CommInfo& commInfo, const typename CommInfo::DataType& v, std::size_t i)
+    static void scatter(CommInfo& commInfo, const typename CommInfo::DataType& v, std::size_t i, std::size_t j = 0)
     {
       // extract GridGlue objects...
       typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
       RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
 
-      commInfo.mbuffer.clear();
+      // get size if we have a new intersection
+      if (j == 0)
+      {
+        commInfo.mbuffer.clear();
+        commInfo.currentsize = commInfo.data->size(ris);
+      }
 
-      // fill buffer
+      // write entry to buffer
       commInfo.mbuffer.write(v);
 
-      // write to domain
-      assert(ris.hasDomain());
-      commInfo.data->scatter(commInfo.mbuffer, ris.entityDomain(), ris, 1);
+      // write back the buffer if we are at the end of this intersection
+      if (j == commInfo.currentsize-1)
+      {
+        if (dir == Dune::ForwardCommunication)
+        {
+          // write to target
+          assert(ris.hasTarget());
+          commInfo.data->scatter(commInfo.mbuffer, ris.entityTarget(), ris, commInfo.currentsize);
+        }
+        else     // (dir == Dune::BackwardCommunication)
+        {
+          // write to domain
+          assert(ris.hasDomain());
+          commInfo.data->scatter(commInfo.mbuffer, ris.entityDomain(), ris, commInfo.currentsize);
+        }
+      }
     }
   };
+
+  typedef GridGlueCommunicationOperator<Dune::ForwardCommunication> GridGlueForwardOperator;
+  typedef GridGlueCommunicationOperator<Dune::BackwardCommunication> GridGlueBackwardOperator;
 
 } // end namespace Dune
 #endif
