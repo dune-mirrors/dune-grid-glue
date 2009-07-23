@@ -121,6 +121,12 @@ namespace Dune
 
     size_t counter() const { return i; }
 
+    void clear()
+    {
+      i = 0;
+      j = 0;
+    }
+
   private:
     DT *a;
     size_t i;
@@ -233,41 +239,35 @@ namespace Dune
     template<class CommInfo>
     static const typename CommInfo::value_type& gather(const CommInfo& commInfo, std::size_t i)
     {
-      typedef typename CommInfo::value_type DataType;
-      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
-      static DataType buffer[10];
-      GridGlueMessageBuffer<DataType> mbuffer(buffer);
-
       // extract GridGlue objects...
       typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
       RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+
+      commInfo.mbuffer.clear();
 
       // read from target
       assert(ris.hasTarget());
-      commInfo.data->gather(mbuffer, ris.entityTarget(), ris);
+      commInfo.data->gather(commInfo.mbuffer, ris.entityTarget(), ris);
 
       // return _the_ value
-      return buffer[0];
+      return commInfo.buffer[0];
     }
 
-    template<class CommInfo, class DataType>
-    static void scatter(CommInfo& commInfo, const DataType& v, std::size_t i)
+    template<class CommInfo>
+    static void scatter(CommInfo& commInfo, const typename CommInfo::DataType& v, std::size_t i)
     {
-      typedef typename CommInfo::value_type DataType;
-      typedef Dune::GridGlueMessageBuffer<DataType> MessageBuffer;
-      DataType buffer[10];
-      GridGlueMessageBuffer<DataType> mbuffer(buffer);
-
       // extract GridGlue objects...
       typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
       RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
 
+      commInfo.mbuffer.clear();
+
       // fill buffer
-      mbuffer.write(v);
+      commInfo.mbuffer.write(v);
 
       // write to domain
       assert(ris.hasDomain());
-      commInfo.data->scatter(mbuffer, ris.entityDomain(), ris, 1);
+      commInfo.data->scatter(commInfo.mbuffer, ris.entityDomain(), ris, 1);
     }
   };
 
