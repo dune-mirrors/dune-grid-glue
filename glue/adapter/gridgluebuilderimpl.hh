@@ -170,21 +170,13 @@ public:
     std::vector<unsigned int> tarfaces;
 
     /*
-     * extract local surface grids
+     * extract global surface grids
      */
 
     // retrieve the coordinate and topology information from the extractors
     // and apply transformations if necessary
     extractSurfaceGrid(this->_glue._domext, domcoords, domfaces, _domtrafo);
     extractSurfaceGrid(this->_glue._tarext, tarcoords, tarfaces, _tartrafo);
-
-    /*
-     * TODO: communicate local surface arrays
-     */
-
-    /*
-     * TODO: merge surface arrays
-     */
 
 #ifdef WRITE_TO_VTK
     const int dimw = Parent::dimw;

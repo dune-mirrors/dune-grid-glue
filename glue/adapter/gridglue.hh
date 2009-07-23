@@ -74,6 +74,16 @@ private:
   /*   P R I V A T E   T Y P E S   */
 
   typedef GridGlue<GET1, GET2> This;
+
+  /** \brief GlobalId type of an intersection (used for communication) */
+  typedef unsigned int GlobalId;
+
+  /** \brief LocalIndex type of an intersection (used for communication) */
+  typedef Dune::ParallelLocalIndex<Dune::PartitionType> LocalIndex;
+
+  /** \brief ParallelIndexSet type (used for communication communication) */
+  typedef Dune::ParallelIndexSet <GlobalId, LocalIndex > PIndexSet;
+
 public:
   /** \todo Please doc me! */
   template<typename BSET1, typename BSET2, int codim1, int codim2>
@@ -223,6 +233,18 @@ private:
   /// also as recognizable end object of iterations over intersections
   mutable RemoteIntersectionImpl NULL_INTERSECTION;
 
+  /// @brief MPI_Comm which this GridGlue is working on
+  MPI_Comm mpicomm;
+
+  /// @brief parallel indexSet for the intersections with a local domain entity
+  PIndexSet domain_is;
+
+  /// @brief parallel indexSet for the intersections with a local target entity
+  PIndexSet target_is;
+
+  /// @brief keeps information about which process has which intersection
+  Dune::RemoteIndices<PIndexSet> remoteIndices;
+
 #warning HACK
 public:
   /// @brief a vector with intersection elements
@@ -258,6 +280,33 @@ protected:
     std::cout << "GridGlue::updateIntersections : The number of overlaps is " << _index_sz
               << " with " << _dindex_sz << " domain and "
               << " with " << _tindex_sz << " target entities" << std::endl;
+
+    ////// create ParallelIndexSet & RemoteIndices
+
+    // setup parallel indexset
+    domain_is.beginResize();
+    target_is.beginResize();
+    RemoteIntersectionIterator rit = iremotebegin();
+    RemoteIntersectionIterator ritend = iremoteend();
+    for (; rit != ritend; ++rit)
+    {
+      if (rit->hasDomain())
+      {
+        domain_is.add (rit->globalIndex(),
+                       LocalIndex(rit->index(), rit->entityDomain()->partitionType()) ) ;
+      }
+      if (rit->hasTarget())
+      {
+        target_is.add (rit->globalIndex(),
+                       LocalIndex(rit->index(), rit->entityTarget()->partitionType()) ) ;
+      }
+    }
+    domain_is.endResize();
+    target_is.endResize();
+
+    // setup remote index information
+    remoteIndices.setIndexSets(domain_is, target_is, mpicomm) ;
+    remoteIndices.rebuild<true>();
   }
 
 
@@ -275,7 +324,11 @@ public:
    * @param matcher The matcher object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
+#if HAVE_MPI
+  GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger, MPI_Comm mpicomm = MPI_COMM_WORLD);
+#else
   GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger);
+#endif
   /*  S E T T E R S  */
 
 
@@ -453,57 +506,35 @@ public:
     typedef Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> DataHandle;
     typedef typename DataHandle::DataType DataType;
 
-    RemoteIntersectionIterator rit = iremotebegin();
-    RemoteIntersectionIterator ritend = iremoteend();
-
 #if HAVE_MPI
 
     /*
      * P A R A L L E L   V E R S I O N
      */
 
-    // TODO: create ParallelIndexSet & RemoteIndices during updateIntersections
-
-    typedef unsigned int GlobalId;
-    typedef Dune::ParallelLocalIndex<Dune::PartitionType> LocalIndex;
-
-    // setup parallel indexset
-    typedef Dune::ParallelIndexSet <GlobalId, LocalIndex > PIndexSet;
-    PIndexSet domain_is;
-    PIndexSet target_is;
-    domain_is.beginResize();
-    target_is.beginResize();
-    for (rit = iremotebegin(); rit != ritend; ++rit)
-    {
-      if (rit->hasDomain())
-      {
-        domain_is.add (rit->globalIndex(),
-                       LocalIndex(rit->index(), rit->entityDomain()->partitionType()) ) ;
-      }
-      if (rit->hasTarget())
-      {
-        target_is.add (rit->globalIndex(),
-                       LocalIndex(rit->index(), rit->entityTarget()->partitionType()) ) ;
-      }
-    }
-    domain_is.endResize();
-    target_is.endResize();
-
-    // setup remote index information
-    // TODO: where to get te comm?!
-    MPI_Comm comm = MPI_COMM_WORLD;
-    Dune::RemoteIndices<PIndexSet> remoteIndices (domain_is, target_is, comm) ;
-    remoteIndices.rebuild<true>();
-
     // setup communication interfaces
-    // TODO: support all kinds of interfaces, currently we only use owner->owner
     typedef Dune::EnumItem <Dune::PartitionType, Dune::InteriorEntity> InteriorFlags;
-    typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::OverlapEntity>  InteriorOverlapFlags;
+    typedef Dune::EnumItem <Dune::PartitionType, Dune::OverlapEntity>  OverlapFlags;
     typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::GhostEntity>  AllFlags;
     Dune::Interface < PIndexSet > interface;
-    interface.build (remoteIndices, InteriorFlags(), AllFlags() );
-
-    // TODO: comm policy
+    switch (iftype)
+    {
+    case Dune::InteriorBorder_InteriorBorder_Interface :
+      interface.build (remoteIndices, InteriorFlags(), InteriorFlags() );
+      break;
+    case Dune::InteriorBorder_All_Interface :
+      interface.build (remoteIndices, InteriorFlags(), AllFlags() );
+      break;
+    case Dune::Overlap_OverlapFront_Interface :
+      interface.build (remoteIndices, OverlapFlags(), OverlapFlags() );
+      break;
+    case Dune::Overlap_All_Interface :
+      interface.build (remoteIndices, OverlapFlags(), AllFlags() );
+      break;
+    case Dune::All_All_Interface :
+      interface.build (remoteIndices, AllFlags(), AllFlags() );
+      break;
+    }
 
     // setup communication info (class needed to tunnel all info to the operator)
     typedef Dune::GridGlueCommInfo<GridGlue,DataHandleImp,DataTypeImp> CommInfo;
@@ -513,7 +544,6 @@ public:
 
     // create communicator
     Dune::BufferedCommunicator<PIndexSet> bComm ;
-    // TODO: use variable size version
     bComm.template build< CommInfo >(commInfo, commInfo, interface);
 
     // do communication
@@ -537,6 +567,10 @@ public:
     // allocate send/receive buffer
     DataType* sendbuffer = new DataType[ssz];
     DataType* receivebuffer = new DataType[rsz];
+
+    // iterators
+    RemoteIntersectionIterator rit = iremotebegin();
+    RemoteIntersectionIterator ritend = iremoteend();
 
     // gather
     Dune::GridGlueMessageBuffer<DataType> gatherbuffer(sendbuffer);
@@ -631,11 +665,19 @@ public:
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
 
 template<typename GET1, typename GET2>
-GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger)
+#if HAVE_MPI
+GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& gv2, Merger* merger, MPI_Comm m)
+#else
+GridGlue<GET1, GET2>::GridGlue(const DomainGridView & gv1, const TargetGridView & gv2, Merger* merger)
+#endif
   : _domgv(gv1), _targv(gv2),
     _domext(gv1), _tarext(gv2), _merg(merger),
     _builder(*const_cast<GridGlue<GET1, GET2>*>(this)),
-    NULL_INTERSECTION(this), _intersections(0, NULL_INTERSECTION)
+    NULL_INTERSECTION(this),
+#if HAVE_MPI
+    mpicomm(m),
+#endif
+    _intersections(0, NULL_INTERSECTION)
 {
   std::cout << "GridGlue: Constructor succeeded!" << std::endl;
 }
