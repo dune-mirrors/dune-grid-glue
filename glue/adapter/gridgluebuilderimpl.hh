@@ -87,7 +87,6 @@ private:
       for (size_t i = 0; i < tempcoords.size(); ++i)
       {
         typename Parent::Coords temp = (*trafo)(tempcoords[i]);
-        std::cout << "coords: " << temp << "\n";
         for (size_t j = 0; j < Parent::dimw; ++j)
           coords.push_back(temp[j]);
       }
@@ -96,7 +95,6 @@ private:
     {
       for (unsigned int i = 0; i < tempcoords.size(); ++i)
       {
-        std::cout << "coords: " << tempcoords[i] << "\n";
         for (size_t j = 0; j < Parent::dimw; ++j)
           coords.push_back(tempcoords[i][j]);
       }
