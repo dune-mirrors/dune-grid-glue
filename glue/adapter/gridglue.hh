@@ -87,9 +87,6 @@ public:
 
   class TargetIntersectionIteratorImpl;
 
-  friend class Dune::GridGlueForwardOperator;
-  friend class Dune::GridGlueBackwardOperator;
-
 public:
 
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
@@ -226,6 +223,8 @@ private:
   /// also as recognizable end object of iterations over intersections
   mutable RemoteIntersectionImpl NULL_INTERSECTION;
 
+#warning HACK
+public:
   /// @brief a vector with intersection elements
   mutable std::vector<RemoteIntersectionImpl>   _intersections;
 
@@ -457,6 +456,12 @@ public:
     RemoteIntersectionIterator rit = iremotebegin();
     RemoteIntersectionIterator ritend = iremoteend();
 
+#if HAVE_MPI
+
+    /*
+     * P A R A L L E L   V E R S I O N
+     */
+
     // TODO: create ParallelIndexSet & RemoteIndices during updateIntersections
 
     typedef unsigned int GlobalId;
@@ -474,17 +479,15 @@ public:
       {
         domain_is.add (rit->globalIndex(),
                        LocalIndex(rit->index(), rit->entityDomain()->partitionType()) ) ;
-        // LocalIndex(rit->domainIndex(), rit->entityDomain()->partitionType()) ) ;
       }
       if (rit->hasTarget())
       {
         target_is.add (rit->globalIndex(),
                        LocalIndex(rit->index(), rit->entityTarget()->partitionType()) ) ;
-        // LocalIndex(rit->targetIndex(), rit->entityTarget()->partitionType()) ) ;
       }
     }
-    domain_is.endResize () ;
-    target_is.endResize () ;
+    domain_is.endResize();
+    target_is.endResize();
 
     // setup remote index information
     // TODO: where to get te comm?!
@@ -507,14 +510,12 @@ public:
     CommInfo commInfo;
     commInfo.gridglue = this;
     commInfo.data = &data;
-    commInfo.dir = dir;
 
     // create communicator
     Dune::BufferedCommunicator<PIndexSet> bComm ;
     // TODO: use variable size version
-    bComm.template build< CommInfo >(interface);
+    bComm.template build< CommInfo >(commInfo, commInfo, interface);
 
-#if 1
     // do communication
     // choose communication direction.
     if (dir == Dune::ForwardCommunication)
@@ -523,11 +524,11 @@ public:
       bComm.backward< Dune::GridGlueBackwardOperator >(commInfo, commInfo);
 
     return;
-#endif
 
-    //
-
-    // CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
+#else
+    /*
+     * S E Q U E N T I A L   V E R S I O N
+     */
 
     // get comm buffer size
     int ssz = this->indexSet_size() * 10;     // times data per intersection
@@ -541,7 +542,6 @@ public:
     Dune::GridGlueMessageBuffer<DataType> gatherbuffer(sendbuffer);
     for (rit = iremotebegin(); rit != ritend; ++rit)
     {
-      // TODO: verify interfacetype
       /*
          we need to have to variants depending on the communication direction.
        */
@@ -567,8 +567,6 @@ public:
       }
     }
 
-#warning ONLY SEQUENTIAL
-    // TODO: communication
     assert(ssz == rsz);
     for (int i=0; i<ssz; i++)
       receivebuffer[i] = sendbuffer[i];
@@ -577,7 +575,6 @@ public:
     Dune::GridGlueMessageBuffer<DataType> scatterbuffer(receivebuffer);
     for (rit = iremotebegin(); rit != ritend; ++rit)
     {
-      // TODO: verify interfacetype
       /*
          we need to have to variants depending on the communication direction.
        */
@@ -585,7 +582,6 @@ public:
       {
         /*
            dir : Forward (domain -> target)
-           TODO: communicate size
          */
         if (rit->hasTarget())
           data.scatter(scatterbuffer, rit->entityTarget(), *rit,
@@ -595,7 +591,6 @@ public:
       {
         /*
            dir : Backward (target -> domain)
-           TODO: communicate size
          */
         if (rit->hasDomain())
           data.scatter(scatterbuffer, rit->entityDomain(), *rit,
@@ -606,6 +601,8 @@ public:
     // cleanup pointers
     delete[] sendbuffer;
     delete[] receivebuffer;
+
+#endif
   }
 
 #if QUICKHACK_INDEX

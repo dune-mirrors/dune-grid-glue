@@ -28,8 +28,12 @@ namespace Dune
      \ingroup GICollectiveCommunication
    */
   template <class DataHandleImp, class DataTypeImp>
-  class GridGlueCommDataHandleIF : public CommDataHandleIF<DataHandleImp, DataTypeImp>
+  class GridGlueCommDataHandleIF
   {
+  public:
+    //! data type of data to communicate
+    typedef DataTypeImp DataType;
+
   protected:
     // one should not create an explicit instance of this inteface object
     GridGlueCommDataHandleIF() {}
@@ -37,7 +41,7 @@ namespace Dune
   public:
 
     /*! how many objects of type DataType have to be sent for a given intersection
-       Note: Only the sender side needs to know this size.
+       Note: Both sender and receiver side need to know this size.
      */
     template<class RISType>
     size_t size (RISType& i) const
@@ -124,40 +128,58 @@ namespace Dune
   };
 
   //// CommPolicy
-
-  template<typename GG>
-  struct TargetSide
-  {
-    const GG & gridglue;
-  };
-
-  template<typename GG>
-  struct DomainSide
-  {
-    const GG & gridglue;
-  };
-
-  template<typename GG>
-  struct CommPolicy< DomainSide<GG> >
-  {
-    typedef PartitionType IndexedTypeFlag;
-    typedef unsigned int IndexedType;
-
-    size_t getSize (const GG&, int index)
-    {
-      return 1;
-    }
-  };
-
   template <typename GG, class DataHandleImp, class DataTypeImp>
   struct GridGlueCommInfo
   {
     typedef DataTypeImp value_type;
     typedef GG GridGlue;
+    typedef DataTypeImp DataType;
 
+    GridGlueCommInfo() : buffer(100), mbuffer(&buffer[0]) {}
+
+    // tunnel information to the policy and the operators
     const GridGlue * gridglue;
     GridGlueCommDataHandleIF<DataHandleImp, DataTypeImp> * data;
-    Dune::CommunicationDirection dir;
+
+    // state variables
+    std::vector<DataType> buffer;
+    mutable GridGlueMessageBuffer<DataType> mbuffer;
+    size_t currentsize;
+  };
+
+  template<typename GG, class DataHandleImp, class DataTypeImp>
+  struct CommPolicy< GridGlueCommInfo<GG, DataHandleImp, DataTypeImp> >
+  {
+    /**
+     * @brief The type of the GridGlueCommInfo
+     */
+    typedef GridGlueCommInfo<GG, DataHandleImp, DataTypeImp> Type;
+
+    /**
+     * @brief The datatype that should be communicated.
+     */
+    typedef DataTypeImp IndexedType;
+
+    /**
+     * @brief Each intersection can communicate a different number of objects.
+     */
+    typedef SizeOne IndexedTypeFlag;
+    //typedef VariableSize IndexedTypeFlag;
+
+    /**
+     * @brief Get the number of objects at an intersection.
+     */
+    static int getSize(const Type& commInfo, size_t i)
+    {
+      assert(false);
+      // get RemoteIntersection
+      typedef typename Type::GridGlue::RemoteIntersection RemoteIntersection;
+      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+
+      assert(commInfo.data->size(ris) == 1);
+      // ask data handle for size
+      return commInfo.data->size(ris);
+    }
   };
 
   // forward gather scatter to use defined class
