@@ -127,10 +127,13 @@ namespace Dune
       j = 0;
     }
 
+    // we need access to these variables in an assertion
+#ifdef NDEBUG
   private:
+#endif
     DT *a;
     size_t i;
-    mutable int j;
+    mutable size_t j;
   };
 
   //// CommPolicy
@@ -141,7 +144,8 @@ namespace Dune
     typedef GG GridGlue;
     typedef DataTypeImp DataType;
 
-    GridGlueCommInfo() : buffer(100), mbuffer(&buffer[0]) {}
+    GridGlueCommInfo() : buffer(100), mbuffer(&buffer[0])
+    {}
 
     // tunnel information to the policy and the operators
     const GridGlue * gridglue;
@@ -169,7 +173,7 @@ namespace Dune
     /**
      * @brief Each intersection can communicate a different number of objects.
      */
-    //typedef SizeOne IndexedTypeFlag;
+    // typedef SizeOne IndexedTypeFlag;
     typedef VariableSize IndexedTypeFlag;
 
     /**
@@ -217,6 +221,7 @@ namespace Dune
       }
 
       // return the j'th value in the buffer
+      assert(j < commInfo.mbuffer.i);
       return commInfo.buffer[j];
     }
 
@@ -235,7 +240,7 @@ namespace Dune
       }
 
       // write entry to buffer
-      commInfo.mbuffer.write(v);
+      commInfo.buffer[j] = v;
 
       // write back the buffer if we are at the end of this intersection
       if (j == commInfo.currentsize-1)
@@ -252,6 +257,7 @@ namespace Dune
           assert(ris.hasDomain());
           commInfo.data->scatter(commInfo.mbuffer, ris.entityDomain(), ris, commInfo.currentsize);
         }
+        assert(commInfo.mbuffer.j <= commInfo.currentsize);
       }
     }
   };

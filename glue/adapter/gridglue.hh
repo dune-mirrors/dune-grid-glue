@@ -523,17 +523,25 @@ public:
       interface.build (remoteIndices, InteriorFlags(), InteriorFlags() );
       break;
     case Dune::InteriorBorder_All_Interface :
-      interface.build (remoteIndices, InteriorFlags(), AllFlags() );
+      if (dir == Dune::ForwardCommunication)
+        interface.build (remoteIndices, InteriorFlags(), AllFlags() );
+      else
+        interface.build (remoteIndices, AllFlags(), InteriorFlags() );
       break;
     case Dune::Overlap_OverlapFront_Interface :
       interface.build (remoteIndices, OverlapFlags(), OverlapFlags() );
       break;
     case Dune::Overlap_All_Interface :
-      interface.build (remoteIndices, OverlapFlags(), AllFlags() );
+      if (dir == Dune::ForwardCommunication)
+        interface.build (remoteIndices, OverlapFlags(), AllFlags() );
+      else
+        interface.build (remoteIndices, AllFlags(), OverlapFlags() );
       break;
     case Dune::All_All_Interface :
       interface.build (remoteIndices, AllFlags(), AllFlags() );
       break;
+    default :
+      DUNE_THROW(Dune::NotImplemented, "GridGlue::communicate for interface " << iftype << " not implemented");
     }
 
     // setup communication info (class needed to tunnel all info to the operator)
@@ -552,8 +560,6 @@ public:
       bComm.forward< Dune::GridGlueForwardOperator >(commInfo, commInfo);
     else
       bComm.backward< Dune::GridGlueBackwardOperator >(commInfo, commInfo);
-
-    return;
 
 #else
     /*
@@ -635,7 +641,6 @@ public:
     // cleanup pointers
     delete[] sendbuffer;
     delete[] receivebuffer;
-
 #endif
   }
 
