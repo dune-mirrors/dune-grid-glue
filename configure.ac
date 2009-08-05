@@ -3,7 +3,7 @@
 AC_PREREQ(2.50)
 DUNE_AC_INIT # gets module version from dune.module file
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([glue/adapter/GridGlue.hh])
+AC_CONFIG_SRCDIR([glue/adapter/gridglue.hh])
 AM_CONFIG_HEADER([config.h])
 
 
