@@ -22,6 +22,8 @@
 
 #include <dune/common/array.hh>
 
+#define QUICKHACK_INDEX 1
+
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"
 #endif
@@ -233,6 +235,7 @@ private:
   /// also as recognizable end object of iterations over intersections
   mutable RemoteIntersectionImpl NULL_INTERSECTION;
 
+#if HAVE_MPI
   /// @brief MPI_Comm which this GridGlue is working on
   MPI_Comm mpicomm;
 
@@ -244,6 +247,7 @@ private:
 
   /// @brief keeps information about which process has which intersection
   Dune::RemoteIndices<PIndexSet> remoteIndices;
+#endif
 
 #warning HACK
 public:
@@ -266,6 +270,7 @@ protected:
     for (unsigned int i = 0; i < this->_merg->nSimplices(); ++i)
     {
       RemoteIntersectionImpl ri(this, i);
+#if HAVE_MPI
       if ((ri.hasTarget() || ri.hasDomain()))
       {
         if (ri.hasDomain())
@@ -275,6 +280,7 @@ protected:
         ri.index() = _index_sz;
         this->_intersections[_index_sz++] = ri;
       }
+#endif
     }
 
     std::cout << "GridGlue::updateIntersections : The number of overlaps is " << _index_sz
@@ -282,7 +288,7 @@ protected:
               << " with " << _tindex_sz << " target entities" << std::endl;
 
     ////// create ParallelIndexSet & RemoteIndices
-
+#if HAVE_MPI
     // setup parallel indexset
     domain_is.beginResize();
     target_is.beginResize();
@@ -307,6 +313,7 @@ protected:
     // setup remote index information
     remoteIndices.setIndexSets(domain_is, target_is, mpicomm) ;
     remoteIndices.rebuild<true>();
+#endif
   }
 
 

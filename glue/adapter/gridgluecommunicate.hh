@@ -157,6 +157,7 @@ namespace Dune
     size_t currentsize;
   };
 
+#if HAVE_MPI
   template<typename GG, class DataHandleImp, class DataTypeImp>
   struct CommPolicy< GridGlueCommInfo<GG, DataHandleImp, DataTypeImp> >
   {
@@ -189,6 +190,7 @@ namespace Dune
       return commInfo.data->size(ris);
     }
   };
+#endif
 
   // forward gather scatter to use defined class
   template<int dir>

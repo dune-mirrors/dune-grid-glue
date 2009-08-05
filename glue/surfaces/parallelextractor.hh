@@ -220,10 +220,14 @@ public:
     globalCoordLocalSize = comm.max(globalCoordLocalSize) + 2;
     size_t globalCoordSize = globalCoordLocalSize * comm.size();;
     globalCoordInfos.resize(globalCoordSize);
+#if HAVE_MPI
     MPI_Allgather(&localCoordInfos[0], localCoordInfos.size(),
                   Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(),
                   &globalCoordInfos[0], globalCoordLocalSize,
                   Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(), comm);
+#else
+    globalCoordInfos = localCoordInfos;
+#endif
 
     // communicate faces
     // TODO: use more efficient communication
@@ -231,10 +235,14 @@ public:
     globalFaceLocalSize = comm.max(globalFaceLocalSize);
     size_t globalFaceSize = globalFaceLocalSize * comm.size();
     globalFaceInfos.resize(globalFaceSize);
+#if HAVE_MPI
     MPI_Allgather(&localFaceInfos[0], localFaceInfos.size(),
                   Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(),
                   &globalFaceInfos[0], globalFaceLocalSize,
                   Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(), comm);
+#else
+    globalFaceInfos = localFaceInfos;
+#endif
 
     // sort and shrink vectors
     {
