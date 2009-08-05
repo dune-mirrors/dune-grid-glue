@@ -2,15 +2,15 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 adapterdir = $(includedir)/dune/glue/adapter
-adapter_HEADERS = CoordinateTransformation.hh\
-	GridGlueBuilderImpl.hh\
-	GridGlue.hh\
-	GridGlueRemoteIntersectionImpl.hh\
-	GridGlueRemoteIntersectionIteratorImpl.hh\
-	GridGlueVtkWriter.hh\
-	RemoteIntersectionConcepts.hh\
-	RemoteIntersection.hh\
-	RemoteIntersectionIterators.hh\
-	SimplexGeometry.hh
+adapter_HEADERS = coordinatetransformation.hh\
+	gridgluebuilderimpl.hh\
+	gridglue.hh\
+	gridglueremoteintersectionimpl.hh\
+	gridglueremoteintersectioniteratorimpl.hh\
+	gridgluevtkwriter.hh\
+	remoteintersectionconcepts.hh\
+	remoteintersection.hh\
+	remoteintersectioniterators.hh\
+	simplexgeometry.hh
 
 include $(top_srcdir)/am/global-rules
