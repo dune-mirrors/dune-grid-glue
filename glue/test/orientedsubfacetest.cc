@@ -9,8 +9,7 @@
 
 using namespace Dune;
 
-typedef UGGrid<3> GridType;
-
+template <class GridType>
 void test(const GridType& grid) {
 
   FieldVector<double,2> localTriCorners[3];
@@ -26,10 +25,10 @@ void test(const GridType& grid) {
 
   double eps = 1e-6;
 
-  GridType::Codim<0>::EntityPointer element = grid.leafbegin<0>();
+  typename GridType::template Codim<0>::EntityPointer element = grid.template leafbegin<0>();
 
-  GridType::Codim<0>::Entity::LevelIntersectionIterator nIt = element->ilevelbegin();
-  GridType::Codim<0>::Entity::LevelIntersectionIterator nEndIt = element->ilevelend();
+  typename GridType::template Codim<0>::Entity::LevelIntersectionIterator nIt = element->ilevelbegin();
+  typename GridType::template Codim<0>::Entity::LevelIntersectionIterator nEndIt = element->ilevelend();
 
   std::cout << "Testing: " << element->type() << std::endl;
 
@@ -64,6 +63,8 @@ void test(const GridType& grid) {
 
 int main()
 {
+
+  typedef UGGrid<3> GridType;
 
   // //////////////////////////////////////////
   //   Create test cube
