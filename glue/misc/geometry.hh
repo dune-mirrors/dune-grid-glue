@@ -23,6 +23,7 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/geometrytype.hh>
 
 
 
@@ -639,7 +640,7 @@ int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
 
 /**
  * @brief computes the local coordinate of a given face's particular corner
- * if the corner was determined using orientedSubface (algorithm embedded)
+ * if the corner was determined using orientedSubface
  *
  * !!WARNING!!
  * This only works for codim 1 faces!
