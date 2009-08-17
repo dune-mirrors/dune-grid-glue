@@ -606,6 +606,7 @@ void printGeometry(const GEO &geo, const char *name)
 template <int dim>
 int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
 {
+#if 0   // These are the proper renumberings for the old (pre Dune-1.2) numberings
   const Dune::ReferenceElement<double,dim>& refElement =
     Dune::ReferenceElements<double, dim>::general(type);
 
@@ -635,6 +636,41 @@ int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
   }
 
   return refElement.subEntity(face,1,vertex,dim);
+#else
+  const Dune::GenericReferenceElement<double,dim>& refElement =
+    Dune::GenericReferenceElements<double, dim>::general(type);
+
+  // Triangle
+  if (type.isTriangle() && face==1)
+    return refElement.subEntity(face,1, (vertex+1)%2, dim);
+
+  // Quadrilateral
+  if (type.isQuadrilateral() && (face==0 || face==3))
+    return refElement.subEntity(face,1, (vertex+1)%2, dim);
+
+  // Pyramid, quad face:  turn 0 3 2 1 into 0 3 1 2
+  if (type.isPyramid() && face==0 && vertex>=2)
+    return refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
+
+  // Prism: swap vertices 2 and 3 for all quad faces
+  if (type.isPrism() && face>=1 && face<4 && vertex>=2)
+    return refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
+
+  // Hexahedron:
+  // face 0: 0 2 4 6 --> 2 0 6 4
+  // face 3: 2 3 6 7 --> 3 2 7 6
+  if (type.isHexahedron() && (face==0 || face==3))
+    return refElement.subEntity(face,1, (vertex<2) ? (vertex+1)%2 : ((vertex-1)%2)+2, dim);
+
+
+  // face 4: 0 1 2 3 --> 0 2 1 3
+  if (type.isHexahedron() && face==4) {
+    const int renumber[4] = {0,2,1,3};
+    return refElement.subEntity(face,1, renumber[vertex], dim);
+  }
+
+  return refElement.subEntity(face,1,vertex,dim);
+#endif
 }
 
 
