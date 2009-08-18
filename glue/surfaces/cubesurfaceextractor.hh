@@ -444,7 +444,7 @@ void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, const Coord
   if (rect)
   {
     Dune::array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->numberInSelf(index);
+    unsigned int num_in_self = this->indexInInside(index);
     Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     // computing the locals is straight forward for flat rectangles,
     // we only need the triangle's corners in element coordinate

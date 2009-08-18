@@ -179,7 +179,7 @@ public:
      * @param index the index of the face
      * @return if failed -1, else the index
      */
-    i = extractor->numberInSelf(u);
+    i = extractor->indexInInside(u);
 
 
     /*

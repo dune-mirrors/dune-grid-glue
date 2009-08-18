@@ -470,7 +470,7 @@ inline void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const C
   {
     // this is a triangle face
     Dune::array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->numberInSelf(index);
+    unsigned int num_in_self = this->indexInInside(index);
     Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     for (int i = 0; i < simplex_corners; ++i)
       corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
@@ -520,7 +520,7 @@ void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordCon
   {
     // this is a triangle face
     Dune::array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->numberInSelf(index);
+    unsigned int num_in_self = this->indexInInside(index);
     Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     for (int i = 0; i < simplex_corners; ++i)
       corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);

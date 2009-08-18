@@ -211,14 +211,14 @@ public:
   // Local number of codim 1 entity in the inside() Entity where intersection is contained in.
   int numberInDomainEntity() const
   {
-    return this->_glue->_domext.numberInSelf(this->_glue->_merg->domainParent(this->_mergeindex));
+    return this->_glue->_domext.indexInInside(this->_glue->_merg->domainParent(this->_mergeindex));
   }
 
 
   // Local number of codim 1 entity in outside() Entity where intersection is contained in.
   int numberInTargetEntity() const
   {
-    return this->_glue->_tarext.numberInSelf(this->_glue->_merg->targetParent(this->_mergeindex));
+    return this->_glue->_tarext.indexInInside(this->_glue->_merg->targetParent(this->_mergeindex));
   }
 
 

@@ -321,7 +321,7 @@ public:
    * @param index the index of the element face
    * @return if failed -1, else 0 (consistent with Dune speaking of entity<0>(0) )
    */
-  int numberInSelf(unsigned int index) const
+  int indexInInside(unsigned int index) const
   {
     return index < this->_faces.size() ? 0 : -1;
   }

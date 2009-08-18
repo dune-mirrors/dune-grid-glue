@@ -120,8 +120,8 @@ public:
         if (dimw == 3)
         {
           // count and remember the corners of this face
-          const Dune::ReferenceElement<ctype, dimw>& refElement =
-            Dune::ReferenceElements<ctype, dimw>::general(pit->type());
+          const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+            Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
           int size = refElement.size(face, 1, dimw);
           face_corners.push_back(size);
           face_corner_count += size;
@@ -345,8 +345,8 @@ public:
         if (dimw == 3)
         {
           // count and remember the corners of this face
-          const Dune::ReferenceElement<ctype, dimw>& refElement =
-            Dune::ReferenceElements<ctype, dimw>::general(pit->type());
+          const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+            Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
           int size = refElement.size(face, 1, dimw);
           face_corners.push_back(size);
           face_corner_count += size;

@@ -383,7 +383,7 @@ template<typename GV>
 inline void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
 {
   Dune::array<Coords, simplex_corners> corners;
-  unsigned int num_in_self = this->numberInSelf(index);
+  unsigned int num_in_self = this->indexInInside(index);
   Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
@@ -417,7 +417,7 @@ template<typename CoordContainer>
 void SimplicialSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
 {
   Dune::array<Coords, simplex_corners> corners;
-  unsigned int num_in_self = this->numberInSelf(index);
+  unsigned int num_in_self = this->indexInInside(index);
   Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
@@ -432,7 +432,7 @@ void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index, co
 {
   Dune::array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
-  unsigned int num_in_self = this->numberInSelf(index);
+  unsigned int num_in_self = this->indexInInside(index);
   Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);

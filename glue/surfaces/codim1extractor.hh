@@ -335,7 +335,7 @@ public:
    * @param index the index of the face
    * @return if failed -1, else the index
    */
-  int numberInSelf(unsigned int index) const
+  int indexInInside(unsigned int index) const
   {
     return index < this->_faces.size() ? this->_faces[index].num_in_parent : -1;
   }

@@ -391,12 +391,12 @@ public:
    * @param index the index of the face
    * @return if failed -1, else the index
    */
-  int numberInSelf(unsigned int index) const
+  int indexInInside(unsigned int index) const
   {
     unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.numberInSelf(l_index);
+    return _lx.indexInInside(l_index);
   }
 
 

@@ -621,8 +621,8 @@ Dune::FieldVector<K, dim> cornerLocalInRefElement(const Dune::GeometryType& type
 {
   unsigned int cornerlocal = orientedSubface<dim>(type, face, vertex);
 
-  const Dune::ReferenceElement<double,dim>& refElement =
-    Dune::ReferenceElements<double, dim>::general(type);
+  const Dune::GenericReferenceElement<double,dim>& refElement =
+    Dune::GenericReferenceElements<double, dim>::general(type);
 
   // return the vertex' center of gravity, i.e. the vertex' location
   return refElement.position(cornerlocal, dim);

@@ -705,12 +705,12 @@ int GridGlue<GET1, GET2>::domainEntityNextFace(const DomainElement& e, int index
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count && (this->_domext.numberInSelf(first) < index || !this->_merg->domainSimplexMatched(first)))
+  while (first < count && (this->_domext.indexInInside(first) < index || !this->_merg->domainSimplexMatched(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
   else
-    return this->_domext.numberInSelf(first);             // found, return the face's number
+    return this->_domext.indexInInside(first);             // found, return the face's number
 }
 
 
@@ -724,12 +724,12 @@ int GridGlue<GET1, GET2>::targetEntityNextFace(const TargetElement& e, int index
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count && (this->_tarext.numberInSelf(first) < index || !this->_merg->targetSimplexMatched(first)))
+  while (first < count && (this->_tarext.indexInInside(first) < index || !this->_merg->targetSimplexMatched(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
   else
-    return this->_tarext.numberInSelf(first);             // found, return the face's number
+    return this->_tarext.indexInInside(first);             // found, return the face's number
 }
 
 
@@ -752,7 +752,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->_domext.numberInSelf(first) == num && this->_merg->domainSimplexMatched(first))
+    if (this->_domext.indexInInside(first) == num && this->_merg->domainSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
@@ -760,7 +760,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
 
       // get the remote intersections
       this->_merg->domainSimplexRefined(first, global_results);
-      while (++first < count && this->_domext.numberInSelf(first) == num && this->_merg->domainSimplexRefined(first, local_results))
+      while (++first < count && this->_domext.indexInInside(first) == num && this->_merg->domainSimplexRefined(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
@@ -828,7 +828,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->_tarext.numberInSelf(first) == num && this->_merg->targetSimplexMatched(first))
+    if (this->_tarext.indexInInside(first) == num && this->_merg->targetSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
@@ -836,7 +836,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
 
       // get the remote intersections
       this->_merg->targetSimplexRefined(first, global_results);
-      while (++first < count && this->_tarext.numberInSelf(first) == num && this->_merg->targetSimplexRefined(first, local_results))
+      while (++first < count && this->_tarext.indexInInside(first) == num && this->_merg->targetSimplexRefined(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
