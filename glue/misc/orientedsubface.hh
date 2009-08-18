@@ -69,6 +69,10 @@ int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
   if (type.isQuadrilateral() && (face==0 || face==3))
     return refElement.subEntity(face,1, (vertex+1)%2, dim);
 
+  // Tetrahedron, face 0 and 2:  swap local vertices 1 and 2
+  if (type.isTetrahedron() && (face==0 || face==2) && vertex>=1)
+    return refElement.subEntity(face,1, (vertex%2)+1, dim);
+
   // Pyramid, quad face:  turn 0 3 2 1 into 0 3 1 2
   if (type.isPyramid() && face==0 && vertex>=2)
     return refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
