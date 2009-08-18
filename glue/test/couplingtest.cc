@@ -150,7 +150,7 @@ public:
                         unsigned int face) const
   {
     const int dim = GridView::dimension;
-    const Dune::GenericReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(eptr->type());
+    const Dune::GenericReferenceElement<double,dim>& refElement = Dune::GenericReferenceElements<double, dim>::general(eptr->type());
 
     int numVertices = refElement.size(face, 1, dim);
 
