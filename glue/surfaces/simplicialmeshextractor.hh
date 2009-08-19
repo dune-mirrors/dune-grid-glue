@@ -536,7 +536,7 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
           // get the vertex pointer and the index from the index set
           // Note that the orientation is always the same for all simplices,
           // i.e. CCW which is 0,1 in 2D and 0,1,2 in 3D
-          typename Codim0Extractor<GV>::VertexPtr vptr(elit->template entity<dim>(i));
+          typename Codim0Extractor<GV>::VertexPtr vptr(elit->template subEntity<dim>(i));
           IndexType vindex = this->index<dim>(*vptr);
 
           // if the vertex is not yet inserted in the vertex info map
