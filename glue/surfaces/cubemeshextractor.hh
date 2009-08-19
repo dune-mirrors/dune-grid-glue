@@ -29,7 +29,6 @@
 #include <dune/grid/common/geometry.hh>
 
 #include "surfacedescriptor.hh"
-#include "simplicialmeshextractor.hh"
 #include <dune/glue/surfaces/codim0extractor.hh>
 
 
