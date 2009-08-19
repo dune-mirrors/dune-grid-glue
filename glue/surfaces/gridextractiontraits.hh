@@ -67,14 +67,14 @@ private:
  * deducing the "right" specialization of the GridMeshTraits struct is not possible for the compiler!
  * Remove the explicit MeshType argument in that case and you're fine.
  */
-template<typename GV, bool extract_mesh = false, MeshClassification::MeshType mtype = MeshClassification::hybrid, bool par=false>
+template<typename GV, int extractorCodim, MeshClassification::MeshType mtype = MeshClassification::hybrid, bool par=false>
 struct DefaultExtractionTraits
 {
   /// @brief the grid's type
   typedef GV GridView;
 
-  /// @brief default is the extraction of a manifold
-  enum { dimS = GridView::dimension-static_cast<int>(!extract_mesh)       };
+  /// @brief Extractor codimension
+  enum { codimension = extractorCodim };
 
   /// @brief determines the type of the extractor used
   static const MeshClassification::MeshType mesh = mtype;

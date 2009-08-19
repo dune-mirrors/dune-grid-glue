@@ -64,7 +64,7 @@ private:
    * type, so the compiler will notice and fail.
    * Also note that only using the specialized versions of this helper struct will lead to success.
    */
-  template<typename LSET, int dimG, int dimS, MeshClassification::MeshType mtype>
+  template<typename LSET, int codimension, MeshClassification::MeshType mtype>
   struct Helper
   {};
 
@@ -78,7 +78,7 @@ public:
 #ifdef GRID_GLUE_USE_CONCEPTS
   typedef
   typename ParallelHelper<
-      typename Helper<GSET, GSET::GridView::dimension, GSET::dimS, GSET::mesh>::ExtractorType,
+      typename Helper<GSET, GSET::codimension, GSET::mesh>::ExtractorType,
       GSET::parallel
       >::ExtractorType
   _ExtractorType;
@@ -86,7 +86,7 @@ public:
 #else
   typedef
   typename ParallelHelper<
-      typename Helper<GSET, GSET::GridView::dimension, GSET::dimS, GSET::mesh>::ExtractorType,
+      typename Helper<GSET, GSET::codimension, GSET::mesh>::ExtractorType,
       GSET::parallel
       >::ExtractorType
   ExtractorType;
@@ -117,59 +117,28 @@ struct ExtractorSelector<GSET>::ParallelHelper<EXTR, true>
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, MeshClassification::simplex>
+struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::simplex>
 {
   typedef SimplicialSurfaceExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, MeshClassification::cube>
+struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::cube>
 {
   typedef CubeSurfaceExtractor<typename LSET::GridView, false>  ExtractorType;
 };
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, MeshClassification::rectangular>
+struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::rectangular>
 {
   typedef CubeSurfaceExtractor<typename LSET::GridView, true>  ExtractorType;
 };
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 3, 2, MeshClassification::hybrid>
-{
-  typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-
-/*   Surface in 2D is a 1D manifold   */
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, MeshClassification::simplex>
-{
-  typedef SimplicialSurfaceExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, MeshClassification::cube>
-{
-  typedef CubeSurfaceExtractor<typename LSET::GridView, false>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, MeshClassification::rectangular>
-{
-  typedef CubeSurfaceExtractor<typename LSET::GridView, true>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, MeshClassification::hybrid>
+struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::hybrid>
 {
   typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
 };
@@ -184,59 +153,28 @@ struct ExtractorSelector<GSET>::Helper<LSET, 2, 1, MeshClassification::hybrid>
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 2, MeshClassification::simplex>
+struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::simplex>
 {
   typedef SimplicialMeshExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 2, MeshClassification::cube>
+struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::cube>
 {
   typedef CubeMeshExtractor<typename LSET::GridView, false>  ExtractorType;
 };
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 2, MeshClassification::rectangular>
+struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::rectangular>
 {
   typedef CubeMeshExtractor<typename LSET::GridView, true>  ExtractorType;
 };
 
 template<typename GSET>
 template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 2, 2, MeshClassification::hybrid>
-{
-  //		typedef GeneralMeshExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-
-/*   2D mesh is extracted and interpreted as 2D manifold in 3D   */
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, 1, MeshClassification::simplex>
-{
-  typedef SimplicialMeshExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, 1, MeshClassification::cube>
-{
-  typedef CubeMeshExtractor<typename LSET::GridView, false>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, 1, MeshClassification::rectangular>
-{
-  typedef CubeMeshExtractor<typename LSET::GridView, true>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, 1, MeshClassification::hybrid>
+struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::hybrid>
 {
   //		typedef GeneralMeshExtractor<typename LSET::GridView>  ExtractorType;
 };
