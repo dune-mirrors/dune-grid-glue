@@ -38,10 +38,10 @@
  *
  * Provides methods that build topology information for given grids.
  * Note that these methods only operate on the grid.
- * The template parameters
- * @li GV the grid view class type
+ *
+ * \tparam GV the grid view class type
  */
-template<typename GV, bool rect = false, int dimG = GV::dimension>
+template<typename GV, bool rect = false>
 class CubeMeshExtractor
   : public Codim0Extractor<GV>
 {
@@ -168,7 +168,8 @@ public:
   CubeMeshExtractor(const GV& gv) :
     _gv(gv), _codim0element(Dune::GeometryType::cube, dim)
   {
-    STDOUTLN("This is CubeMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space expecting faces of type " << _codim0element << "!");
+    std::cout << "This is CubeMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid"
+              << " expecting faces of type " << _codim0element << "!" << std::endl;
   }
 
 
@@ -198,8 +199,7 @@ public:
    * index 1 is associated with the position x1. If we the surface consists of triangles
    * we have always groups of 3 indices describing one triangle.
    *
-   * Hint: The exception Dune::MathError is thrown if not all "interesting" boundary
-   * segments have are simplices.
+   * \throws The exception Dune::MathError is thrown if not all marked elements are cubes.
    */
   void update(const ElementDescriptor<GV>& descr);
 
@@ -209,8 +209,6 @@ public:
    */
   void clear();
 
-
-  /*  S E T T E R S  */
 
 
   /*  G E T T E R S  */
@@ -465,8 +463,8 @@ public:
 
 
 
-template<typename GV, bool rect, int dimG>
-CubeMeshExtractor<GV, rect, dimG>::~CubeMeshExtractor()
+template<typename GV, bool rect>
+CubeMeshExtractor<GV, rect>::~CubeMeshExtractor()
 {
   // only the objects that have been allocated manually have to be
   // deallocated manually again
@@ -484,8 +482,8 @@ CubeMeshExtractor<GV, rect, dimG>::~CubeMeshExtractor()
 
 
 
-template<typename GV, bool rect, int dimG>
-void CubeMeshExtractor<GV, rect, dimG>::clear()
+template<typename GV, bool rect>
+void CubeMeshExtractor<GV, rect>::clear()
 {
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
@@ -516,8 +514,8 @@ void CubeMeshExtractor<GV, rect, dimG>::clear()
 
 
 
-template<typename GV, bool rect, int dimG>
-void CubeMeshExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& descr)
+template<typename GV, bool rect>
+void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -561,7 +559,7 @@ void CubeMeshExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& desc
           // get the vertex pointer and the index from the index set
           // Note that the orientation is always the same for all simplices,
           // i.e. CCW which is 0,1 in 2D and 0,1,2 in 3D
-          typename Codim0Extractor<GV>::VertexPtr vptr(elit->template entity<dim>(i));
+          typename Codim0Extractor<GV>::VertexPtr vptr(elit->template subEntity<dim>(i));
           IndexType vindex = this->index<dim>(*vptr);
 
           // if the vertex is not yet inserted in the vertex info map
@@ -685,8 +683,8 @@ void CubeMeshExtractor<GV, rect, dimG>::update(const ElementDescriptor<GV>& desc
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeMeshExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const
+template<typename GV, bool rect>
+inline void CubeMeshExtractor<GV, rect>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const
 {
   // only interpolate barycentric in the given triangle => for flat quads this is exact!
   Dune::array<Coords, simplex_corners> corners;
@@ -696,25 +694,25 @@ inline void CubeMeshExtractor<GV, rect, dimG>::globalCoords(unsigned int index, 
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeMeshExtractor<GV, rect, dimG>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const
+template<typename GV, bool rect>
+inline void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const
 {
   Coords wcoords;
   this->localAndGlobalCoords(index, bcoords, ecoords, wcoords);
 }
 
 
-template<typename GV, bool rect, int dimG>
-inline void CubeMeshExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const
+template<typename GV, bool rect>
+inline void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->globalCoords(index, bcoords, wcoords);
   ecoords = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().local(wcoords);
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV, bool rect>
 template<typename CoordContainerB, typename CoordContainerW>
-void CubeMeshExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerW &wcoords, int size) const
+void CubeMeshExtractor<GV, rect>::globalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerW &wcoords, int size) const
 {
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
@@ -724,58 +722,23 @@ void CubeMeshExtractor<GV, rect, dimG>::globalCoords(unsigned int index, const C
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV, bool rect>
 template<typename CoordContainerB, typename CoordContainerE>
-void CubeMeshExtractor<GV, rect, dimG>::localCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, int size) const
+void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, int size) const
 {
   CoordContainerE wcoords;
   this->localAndGlobalCoords(index, bcoords, ecoords, wcoords, size);
 }
 
 
-template<typename GV, bool rect, int dimG>
+template<typename GV, bool rect>
 template<typename CoordContainerB, typename CoordContainerE>
-void CubeMeshExtractor<GV, rect, dimG>::localAndGlobalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, CoordContainerE &wcoords, int size) const
+void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, CoordContainerE &wcoords, int size) const
 {
   this->globalCoords(index, bcoords, wcoords, size);
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].self)->second->p;
   for (int i = 0; i < size; ++i)
     ecoords[i] = eptr->geometry().local(wcoords[i]);
 }
-
-
-/*   S P E C I A L I Z A T I O N   F O R   2 D   G R I D S   */
-
-template<typename GV, bool rect>
-class CubeMeshExtractor<GV, rect, 1> : public SimplicialMeshExtractor<GV>
-{
-private:
-
-  typedef SimplicialMeshExtractor<GV>  Base;
-
-
-public:
-
-  /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
-
-  enum
-  {
-    cube_corners = 1 << (Base::dim-1)
-  };
-
-
-  /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
-
-  CubeMeshExtractor(const GV& gv) :
-    Base(gv, Dune::GeometryType(Dune::GeometryType::cube, Base::dim))
-  {
-    std::cout << "This is CubeMeshExtractor on a <" << GV::dimension << ","
-              << GV::dimensionworld << "> grid working in " << Base::dimw
-              << " space expecting faces of type "
-              << Dune::GeometryType(Dune::GeometryType::cube, Base::dim) << "!"
-              << std::endl;
-  }
-};
-
 
 #endif // CUBEMESHEXTRACTOR_HH_
