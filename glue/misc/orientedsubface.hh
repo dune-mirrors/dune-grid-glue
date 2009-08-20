@@ -73,13 +73,23 @@ int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
   if (type.isTetrahedron() && (face==0 || face==2) && vertex>=1)
     return refElement.subEntity(face,1, (vertex%2)+1, dim);
 
-  // Pyramid, quad face:  turn 0 3 2 1 into 0 3 1 2
-  if (type.isPyramid() && face==0 && vertex>=2)
-    return refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
+  // Pyramid, quad face (0):  swap 1 and 2
+  if (type.isPyramid() && face==0 && vertex>=1 && vertex<=2)
+    return refElement.subEntity(face,1, (vertex%2)+1, dim);
 
-  // Prism: swap vertices 2 and 3 for all quad faces
-  if (type.isPrism() && face>=1 && face<4 && vertex>=2)
-    return refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
+  // Pyramid, faces 1 and 4: swap 0 and 1
+  if (type.isPyramid() && (face==1 || face==4) && vertex<2)
+    return refElement.subEntity(face,1, (vertex+1)%2, dim);
+
+  // Prism, face 3: swap vertices 1 and 2
+  if (type.isPrism() && face==3 && vertex>=1)
+    return refElement.subEntity(face,1, (vertex%2)+1, dim);
+
+  // Prism: face 1: swap vertices 0 and 1; and 2 and 3
+  if (type.isPrism() && face==1)
+    return (vertex<2)
+           ? refElement.subEntity(face,1, (vertex+1)%2, dim)
+           : refElement.subEntity(face,1, ((vertex-1)%2)+2, dim);
 
   // Hexahedron:
   // face 0: 0 2 4 6 --> 2 0 6 4
