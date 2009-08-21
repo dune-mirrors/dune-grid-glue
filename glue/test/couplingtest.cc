@@ -385,7 +385,7 @@ int main(int argc, char *argv[]) try
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
 
-  //test1d2dCoupling<2,MeshClassification::cube>();
+  test1d2dCoupling<2,MeshClassification::cube>();
 
 }
 catch (Exception e) {
