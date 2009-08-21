@@ -251,9 +251,9 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
         // only look at boundary faces
         if (is->boundary() && descr.contains(elit, is->indexInInside())) {
 
-          // Make sure the face is a simplex
+          // Make sure the face is a cube
           if (!is->type().isCube())
-            DUNE_THROW(Dune::GridError, "found non-simplicial boundary entity: " << is->type());
+            DUNE_THROW(Dune::GridError, "found non-cube boundary entity: " << is->type());
 
           boundary_faces.insert(is->indexInInside());
 
