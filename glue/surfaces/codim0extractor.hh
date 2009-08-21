@@ -49,7 +49,7 @@ public:
   enum {dimworld = GV::dimensionworld};
   enum {dim      = GV::dimension};
 
-  /** \brief This class extracts codim-1 stuff (surfaces) */
+  /** \brief This class extracts codim-0 stuff (elements) */
   enum {codim    = 0};
 
   typedef GV GridView;
@@ -123,6 +123,54 @@ public:
 
   typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
   typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
+
+  /************************** MEMBER VARIABLES ************************/
+
+  // these values are filled on surface extraction and can be
+  // asked by the corresponding getters
+
+  /// @brief the grid object to extract the surface from
+  const GV&                                              _gv;
+
+
+  /*        Geometrical and Topological Information                */
+
+  /// @brief all information about the corner vertices of the extracted
+  std::vector<typename Codim0Extractor<GV>::CoordinateInfo>   _coords;
+
+  /// @brief a map enabling faster access to vertices and coordinates
+  ///
+  /// Maps a vertex' index (from index set) to an object holding the locally
+  /// associated index of the vertex' coordinate in _coords and an entity
+  /// pointer to the codim<dim> entity.
+  typename Codim0Extractor<GV>::VertexInfoMap _vtxInfo;
+
+  /// @brief a map enabling faster access to elements and faces
+  ///
+  /// Maps an element's index (from index set) to an object holding the locally
+  /// associated index of its first face in _indices (if there are more they are
+  /// positioned consecutively) and an entity pointer to the codim<0> entity.
+  typename Codim0Extractor<GV>::ElementInfoMap _elmtInfo;
+
+public:
+
+  /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
+
+  /**
+   * @brief except from the GridView initializes all member variables with null values
+   * @param gv the grid view object to work with
+   */
+  Codim0Extractor(const GV& gv) :
+    _gv(gv)
+  {}
+
+
+
+  bool contains (unsigned int global, unsigned int & local) const
+  {
+    local = global;
+    return true;
+  }
 
 };
 

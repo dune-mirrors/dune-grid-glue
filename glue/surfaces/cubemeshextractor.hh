@@ -126,34 +126,10 @@ private:
   // these values are filled on surface extraction and can be
   // asked by the corresponding getters
 
-  /// @brief the grid object to extract the surface from
-  const GV&                                              _gv;
-
-
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the extracted faces
   std::vector<FaceInfo>         _faces;
-
-  /// @brief all information about the corner vertices of the extracted
-  std::vector<typename Codim0Extractor<GV>::CoordinateInfo>   _coords;
-
-  /// @brief a map enabling faster access to vertices and coordinates
-  ///
-  /// Maps a vertex' index (from index set) to an object holding the locally
-  /// associated index of the vertex' coordinate in _coords and an entity
-  /// pointer to the codim<dim> entity.
-  typename Codim0Extractor<GV>::VertexInfoMap _vtxInfo;
-
-  /// @brief a map enabling faster access to elements and faces
-  ///
-  /// Maps an element's index (from index set) to an object holding the locally
-  /// associated index of its first face in _indices (if there are more they are
-  /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  typename Codim0Extractor<GV>::ElementInfoMap _elmtInfo;
-
-  /// @brief geometry type of the surface patches
-  const Dune::GeometryType _codim0element;
 
 
 public:
@@ -164,11 +140,11 @@ public:
    * @brief except from the GridView initializes all member variables with null values
    * @param gv the grid view object to work with
    */
-  CubeMeshExtractor(const GV& gv) :
-    _gv(gv), _codim0element(Dune::GeometryType::cube, dim)
+  CubeMeshExtractor(const GV& gv)
+    : Codim0Extractor<GV>(gv)
   {
-    std::cout << "This is CubeMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid"
-              << " expecting faces of type " << _codim0element << "!" << std::endl;
+    std::cout << "This is CubeMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid!"
+              << std::endl;
   }
 
 
@@ -540,7 +516,7 @@ void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
     {
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
-      if (elit->type() != this->_codim0element)
+      if (!elit->type().isCube())
         DUNE_THROW(Dune::GridError, "expected cube grid but found non-cube entity of codimension 0: " << elit->type());
 
       // only do sth. if this element is "interesting"
