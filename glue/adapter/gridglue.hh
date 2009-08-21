@@ -139,9 +139,9 @@ public:
     /** \brief export the world dimension
 
         (must be the same for both extractors!) */
-    dimw = DomainExtractor::dimw
+    dimw = DomainExtractor::dimworld
   };
-  dune_static_assert((int)DomainExtractor::dimw == (int)TargetExtractor::dimw,
+  dune_static_assert((int)DomainExtractor::dimworld == (int)TargetExtractor::dimworld,
                      "world dimension must be the same for both extractors!");
 
   /** \brief The type used for coordinates

@@ -49,20 +49,14 @@ public:
   /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
 
 
-  enum
-  {
-    dim = GV::dimension
-  };
+  enum {dim      = GV::dimension};
 
-  enum
-  {
-    dimw = GV::dimensionworld
-  };
+  enum {dimworld = GV::dimensionworld};
 
   /// @brief compile time number of corners of surface simplices
   enum
   {
-    simplex_corners = dimw
+    simplex_corners = dimworld
   };
 
   enum
@@ -73,7 +67,7 @@ public:
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dim>                                     Coords;
+  typedef Dune::FieldVector<ctype, dimworld>                                Coords;
   typedef Dune::array<unsigned int, simplex_corners>                        SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
@@ -158,7 +152,7 @@ public:
 
   /**
    * ASSUMPTION:
-   * dim == dimw
+   * dim == dimworld
    *
    * Extracts a codimension 1 surface from the grid @c g and builds up two arrays
    * with the topology of the surface written to them. The description of the
@@ -195,7 +189,7 @@ public:
    * dimension lifting the newly introduced dimension is set to 0. This is always
    * the last coordinate, i.e. y in 2D and z in 3D.
    */
-  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
   {
     coords.resize(this->_coords.size());
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -309,7 +303,7 @@ public:
    * @param bcoords the barycentric coordinates
    * @param wcoords to be filled with world coordinates
    */
-  void globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const;
+  void globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const;
 
 
   /**
@@ -321,18 +315,18 @@ public:
    * @param bcoords the barycentric coordinates
    * @param ecoords to be filled with element coordinates
    */
-  void localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const;
+  void localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const;
 
 
   /**
-   * @brief for given barycentric coords in a simplex compute element and world coordinates
+   * @brief for given barycentric coords in a cube compute element and world coordinates
    *
    * @param index the index of the simplex
    * @param bcoords the barycentric coordinates
    * @param ecoords to be filled with element coordinates
    * @param wcoords to be filled with world coordinates
    */
-  void localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const;
+  void localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const;
 
 
   /**
@@ -344,8 +338,10 @@ public:
    * @param bcoords the barycentric coordinates
    * @param wcoords to be filled with world coordinates
    */
-  template<typename CoordContainerB, typename CoordContainerW>
-  void globalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerW &wcoords, int size) const;
+  void globalCoords(unsigned int index,
+                    const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
+                    Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                    int size) const;
 
 
   /**
@@ -370,8 +366,11 @@ public:
    * @param wcoords to be filled with world coordinates
    * @return
    */
-  template<typename CoordContainerB, typename CoordContainerE>
-  void localAndGlobalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, CoordContainerE &wcoords, int size) const;
+  void localAndGlobalCoords(unsigned int index,
+                            const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
+                            Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                            int size) const;
 
 
   /**
@@ -659,18 +658,18 @@ void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
 
 
 template<typename GV, bool rect>
-inline void CubeMeshExtractor<GV, rect>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const
+inline void CubeMeshExtractor<GV, rect>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const
 {
   // only interpolate barycentric in the given triangle => for flat quads this is exact!
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i]].coord;
-  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dim> >(corners, bcoords, wcoords, dim);
+  interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dim> >(corners, bcoords, wcoords, dim);
 }
 
 
 template<typename GV, bool rect>
-inline void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const
+inline void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const
 {
   Coords wcoords;
   this->localAndGlobalCoords(index, bcoords, ecoords, wcoords);
@@ -678,7 +677,7 @@ inline void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const D
 
 
 template<typename GV, bool rect>
-inline void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const
+inline void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->globalCoords(index, bcoords, wcoords);
   ecoords = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().local(wcoords);
@@ -686,14 +685,17 @@ inline void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index
 
 
 template<typename GV, bool rect>
-template<typename CoordContainerB, typename CoordContainerW>
-void CubeMeshExtractor<GV, rect>::globalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerW &wcoords, int size) const
+void CubeMeshExtractor<GV, rect>::
+globalCoords(unsigned int index,
+             const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
+             Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+             int size) const
 {
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i]].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dim> >(corners, bcoords[i], wcoords[i], dim);
+    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], wcoords[i], dim);
 }
 
 
@@ -707,8 +709,12 @@ void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const CoordCon
 
 
 template<typename GV, bool rect>
-template<typename CoordContainerB, typename CoordContainerE>
-void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, CoordContainerE &wcoords, int size) const
+void CubeMeshExtractor<GV, rect>::
+localAndGlobalCoords(unsigned int index,
+                     const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
+                     Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                     Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                     int size) const
 {
   this->globalCoords(index, bcoords, wcoords, size);
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].self)->second->p;

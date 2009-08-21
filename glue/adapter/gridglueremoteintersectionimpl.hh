@@ -352,7 +352,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_tarext.contains(targetIndex, unused))
     {
-      glue->_tarext.localAndGlobalCoords(targetIndex, corners_barycentric, corners_local, corners_global, coorddim);
+      glue->_tarext.localAndGlobalCoords(targetIndex, corners_barycentric, corners_local, corners_global, (int)coorddim);
 
       // set the corners of the geometries
       this->_tarlgeom.setup(geometrytype, corners_local);
