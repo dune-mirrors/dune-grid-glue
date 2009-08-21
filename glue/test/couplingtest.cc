@@ -206,8 +206,8 @@ void testMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,false,ExtractorClassification> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,false,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
 
   typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
 
@@ -267,8 +267,8 @@ void testNonMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,false,ExtractorClassification> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,false,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
 
   typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
 
@@ -330,26 +330,23 @@ void test1d2dCoupling()
   typedef typename GridType2d::LevelGridView DomGridView;
   typedef typename GridType1d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,false,ExtractorClassification> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,true,ExtractorClassification> TarTraits;
-
-  typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
+  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0,ExtractorClassification> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
-  SurfaceMergeImpl merger;
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), merger);
+  PSurfaceMerge<dim,double> merger;
+  merger.setMaxDistance(0.01);
+
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
   VerticalFaceDescriptor<DomGridView> domdesc(1);
   AllElementsDescriptor<TarGridView>  tardesc;
 
-  glue.merger().setMaxDistance(0.01);
-
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
 
-  if (!glue.builder().build())
-    DUNE_THROW(Dune::GridError, "Gluing failed!");
+  glue.builder().build();
 
   std::cout << "Gluing successful!" << std::endl;
 
