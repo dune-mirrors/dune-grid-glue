@@ -555,17 +555,31 @@ void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
           }
         }
 
-        // add a new face to the temporary collection for the 1st triangle
-        temp_faces.push_back(FaceInfo(simplex_index++, eindex, 1));
-        temp_faces.back().corners[0] = vertex_indices[0];
-        temp_faces.back().corners[1] = vertex_indices[1];
-        temp_faces.back().corners[2] = vertex_indices[2];
+        // Currently the extractor splits quadrilaterals into triangles (because psurface)
+        // can only handle triangles). Since this is done manually we cannot handle grids
+        // of dimension higher than 2.
+        dune_static_assert(dim<=2, "CubeMeshExtractor only implemented for 1d and 2d");
 
-        // add a new face to the temporary collection for the 2nd triangle
-        temp_faces.push_back(FaceInfo(simplex_index++, eindex, 0));
-        temp_faces.back().corners[0] = vertex_indices[3];
-        temp_faces.back().corners[1] = vertex_indices[2];
-        temp_faces.back().corners[2] = vertex_indices[1];
+        // add a new face to the temporary collection
+        temp_faces.push_back(FaceInfo(simplex_index++, eindex,
+                                      1                          // first of two triangles
+                                      ));
+        for (int i=0; i<dim+1; i++) {
+          //temp_faces.back().corners[i].idx = vertex_indices[i];
+          temp_faces.back().corners[i] = vertex_indices[i];
+          // remember the vertices' numbers in parent element's vertices
+          // Possibly not needed, because we _are_ the parent element
+          //temp_faces.back().corners[i].num = vertex_numbers[i];
+        }
+
+        // now introduce the second triangle subdividing the quadrilateral
+        if (dim==3) {
+          // add a new face to the temporary collection for the 2nd triangle
+          temp_faces.push_back(FaceInfo(simplex_index++, eindex, 0));
+          temp_faces.back().corners[0] = vertex_indices[3];
+          temp_faces.back().corners[1] = vertex_indices[2];
+          temp_faces.back().corners[2] = vertex_indices[1];
+        }
       }
     }             // end loop over elements
 
