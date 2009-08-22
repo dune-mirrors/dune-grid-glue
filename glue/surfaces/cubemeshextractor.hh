@@ -364,7 +364,6 @@ public:
    * @param bcoords the barycentric coordinates
    * @param ecoords to be filled with element coordinates
    * @param wcoords to be filled with world coordinates
-   * @return
    */
   void localAndGlobalCoords(unsigned int index,
                             const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
