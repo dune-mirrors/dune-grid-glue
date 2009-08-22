@@ -330,7 +330,7 @@ void test1d2dCoupling()
   typedef typename GridType2d::LevelGridView DomGridView;
   typedef typename GridType1d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<DomGridView,1,MeshClassification::cube> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0,ExtractorClassification> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
@@ -348,7 +348,7 @@ void test1d2dCoupling()
 
   glue.builder().build();
 
-  std::cout << "Gluing successful!" << std::endl;
+  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -385,7 +385,9 @@ int main(int argc, char *argv[]) try
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
 
+  // Test a unit cube versus a grid one dimension lower
   test1d2dCoupling<2,MeshClassification::cube>();
+  test1d2dCoupling<2,MeshClassification::simplex>();
 
 }
 catch (Exception e) {
