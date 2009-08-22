@@ -49,15 +49,9 @@ public:
   /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
 
 
-  enum
-  {
-    dim = GV::dimension
-  };
+  enum {dim      = GV::dimension};
 
-  enum
-  {
-    dimw = GV::dimensionworld
-  };
+  enum {dimworld = GV::dimensionworld};
 
   /// @brief compile time number of corners of surface simplices
   enum
@@ -135,7 +129,7 @@ public:
   SimplicialMeshExtractor(const GV& gv)
     : Codim0Extractor<GV>(gv)
   {
-    std::cout << "This is SimplicialMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid working in " << dimw << " space!" << std::endl;
+    std::cout << "This is SimplicialMeshExtractor on a <" << GV::dimension << "," << GV::dimensionworld << "> grid!" << std::endl;
   }
 
 
@@ -149,7 +143,7 @@ public:
 
   /**
    * ASSUMPTION:
-   * dim == dimw
+   * dim == dimworld
    *
    * Extracts a codimension 1 surface from the grid @c g and builds up two arrays
    * with the topology of the surface written to them. The description of the
@@ -189,7 +183,7 @@ public:
    * dimension lifting the newly introduced dimension is set to 0. This is always
    * the last coordinate, i.e. y in 2D and z in 3D.
    */
-  void getCoords(std::vector<Dune::FieldVector<ctype, dimw> >& coords) const
+  void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
   {
     coords.resize(this->_coords.size());
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
@@ -256,17 +250,6 @@ public:
   }
 
 
-  //	/**
-  //	 * @brief gets the index of this element face
-  //	 * @return the index if possible, -1 else
-  //	 */
-  //	int firstFaceIndex(const Element& e) const
-  //	{
-  //		typename ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
-  //		return it == this->_elmtInfo.end() ? -1 : it->second->idx;
-  //	}
-
-
   /**
    * @brief gets index of first face as well as the total number of faces that
    * were extracted from this element
@@ -305,13 +288,20 @@ public:
   }
 
 
-  void globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const;
+  void globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const;
 
 
-  void localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const;
+  void localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const;
 
-
-  void localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const;
+  /**
+   * @brief for given barycentric coords in a cube compute element and world coordinates
+   *
+   * @param index the index of the simplex
+   * @param bcoords the barycentric coordinates
+   * @param ecoords to be filled with element coordinates
+   * @param wcoords to be filled with world coordinates
+   */
+  void localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const;
 
 
   template<typename CoordContainerB, typename CoordContainerW>
@@ -322,8 +312,19 @@ public:
   void localCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, int size) const;
 
 
-  template<typename CoordContainerB, typename CoordContainerE>
-  void localAndGlobalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, CoordContainerE &wcoords, int size) const;
+  /**
+   * @brief for several given barycentric coords in a simplex compute element and world coordinates
+   *
+   * @param index the index of the simplex
+   * @param bcoords the barycentric coordinates
+   * @param ecoords to be filled with element coordinates
+   * @param wcoords to be filled with world coordinates
+   */
+  void localAndGlobalCoords(unsigned int index,
+                            const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
+                            Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                            int size) const;
 
 
   /**
@@ -467,8 +468,8 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
     {
       // check if there are unwanted geometric shapes
       // if one appears => exit with error
-      if (elit->type() != this->_codim0element)
-        DUNE_THROW(Dune::GridError, "expected simplicial grid but found non-simplicial entity of codimension 0: " << elit->type());
+      if (!elit->type().isSimplex())
+        DUNE_THROW(Dune::GridError, "Expected simplicial grid but found a " << elit->type());
 
       // only do sth. if this element is "interesting"
       // implicit cast is done automatically
@@ -605,21 +606,21 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 
 
 template<typename GV>
-inline void SimplicialMeshExtractor<GV>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &wcoords) const
+inline void SimplicialMeshExtractor<GV>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const
 {
   wcoords = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().global(barycentricToReference(bcoords));
 }
 
 
 template<typename GV>
-inline void SimplicialMeshExtractor<GV>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords) const
+inline void SimplicialMeshExtractor<GV>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const
 {
   ecoords = barycentricToReference(bcoords);
 }
 
 
 template<typename GV>
-inline void SimplicialMeshExtractor<GV>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimw> &bcoords, Coords &ecoords, Coords &wcoords) const
+inline void SimplicialMeshExtractor<GV>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->localCoords(index, bcoords, ecoords);
   this->globalCoords(index, bcoords, wcoords);
@@ -649,8 +650,12 @@ void SimplicialMeshExtractor<GV>::localCoords(unsigned int index, const CoordCon
 
 
 template<typename GV>
-template<typename CoordContainerB, typename CoordContainerE>
-void SimplicialMeshExtractor<GV>::localAndGlobalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, CoordContainerE &wcoords, int size) const
+void SimplicialMeshExtractor<GV>::
+localAndGlobalCoords(unsigned int index,
+                     const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
+                     Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                     Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                     int size) const
 {
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].self)->second->p;
   for (int i = 0; i < size; ++i)
