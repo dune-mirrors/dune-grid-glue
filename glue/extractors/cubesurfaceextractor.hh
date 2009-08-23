@@ -111,9 +111,6 @@ public:
 
 
   /**
-   * ASSUMPTION:
-   * dim == dimw
-   *
    * Extracts a codimension 1 surface from the grid @c g and builds up two arrays
    * with the topology of the surface written to them. The description of the
    * surface part that is to be extracted is given in form of a mapper or set object
