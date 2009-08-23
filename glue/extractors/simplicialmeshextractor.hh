@@ -142,25 +142,6 @@ public:
   /*  F U N C T I O N A L I T Y  */
 
   /**
-   * ASSUMPTION:
-   * dim == dimworld
-   *
-   * Extracts a codimension 1 surface from the grid @c g and builds up two arrays
-   * with the topology of the surface written to them. The description of the
-   * surface part that is to be extracted is given in form of a mapper or set object
-   * @c m specifying an index set with codimension 0 entities near or on the boundary.
-   * It is assumed that only one geometric shape exists on the boundary.
-   * The template parameter n then denotes the number of corners per boundary element
-   * (e.g. n==3 for triangles in a 3D grid of tetrahedra).
-   *
-   * Assumed that we are in 2D the coords array will have the structure
-   * x0 y0 x1 y1 ... x(n-1) y(n-1)
-   * Values in the @c _indices array then refer to the indices of the coordinates, e.g.
-   * index 1 is associated with the position x1. If we the surface consists of triangles
-   * we have always groups of 3 indices describing one triangle.
-   *
-   * Hint: The exception Dune::MathError is thrown if not all "interesting" boundary
-   * segments have are simplices.
    */
   void update(const ElementDescriptor<GV>& descr);
 
