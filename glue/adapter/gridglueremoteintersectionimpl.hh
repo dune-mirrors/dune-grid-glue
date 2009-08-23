@@ -317,23 +317,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
       // temporary: make this a barycentric coordinate.  Barycentric coordinates should
       // not appear outside of PSurfaceMerge, but for a smoother transition I keep them here
 
-      corners_barycentric[i] = 1.0;
-
-      if (coorddim == 2) {
-        // local to barycentric
-        corners_barycentric[i][0] = 1.0 - corner_local_tmp[0];
-        corners_barycentric[i][1] = corner_local_tmp[0];
-      }
-      else {
-
-        // local to barycentric
-        for (int j = 0; j < coorddim-1; ++j)             // #dimensions of coordinate space
-        {
-          corners_barycentric[i][j] = corner_local_tmp[j];
-          // assemble the last coordinate
-          corners_barycentric[i][coorddim-1] -= corners_barycentric[i][j];
-        }
-      }
+      corners_barycentric[i] = referenceToBarycentric(corner_local_tmp);
 
     }
 
