@@ -226,7 +226,8 @@ void testMatchingCubeGrids()
 
   glue.builder().build();
 
-  std::cout << "Gluing successful!" << std::endl;
+  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
+  assert(merger.nSimplices() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -287,7 +288,8 @@ void testNonMatchingCubeGrids()
 
   glue.builder().build();
 
-  std::cout << "Gluing successful!" << std::endl;
+  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
+  assert(merger.nSimplices() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -349,6 +351,7 @@ void test1d2dCoupling()
   glue.builder().build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
+  assert(merger.nSimplices() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
