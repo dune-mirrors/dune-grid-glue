@@ -28,12 +28,6 @@
 #define PSURFACEMERGE_HH
 
 
-// This flag can be set to avoid illegal barycentric coordinates.
-// It may happen, that the sum of the first dim-1 coordinates
-// exceeds 1.0 which results in the last coordinate being
-// negative. It is set to 0.0 then instead.
-#define CHECK_BARYCENTRIC_COORDINATES
-
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -72,6 +66,9 @@ public:
 
   /// @brief the coordinate type used in this interface
   typedef Dune::FieldVector<T, dim>  Coords;
+
+  /// @brief the coordinate type used in this interface
+  typedef Dune::FieldVector<T, dim-1>  LocalCoords;
 
   /// @brief a function (or functor) describing the domain normals
   typedef void (*SurfaceNormal)(const ctype* pos, ctype* dir);
@@ -435,16 +432,16 @@ public:
    * (parent's index can be obtained via "domainParent")
    * @param idx the index of the merged grid simplex
    * @param corner the index of the simplex' corner
-   * @return barycentric coordinates in parent domain simplex
+   * @return local coordinates in parent domain simplex
    */
-  Coords domainParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords domainParentLocal(unsigned int idx, unsigned int corner) const;
 
   /**
    * @brief get the target parent's simplex local coordinates for a particular merged grid simplex corner
    * (parent's index can be obtained via "targetParent")
    * @param idx the index of the merged grid simplex
    * @param corner the index of the simplex' corner
-   * @return barycentric coordinates in parent target simplex
+   * @return local coordinates in parent target simplex
    */
   Coords targetParentLocal(unsigned int idx, unsigned int corner) const;
 
@@ -705,7 +702,7 @@ Dune::FieldVector<typename PSurfaceMerge<dim, T>::Coords, dim> PSurfaceMerge<dim
 
 
 template<int dim, typename T>
-typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, T>::LocalCoords PSurfaceMerge<dim, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
@@ -713,34 +710,9 @@ typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::domainParentLocal(
   // but note that the last coordinate is only stored implicitly
   // (sum must be 1.0, i.e. last is lin. dep.)
 
-  Coords result(1.0);
-
-  if (dim == 2)
-  {
-    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
-    // local coordinates in the domain parent triangle.
-    // So in order to have a barycentric representation of local corners we just
-    // reverse the order of the local coordinates' components.
-    result[0] = 1.0 - ip.localCoords[0][corner][0];
-    result[1] = ip.localCoords[0][corner][0];
-  }
-  else
-  {
-    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
-    // POSITIVELY oriented barycentric coordinates in the domain parent.
-    // Since this is what we want we just stick to this order of corners.
-    for (int j = 0; j < dim-1; ++j)             // #dimensions of coordinate space
-    {
-      result[j] = ip.localCoords[0][corner][j];
-      // assemble the last coordinate
-      result[dim-1] -= result[j];
-    }
-  }
-#ifdef CHECK_BARYCENTRIC_COORDINATES
-  // sometimes the numerics are a bit off...
-  if (result[dim-1] < 0.0)
-    result[dim-1] = 0.0;
-#endif
+  LocalCoords result;
+  for (int i=0; i<dim-1; i++)
+    result[i] = ip.localCoords[0][corner][i];
 
   return result;
 }
@@ -777,11 +749,7 @@ typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::targetParentLocal(
       result[dim-1] -= result[j];
     }
   }
-#ifdef CHECK_BARYCENTRIC_COORDINATES
-  // sometimes the numerics are a bit off...
-  if (result[dim-1] < 0.0)
-    result[dim-1] = 0.0;
-#endif
+
   return result;
 }
 
@@ -810,43 +778,6 @@ void PSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<Inters
 
   // get the base pointer of the array
   this->baseptr = &this->domOrder[0];
-
-  //	// This does not really work either!
-  //	// If CHECK_BARYCENTRIC_COORDINATES is set this should ensure that the sum of the first n-1 barycentric
-  //	// coordinates does not exceed 1.0 - but it does not work!!
-  //	// Alternatively the result of the {domain,target}ParentLocal methods can be modified (which does not work either...)
-  //	ofstream fosd, fost;
-  //	fosd.open("/tmp/domain_overlaps.dat");
-  //	fost.open("/tmp/target_overlaps.dat");
-  //	for (unsigned int i = 0; i < this->domOrder.size(); ++i)
-  //	{
-  //		for (int k = 0; k < dim; ++k)
-  //		{
-  //			ctype domsum = 1.0, tarsum = 1.0;
-  //			fosd << "l(";
-  //			fost << "l(";
-  //			for (int j = 0; j < dim-1; ++j)
-  //			{
-  //				fosd << this->domOrder[i].localCoords[0][k][j] << "  ";
-  //				domsum -= this->domOrder[i].localCoords[0][k][j];
-  //				fost << this->domOrder[i].localCoords[1][k][j] << "  ";
-  //				tarsum -= this->domOrder[i].localCoords[1][k][j];
-  //			}
-  //			fosd << domsum << ")      g(";
-  //			fost << tarsum << ")      g(";
-  //			for (int j = 0; j < dim; ++j)
-  //			{
-  //				fosd << "  " << this->domOrder[i].points[k][j];
-  //				fost << "  " << this->domOrder[i].points[k][j];
-  //			}
-  //			fosd << ")\n";
-  //			fost << ")\n";
-  //		}
-  //		fosd << std::endl;
-  //		fost << std::endl;
-  //	}
-  //	fosd.close();
-  //	fost.close();
 
 }
 

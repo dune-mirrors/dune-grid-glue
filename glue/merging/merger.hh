@@ -12,6 +12,9 @@ public:
   /// @brief the coordinate type used in this interface
   typedef Dune::FieldVector<ctype, dim>  Coords;
 
+  /// @brief the local coordinate type used in this interface
+  typedef Dune::FieldVector<ctype, dim-1>  LocalCoords;
+
 
   /**
    * @brief builds the merged grid
@@ -102,7 +105,7 @@ public:
    * @param corner the index of the simplex' corner
    * @return barycentric coordinates in parent domain simplex
    */
-  virtual Coords domainParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual LocalCoords domainParentLocal(unsigned int idx, unsigned int corner) const = 0;
 
   /**
    * @brief get the target parent's simplex local coordinates for a particular merged grid simplex corner

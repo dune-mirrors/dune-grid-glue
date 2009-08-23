@@ -310,8 +310,32 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
   // initialize the local and the global geometry of the domain
   {
-    for (int i = 0; i < coorddim; ++i)
-      corners_barycentric[i] = glue->_merg->domainParentLocal(mergeindex, i);
+    for (int i = 0; i < coorddim; ++i) {
+
+      LocalCoords corner_local_tmp = glue->_merg->domainParentLocal(mergeindex, i);
+
+      // temporary: make this a barycentric coordinate.  Barycentric coordinates should
+      // not appear outside of PSurfaceMerge, but for a smoother transition I keep them here
+
+      corners_barycentric[i] = 1.0;
+
+      if (coorddim == 2) {
+        // local to barycentric
+        corners_barycentric[i][0] = 1.0 - corner_local_tmp[0];
+        corners_barycentric[i][1] = corner_local_tmp[0];
+      }
+      else {
+
+        // local to barycentric
+        for (int j = 0; j < coorddim-1; ++j)             // #dimensions of coordinate space
+        {
+          corners_barycentric[i][j] = corner_local_tmp[j];
+          // assemble the last coordinate
+          corners_barycentric[i][coorddim-1] -= corners_barycentric[i][j];
+        }
+      }
+
+    }
 
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementcoorddim = DomainGridType::template Codim<0>::Geometry::mydimension;
