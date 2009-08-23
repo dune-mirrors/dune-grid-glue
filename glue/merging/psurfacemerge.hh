@@ -443,7 +443,7 @@ public:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent target simplex
    */
-  Coords targetParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords targetParentLocal(unsigned int idx, unsigned int corner) const;
 
 };
 
@@ -706,10 +706,8 @@ typename PSurfaceMerge<dim, T>::LocalCoords PSurfaceMerge<dim, T>::domainParentL
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
-  // read the local coordinates from the overlap's struct,
-  // but note that the last coordinate is only stored implicitly
-  // (sum must be 1.0, i.e. last is lin. dep.)
 
+  // read the local coordinates from the overlap's struct,
   LocalCoords result;
   for (int i=0; i<dim-1; i++)
     result[i] = ip.localCoords[0][corner][i];
@@ -719,36 +717,15 @@ typename PSurfaceMerge<dim, T>::LocalCoords PSurfaceMerge<dim, T>::domainParentL
 
 
 template<int dim, typename T>
-typename PSurfaceMerge<dim, T>::Coords PSurfaceMerge<dim, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, T>::LocalCoords PSurfaceMerge<dim, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
 
   // read the local coordinates from the overlap's struct,
-  // but note that the last coordinate is only stored implicitly
-  // (sum must be 1.0, i.e. last is lin. dep.)
-  Coords result(1.0);
-
-  if (dim == 2)
-  {
-    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
-    // local coordinates in the target parent face.
-    // So in order to have a barycentric representation of local corners we just
-    // reverse the order of the local coordinates' components.
-    result[0] = 1.0 - ip.localCoords[1][corner][0];
-    result[1] = ip.localCoords[1][corner][0];
-  }
-  else       // dim == 3
-  {
-    // ContactMapping::getOverlaps fills the IntersectionPrimitive<float> data objects with
-    // NEGATIVELY oriented barycentric coordinates in the target parent.
-    for (int j = 0; j < dim-1; ++j)             // #dimensions of coordinate space
-    {
-      result[j] = ip.localCoords[1][corner][j];
-      // assemble the last coordinate
-      result[dim-1] -= result[j];
-    }
-  }
+  LocalCoords result;
+  for (int i=0; i<dim-1; i++)
+    result[i] = ip.localCoords[1][corner][i];
 
   return result;
 }

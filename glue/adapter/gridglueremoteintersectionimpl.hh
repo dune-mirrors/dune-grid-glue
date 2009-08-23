@@ -344,8 +344,15 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
   // do the same for the local and the global geometry of the target
   {
-    for (int i = 0; i < coorddim; ++i)
-      corners_barycentric[i] = glue->_merg->targetParentLocal(mergeindex, i);
+    for (int i = 0; i < coorddim; ++i) {
+
+      LocalCoords corner_local_tmp = glue->_merg->targetParentLocal(mergeindex, i);
+
+      // temporary: make this a barycentric coordinate.  Barycentric coordinates should
+      // not appear outside of PSurfaceMerge, but for a smoother transition I keep them here
+      corners_barycentric[i] = referenceToBarycentric(corner_local_tmp);
+
+    }
 
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementcoorddim = TargetGridType::template Codim<0>::Geometry::mydimension;

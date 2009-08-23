@@ -114,7 +114,7 @@ public:
    * @param corner the index of the simplex' corner
    * @return barycentric coordinates in parent target simplex
    */
-  virtual Coords targetParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual LocalCoords targetParentLocal(unsigned int idx, unsigned int corner) const = 0;
 
 };
 
