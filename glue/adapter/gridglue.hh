@@ -27,12 +27,12 @@
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"
 #endif
-#include "../surfaces/gridextractor.hh"
+#include "../extractors/gridextractor.hh"
 #include "../merging/psurfacemerge.hh"
-#include "../surfaces/vtksurfacewriter.hh"
-#include "../surfaces/gridextractiontraits.hh"
-#include "../surfaces/extractorselector.hh"
-#include "../surfaces/surfacedescriptor.hh"
+#include "../extractors/vtksurfacewriter.hh"
+#include "../extractors/gridextractiontraits.hh"
+#include "../extractors/extractorselector.hh"
+#include "../extractors/surfacedescriptor.hh"
 #include "simplexgeometry.hh"
 #include "remoteintersection.hh"
 #include "remoteintersectioniterators.hh"
