@@ -64,8 +64,10 @@ namespace RemoteIntersectionInterface
 
   public:
 
+    /** \brief Dimension of the world space of the intersection */
     enum { coorddim = RemoteIntersectionImpl::coorddim };
 
+    /** \brief Dimension of the intersection */
     enum { mydim = RemoteIntersectionImpl::mydim };
 
 
