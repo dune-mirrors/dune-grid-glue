@@ -11,22 +11,28 @@
 #include <dune/glue/merging/psurfacemerge.hh>
 #include <dune/glue/adapter/gridglue.hh>
 
-template <int dim, class IntersectionIt>
+template <class IntersectionIt>
 void testIntersection(const IntersectionIt & rIIt)
 {
-  const Dune::QuadratureRule<double, dim-1>& quad = Dune::QuadratureRules<double, dim-1>::rule(rIIt->type(), 3);
+  // Dimension of the intersection
+  const int dim = IntersectionIt::mydim;
+
+  // Dimension of world coordinates
+  const int coorddim = IntersectionIt::coorddim;
+
+  const Dune::QuadratureRule<double, dim>& quad = Dune::QuadratureRules<double, dim>::rule(rIIt->type(), 3);
 
   for (unsigned int l=0; l<quad.size(); l++) {
 
-    Dune::FieldVector<double, dim-1> quadPos = quad[l].position();
+    Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
     // Test whether local domain position is consistent with global domain position
-    Dune::FieldVector<double,dim> localDomainPos =
+    Dune::FieldVector<double,coorddim> localDomainPos =
       rIIt->entityDomain()->geometry().global(rIIt->intersectionDomainLocal().global(quadPos));
-    Dune::FieldVector<double,dim> globalDomainPos = rIIt->intersectionDomainGlobal().global(quadPos);
-    Dune::FieldVector<double,dim> localTargetPos =
+    Dune::FieldVector<double,coorddim> globalDomainPos = rIIt->intersectionDomainGlobal().global(quadPos);
+    Dune::FieldVector<double,coorddim> localTargetPos =
       rIIt->entityTarget()->geometry().global(rIIt->intersectionTargetLocal().global(quadPos));
-    Dune::FieldVector<double,dim> globalTargetPos = rIIt->intersectionTargetGlobal().global(quadPos);
+    Dune::FieldVector<double,coorddim> globalTargetPos = rIIt->intersectionTargetGlobal().global(quadPos);
 
     // Test whether local domain position is consistent with global domain position
     assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
@@ -54,7 +60,7 @@ void testCoupling(const GlueType& glue)
   typename GlueType::RemoteIntersectionIterator rIEndIt = glue.iremoteend();
   for (; rIIt!=rIEndIt; ++rIIt) {
     // Create a set of test points
-    testIntersection<dim, typename GlueType::RemoteIntersectionIterator>(rIIt);
+    testIntersection(rIIt);
   }
 
   // ///////////////////////////////////////
@@ -74,7 +80,7 @@ void testCoupling(const GlueType& glue)
     typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
     for (; rIIt!=rIEndIt; ++rIIt) {
       assert (rIIt->entityDomain() == dit);
-      testIntersection<dim>(rIIt);
+      testIntersection(rIIt);
       icount++;
     }
 
@@ -86,7 +92,7 @@ void testCoupling(const GlueType& glue)
       typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityDomain() == dit);
-        testIntersection<dim>(rIIt);
+        testIntersection(rIIt);
         icount2++;
       }
     }
@@ -111,7 +117,7 @@ void testCoupling(const GlueType& glue)
     typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
     for (; rIIt!=rIEndIt; ++rIIt) {
       assert (rIIt->entityTarget() == tit);
-      testIntersection<dim>(rIIt);
+      testIntersection(rIIt);
       icount++;
     }
 
@@ -123,7 +129,7 @@ void testCoupling(const GlueType& glue)
       typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityTarget() == tit);
-        testIntersection<dim>(rIIt);
+        testIntersection(rIIt);
         icount2++;
       }
     }
