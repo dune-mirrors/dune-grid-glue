@@ -1,6 +1,6 @@
 # -*- tab-width: 4; indent-tabs-mode: nil -*-
 
-TESTPROGS = couplingtest orientedsubfacetest
+TESTPROGS = couplingtest overlappingcouplingtest mixeddimcouplingtest orientedsubfacetest
 
 
 # programs just to build when "make check" is used
@@ -16,6 +16,8 @@ AM_LDFLAGS  += $(UG_LDFLAGS) $(UG_LIBS)
 
 # define the programs
 couplingtest_SOURCES = couplingtest.cc
+mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
+overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 orientedsubfacetest_SOURCES = orientedsubfacetest.cc
 
 include $(top_srcdir)/am/global-rules

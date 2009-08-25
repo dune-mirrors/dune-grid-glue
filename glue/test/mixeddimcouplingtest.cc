@@ -17,7 +17,6 @@
 
 using namespace Dune;
 
-
 template <class GridView>
 class VerticalFaceDescriptor
   : public FaceDescriptor<GridView>
@@ -58,49 +57,52 @@ public:
   }
 };
 
+
+
 template <int dim, MeshClassification::MeshType ExtractorClassification>
-void testMatchingCubeGrids()
+void test1d2dCoupling()
 {
 
   // ///////////////////////////////////////
-  //   Make two cube grids
+  //   Make a cube grid and a 1d grid
   // ///////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType;
+  typedef SGrid<dim,dim> GridType2d;
 
   FieldVector<int, dim> elements(1);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
-  GridType cubeGrid0(elements, lower, upper);
+  GridType2d cubeGrid0(elements, lower, upper);
 
-  lower[0] += 1;
-  upper[0] += 1;
+  typedef SGrid<dim-1,dim> GridType1d;
 
-  GridType cubeGrid1(elements, lower, upper);
+  FieldVector<int, dim-1> elements1d(1);
+  FieldVector<double,dim-1> lower1d(0);
+  FieldVector<double,dim-1> upper1d(1);
+
+  GridType1d cubeGrid1(elements1d, lower1d, upper1d);
 
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
   // ////////////////////////////////////////
 
-  typedef typename GridType::LevelGridView DomGridView;
-  typedef typename GridType::LevelGridView TarGridView;
+  typedef typename GridType2d::LevelGridView DomGridView;
+  typedef typename GridType1d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
-
-  typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
+  typedef DefaultExtractionTraits<DomGridView,1,MeshClassification::cube> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0,ExtractorClassification> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
-  SurfaceMergeImpl merger;
+  PSurfaceMerge<dim,double> merger;
+  merger.setMaxDistance(0.01);
+
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
   VerticalFaceDescriptor<DomGridView> domdesc(1);
-  VerticalFaceDescriptor<TarGridView> tardesc(1);
-
-  merger.setMaxDistance(0.01);
+  AllElementsDescriptor<TarGridView>  tardesc;
 
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
@@ -120,49 +122,48 @@ void testMatchingCubeGrids()
 
 
 template <int dim, MeshClassification::MeshType ExtractorClassification>
-void testNonMatchingCubeGrids()
+void test2d1dCoupling()
 {
 
   // ///////////////////////////////////////
-  //   Make two cube grids
+  //   Make a cube grid and a 1d grid
   // ///////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType;
+  typedef SGrid<dim-1,dim> GridType1d;
 
-  FieldVector<int, dim> elements(2);
+  FieldVector<int, dim-1> elements1d(1);
+  FieldVector<double,dim-1> lower1d(0);
+  FieldVector<double,dim-1> upper1d(1);
+
+  GridType1d cubeGrid1(elements1d, lower1d, upper1d);
+
+  typedef SGrid<dim,dim> GridType2d;
+
+  FieldVector<int, dim> elements(1);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
-  GridType cubeGrid0(elements, lower, upper);
-
-  elements = 4;
-  lower[0] += 1;
-  upper[0] += 1;
-
-  GridType cubeGrid1(elements, lower, upper);
-
+  GridType2d cubeGrid0(elements, lower, upper);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
   // ////////////////////////////////////////
 
-  typedef typename GridType::LevelGridView DomGridView;
-  typedef typename GridType::LevelGridView TarGridView;
+  typedef typename GridType1d::LevelGridView DomGridView;
+  typedef typename GridType2d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
+  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::cube> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
-
-  typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
-  SurfaceMergeImpl merger;
+  PSurfaceMerge<dim,double> merger;
+  merger.setMaxDistance(0.01);
+
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
-  VerticalFaceDescriptor<DomGridView> domdesc(1);
+  AllElementsDescriptor<DomGridView>  domdesc;
   VerticalFaceDescriptor<TarGridView> tardesc(1);
-
-  merger.setMaxDistance(0.01);
 
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
@@ -181,29 +182,18 @@ void testNonMatchingCubeGrids()
 }
 
 
+
+
 int main(int argc, char *argv[]) try
 {
 
-  // Test two unit squares, extract boundaries using the CubeSurfaceExtractor
-  testMatchingCubeGrids<2,MeshClassification::cube>();
-  testNonMatchingCubeGrids<2,MeshClassification::cube>();
+  // Test a unit cube versus a grid one dimension lower
+  test1d2dCoupling<2,MeshClassification::cube>();
+  test1d2dCoupling<2,MeshClassification::simplex>();
 
-  // Test two unit squares, extract boundaries using the SimplexSurfaceExtractor
-  // Should work, because the boundary consists of 1d simplices
-  testMatchingCubeGrids<2,MeshClassification::simplex>();
-  testNonMatchingCubeGrids<2,MeshClassification::simplex>();
-
-  // Test two unit squares, extract boundaries using the GeneralSurfaceExtractor
-  testMatchingCubeGrids<2,MeshClassification::hybrid>();
-  testNonMatchingCubeGrids<2,MeshClassification::hybrid>();
-
-  // Test two unit cubes, extract boundaries using the CubeSurfaceExtractor
-  testMatchingCubeGrids<3,MeshClassification::cube>();
-  testNonMatchingCubeGrids<3,MeshClassification::cube>();
-
-  // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
-  testMatchingCubeGrids<3,MeshClassification::hybrid>();
-  testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
+  // Test a unit cube versus a grid one dimension lower
+  test2d1dCoupling<2,MeshClassification::cube>();
+  test2d1dCoupling<2,MeshClassification::simplex>();
 
 }
 catch (Exception e) {
