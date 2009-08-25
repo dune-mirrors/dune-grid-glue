@@ -135,7 +135,7 @@ void test2d1dCoupling()
   FieldVector<double,dim-1> lower1d(0);
   FieldVector<double,dim-1> upper1d(1);
 
-  GridType1d cubeGrid1(elements1d, lower1d, upper1d);
+  GridType1d cubeGrid0(elements1d, lower1d, upper1d);
 
   typedef SGrid<dim,dim> GridType2d;
 
@@ -143,7 +143,7 @@ void test2d1dCoupling()
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
-  GridType2d cubeGrid0(elements, lower, upper);
+  GridType2d cubeGrid1(elements, lower, upper);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
