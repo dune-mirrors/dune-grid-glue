@@ -33,7 +33,6 @@
 
 
 /**
- * @class ExtractorSelector
  * @brief automatic deduction of a suitable extractor for the configuration
  * given in the extraction traits class
  *
