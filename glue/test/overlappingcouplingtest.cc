@@ -61,7 +61,7 @@ int main()
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
-  PSurfaceMerge<dim,double> merger;
+  PSurfaceMerge<dim,dim,double> merger;
 
   GlueType glue(grid0.leafView(), grid1.leafView(), &merger);
 
