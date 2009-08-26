@@ -4,16 +4,19 @@
 #define DUNE_MERGER_HH
 
 
-template <class ctype, int dim>
+template <class ctype, int domainDim, int targetDim, int dimworld>
 class Merger
 {
 public:
 
-  /// @brief the coordinate type used in this interface
-  typedef Dune::FieldVector<ctype, dim>  Coords;
+  /// @brief the local coordinate type for the domain coordinates
+  typedef Dune::FieldVector<ctype, domainDim>  DomainCoords;
 
-  /// @brief the local coordinate type used in this interface
-  typedef Dune::FieldVector<ctype, dim-1>  LocalCoords;
+  /// @brief the local coordinate type for the target coordinates
+  typedef Dune::FieldVector<ctype, targetDim>  TargetCoords;
+
+  /// @brief the coordinate type used in this interface
+  typedef Dune::FieldVector<ctype, dimworld>  WorldCoords;
 
 
   /**
@@ -105,7 +108,7 @@ public:
    * @param corner the index of the simplex' corner
    * @return barycentric coordinates in parent domain simplex
    */
-  virtual LocalCoords domainParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual DomainCoords domainParentLocal(unsigned int idx, unsigned int corner) const = 0;
 
   /**
    * @brief get the target parent's simplex local coordinates for a particular merged grid simplex corner
@@ -114,7 +117,7 @@ public:
    * @param corner the index of the simplex' corner
    * @return barycentric coordinates in parent target simplex
    */
-  virtual LocalCoords targetParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual TargetCoords targetParentLocal(unsigned int idx, unsigned int corner) const = 0;
 
 };
 

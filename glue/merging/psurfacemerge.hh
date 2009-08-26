@@ -47,28 +47,31 @@
 
 /** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
 
-   \tparam dim Grid dimension
+   \tparam dim Grid dimension of the coupling grids.  Must be the same for both sides
+   \tparam dimworld  Dimension of the world coordinates.  Must be equal to dim or to dim+1
    \tparam T Type used for coordinates
  */
-template<int dim, typename T = double>
+template<int dim, int dimworld, typename T = double>
 class PSurfaceMerge
-  : public Merger<T,dim>
+  : public Merger<T,dim,dim,dimworld>
 {
+  dune_static_assert( dim==1 || dim==2,
+                      "PSurface can only handle the cases dim==1 and dim==2!");
+
+  dune_static_assert( dim==dimworld || dim+1==dimworld,
+                      "PSurface can only handle the cases dim==dimworld and dim+1==dimworld!");
 public:
 
   /*   E X P O R T E D   T Y P E S   A N D   C O N S T A N T S   */
-
-  /// @brief the dimension via compile time constant
-  enum { dimw = dim };
 
   /// @brief the numeric type used in this interface
   typedef T ctype;
 
   /// @brief the coordinate type used in this interface
-  typedef Dune::FieldVector<T, dim>  Coords;
+  typedef Dune::FieldVector<T, dimworld>  WorldCoords;
 
   /// @brief the coordinate type used in this interface
-  typedef Dune::FieldVector<T, dim-1>  LocalCoords;
+  typedef Dune::FieldVector<T, dim>  LocalCoords;
 
   /// @brief a function (or functor) describing the domain normals
   typedef void (*SurfaceNormal)(const ctype* pos, ctype* dir);
@@ -214,10 +217,10 @@ private:
     {}
 
     /// @brief mandatory for the point locator
-    bool operator()(const Coords& lower, const Coords& upper, const OverlapCorner& item) const
+    bool operator()(const WorldCoords& lower, const WorldCoords& upper, const OverlapCorner& item) const
     {
       const IntersectionPrimitive<float>& ip = this->olm.domain(item.idx);
-      for (typename Coords::size_type i = 0; i < dim; ++i)
+      for (typename WorldCoords::size_type i = 0; i < dim; ++i)
         if (lower[i] > ip.points[item.corner][i] || upper[i] <= ip.points[item.corner][i])
           return false;
       return true;
@@ -228,7 +231,7 @@ private:
   };
 
   /// @brief class used for domain and target vertex locating in the merged grid
-  typedef MultiDimOctree<OverlapCorner, OverlapCornerGeometry, Coords, dim, true>  Locator;
+  typedef MultiDimOctree<OverlapCorner, OverlapCornerGeometry, WorldCoords, dimworld, true>  Locator;
 
 private:
 
@@ -243,25 +246,25 @@ private:
   /* geometric data for both domain and targt */
 
   /// @brief domain coordinates
-  std::vector<std::tr1::array<double,dim> >   _domc;
+  std::vector<std::tr1::array<double,dimworld> >   _domc;
 
   /// @brief target coordinates
-  std::vector<std::tr1::array<double,dim> >   _tarc;
+  std::vector<std::tr1::array<double,dimworld> >   _tarc;
 
 
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
-  std::vector<std::tr1::array<int,dim> >         _domi;
+  std::vector<std::tr1::array<int,dim+1> >         _domi;
 
   /// @brief target indices (internal copy)
-  std::vector<std::tr1::array<int,dim> >         _tari;
+  std::vector<std::tr1::array<int,dim+1> >         _tari;
 
 
   /* members associated with the merged grid */
 
   /// @brief make use of psurface contact mapping functionality
-  ContactMapping<dim> _cm;
+  ContactMapping<dim+1> _cm;
 
   /// @brief provides an interface for convenient and efficient
   /// access to the set of computed simplex overlaps in the merged grid
@@ -291,14 +294,14 @@ protected:
    * @return const ref to an array of ordered coordinates denoting the corners and the orientation
    * of the simplex IFF given index was valid
    */
-  Dune::FieldVector<Coords, dim> simplexCorners(unsigned int idx) const;
+  Dune::FieldVector<WorldCoords, dim> simplexCorners(unsigned int idx) const;
 
 
 public:
 
   PSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
     _maxdist(max_distance), _eps(1E-10),
-    _olclocator(typename Locator::BoxType(Coords(0.0), Coords(1.0))), _olcgeometry(NULL), _domnormals(domain_normals)
+    _olclocator(typename Locator::BoxType(WorldCoords(0.0), WorldCoords(1.0))), _olcgeometry(NULL), _domnormals(domain_normals)
   {}
 
 
@@ -451,8 +454,8 @@ public:
 /* IMPLEMENTATION OF CLASS   C O N T A C T  M A P P I N G  S U R F A C E  M E R G E */
 
 
-template<int dim, typename T>
-void PSurfaceMerge<dim, T>::build(
+template<int dim, int dimworld, typename T>
+void PSurfaceMerge<dim, dimworld, T>::build(
   const std::vector<T>& domain_coords,
   const std::vector<unsigned int>& domain_simplices,
   const std::vector<T>& target_coords,
@@ -461,27 +464,27 @@ void PSurfaceMerge<dim, T>::build(
 {
   // copy domain and target simplices to internal arrays
   // (cannot keep refs since outside modification would destroy information)
-  this->_domi.resize(domain_simplices.size()/dim);
-  for (unsigned int i = 0; i < domain_simplices.size()/dim; ++i)
-    for (int j=0; j<dim; j++)
-      this->_domi[i][j] = domain_simplices[i*dim+j];
+  this->_domi.resize(domain_simplices.size()/(dim+1));
+  for (unsigned int i = 0; i < domain_simplices.size()/(dim+1); ++i)
+    for (int j=0; j<dim+1; j++)
+      this->_domi[i][j] = domain_simplices[i*(dim+1)+j];
 
-  this->_tari.resize(target_simplices.size()/dim);
-  for (unsigned int i = 0; i < target_simplices.size()/dim; ++i)
-    for (int j=0; j<dim; j++)
-      this->_tari[i][j] = target_simplices[i*dim+j];
+  this->_tari.resize(target_simplices.size()/(dim+1));
+  for (unsigned int i = 0; i < target_simplices.size()/(dim+1); ++i)
+    for (int j=0; j<dim+1; j++)
+      this->_tari[i][j] = target_simplices[i*(dim+1)+j];
 
   // copy the coordinates to internal arrays of coordinates
   // (again cannot just keep refs and this representation has advantages)
-  this->_domc.resize(domain_coords.size() / dim);
+  this->_domc.resize(domain_coords.size() / dimworld);
   for (unsigned int i = 0; i < this->_domc.size(); ++i)
-    for (unsigned int j = 0; j < dim; ++j)
-      this->_domc[i][j] = domain_coords[i*dim + j];
+    for (unsigned int j = 0; j < dimworld; ++j)
+      this->_domc[i][j] = domain_coords[i*dimworld + j];
 
-  this->_tarc.resize(target_coords.size() / dim);
+  this->_tarc.resize(target_coords.size() / dimworld);
   for (unsigned int i = 0; i < this->_tarc.size(); ++i)
-    for (unsigned int j = 0; j < dim; ++j)
-      this->_tarc[i][j] = target_coords[i*dim + j];
+    for (unsigned int j = 0; j < dimworld; ++j)
+      this->_tarc[i][j] = target_coords[i*dimworld + j];
 
   std::cout << "Building merged grid... (wait for finish!)" << std::endl;
 
@@ -506,15 +509,16 @@ void PSurfaceMerge<dim, T>::build(
   unsigned int num_olcorners = dim * this->_olm.nOverlaps();
 
   // re-initialize the point locator
-  Coords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
+  WorldCoords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
+
   // compute the bounding box of the merged grid
-  typename Dune::FieldVector<Coords, dim>::size_type j;
-  typename Coords::size_type k;
+  typename Dune::FieldVector<WorldCoords, dim>::size_type j;
+  typename WorldCoords::size_type k;
   for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
   {
     // can work with a reference here since no allocation is done in the next two loops
     // (should save some calls to constructors)
-    const Dune::FieldVector<Coords, dim>& corners = this->simplexCorners(i);
+    const Dune::FieldVector<WorldCoords, dim>& corners = this->simplexCorners(i);
     for (j = 0; j < dim; ++j)
       for (k = 0; k < dim; ++k)
       {
@@ -561,23 +565,23 @@ void PSurfaceMerge<dim, T>::build(
 }
 
 
-template<int dim, typename T>
-inline unsigned int PSurfaceMerge<dim, T>::nSimplices() const
+template<int dim, int dimworld, typename T>
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
 {
   return this->_olm.nOverlaps();
 }
 
 
-template<int dim, typename T>
-inline bool PSurfaceMerge<dim, T>::domainSimplexMatched(unsigned int idx) const
+template<int dim, int dimworld, typename T>
+inline bool PSurfaceMerge<dim, dimworld, T>::domainSimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstDomainParent" is in the valid range
   return (this->_olm.firstDomainParent(idx) < this->_olm.nOverlaps());
 }
 
 
-template<int dim, typename T>
-inline bool PSurfaceMerge<dim, T>::targetSimplexMatched(unsigned int idx) const
+template<int dim, int dimworld, typename T>
+inline bool PSurfaceMerge<dim, dimworld, T>::targetSimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstTargetParent" is in the valid range
   return (this->_olm.firstTargetParent(idx) < this->_olm.nOverlaps());
@@ -624,23 +628,23 @@ inline bool PSurfaceMerge<dim, T>::targetSimplexMatched(unsigned int idx) const
 //}
 
 
-template<int dim, typename T>
-inline unsigned int PSurfaceMerge<dim, T>::domainParent(unsigned int idx) const
+template<int dim, int dimworld, typename T>
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::domainParent(unsigned int idx) const
 {
   return this->_olm.domain(idx).tris[0];
 }
 
 
-template<int dim, typename T>
-inline unsigned int PSurfaceMerge<dim, T>::targetParent(unsigned int idx) const
+template<int dim, int dimworld, typename T>
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::targetParent(unsigned int idx) const
 {
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
   return this->_olm.domain(idx).tris[1];
 }
 
 
-template<int dim, typename T>
-bool PSurfaceMerge<dim, T>::domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
+template<int dim, int dimworld, typename T>
+bool PSurfaceMerge<dim, dimworld, T>::domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
   unsigned int first = this->_olm.firstDomainParent(idx);
   unsigned int count = 0;
@@ -663,8 +667,8 @@ bool PSurfaceMerge<dim, T>::domainSimplexRefined(unsigned int idx, std::vector<u
 }
 
 
-template<int dim, typename T>
-bool PSurfaceMerge<dim, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
+template<int dim, int dimworld, typename T>
+bool PSurfaceMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
   unsigned int first = this->_olm.firstTargetParent(idx);
   unsigned int count = 0;
@@ -687,13 +691,13 @@ bool PSurfaceMerge<dim, T>::targetSimplexRefined(unsigned int idx, std::vector<u
 }
 
 
-template<int dim, typename T>
-Dune::FieldVector<typename PSurfaceMerge<dim, T>::Coords, dim> PSurfaceMerge<dim, T>::simplexCorners(unsigned int idx) const
+template<int dim, int dimworld, typename T>
+Dune::FieldVector<typename PSurfaceMerge<dim, dimworld, T>::WorldCoords, dim> PSurfaceMerge<dim, dimworld, T>::simplexCorners(unsigned int idx) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
   // copy the relevant fields from the points stored with the simplex overlap
-  Dune::FieldVector<Coords, dim> result;
+  Dune::FieldVector<WorldCoords, dim> result;
   for (int i = 0; i < dim; ++i)       // #simplex_corners equals dim here
     for (int j = 0; j < dim; ++j)             // #dimensions of coordinate space
       result[i][j] = ip.points[i][j];
@@ -701,30 +705,30 @@ Dune::FieldVector<typename PSurfaceMerge<dim, T>::Coords, dim> PSurfaceMerge<dim
 }
 
 
-template<int dim, typename T>
-typename PSurfaceMerge<dim, T>::LocalCoords PSurfaceMerge<dim, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
+template<int dim, int dimworld, typename T>
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
-  for (int i=0; i<dim-1; i++)
+  for (int i=0; i<dim; i++)
     result[i] = ip.localCoords[0][corner][i];
 
   return result;
 }
 
 
-template<int dim, typename T>
-typename PSurfaceMerge<dim, T>::LocalCoords PSurfaceMerge<dim, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
+template<int dim, int dimworld, typename T>
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
-  for (int i=0; i<dim-1; i++)
+  for (int i=0; i<dim; i++)
     result[i] = ip.localCoords[1][corner][i];
 
   return result;
@@ -733,8 +737,8 @@ typename PSurfaceMerge<dim, T>::LocalCoords PSurfaceMerge<dim, T>::targetParentL
 
 /* IMPLEMENTATION OF   O V E R L A P  M A N A G E R  SUBCLASS */
 
-template<int dim, typename T>
-void PSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered)
+template<int dim, int dimworld, typename T>
+void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered)
 {
   this->domOrder.resize(unordered.size());
   this->tarOrder.resize(unordered.size(), NULL);
@@ -759,8 +763,8 @@ void PSurfaceMerge<dim, T>::OverlapManager::setOverlaps(const std::vector<Inters
 }
 
 
-template<int dim, typename T>
-unsigned int PSurfaceMerge<dim, T>::OverlapManager::firstDomainParent(unsigned int parent) const
+template<int dim, int dimworld, typename T>
+unsigned int PSurfaceMerge<dim, dimworld, T>::OverlapManager::firstDomainParent(unsigned int parent) const
 {
   // perform a binary search for a simplex overlap with the given parent
   unsigned int first = 0, last = this->domOrder.size(), p = last/2;
@@ -787,8 +791,8 @@ unsigned int PSurfaceMerge<dim, T>::OverlapManager::firstDomainParent(unsigned i
 }
 
 
-template<int dim, typename T>
-unsigned int PSurfaceMerge<dim, T>::OverlapManager::firstTargetParent(unsigned int parent) const
+template<int dim, int dimworld, typename T>
+unsigned int PSurfaceMerge<dim, dimworld, T>::OverlapManager::firstTargetParent(unsigned int parent) const
 {
   // perform a binary search for a simplex overlap with the given parent
   unsigned int first = 0, last = this->domOrder.size(), p = last/2;
