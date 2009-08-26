@@ -180,7 +180,10 @@ public:
   typedef typename TargetGridView::Traits::template Codim<TargetGridType::dimension>::EntityPointer TargetVertexPtr;
 
   /** \todo Please doc me! */
-  typedef ::Merger<typename DomainGridType::ctype,DomainGridType::dimension>                         Merger;
+  typedef ::Merger<typename DomainGridType::ctype,
+      DomainGridType::dimension - DomainExtractor::codim,
+      TargetGridType::dimension - TargetExtractor::codim,
+      dimw>                         Merger;
 
   /** \todo Please doc me! */
   typedef BuilderImpl<GET1, GET2, DomainExtractor::codim, TargetExtractor::codim>                    Builder;
