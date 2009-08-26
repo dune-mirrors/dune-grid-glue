@@ -690,7 +690,7 @@ globalCoords(unsigned int index,
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i]].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], wcoords[i], dim);
+    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], wcoords[i], dimworld);
 }
 
 
