@@ -90,7 +90,7 @@ void testMatchingCubeGrids()
   typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
 
-  typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
+  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
@@ -152,7 +152,7 @@ void testNonMatchingCubeGrids()
   typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
 
-  typedef PSurfaceMerge<dim,double> SurfaceMergeImpl;
+  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 

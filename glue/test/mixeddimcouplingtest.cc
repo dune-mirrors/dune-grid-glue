@@ -96,7 +96,7 @@ void test1d2dCoupling()
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
-  PSurfaceMerge<dim,double> merger;
+  PSurfaceMerge<dim-1,dim,double> merger;
   merger.setMaxDistance(0.01);
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -157,7 +157,7 @@ void test2d1dCoupling()
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
-  PSurfaceMerge<dim,double> merger;
+  PSurfaceMerge<dim-1,dim,double> merger;
   merger.setMaxDistance(0.01);
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
