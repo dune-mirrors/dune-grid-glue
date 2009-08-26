@@ -326,18 +326,20 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
     // a face number is only important if dealing with surfaces, not meshes
 
-    // compute the local coordinates with the correct dimension and the global coordinates
-    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
+    // Coordinates of the remote intersection corners wrt the element coordinate system
+    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_element_local;
+
+    // world coordinates of the remote intersection corners
     Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, coorddim> corners_global;
 
     unsigned int domainIndex = glue->_merg->domainParent(mergeindex);
     unsigned int unused;
     if (glue->_domext.contains(domainIndex, unused))
     {
-      glue->_domext.localAndGlobalCoords(domainIndex, corners_barycentric, corners_local, corners_global, coorddim);
+      glue->_domext.localAndGlobalCoords(domainIndex, corners_barycentric, corners_element_local, corners_global, coorddim);
 
       // set the corners of the geometries
-      this->_domlgeom.setup(geometrytype, corners_local);
+      this->_domlgeom.setup(geometrytype, corners_element_local);
       this->_domggeom.setup(geometrytype, corners_global);
     }
   }
@@ -359,18 +361,20 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
     // a face number is only important if dealing with surfaces, not manifolds or meshes
 
-    // compute the local coordinates with the correct dimension and the global coordinates
-    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_local;
+    // Coordinates of the remote intersection corners wrt the element coordinate system
+    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_element_local;
+
+    // world coordinates of the remote intersection corners
     Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, coorddim> corners_global;
 
     unsigned int targetIndex = glue->_merg->targetParent(mergeindex);
     unsigned int unused;
     if (glue->_tarext.contains(targetIndex, unused))
     {
-      glue->_tarext.localAndGlobalCoords(targetIndex, corners_barycentric, corners_local, corners_global, (int)coorddim);
+      glue->_tarext.localAndGlobalCoords(targetIndex, corners_barycentric, corners_element_local, corners_global, (int)coorddim);
 
       // set the corners of the geometries
-      this->_tarlgeom.setup(geometrytype, corners_local);
+      this->_tarlgeom.setup(geometrytype, corners_element_local);
       this->_targgeom.setup(geometrytype, corners_global);
     }
   }
