@@ -103,8 +103,7 @@ public:
   {
     std::cout << "This is CubeSurfaceExtractor on a <"
               << GV::dimension << "," << GV::dimensionworld
-              << "> grid working in " << dimworld
-              << " space!" << std::endl;
+              << "> grid!" << std::endl;
   }
 
   /*  F U N C T I O N A L I T Y  */
