@@ -245,39 +245,6 @@ inline void interpolateBarycentric(const Dune::array<V, dim>& values, const Dune
 
 
 
-template<typename K>
-Dune::FieldVector<K, 2> computeNormal(const Dune::array<Dune::FieldVector<K, 2>, 1>& v)
-{
-  Dune::FieldVector<K, 2> result(v[0][1]);
-  result[1] = -v[0][0];
-  return result;
-}
-
-
-template<typename K>
-Dune::FieldVector<K, 3> computeNormal(const Dune::array<Dune::FieldVector<K, 3>, 2>& v)
-{
-  Dune::FieldVector<K, 3> result(0.0);
-  result[0] = v[0][1]*v[1][2] - v[0][2]*v[1][1];
-  result[1] = v[0][2]*v[1][0] - v[0][0]*v[1][2];
-  result[2] = v[0][0]*v[1][1] - v[0][1]*v[1][0];
-  return result;
-}
-
-
-// can not be used to do dimension independent programming (two arguments)
-template<typename K>
-Dune::FieldVector<K, 3> computeNormal(const Dune::FieldVector<K, 3> &v0, const Dune::FieldVector<K, 3> &v1)
-{
-  Dune::FieldVector<K, 3> result(0.0);
-  result[0] = v0[1]*v1[2] - v0[2]*v1[1];
-  result[1] = v0[2]*v1[0] - v0[0]*v1[2];
-  result[2] = v0[0]*v1[1] - v0[1]*v1[0];
-  return result;
-}
-
-
-
 template<typename GEO>
 void printGeometry(const GEO &geo, const char *name)
 {
