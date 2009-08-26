@@ -51,7 +51,7 @@ public:
 
   enum
   {
-    dimw = GV::dimensionworld
+    dimworld = GV::dimensionworld
   };
 
   enum
@@ -73,7 +73,7 @@ public:
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dimw>                           Coords;
+  typedef Dune::FieldVector<ctype, dimworld>                           Coords;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
@@ -103,7 +103,7 @@ public:
   {
     std::cout << "This is CubeSurfaceExtractor on a <"
               << GV::dimension << "," << GV::dimensionworld
-              << "> grid working in " << dimw
+              << "> grid working in " << dimworld
               << " space!" << std::endl;
   }
 
@@ -202,8 +202,11 @@ public:
    * @param wcoords to be filled with world coordinates
    * @return
    */
-  template<typename CoordContainer>
-  void localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const;
+  void localAndGlobalCoords(unsigned int index,
+                            const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &bcoords,
+                            Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                            int size) const;
 
 }; // end of class CubeSurfaceExtractor
 
@@ -374,7 +377,7 @@ inline void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, con
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, wcoords, dimw);
+  interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords, wcoords, dimworld);
 }
 
 
@@ -392,15 +395,15 @@ inline void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, cons
     {
       // the triangle's corners are (0 1 2) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
+        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
     }
     else
     {
       // the triangle's corners are (3 2 1) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, 3-i);
+        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
     }
-    interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords, ecoords, dimw);
+    interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords, ecoords, dimworld);
   }
   else
   {
@@ -430,7 +433,7 @@ void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, const Coor
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
   for (int i = 0; i < size; ++i)
-    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], wcoords[i], dimw);
+    interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], wcoords[i], dimworld);
 }
 
 
@@ -449,33 +452,44 @@ void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, const Coord
     {
       // the triangle's corners are (0 1 2) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, i);
+        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
     }
     else
     {
       // the triangle's corners are (3 2 1) using face indices
       for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimw>(gt, num_in_self, 3-i);
+        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
     }
     for (int i = 0; i < size; ++i)
-      interpolateBarycentric<dimw, ctype, Dune::FieldVector<ctype, dimw> >(corners, bcoords[i], ecoords[i], dimw);
+      interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], ecoords[i], dimworld);
   }
   else
   {
+    Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> subEntityCoords;
+    for (int i=0; i<dimworld; i++)
+      subEntityCoords[i] = barycentricToReference(bcoords[i]);
+
     CoordContainer wcoords;
-    this->localAndGlobalCoords(index, bcoords, ecoords, wcoords, size);
+    this->localAndGlobalCoords(index, subEntityCoords, ecoords, wcoords, size);
   }
 }
 
 
 template<typename GV, bool rect>
-template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
+void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index,
+                                                          const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &subEntityCoords,
+                                                          Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                                                          Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                                                          int size) const
 {
-  this->globalCoords(index, bcoords, wcoords, size);
+  Dune::array<Dune::FieldVector<ctype,dim>, dimworld> barycentricCoords;
+  for (int i=0; i<dimworld; i++)
+    barycentricCoords[i] = referenceToBarycentric(subEntityCoords[i]);
+
+  this->globalCoords(index, barycentricCoords, wcoords, size);
   // for rectangles avoid using world coordinates
   if (rect)
-    this->localCoords(index, bcoords, ecoords, size);
+    this->localCoords(index, barycentricCoords, ecoords, size);
   else
   {
     ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;

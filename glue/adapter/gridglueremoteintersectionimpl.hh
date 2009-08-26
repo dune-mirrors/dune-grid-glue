@@ -304,24 +304,13 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
   // (happens when the parent GridGlue initializes the "end"-Intersection)
   assert (0 <= mergeindex || mergeindex < glue->_index_sz);
 
-  // the number of simplex corners as well as
-  // the number of the coordinate space's dimensions
-  Dune::array<Coords, coorddim> corners_barycentric;
-
   // initialize the local and the global geometry of the domain
   {
+    // coordinates within the subentity that contains the remote intersection
     Dune::array<LocalCoords, coorddim> corners_subEntity_local;
 
-    for (int i = 0; i < coorddim; ++i) {
-
+    for (int i = 0; i < coorddim; ++i)
       corners_subEntity_local[i] = glue->_merg->domainParentLocal(mergeindex, i);
-
-      // temporary: make this a barycentric coordinate.  Barycentric coordinates should
-      // not appear outside of PSurfaceMerge, but for a smoother transition I keep them here
-
-      corners_barycentric[i] = referenceToBarycentric(corners_subEntity_local[i]);
-
-    }
 
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementcoorddim = DomainGridType::template Codim<0>::Geometry::mydimension;
@@ -338,7 +327,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_domext.contains(domainIndex, unused))
     {
-      glue->_domext.localAndGlobalCoords(domainIndex, corners_barycentric, corners_element_local, corners_global, coorddim);
+      glue->_domext.localAndGlobalCoords(domainIndex, corners_subEntity_local, corners_element_local, corners_global, coorddim);
 
       // set the corners of the geometries
       this->_domlgeom.setup(geometrytype, corners_element_local);
@@ -348,17 +337,11 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
   // do the same for the local and the global geometry of the target
   {
+    // coordinates within the subentity that contains the remote intersection
     Dune::array<LocalCoords, coorddim> corners_subEntity_local;
 
-    for (int i = 0; i < coorddim; ++i) {
-
+    for (int i = 0; i < coorddim; ++i)
       corners_subEntity_local[i] = glue->_merg->targetParentLocal(mergeindex, i);
-
-      // temporary: make this a barycentric coordinate.  Barycentric coordinates should
-      // not appear outside of PSurfaceMerge, but for a smoother transition I keep them here
-      corners_barycentric[i] = referenceToBarycentric(corners_subEntity_local[i]);
-
-    }
 
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementcoorddim = TargetGridType::template Codim<0>::Geometry::mydimension;
@@ -375,7 +358,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_tarext.contains(targetIndex, unused))
     {
-      glue->_tarext.localAndGlobalCoords(targetIndex, corners_barycentric, corners_element_local, corners_global, (int)coorddim);
+      glue->_tarext.localAndGlobalCoords(targetIndex, corners_subEntity_local, corners_element_local, corners_global, coorddim);
 
       // set the corners of the geometries
       this->_tarlgeom.setup(geometrytype, corners_element_local);

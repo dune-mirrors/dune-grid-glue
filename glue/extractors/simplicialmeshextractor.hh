@@ -302,8 +302,8 @@ public:
    * @param wcoords to be filled with world coordinates
    */
   void localAndGlobalCoords(unsigned int index,
-                            const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
-                            Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                            const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &subEntityCoords,
+                            Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &elementCoords,
                             Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
                             int size) const;
 
@@ -633,17 +633,17 @@ void SimplicialMeshExtractor<GV>::localCoords(unsigned int index, const CoordCon
 template<typename GV>
 void SimplicialMeshExtractor<GV>::
 localAndGlobalCoords(unsigned int index,
-                     const Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &bcoords,
-                     Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                     const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &subEntityCoords,
+                     Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &elementCoords,
                      Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
                      int size) const
 {
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].self)->second->p;
   for (int i = 0; i < size; ++i)
   {
-    ecoords[i] = barycentricToReference(bcoords[i]);
-    // compute global coordinates and pad with 0 in last coordinate
-    wcoords[i] = eptr->geometry().global(ecoords[i]);
+    elementCoords[i] = subEntityCoords[i];
+    // compute global coordinates
+    wcoords[i] = eptr->geometry().global(elementCoords[i]);
   }
 }
 
