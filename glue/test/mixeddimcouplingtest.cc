@@ -195,6 +195,9 @@ int main(int argc, char *argv[]) try
   test2d1dCoupling<2,MeshClassification::cube>();
   test2d1dCoupling<2,MeshClassification::simplex>();
 
+  // Test a unit cube versus a grid one dimension lower
+  test2d1dCoupling<3,MeshClassification::cube>();
+
 }
 catch (Exception e) {
   std::cout << e << std::endl;
