@@ -75,33 +75,6 @@ inline Dune::FieldVector<K, dim+1> referenceToBarycentric(const Dune::FieldVecto
 
 
 /**
- * @brief compute the area of a 2D or 3D simplex
- * @param coords pointer to the 1st of 2 or 3 simplex corners
- * @return the "area" between the coordinates
- */
-template<typename K, int dim>
-inline K computeArea(const Dune::FieldVector<K, dim>& coords)
-{
-  if (dim == 2)
-  {
-    return (coords[0] - coords[1]).two_norm();
-  }
-  else if (dim == 3)
-  {
-    Dune::FieldVector<K, dim> normal, v1 = coords[0] - coords[1], v0 = coords[2] - coords[1];
-    normal[0] = v0[1]*v1[2] - v0[2]*v1[1];
-    normal[1] = v0[2]*v1[0] - v0[0]*v1[2];
-    normal[2] = v0[0]*v1[1] - v0[1]*v1[0];
-    return 0.5 * normal.two_norm();
-  }
-  else
-  {
-    DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
-  }
-}
-
-
-/**
  * @brief generic linear interpolation for convenience
  *
  * @param values a vector of values at the edge's corners,
