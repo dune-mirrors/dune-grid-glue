@@ -18,11 +18,11 @@
 using namespace Dune;
 
 template <class GridView>
-class VerticalFaceDescriptor
+class HorizontalFaceDescriptor
   : public FaceDescriptor<GridView>
 {
 public:
-  VerticalFaceDescriptor(double sliceCoord)
+  HorizontalFaceDescriptor(double sliceCoord)
     : sliceCoord_(sliceCoord)
   {}
 
@@ -35,7 +35,7 @@ public:
     int numVertices = refElement.size(face, 1, dim);
 
     for (int i=0; i<numVertices; i++)
-      if ( std::abs(eptr->geometry().corner(refElement.subEntity(face,1,i,dim))[0] - sliceCoord_) > 1e-6 )
+      if ( std::abs(eptr->geometry().corner(refElement.subEntity(face,1,i,dim))[1] - sliceCoord_) > 1e-6 )
         return false;
 
     return true;
@@ -101,7 +101,7 @@ void test1d2dCoupling()
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
-  VerticalFaceDescriptor<DomGridView> domdesc(1);
+  HorizontalFaceDescriptor<DomGridView> domdesc(0);
   AllElementsDescriptor<TarGridView>  tardesc;
 
   glue.builder().setDomainDescriptor(domdesc);
@@ -163,7 +163,7 @@ void test2d1dCoupling()
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
   AllElementsDescriptor<DomGridView>  domdesc;
-  VerticalFaceDescriptor<TarGridView> tardesc(1);
+  HorizontalFaceDescriptor<TarGridView> tardesc(0);
 
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
