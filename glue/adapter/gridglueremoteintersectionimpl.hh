@@ -310,14 +310,16 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
   // initialize the local and the global geometry of the domain
   {
+    Dune::array<LocalCoords, coorddim> corners_subEntity_local;
+
     for (int i = 0; i < coorddim; ++i) {
 
-      LocalCoords corner_local_tmp = glue->_merg->domainParentLocal(mergeindex, i);
+      corners_subEntity_local[i] = glue->_merg->domainParentLocal(mergeindex, i);
 
       // temporary: make this a barycentric coordinate.  Barycentric coordinates should
       // not appear outside of PSurfaceMerge, but for a smoother transition I keep them here
 
-      corners_barycentric[i] = referenceToBarycentric(corner_local_tmp);
+      corners_barycentric[i] = referenceToBarycentric(corners_subEntity_local[i]);
 
     }
 
@@ -346,13 +348,15 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
   // do the same for the local and the global geometry of the target
   {
+    Dune::array<LocalCoords, coorddim> corners_subEntity_local;
+
     for (int i = 0; i < coorddim; ++i) {
 
-      LocalCoords corner_local_tmp = glue->_merg->targetParentLocal(mergeindex, i);
+      corners_subEntity_local[i] = glue->_merg->targetParentLocal(mergeindex, i);
 
       // temporary: make this a barycentric coordinate.  Barycentric coordinates should
       // not appear outside of PSurfaceMerge, but for a smoother transition I keep them here
-      corners_barycentric[i] = referenceToBarycentric(corner_local_tmp);
+      corners_barycentric[i] = referenceToBarycentric(corners_subEntity_local[i]);
 
     }
 
