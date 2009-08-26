@@ -44,13 +44,15 @@ public:
   void constraints()
   {
     typedef typename T::GridView TempGridView;
-    enum { dimensionsurface = T::dimS };
+    enum { codimension = T::codimension };
     this->mesh = T::mesh;
+    this->par  = T::parallel;
   }
 
 private:
 
   MeshClassification::MeshType mesh;
+  bool par;
 };
 
 
