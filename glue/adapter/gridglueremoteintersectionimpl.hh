@@ -334,7 +334,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_domext.contains(domainIndex, unused))
     {
-      glue->_domext.localAndGlobalCoords(domainIndex, corners_subEntity_local, corners_element_local, corners_global, coorddim);
+      glue->_domext.localAndGlobalCoords(domainIndex, corners_subEntity_local, corners_element_local, corners_global);
 
       // set the corners of the geometries
       this->_domlgeom.setup(geometrytype, corners_element_local);
@@ -365,7 +365,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_tarext.contains(targetIndex, unused))
     {
-      glue->_tarext.localAndGlobalCoords(targetIndex, corners_subEntity_local, corners_element_local, corners_global, coorddim);
+      glue->_tarext.localAndGlobalCoords(targetIndex, corners_subEntity_local, corners_element_local, corners_global);
 
       // set the corners of the geometries
       this->_tarlgeom.setup(geometrytype, corners_element_local);

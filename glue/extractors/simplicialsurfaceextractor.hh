@@ -203,8 +203,7 @@ public:
   void localAndGlobalCoords(unsigned int index,
                             const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &bcoords,
                             Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
-                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
-                            int size) const;
+                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords) const;
 
 }; // end of class SimplicialSurfaceExtractor
 
@@ -429,8 +428,7 @@ template<typename GV>
 void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index,
                                                           const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &bcoords,
                                                           Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
-                                                          Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
-                                                          int size) const
+                                                          Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords) const
 {
   Dune::array<Coords, simplex_corners> corners;
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
@@ -438,7 +436,7 @@ void SimplicialSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index,
   Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
-  for (int i = 0; i < size; ++i)
+  for (int i = 0; i < wcoords.size(); ++i)
   {
     interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, referenceToBarycentric(bcoords[i]), ecoords[i], dimworld);
     wcoords[i] = eptr->geometry().global(ecoords[i]);

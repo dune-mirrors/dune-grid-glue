@@ -174,7 +174,7 @@ public:
    * @param wcoords to be filled with world coordinates
    */
   template<typename CoordContainer>
-  void globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const;
+  void globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords) const;
 
 
   /**
@@ -187,7 +187,7 @@ public:
    * @param ecoords to be filled with element coordinates
    */
   template<typename CoordContainer>
-  void localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const;
+  void localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords) const;
 
 
   /**
@@ -202,8 +202,7 @@ public:
   void localAndGlobalCoords(unsigned int index,
                             const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &bcoords,
                             Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
-                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
-                            int size) const;
+                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords) const;
 
 }; // end of class GeneralSurfaceExtractor
 
@@ -501,12 +500,12 @@ inline void GeneralSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index
 
 template<typename GV>
 template<typename CoordContainer>
-void GeneralSurfaceExtractor<GV>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
+void GeneralSurfaceExtractor<GV>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords) const
 {
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  for (int i = 0; i < size; ++i)
+  for (int i = 0; i < wcoords.size(); ++i)
     interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], wcoords[i], dimworld);
 
 }
@@ -514,7 +513,7 @@ void GeneralSurfaceExtractor<GV>::globalCoords(unsigned int index, const CoordCo
 
 template<typename GV>
 template<typename CoordContainer>
-void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
+void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords) const
 {
   if (this->_faces[index].category == 0)
   {
@@ -524,7 +523,7 @@ void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordCon
     Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     for (int i = 0; i < simplex_corners; ++i)
       corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < ecoords.size(); ++i)
       interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], ecoords[i], dimworld);
   }
   else
@@ -535,7 +534,7 @@ void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordCon
       subEntityCoords[i] = barycentricToReference(bcoords[i]);
 
     CoordContainer wcoords;
-    this->localAndGlobalCoords(index, subEntityCoords, ecoords, wcoords, size);
+    this->localAndGlobalCoords(index, subEntityCoords, ecoords, wcoords);
   }
 }
 
@@ -544,21 +543,20 @@ template<typename GV>
 void GeneralSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index,
                                                        const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &subEntityCoords,
                                                        Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
-                                                       Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
-                                                       int size) const
+                                                       Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords) const
 {
   Dune::array<Dune::FieldVector<ctype,dim>, dimworld> barycentricCoords;
   for (int i=0; i<dimworld; i++)
     barycentricCoords[i] = referenceToBarycentric(subEntityCoords[i]);
 
-  this->globalCoords(index, barycentricCoords, wcoords, size);
+  this->globalCoords(index, barycentricCoords, wcoords);
   // for triangles
   if (this->_faces[index].category == 0)
-    this->localCoords(index, barycentricCoords, ecoords, size);
+    this->localCoords(index, barycentricCoords, ecoords);
   else
   {
     ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < ecoords.size(); ++i)
       ecoords[i] = eptr->geometry().local(wcoords[i]);
   }
 }
