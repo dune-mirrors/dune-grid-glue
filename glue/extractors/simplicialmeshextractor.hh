@@ -159,20 +159,13 @@ public:
 
   /**
    * @brief getter for the coordinates array
-   * @param coords a vector that will be resized (!) and filled with the coordinates,
-   * note that the single components are written consecutively and that due to the
-   * dimension lifting the newly introduced dimension is set to 0. This is always
-   * the last coordinate, i.e. y in 2D and z in 3D.
+   * @param coords a vector that will be resized (!) and filled with the coordinates
    */
   void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
   {
     coords.resize(this->_coords.size());
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
-    {
-      for (unsigned int j = 0; j < dim; ++j)
-        coords[i][j] = this->_coords[i].coord[j];
-      coords[i][dim] = 0.0;                   // set the last component to 0 (see specification)
-    }
+      coords[i] = this->_coords[i].coord;
   }
 
   /**
