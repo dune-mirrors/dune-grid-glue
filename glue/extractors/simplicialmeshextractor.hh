@@ -62,7 +62,7 @@ public:
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dim>                                     Coords;
+  typedef Dune::FieldVector<ctype, dimworld>                                Coords;
   typedef Dune::array<unsigned int, simplex_corners>                        SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
