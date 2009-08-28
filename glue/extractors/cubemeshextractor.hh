@@ -165,26 +165,6 @@ public:
   /*  G E T T E R S  */
 
   /**
-   * @brief getter for the coordinates array
-   * @param coords a vector that will be resized (!) and filled with the coordinates
-   */
-  void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
-  {
-    coords.resize(this->_coords.size());
-    for (unsigned int i = 0; i < this->_coords.size(); ++i)
-      coords[i] = this->_coords[i].coord;
-  }
-
-  /**
-   * @brief getter for the count of coordinates
-   * @return the count
-   */
-  unsigned int nCoords() const
-  {
-    return this->_coords.size();
-  }
-
-  /**
    * @brief getter for the indices array
    * It is strongly recommended not to modify its contents.
    * Deallocation is done in this class.
@@ -196,16 +176,6 @@ public:
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
       for (unsigned int j = 0; j < simplex_corners; ++j)
         faces[i][j] = this->_faces[i].corners[j];
-  }
-
-
-  /**
-   * @brief getter for internally used index set (grid's index set)
-   * @return the index set
-   */
-  const IndexSet& indexSet() const
-  {
-    return this->_gv.indexSet();
   }
 
 
