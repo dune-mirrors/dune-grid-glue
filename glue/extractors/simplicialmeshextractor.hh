@@ -173,17 +173,6 @@ public:
 
 
   /**
-   * @brief getter for the index of an entity of codim cc
-   * @return the index specified by the grid's index set
-   */
-  template<int cc>
-  IndexType index(const typename GV::Traits::template Codim<cc>::Entity& e) const
-  {
-    return this->indexSet().template index<cc>(e);
-  }
-
-
-  /**
    * @brief gets index of coordinate in _coords associated with given vertex
    * @return the index if possible, -1 else
    */

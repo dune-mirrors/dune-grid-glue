@@ -180,17 +180,6 @@ public:
 
 
   /**
-   * @brief getter for the index of an entity of codim cc
-   * @return the index specified by the grid's index set
-   */
-  template<int cc>
-  IndexType index(const typename GV::Traits::template Codim<cc>::Entity& e) const
-  {
-    return this->indexSet().template index<cc>(e);
-  }
-
-
-  /**
    * @brief gets index of coordinate in _coords associated with given vertex
    * @return the index if possible, -1 else
    */
@@ -212,7 +201,7 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    typename Codim0Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->index<0>(e));
+    typename Codim0Extractor<GV>::ElementInfoMap::const_iterator it = this->_elmtInfo.find(this->indexSet().template index<0>(e));
     if (it == this->_elmtInfo.end())
     {
       first = -1;
@@ -476,7 +465,7 @@ void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
           // Note that the orientation is always the same for all simplices,
           // i.e. CCW which is 0,1 in 2D and 0,1,2 in 3D
           typename Codim0Extractor<GV>::VertexPtr vptr(elit->template subEntity<dim>(i));
-          IndexType vindex = this->index<dim>(*vptr);
+          IndexType vindex = this->indexSet().template index<dim>(*vptr);
 
           // if the vertex is not yet inserted in the vertex info map
           // it is a new one -> it will be inserted now!
