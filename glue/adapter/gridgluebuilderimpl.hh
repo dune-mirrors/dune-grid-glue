@@ -64,17 +64,18 @@ private:
 
   const TargetDescriptor*                   _tarelmntdescr;
 
-  const typename Parent::Transformation*    _domtrafo;
+  const typename Parent::DomainTransformation*    _domtrafo;
 
-  const typename Parent::Transformation*    _tartrafo;
+  const typename Parent::TargetTransformation*    _tartrafo;
 
   template<typename Extractor>
   void extractSurfaceGrid (const Extractor & ext,
                            std::vector<typename Parent::ctype> & coords,
                            std::vector<unsigned int> & faces,
-                           const typename Parent::Transformation* trafo) const
+                           //const typename Parent::Transformation* trafo) const
+                           const CoordinateTransformation<Extractor::dimworld, Parent::dimworld, typename Parent::ctype>* trafo) const
   {
-    std::vector<typename Parent::Coords> tempcoords;
+    std::vector<typename Extractor::Coords> tempcoords;
     std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
 
     ext.getCoords(tempcoords);
@@ -130,13 +131,13 @@ public:
   }
 
 
-  void setDomainTransformation(const typename Parent::Transformation* trafo)
+  void setDomainTransformation(const typename Parent::DomainTransformation* trafo)
   {
     this->_domtrafo = trafo;
   }
 
 
-  void setTargetTransformation(const typename Parent::Transformation* trafo)
+  void setTargetTransformation(const typename Parent::TargetTransformation* trafo)
   {
     this->_tartrafo = trafo;
   }

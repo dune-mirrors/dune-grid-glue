@@ -150,8 +150,11 @@ public:
   /** \brief The type used for coordinate vectors */
   typedef Dune::FieldVector<ctype, dimworld>                   Coords;
 
-  /** \brief The type of transformation used */
-  typedef CoordinateTransformation<dimworld, ctype>      Transformation;
+  /** \brief The type of transformation used for the domain grid*/
+  typedef CoordinateTransformation<DomainExtractor::dimworld, dimworld, ctype>      DomainTransformation;
+
+  /** \brief The type of transformation used for the domain grid*/
+  typedef CoordinateTransformation<TargetExtractor::dimworld, dimworld, ctype>      TargetTransformation;
 
   /** \brief The type of the domain grid elements */
   typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainElement;
