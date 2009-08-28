@@ -20,18 +20,17 @@
 #define COORDINATETRANSFORMATION_HH
 
 /** \brief Base class for vertex transformations
-    \tparam dim The grid dimension
+    \tparam gridDimworld The dimension of the grid world
+    \tparam couplingDimworld The dimension of the coupling world.  This may be larger than gridDimworld
     \tparam ctype The type used for coordinates
  */
-template<int dim, typename ctype = double>
+template<int gridDimworld, int couplingDimworld, typename ctype = double>
 class CoordinateTransformation
 {
 public:
-  /** \brief The type used for coordinate vectors */
-  typedef Dune::FieldVector<ctype, dim> Coords;
 
   /** \brief Map a point to a new position */
-  virtual const Coords operator()(const Coords& c) const = 0;
+  virtual Dune::FieldVector<ctype, couplingDimworld> operator()(const Dune::FieldVector<ctype, gridDimworld>& c) const = 0;
 
 };
 
