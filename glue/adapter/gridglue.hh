@@ -136,13 +136,11 @@ public:
 
   /** \brief export the world dimension */
   enum {
-    /** \brief export the world dimension
+    /** \brief export the world dimension :
+        maximum of the two extractor world dimensions */
+    dimworld = ((int)DomainExtractor::dimworld > (int)TargetExtractor::dimworld) ? (int)DomainExtractor::dimworld : (int)TargetExtractor::dimworld
 
-        (must be the same for both extractors!) */
-    dimw = DomainExtractor::dimworld
   };
-  dune_static_assert((int)DomainExtractor::dimworld == (int)TargetExtractor::dimworld,
-                     "world dimension must be the same for both extractors!");
 
   /** \brief The type used for coordinates
       \todo maybe use traits class to decide which has more precision (DomainGridType::ctype or TargetGridType::ctype) and then take this one
@@ -150,10 +148,10 @@ public:
   typedef typename DomainGridType::ctype ctype;
 
   /** \brief The type used for coordinate vectors */
-  typedef Dune::FieldVector<ctype, dimw>                   Coords;
+  typedef Dune::FieldVector<ctype, dimworld>                   Coords;
 
   /** \brief The type of transformation used */
-  typedef CoordinateTransformation<dimw, ctype>      Transformation;
+  typedef CoordinateTransformation<dimworld, ctype>      Transformation;
 
   /** \brief The type of the domain grid elements */
   typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainElement;
@@ -183,7 +181,7 @@ public:
   typedef ::Merger<typename DomainGridType::ctype,
       DomainGridType::dimension - DomainExtractor::codim,
       TargetGridType::dimension - TargetExtractor::codim,
-      dimw>                         Merger;
+      dimworld>                         Merger;
 
   /** \todo Please doc me! */
   typedef BuilderImpl<GET1, GET2, DomainExtractor::codim, TargetExtractor::codim>                    Builder;

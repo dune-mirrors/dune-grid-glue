@@ -79,7 +79,7 @@ private:
 
     ext.getCoords(tempcoords);
     coords.clear();
-    coords.reserve(Parent::dimw*tempcoords.size());
+    coords.reserve(Parent::dimworld*tempcoords.size());
 
     if (trafo != NULL)
     {
@@ -87,7 +87,7 @@ private:
       for (size_t i = 0; i < tempcoords.size(); ++i)
       {
         typename Parent::Coords temp = (*trafo)(tempcoords[i]);
-        for (size_t j = 0; j < Parent::dimw; ++j)
+        for (size_t j = 0; j < Parent::dimworld; ++j)
           coords.push_back(temp[j]);
       }
     }
@@ -95,7 +95,7 @@ private:
     {
       for (unsigned int i = 0; i < tempcoords.size(); ++i)
       {
-        for (size_t j = 0; j < Parent::dimw; ++j)
+        for (size_t j = 0; j < Parent::dimworld; ++j)
           coords.push_back(tempcoords[i][j]);
       }
     }

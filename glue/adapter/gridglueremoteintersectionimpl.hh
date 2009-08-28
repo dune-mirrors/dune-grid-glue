@@ -41,7 +41,7 @@ private:
 public:
 
 
-  enum { coorddim = Parent::dimw };
+  enum { coorddim = Parent::dimworld };
 
   enum { mydim = coorddim - 1 };
 
@@ -277,7 +277,7 @@ public:
 
 
 template<typename GET1, typename GET2>
-const Dune::GeometryType GridGlue<GET1, GET2>::RemoteIntersectionImpl::geometrytype(Dune::GeometryType::simplex, Parent::dimw-1);
+const Dune::GeometryType GridGlue<GET1, GET2>::RemoteIntersectionImpl::geometrytype(Dune::GeometryType::simplex, Parent::dimworld-1);
 
 
 template<typename GET1, typename GET2>
