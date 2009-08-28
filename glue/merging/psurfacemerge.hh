@@ -60,6 +60,12 @@ class PSurfaceMerge
 
   dune_static_assert( dim==dimworld || dim+1==dimworld,
                       "PSurface can only handle the cases dim==dimworld and dim+1==dimworld!");
+
+  // The psurface library itself always expects dimworld to be dim+1
+  // To be able to handle the case dim==dimworld we keep an artificial world
+  // around which the additional dimension
+  enum {psurfaceDimworld = dimworld + (dim==dimworld)};
+
 public:
 
   /*   E X P O R T E D   T Y P E S   A N D   C O N S T A N T S   */
@@ -246,10 +252,10 @@ private:
   /* geometric data for both domain and targt */
 
   /// @brief domain coordinates
-  std::vector<std::tr1::array<double,dimworld> >   _domc;
+  std::vector<std::tr1::array<double,psurfaceDimworld> >   _domc;
 
   /// @brief target coordinates
-  std::vector<std::tr1::array<double,dimworld> >   _tarc;
+  std::vector<std::tr1::array<double,psurfaceDimworld> >   _tarc;
 
 
   /* topologic information for domain and target */
@@ -485,6 +491,19 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   for (unsigned int i = 0; i < this->_tarc.size(); ++i)
     for (unsigned int j = 0; j < dimworld; ++j)
       this->_tarc[i][j] = target_coords[i*dimworld + j];
+
+  // psurface doesn't actually support the case dim==dimworld.  Therefore we
+  // use a trick: we just embed everything in a space of dimension dimworld+1
+  if (dim==dimworld) {
+    for (unsigned int i = 0; i < this->_domc.size(); ++i)
+      _domc[i][dim] = 0;
+
+    for (unsigned int i = 0; i < this->_domc.size(); ++i)
+      _tarc[i][dim] = 1;
+
+    // Needs to be more than 1
+    _maxdist = 2;
+  }
 
   std::cout << "Building merged grid... (wait for finish!)" << std::endl;
 
