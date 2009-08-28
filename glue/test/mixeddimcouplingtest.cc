@@ -60,7 +60,7 @@ public:
 
 
 template <int dim, MeshClassification::MeshType ExtractorClassification>
-void test1d2dCoupling()
+void test1d2dCouplingMatchingDimworld()
 {
 
   // ///////////////////////////////////////
@@ -122,7 +122,7 @@ void test1d2dCoupling()
 
 
 template <int dim, MeshClassification::MeshType ExtractorClassification>
-void test2d1dCoupling()
+void test2d1dCouplingMatchingDimworld()
 {
 
   // ///////////////////////////////////////
@@ -182,16 +182,161 @@ void test2d1dCoupling()
 }
 
 
+template <int dim, MeshClassification::MeshType ExtractorClassification>
+void test1d2dCoupling()
+{
+
+  // ///////////////////////////////////////
+  //   Make a cube grid and a 1d grid
+  // ///////////////////////////////////////
+
+  typedef SGrid<dim,dim> GridType2d;
+
+  FieldVector<int, dim> elements(1);
+  FieldVector<double,dim> lower(0);
+  FieldVector<double,dim> upper(1);
+
+  GridType2d cubeGrid0(elements, lower, upper);
+
+  typedef SGrid<dim-1,dim-1> GridType1d;
+
+  FieldVector<int, dim-1> elements1d(1);
+  FieldVector<double,dim-1> lower1d(0);
+  FieldVector<double,dim-1> upper1d(1);
+
+  GridType1d cubeGrid1(elements1d, lower1d, upper1d);
+
+
+  // ////////////////////////////////////////
+  //   Set up coupling at their interface
+  // ////////////////////////////////////////
+
+  typedef typename GridType2d::LevelGridView DomGridView;
+  typedef typename GridType1d::LevelGridView TarGridView;
+
+  typedef DefaultExtractionTraits<DomGridView,1,MeshClassification::cube> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0,ExtractorClassification> TarTraits;
+
+  typedef GridGlue<DomTraits,TarTraits> GlueType;
+
+  PSurfaceMerge<dim-1,dim,double> merger;
+  merger.setMaxDistance(0.01);
+
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
+
+  HorizontalFaceDescriptor<DomGridView> domdesc(0);
+  AllElementsDescriptor<TarGridView>  tardesc;
+
+  glue.builder().setDomainDescriptor(domdesc);
+  glue.builder().setTargetDescriptor(tardesc);
+
+  glue.builder().build();
+
+  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
+  assert(merger.nSimplices() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(glue);
+
+}
+
+
+template <int dim, MeshClassification::MeshType ExtractorClassification>
+void test2d1dCoupling()
+{
+
+  // ///////////////////////////////////////
+  //   Make a cube grid and a 1d grid
+  // ///////////////////////////////////////
+
+  typedef SGrid<dim-1,dim-1> GridType1d;
+
+  FieldVector<int, dim-1> elements1d(1);
+  FieldVector<double,dim-1> lower1d(0);
+  FieldVector<double,dim-1> upper1d(1);
+
+  GridType1d cubeGrid0(elements1d, lower1d, upper1d);
+
+  typedef SGrid<dim,dim> GridType2d;
+
+  FieldVector<int, dim> elements(1);
+  FieldVector<double,dim> lower(0);
+  FieldVector<double,dim> upper(1);
+
+  GridType2d cubeGrid1(elements, lower, upper);
+
+  // ////////////////////////////////////////
+  //   Set up coupling at their interface
+  // ////////////////////////////////////////
+
+  typedef typename GridType1d::LevelGridView DomGridView;
+  typedef typename GridType2d::LevelGridView TarGridView;
+
+  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::cube> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
+
+  typedef GridGlue<DomTraits,TarTraits> GlueType;
+
+  PSurfaceMerge<dim-1,dim,double> merger;
+  merger.setMaxDistance(0.01);
+
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), 0 /*&merger*/);
+
+  AllElementsDescriptor<DomGridView>  domdesc;
+  HorizontalFaceDescriptor<TarGridView> tardesc(0);
+
+  glue.builder().setDomainDescriptor(domdesc);
+  glue.builder().setTargetDescriptor(tardesc);
+
+  glue.builder().build();
+
+  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
+  assert(merger.nSimplices() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(glue);
+
+}
+
+
 
 
 int main(int argc, char *argv[]) try
 {
+  // /////////////////////////////////////////////////////////////
+  //   First set of tests: the grid have different dimensions,
+  //   but the world dimension is the same for both of them.
+  // /////////////////////////////////////////////////////////////
+
+  // Test a unit square versus a grid one dimension lower
+  test1d2dCouplingMatchingDimworld<2,MeshClassification::cube>();
+  test1d2dCouplingMatchingDimworld<2,MeshClassification::simplex>();
+
+  // Test a unit square versus a grid one dimension lower
+  test2d1dCouplingMatchingDimworld<2,MeshClassification::cube>();
+  test2d1dCouplingMatchingDimworld<2,MeshClassification::simplex>();
 
   // Test a unit cube versus a grid one dimension lower
+  test2d1dCouplingMatchingDimworld<3,MeshClassification::cube>();
+
+
+
+  // /////////////////////////////////////////////////////////////
+  //   Second set of tests: the grid have different dimensions,
+  //   and the world dimension is different as well
+  // /////////////////////////////////////////////////////////////
+
+  // Test a unit square versus a grid one dimension lower
   test1d2dCoupling<2,MeshClassification::cube>();
   test1d2dCoupling<2,MeshClassification::simplex>();
 
-  // Test a unit cube versus a grid one dimension lower
+  // Test a unit square versus a grid one dimension lower
   test2d1dCoupling<2,MeshClassification::cube>();
   test2d1dCoupling<2,MeshClassification::simplex>();
 
