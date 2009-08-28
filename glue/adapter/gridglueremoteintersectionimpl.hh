@@ -41,10 +41,6 @@ private:
 public:
 
 
-  enum { coorddim = Parent::dimworld };
-
-  enum { mydim = coorddim - 1 };
-
   typedef typename Parent::DomainGridView DomainGridView;
 
   typedef typename DomainGridView::Grid DomainGridType;
@@ -52,6 +48,15 @@ public:
   typedef typename Parent::TargetGridView TargetGridView;
 
   typedef typename TargetGridView::Grid TargetGridType;
+
+  enum { coorddim = Parent::dimworld };
+
+  dune_static_assert(DomainGridType::dimension - DomainExtractor::codim
+                     == TargetGridType::dimension - TargetExtractor::codim,
+                     "Currently both coupling extracts need to have the same dimension!");
+
+  // Use domain for the definition of mydim because we assume that the value for target is the same
+  enum { mydim = DomainGridType::dimension - DomainExtractor::codim };
 
 
   typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainEntity;
@@ -306,22 +311,24 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
   // initialize the local and the global geometry of the domain
   {
+    // compute the coordinates of the subface's corners in codim 0 entity local coordinates
+    const int elementdim = DomainGridType::template Codim<0>::Geometry::mydimension;
+
+    const int nSimplexCorners = elementdim - Parent::DomainExtractor::codim + 1;
+
     // coordinates within the subentity that contains the remote intersection
-    Dune::array<LocalCoords, coorddim> corners_subEntity_local;
+    Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
 
     for (int i = 0; i < coorddim; ++i)
       corners_subEntity_local[i] = glue->_merg->domainParentLocal(mergeindex, i);
 
-    // compute the coordinates of the subface's corners in codim 0 entity local coordinates
-    const int elementcoorddim = DomainGridType::template Codim<0>::Geometry::mydimension;
-
     // a face number is only important if dealing with surfaces, not meshes
 
     // Coordinates of the remote intersection corners wrt the element coordinate system
-    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_element_local;
+    Dune::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
 
     // world coordinates of the remote intersection corners
-    Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, coorddim> corners_global;
+    Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, nSimplexCorners> corners_global;
 
     unsigned int domainIndex = glue->_merg->domainParent(mergeindex);
     unsigned int unused;
@@ -337,22 +344,22 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
   // do the same for the local and the global geometry of the target
   {
+    // compute the coordinates of the subface's corners in codim 0 entity local coordinates
+    const int elementdim = TargetGridType::template Codim<0>::Geometry::mydimension;
+
+    const int nSimplexCorners = elementdim - Parent::TargetExtractor::codim + 1;
+
     // coordinates within the subentity that contains the remote intersection
-    Dune::array<LocalCoords, coorddim> corners_subEntity_local;
+    Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
 
     for (int i = 0; i < coorddim; ++i)
       corners_subEntity_local[i] = glue->_merg->targetParentLocal(mergeindex, i);
 
-    // compute the coordinates of the subface's corners in codim 0 entity local coordinates
-    const int elementcoorddim = TargetGridType::template Codim<0>::Geometry::mydimension;
-
-    // a face number is only important if dealing with surfaces, not manifolds or meshes
-
     // Coordinates of the remote intersection corners wrt the element coordinate system
-    Dune::array<Dune::FieldVector<ctype, elementcoorddim>, coorddim> corners_element_local;
+    Dune::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
 
     // world coordinates of the remote intersection corners
-    Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, coorddim> corners_global;
+    Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, nSimplexCorners> corners_global;
 
     unsigned int targetIndex = glue->_merg->targetParent(mergeindex);
     unsigned int unused;

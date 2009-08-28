@@ -56,7 +56,7 @@ public:
   /// @brief compile time number of corners of surface simplices
   enum
   {
-    simplex_corners = dimworld
+    simplex_corners = dim+1
   };
 
   enum
@@ -321,8 +321,8 @@ public:
    * @param wcoords to be filled with world coordinates
    */
   void globalCoords(unsigned int index,
-                    const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &bcoords,
-                    Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                    const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &bcoords,
+                    Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords,
                     int size) const;
 
 
@@ -348,9 +348,9 @@ public:
    * @param wcoords to be filled with world coordinates
    */
   void localAndGlobalCoords(unsigned int index,
-                            const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &bcoords,
-                            Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
-                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                            const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &bcoords,
+                            Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &ecoords,
+                            Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords,
                             int size) const;
 
 
@@ -682,8 +682,8 @@ inline void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index
 template<typename GV, bool rect>
 void CubeMeshExtractor<GV, rect>::
 globalCoords(unsigned int index,
-             const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &bcoords,
-             Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+             const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &bcoords,
+             Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords,
              int size) const
 {
   Dune::array<Coords, simplex_corners> corners;
@@ -706,9 +706,9 @@ void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const CoordCon
 template<typename GV, bool rect>
 void CubeMeshExtractor<GV, rect>::
 localAndGlobalCoords(unsigned int index,
-                     const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &subEntityCoords,
-                     Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &elementCoords,
-                     Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
+                     const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &subEntityCoords,
+                     Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &elementCoords,
+                     Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords,
                      int size) const
 {
   this->globalCoords(index, subEntityCoords, wcoords, size);
