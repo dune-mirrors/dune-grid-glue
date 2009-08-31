@@ -254,10 +254,9 @@ public:
    * @param wcoords to be filled with world coordinates
    */
   void localAndGlobalCoords(unsigned int index,
-                            const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &subEntityCoords,
-                            Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &elementCoords,
-                            Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
-                            int size) const;
+                            const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &subEntityCoords,
+                            Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &elementCoords,
+                            Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords) const;
 
 
   /**
@@ -585,13 +584,12 @@ void SimplicialMeshExtractor<GV>::localCoords(unsigned int index, const CoordCon
 template<typename GV>
 void SimplicialMeshExtractor<GV>::
 localAndGlobalCoords(unsigned int index,
-                     const Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &subEntityCoords,
-                     Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &elementCoords,
-                     Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords,
-                     int size) const
+                     const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &subEntityCoords,
+                     Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &elementCoords,
+                     Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords) const
 {
   ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].self)->second->p;
-  for (int i = 0; i < size; ++i)
+  for (int i = 0; i < elementCoords.size(); ++i)
   {
     elementCoords[i] = subEntityCoords[i];
     // compute global coordinates
