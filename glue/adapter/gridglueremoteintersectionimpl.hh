@@ -111,8 +111,6 @@ private:
 
 public:
 
-  static const Dune::GeometryType geometrytype;
-
   /*   F U N C T I O N A L I T Y   */
 
   RemoteIntersectionImpl(const Parent* glue)
@@ -209,7 +207,7 @@ public:
   // obtain the type of reference element for this intersection
   Dune::GeometryType type() const
   {
-    return geometrytype;
+    return Dune::GeometryType(Dune::GeometryType::simplex, Parent::dimworld-1);
   }
 
 
@@ -282,10 +280,6 @@ public:
 
 
 template<typename GET1, typename GET2>
-const Dune::GeometryType GridGlue<GET1, GET2>::RemoteIntersectionImpl::geometrytype(Dune::GeometryType::simplex, Parent::dimworld-1);
-
-
-template<typename GET1, typename GET2>
 bool GridGlue<GET1, GET2>::RemoteIntersectionImpl::conforming() const
 {
   std::vector<unsigned int> results;
@@ -337,8 +331,8 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
       glue->_domext.localAndGlobalCoords(domainIndex, corners_subEntity_local, corners_element_local, corners_global);
 
       // set the corners of the geometries
-      this->_domlgeom.setup(geometrytype, corners_element_local);
-      this->_domggeom.setup(geometrytype, corners_global);
+      this->_domlgeom.setup(type(), corners_element_local);
+      this->_domggeom.setup(type(), corners_global);
     }
   }
 
@@ -368,8 +362,8 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
       glue->_tarext.localAndGlobalCoords(targetIndex, corners_subEntity_local, corners_element_local, corners_global);
 
       // set the corners of the geometries
-      this->_tarlgeom.setup(geometrytype, corners_element_local);
-      this->_targgeom.setup(geometrytype, corners_global);
+      this->_tarlgeom.setup(type(), corners_element_local);
+      this->_targgeom.setup(type(), corners_global);
     }
   }
 }
