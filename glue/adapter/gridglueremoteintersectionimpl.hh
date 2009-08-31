@@ -207,7 +207,7 @@ public:
   // obtain the type of reference element for this intersection
   Dune::GeometryType type() const
   {
-    return Dune::GeometryType(Dune::GeometryType::simplex, Parent::dimworld-1);
+    return Dune::GeometryType(Dune::GeometryType::simplex, mydim);
   }
 
 
