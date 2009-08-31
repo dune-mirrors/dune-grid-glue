@@ -6,6 +6,8 @@ TESTPROGS = nonoverlappingcouplingtest overlappingcouplingtest mixeddimcouplingt
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTPROGS)
 
+# programs to run when "make check" is used
+TESTS = $(TESTPROGS)
 
 AM_CPPFLAGS += $(PSURFACE_CPPFLAGS)
 AM_LDFLAGS += $(LOCAL_LIBS) $(PSURFACE_LDFLAGS) $(PSURFACE_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS)
