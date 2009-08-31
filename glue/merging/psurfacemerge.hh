@@ -471,15 +471,32 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   // copy domain and target simplices to internal arrays
   // (cannot keep refs since outside modification would destroy information)
   this->_domi.resize(domain_simplices.size()/(dim+1));
+  this->_tari.resize(target_simplices.size()/(dim+1));
+
   for (unsigned int i = 0; i < domain_simplices.size()/(dim+1); ++i)
     for (int j=0; j<dim+1; j++)
       this->_domi[i][j] = domain_simplices[i*(dim+1)+j];
 
-  this->_tari.resize(target_simplices.size()/(dim+1));
-  for (unsigned int i = 0; i < target_simplices.size()/(dim+1); ++i)
-    for (int j=0; j<dim+1; j++)
-      this->_tari[i][j] = target_simplices[i*(dim+1)+j];
+  if (dim!=dimworld) {
 
+    // dim==dimworld-1: just copy the two arrays
+    for (unsigned int i = 0; i < target_simplices.size()/(dim+1); ++i)
+      for (int j=0; j<dim+1; j++)
+        this->_tari[i][j] = target_simplices[i*(dim+1)+j];
+
+  } else {
+
+    // dim==dimworld: "hen grids are artificially embedded in a dim+1 space,
+    // the second grid needs to have its orientation reversed.
+    // That way, the 'surface normals' of the two grids point towards each other.
+    for (unsigned int i = 0; i < target_simplices.size()/(dim+1); ++i) {
+      _tari[i][0] = target_simplices[i*(dim+1)+1];
+      _tari[i][1] = target_simplices[i*(dim+1)+0];
+      if (dim==2)
+        _tari[i][2] = target_simplices[i*(dim+1)+2];
+    }
+
+  }
   // copy the coordinates to internal arrays of coordinates
   // (again cannot just keep refs and this representation has advantages)
   this->_domc.resize(domain_coords.size() / dimworld);
