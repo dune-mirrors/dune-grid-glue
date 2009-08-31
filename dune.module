@@ -4,6 +4,6 @@
 #Name of the module
 Module: dune-grid-glue
 Version: 0.1
-Maintainer: elchupacabra@gmx.de
+Maintainer: sander@mi.fu-berlin.de
 #depending on
 Depends: dune-common dune-grid dune-istl
