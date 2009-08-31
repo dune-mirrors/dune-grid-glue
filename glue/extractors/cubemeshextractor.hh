@@ -569,36 +569,6 @@ void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
     }
   }
 
-
-  //	const char prefix[] = "CubeMeshExtractor: ";
-  //
-  //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
-  //	for (unsigned int i = 0; i < this->_coords.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "self=" << this->_coords[i].self << " index=" << this->_coords[i].index
-  //					<< " coord=(" << this->_coords[i].coord << ") num_faces=" << this->_coords[i].num_faces
-  //					<< " faces={");
-  //			for (unsigned int j = 0; j < this->_coords[i].num_faces; ++j)
-  //				STDOUT(" " << this->_coords[i].faces[j]);
-  //			STDOUTLN("}");
-  //		}
-  //	}
-  //
-  //	STDOUTLN("\n" << prefix << "Extracted faces (size=" << this->_faces.size() << ")");
-  //	for (unsigned int i = 0; i < this->_faces.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "self=" << this->_faces[i].self << " index=" << this->_faces[i].index << " corners={");
-  //			for (unsigned int j = 0; j < simplex_corners; ++j)
-  //				STDOUT("(" << this->_faces[i].corners[j] << ")");
-  //			STDOUTLN("}");
-  //		}
-  //
-  //	}
-
 }
 
 

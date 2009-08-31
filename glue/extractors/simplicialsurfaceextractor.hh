@@ -333,37 +333,6 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     current->coord = it1->second->p->geometry().corner(0);
   }
 
-
-  //	const char prefix[] = "SimplicialSurfaceExtractor: ";
-  //
-  //	STDOUTLN(prefix << "Extracted Coordinates (size=" << this->_coords.size() << ")");
-  //	for (unsigned int i = 0; i < this->_coords.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "vtxindex=" << this->_coords[i].vtxindex << " index=" << this->_coords[i].index
-  //					<< " coord=(" << this->_coords[i].coord << ") num_faces=" << this->_coords[i].num_faces
-  //					<< " faces={");
-  //			for (unsigned int j = 0; j < this->_coords[i].num_faces; ++j)
-  //				STDOUT(" " << this->_coords[i].faces[j]);
-  //			STDOUTLN("}");
-  //		}
-  //	}
-  //
-  //	STDOUTLN("\n" << prefix << "Extracted faces (size=" << this->_faces.size() << ")");
-  //	for (unsigned int i = 0; i < this->_faces.size(); ++i)
-  //	{
-  ////		if (i % 100 == 0)
-  //		{
-  //			STDOUT(prefix << "parent=" << this->_faces[i].parent << " index=" << this->_faces[i].index
-  //					<< " nip=" << this->_faces[i].num_in_parent << " corners={");
-  //			for (unsigned int j = 0; j < simplex_corners; ++j)
-  //				STDOUT("(" << this->_faces[i].corners[j].idx << ", " << this->_faces[i].corners[j].num << ")");
-  //			STDOUTLN("}");
-  //		}
-  //
-  //	}
-
 }
 
 
