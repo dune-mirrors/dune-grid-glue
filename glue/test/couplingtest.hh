@@ -58,10 +58,8 @@ void testCoupling(const GlueType& glue)
 
   typename GlueType::RemoteIntersectionIterator rIIt    = glue.iremotebegin();
   typename GlueType::RemoteIntersectionIterator rIEndIt = glue.iremoteend();
-  for (; rIIt!=rIEndIt; ++rIIt) {
-    // Create a set of test points
+  for (; rIIt!=rIEndIt; ++rIIt)
     testIntersection(rIIt);
-  }
 
   // ///////////////////////////////////////
   //   Domain Entity centric
