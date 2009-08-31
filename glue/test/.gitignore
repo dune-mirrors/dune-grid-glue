@@ -1,7 +1,7 @@
 Makefile.in
 Makefile
 .deps
-couplingtest
+nonoverlappingcouplingtest
 orientedsubfacetest
 mixeddimcouplingtest
 overlappingcouplingtest
