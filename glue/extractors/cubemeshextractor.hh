@@ -504,7 +504,7 @@ void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
         }
 
         // now introduce the second triangle subdividing the quadrilateral
-        if (dim==3) {
+        if (dim==2) {
           // add a new face to the temporary collection for the 2nd triangle
           temp_faces.push_back(FaceInfo(simplex_index++, eindex, 0));
           temp_faces.back().corners[0] = vertex_indices[3];
