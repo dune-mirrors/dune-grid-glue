@@ -73,7 +73,7 @@ public:
     {}
 
     CoordinateInfo(unsigned int index_, IndexType vtxindex_)
-      :       self(vtxindex_), index(index_), num_faces(0), faces(NULL)
+      :       self(vtxindex_), index(index_)
     {}
 
     /// @brief the index of the parent element (from index set)
@@ -85,16 +85,9 @@ public:
     /// @brief the index of this coordinate (in internal storage scheme) // NEEDED??
     unsigned int index : 28;
 
-    /// @brief the number of extracted faces with this coord as corner,
-    /// major purpose is holding the length of the array "faces"
-    unsigned int num_faces : 4;
-
-    /// @brief holds the indices of the faces of which the coordinate is a corner
-    unsigned int* faces;
   };
 
   /**
-   * @class EntityInfo
    * @brief simple struct holding a vertex pointer and an index
    */
   struct VertexInfo
@@ -106,7 +99,6 @@ public:
   };
 
   /**
-   * @class ElementInfo
    * @brief simple struct holding an entity pointer and an index
    */
   struct ElementInfo
@@ -136,21 +128,21 @@ public:
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the corner vertices of the extracted
-  std::vector<typename Codim0Extractor<GV>::CoordinateInfo>   _coords;
+  std::vector<CoordinateInfo>   _coords;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
   /// Maps a vertex' index (from index set) to an object holding the locally
   /// associated index of the vertex' coordinate in _coords and an entity
   /// pointer to the codim<dim> entity.
-  typename Codim0Extractor<GV>::VertexInfoMap _vtxInfo;
+  VertexInfoMap _vtxInfo;
 
   /// @brief a map enabling faster access to elements and faces
   ///
   /// Maps an element's index (from index set) to an object holding the locally
   /// associated index of its first face in _indices (if there are more they are
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  typename Codim0Extractor<GV>::ElementInfoMap _elmtInfo;
+  ElementInfoMap _elmtInfo;
 
 public:
 

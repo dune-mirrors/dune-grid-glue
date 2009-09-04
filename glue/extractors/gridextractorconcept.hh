@@ -280,17 +280,6 @@ public:
     vptr = extractor->vertex(u);
 
 
-    //		/*
-    //		 * @brief gets the indices of all faces with the given coordinate as corner
-    //		 * @param index the index of the coordinate
-    //		 * @param faces array if given index was legal
-    //		 * @param count length of array if successful
-    //		 * @return TRUE <=> if successful
-    //		 * DO NOT MODIFY THE ARRAY'S CONTENT!
-    //		 */
-    //		b = extractor->parentFaces(u,  unsigned int const*& faces, u);
-
-
     /*
      * @brief default destructor
      */

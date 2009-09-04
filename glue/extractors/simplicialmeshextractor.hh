@@ -300,25 +300,6 @@ public:
     return (this->_vtxInfo.find(this->_coords[index].self))->second->p;
   }
 
-
-  /**
-   * @brief gets the indices of all faces with the given coordinate as corner
-   * @param index the index of the coordinate
-   * @param faces array if given index was legal
-   * @param count length of array if successful
-   * @return TRUE <=> if successful
-   * DO NOT MODIFY THE ARRAY'S CONTENT!
-   */
-  bool parentFaces(unsigned int index,  unsigned int const*& faces, unsigned int& count) const
-  {
-    if (index >= this->_coords.size())
-      return false;
-    // index valid
-    faces = this->_coords[index].faces;
-    count = this->_coords[index].num_faces;
-    return true;
-  }
-
 }; // end of class SimplicialMeshExtractor
 
 
@@ -329,9 +310,6 @@ SimplicialMeshExtractor<GV>::~SimplicialMeshExtractor()
   // only the objects that have been allocated manually have to be
   // deallocated manually again
   // free all the manually allocated memory
-  for (unsigned int i = 0; i < this->_coords.size(); ++i)
-    if (this->_coords[i].faces != NULL)
-      delete this->_coords[i].faces;
   for (typename Codim0Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
     if (it->second != NULL)
       delete it->second;
@@ -348,10 +326,6 @@ void SimplicialMeshExtractor<GV>::clear()
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
   {
-    // free all the manually allocated memory
-    for (unsigned int i = 0; i < this->_coords.size(); ++i)
-      if (this->_coords[i].faces != NULL)
-        delete this->_coords[i].faces;
     std::vector<typename Codim0Extractor<GV>::CoordinateInfo> dummy;
     this->_coords.swap(dummy);
   }
@@ -487,8 +461,6 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
     for (unsigned int i = 0; i < this->_coords.size(); ++i)
     {
       // allocate an array and initialize its first element with its length
-      this->_coords[i].num_faces = refcount[i];
-      this->_coords[i].faces = new unsigned int[refcount[i]];
       refcount[i] = 0;                   // used as "pointer" in next loop
     }
 
@@ -498,7 +470,6 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       for (unsigned int j = 0; j < simplex_corners; ++j)
       {
         unsigned int ref = this->_faces[i].corners[j];
-        this->_coords[ref].faces[refcount[ref]] = i;
         refcount[ref]++;
       }
     }
