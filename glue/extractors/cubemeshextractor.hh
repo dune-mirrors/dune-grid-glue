@@ -142,12 +142,6 @@ public:
   }
 
 
-  /**
-   * @brief default destructor, frees memory
-   */
-  ~CubeMeshExtractor();
-
-
   /*  F U N C T I O N A L I T Y  */
 
   /**
@@ -350,45 +344,14 @@ public:
 
 
 template<typename GV, bool rect>
-CubeMeshExtractor<GV, rect>::~CubeMeshExtractor()
-{
-  // only the objects that have been allocated manually have to be
-  // deallocated manually again
-  // free all the manually allocated memory
-  for (typename Codim0Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-  for (typename Codim0Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-}
-
-
-
-template<typename GV, bool rect>
 void CubeMeshExtractor<GV, rect>::clear()
 {
+  Codim0Extractor<GV>::clear();
+
   // this is an inofficial way on how to free the memory allocated
   // by a std::vector
-  {
-    std::vector<typename Codim0Extractor<GV>::CoordinateInfo> dummy;
-    this->_coords.swap(dummy);
-  }
-  {
-    std::vector<FaceInfo> dummy;
-    this->_faces.swap(dummy);
-  }
-
-  // first free all manually allocated vertex/element info items...
-  for (typename Codim0Extractor<GV>::VertexInfoMap::iterator it = this->_vtxInfo.begin(); it != this->_vtxInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-  for (typename Codim0Extractor<GV>::ElementInfoMap::iterator it = this->_elmtInfo.begin(); it != this->_elmtInfo.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
-  // ...then clear the maps themselves, too
-  this->_vtxInfo.clear();
-  this->_elmtInfo.clear();
+  std::vector<FaceInfo> dummy;
+  this->_faces.swap(dummy);
 }
 
 

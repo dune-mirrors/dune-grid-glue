@@ -156,7 +156,38 @@ public:
     _gv(gv)
   {}
 
+  ~Codim0Extractor()
+  {
+    // only the objects that have been allocated manually have to be
+    // deallocated manually again
+    // free all the manually allocated memory
+    for (typename VertexInfoMap::iterator it = _vtxInfo.begin(); it != _vtxInfo.end(); ++it)
+      if (it->second != NULL)
+        delete it->second;
+    for (typename ElementInfoMap::iterator it = _elmtInfo.begin(); it != _elmtInfo.end(); ++it)
+      if (it->second != NULL)
+        delete it->second;
+  }
 
+  void clear()
+  {
+    // this is an inofficial way on how to free the memory allocated
+    // by a std::vector
+    std::vector<typename Codim0Extractor<GV>::CoordinateInfo> dummy;
+    this->_coords.swap(dummy);
+
+    // first free all manually allocated vertex/element info items...
+    for (typename VertexInfoMap::iterator it = _vtxInfo.begin(); it != _vtxInfo.end(); ++it)
+      if (it->second != NULL)
+        delete it->second;
+    for (typename ElementInfoMap::iterator it = _elmtInfo.begin(); it != _elmtInfo.end(); ++it)
+      if (it->second != NULL)
+        delete it->second;
+
+    // ...then clear the maps themselves, too
+    _vtxInfo.clear();
+    _elmtInfo.clear();
+  }
 
   bool contains (unsigned int global, unsigned int & local) const
   {
