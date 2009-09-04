@@ -184,7 +184,7 @@ namespace Dune
     {
       // get RemoteIntersection
       typedef typename Type::GridGlue::RemoteIntersection RemoteIntersection;
-      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+      RemoteIntersection ris(commInfo.gridglue->getIntersection(i));
 
       // ask data handle for size
       return commInfo.data->size(ris);
@@ -202,7 +202,7 @@ namespace Dune
     {
       // get RemoteIntersection
       typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
-      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+      RemoteIntersection ris(commInfo.gridglue->getIntersection(i));
 
       // fill buffer if we have a new intersection
       if (j == 0)
@@ -232,7 +232,7 @@ namespace Dune
     {
       // extract GridGlue objects...
       typedef typename CommInfo::GridGlue::RemoteIntersection RemoteIntersection;
-      RemoteIntersection ris(commInfo.gridglue->_intersections[i]);
+      RemoteIntersection ris(commInfo.gridglue->getIntersection(i));
 
       // get size if we have a new intersection
       if (j == 0)

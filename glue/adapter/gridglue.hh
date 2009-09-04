@@ -253,8 +253,6 @@ private:
   Dune::RemoteIndices<PIndexSet> remoteIndices;
 #endif
 
-#warning HACK
-public:
   /// @brief a vector with intersection elements
   mutable std::vector<RemoteIntersectionImpl>   _intersections;
 
@@ -676,6 +674,12 @@ public:
     return _tindex_sz;
   }
 #endif
+
+  RemoteIntersection getIntersection(int i) const
+  {
+    return RemoteIntersection(_intersections[i]);
+  }
+
 };
 
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
