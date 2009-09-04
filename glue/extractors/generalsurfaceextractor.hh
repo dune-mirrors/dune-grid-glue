@@ -505,7 +505,7 @@ void GeneralSurfaceExtractor<GV>::globalCoords(unsigned int index, const CoordCo
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  for (int i = 0; i < wcoords.size(); ++i)
+  for (size_t i = 0; i < wcoords.size(); ++i)
     interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], wcoords[i], dimworld);
 
 }
@@ -523,7 +523,7 @@ void GeneralSurfaceExtractor<GV>::localCoords(unsigned int index, const CoordCon
     Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
     for (int i = 0; i < simplex_corners; ++i)
       corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
-    for (int i = 0; i < ecoords.size(); ++i)
+    for (size_t i = 0; i < ecoords.size(); ++i)
       interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], ecoords[i], dimworld);
   }
   else
@@ -556,7 +556,7 @@ void GeneralSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index,
   else
   {
     ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
-    for (int i = 0; i < ecoords.size(); ++i)
+    for (size_t i = 0; i < ecoords.size(); ++i)
       ecoords[i] = eptr->geometry().local(wcoords[i]);
   }
 }
