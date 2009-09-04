@@ -70,7 +70,7 @@ public:
   template<typename Glue>
   static void write(const Glue& glue, const char* filename_trunk)
   {
-    const int dimw = Glue::dimw;
+    const int dimw = Glue::dimworld;
 
     typedef typename Glue::ctype ctype;
 
