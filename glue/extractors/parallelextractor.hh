@@ -50,7 +50,7 @@ public:
   // retrieve typedefs etc. from LocalExtractor
   enum { dimworld = LX::dimworld };
   enum { dim      = LX::dim };
-  enum { dimw     = LX::dimw };
+  enum { dimw     = LX::dimworld };
   enum { codim    = LX::codim };
   enum { simplex_corners = LX::simplex_corners };
 
@@ -439,6 +439,7 @@ public:
     return _lx.vertex(l_index);
   }
 
+#if 0
 
   /**
    * @brief for given barycentric coords in a simplex compute world coordinates
@@ -492,6 +493,7 @@ public:
     return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords);
   }
 
+#endif
 
   /**
    * @brief for several given barycentric coords in a simplex compute world coordinates
@@ -502,13 +504,13 @@ public:
    * @param bcoords the barycentric coordinates
    * @param wcoords to be filled with world coordinates
    */
-  template<typename CoordContainer>
-  void globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords, int size) const
+  template<typename BCoordContainer, typename CoordContainer>
+  void globalCoords(unsigned int index, const BCoordContainer &bcoords, CoordContainer &wcoords) const
   {
     unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.globalCoords(l_index, bcoords, wcoords, size);
+    return _lx.globalCoords(l_index, bcoords, wcoords);
   }
 
 
@@ -521,13 +523,13 @@ public:
    * @param bcoords the barycentric coordinates
    * @param ecoords to be filled with element coordinates
    */
-  template<typename CoordContainer>
-  void localCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, int size) const
+  template<typename BCoordContainer, typename CoordContainer>
+  void localCoords(unsigned int index, const BCoordContainer &bcoords, CoordContainer &ecoords) const
   {
     int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.localCoords(l_index, bcoords, ecoords, size);
+    return _lx.localCoords(l_index, bcoords, ecoords);
   }
 
 
@@ -540,13 +542,13 @@ public:
    * @param wcoords to be filled with world coordinates
    * @return
    */
-  template<typename CoordContainer>
-  void localAndGlobalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &ecoords, CoordContainer &wcoords, int size) const
+  template<typename BCoordContainer, typename ECoordContainer, typename WCoordContainer>
+  void localAndGlobalCoords(unsigned int index, const BCoordContainer &bcoords, ECoordContainer &ecoords, WCoordContainer &wcoords) const
   {
     unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords, size);
+    return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords);
   }
 
 };
