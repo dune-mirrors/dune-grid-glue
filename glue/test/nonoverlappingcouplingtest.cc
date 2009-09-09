@@ -119,7 +119,7 @@ void testMatchingCubeGrids()
 }
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification>
+template <int dim, MeshClassification::MeshType ExtractorClassification, bool domParallel = false, bool tarParallel = false>
 void testNonMatchingCubeGrids()
 {
 
@@ -149,8 +149,8 @@ void testNonMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification,domParallel> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification,tarParallel> TarTraits;
 
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
@@ -187,23 +187,28 @@ int main(int argc, char *argv[]) try
   // Test two unit squares, extract boundaries using the CubeSurfaceExtractor
   testMatchingCubeGrids<2,MeshClassification::cube>();
   testNonMatchingCubeGrids<2,MeshClassification::cube>();
+  testNonMatchingCubeGrids<2,MeshClassification::cube,true,true>();
 
   // Test two unit squares, extract boundaries using the SimplexSurfaceExtractor
   // Should work, because the boundary consists of 1d simplices
   testMatchingCubeGrids<2,MeshClassification::simplex>();
   testNonMatchingCubeGrids<2,MeshClassification::simplex>();
+  testNonMatchingCubeGrids<2,MeshClassification::simplex,true,true>();
 
   // Test two unit squares, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<2,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<2,MeshClassification::hybrid>();
+  testNonMatchingCubeGrids<2,MeshClassification::hybrid,true,true>();
 
   // Test two unit cubes, extract boundaries using the CubeSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::cube>();
   testNonMatchingCubeGrids<3,MeshClassification::cube>();
+  testNonMatchingCubeGrids<3,MeshClassification::cube,true,true>();
 
   // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
+  testNonMatchingCubeGrids<3,MeshClassification::hybrid,true,true>();
 
 }
 catch (Exception e) {
