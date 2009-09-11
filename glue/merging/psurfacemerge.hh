@@ -624,46 +624,6 @@ inline bool PSurfaceMerge<dim, dimworld, T>::targetSimplexMatched(unsigned int i
 }
 
 
-//template<int dim, typename T>
-//bool PSurfaceMerge<dim, T>::domainVertexMatched(unsigned int idx) const
-//{
-//	// TODO think about implementation similar to targetVertexMatched below...
-//	Coords lower(-this->_eps), upper(this->_eps);
-//	lower += this->_domc[idx];
-//	upper += this->_domc[idx];
-//	typename Locator::ResultContainer res;
-//	return (this->_olclocator.lookup(typename Locator::BoxType(lower, upper), res) > 0);
-//}
-//
-//
-//template<int dim, typename T>
-//bool PSurfaceMerge<dim, T>::targetVertexMatched(unsigned int idx) const
-//{
-//	Coords lower(-this->_eps - this->_maxdist), upper(this->_eps + this->_maxdist);
-//	lower += this->_tarc[idx];
-//	upper += this->_tarc[idx];
-//	typename Locator::ResultContainer res;
-//	unsigned int count = this->_olclocator.lookup(typename Locator::BoxType(lower, upper), res);
-//
-//	// now check in the results if there is a target vertex there
-//	for (unsigned int i = 0; i < count; ++i)
-//	{
-//		const IntersectionPrimitive<float>& ip = this->_olm.domain(res[i]->idx);
-//		for (int j = 0; j < dim-1; ++j)
-//		{
-//			// for a vertex only 0 and 1 are possible bar. coord values
-//			if (ip.localCoords[1][res[i]->corner][j] != 1.0 &&
-//					ip.localCoords[1][res[i]->corner][j] != 0.0)
-//				continue;
-//		}
-//		// if this point is reached, a valid vertex is found
-//		return true;
-//	}
-//	// being here: no success!
-//	return false;
-//}
-
-
 template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::domainParent(unsigned int idx) const
 {
