@@ -709,8 +709,22 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
-  for (int i=0; i<dim; i++)
-    result[i] = ip.localCoords[0][corner][i];
+
+  if (dim==1) {
+    result[0] = ip.localCoords[0][corner][0];
+  } else {
+
+    // The psurface local coordinates are strange: The coordinates x[0], x[1] are the first two
+    // components of the three barycentric coordinates.  The third one is implied to be 1-x[0]-x[1].
+    // Maybe I should change that some day.  OS
+    assert(dim==2);
+    Dune::FieldVector<double,dim+1> barycentric;
+    barycentric[0] = ip.localCoords[0][corner][0];
+    barycentric[1] = ip.localCoords[0][corner][1];
+    barycentric[2] = 1 - barycentric[0] - barycentric[1];
+
+    result = barycentricToReference(barycentric);
+  }
 
   return result;
 }
@@ -724,9 +738,21 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
-  for (int i=0; i<dim; i++)
-    result[i] = ip.localCoords[1][corner][i];
+  if (dim==1) {
+    result[0] = ip.localCoords[1][corner][0];
+  } else {
 
+    // The psurface local coordinates are strange: The coordinates x[0], x[1] are the first two
+    // components of the three barycentric coordinates.  The third one is implied to be 1-x[0]-x[1].
+    // Maybe I should change that some day.  OS
+    assert(dim==2);
+    Dune::FieldVector<double,dim+1> barycentric;
+    barycentric[0] = ip.localCoords[1][corner][0];
+    barycentric[1] = ip.localCoords[1][corner][1];
+    barycentric[2] = 1 - barycentric[0] - barycentric[1];
+
+    result = barycentricToReference(barycentric);
+  }
   return result;
 }
 
