@@ -40,7 +40,7 @@
  *
  * \tparam GV the grid view class type
  */
-template<typename GV, bool rect = false>
+template<typename GV>
 class CubeMeshExtractor
   : public Codim0Extractor<GV>
 {
@@ -343,8 +343,8 @@ public:
 
 
 
-template<typename GV, bool rect>
-void CubeMeshExtractor<GV, rect>::clear()
+template<typename GV>
+void CubeMeshExtractor<GV>::clear()
 {
   Codim0Extractor<GV>::clear();
 
@@ -356,8 +356,8 @@ void CubeMeshExtractor<GV, rect>::clear()
 
 
 
-template<typename GV, bool rect>
-void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
+template<typename GV>
+void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -506,8 +506,8 @@ void CubeMeshExtractor<GV, rect>::update(const ElementDescriptor<GV>& descr)
 }
 
 
-template<typename GV, bool rect>
-inline void CubeMeshExtractor<GV, rect>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const
+template<typename GV>
+inline void CubeMeshExtractor<GV>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const
 {
   // only interpolate barycentric in the given triangle => for flat quads this is exact!
   Dune::array<Coords, simplex_corners> corners;
@@ -517,24 +517,24 @@ inline void CubeMeshExtractor<GV, rect>::globalCoords(unsigned int index, const 
 }
 
 
-template<typename GV, bool rect>
-inline void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const
+template<typename GV>
+inline void CubeMeshExtractor<GV>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const
 {
   Coords wcoords;
   this->localAndGlobalCoords(index, bcoords, ecoords, wcoords);
 }
 
 
-template<typename GV, bool rect>
-inline void CubeMeshExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const
+template<typename GV>
+inline void CubeMeshExtractor<GV>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const
 {
   this->globalCoords(index, bcoords, wcoords);
   ecoords = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().local(wcoords);
 }
 
 
-template<typename GV, bool rect>
-void CubeMeshExtractor<GV, rect>::
+template<typename GV>
+void CubeMeshExtractor<GV>::
 globalCoords(unsigned int index,
              const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &bcoords,
              Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords) const
@@ -547,17 +547,17 @@ globalCoords(unsigned int index,
 }
 
 
-template<typename GV, bool rect>
+template<typename GV>
 template<typename CoordContainerB, typename CoordContainerE>
-void CubeMeshExtractor<GV, rect>::localCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, int size) const
+void CubeMeshExtractor<GV>::localCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, int size) const
 {
   CoordContainerE wcoords;
   this->localAndGlobalCoords(index, bcoords, ecoords, wcoords, size);
 }
 
 
-template<typename GV, bool rect>
-void CubeMeshExtractor<GV, rect>::
+template<typename GV>
+void CubeMeshExtractor<GV>::
 localAndGlobalCoords(unsigned int index,
                      const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &subEntityCoords,
                      Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &elementCoords,

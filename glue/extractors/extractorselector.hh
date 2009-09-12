@@ -161,14 +161,14 @@ template<typename GSET>
 template<typename LSET>
 struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::cube>
 {
-  typedef CubeMeshExtractor<typename LSET::GridView, false>  ExtractorType;
+  typedef CubeMeshExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 template<typename GSET>
 template<typename LSET>
 struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::rectangular>
 {
-  typedef CubeMeshExtractor<typename LSET::GridView, true>  ExtractorType;
+  typedef CubeMeshExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 template<typename GSET>
