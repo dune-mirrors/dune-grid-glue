@@ -246,9 +246,6 @@ private:
   /// @brief maximum distance between two matched points in the mapping
   T _maxdist;
 
-  /// @brief tolerance value for geometric comparisons with float and double precision
-  T _eps;
-
   /* geometric data for both domain and targt */
 
   /// @brief domain coordinates
@@ -306,7 +303,7 @@ protected:
 public:
 
   PSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
-    _maxdist(max_distance), _eps(1E-10),
+    _maxdist(max_distance),
     _olclocator(typename Locator::BoxType(WorldCoords(0.0), WorldCoords(1.0))), _olcgeometry(NULL), _domnormals(domain_normals)
   {}
 
