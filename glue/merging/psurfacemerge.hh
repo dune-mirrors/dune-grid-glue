@@ -39,7 +39,6 @@
 #include <dune/common/fvector.hh>
 
 #include <dune/glue/misc/geometry.hh>
-#include <dune/glue/misc/multidimoctree.hh>
 #include <dune/glue/merging/merger.hh>
 
 #include <psurface/ContactMapping.h>
