@@ -199,46 +199,6 @@ private:
   };
 
 
-
-  /**
-   * @class OverlapCorner
-   * @brief identifies one corner point in a particular overlap simplex
-   *
-   * Since the number of corners is so small one "shared" int is enough.
-   */
-  struct OverlapCorner
-  {
-    unsigned int idx : 24;
-    unsigned int corner : 8;
-  };
-
-
-  /**
-   * @class OverlapCornerGeometry
-   * @brief for an OverlapCorner struct provides the geometric information needed in the point locator
-   */
-  struct OverlapCornerGeometry
-  {
-    OverlapCornerGeometry(const OverlapManager& olm_) : olm(olm_)
-    {}
-
-    /// @brief mandatory for the point locator
-    bool operator()(const WorldCoords& lower, const WorldCoords& upper, const OverlapCorner& item) const
-    {
-      const IntersectionPrimitive<float>& ip = this->olm.domain(item.idx);
-      for (typename WorldCoords::size_type i = 0; i < dim; ++i)
-        if (lower[i] > ip.points[item.corner][i] || upper[i] <= ip.points[item.corner][i])
-          return false;
-      return true;
-    }
-
-    /// @brief the source of the geometric information
-    const OverlapManager& olm;
-  };
-
-  /// @brief class used for domain and target vertex locating in the merged grid
-  typedef MultiDimOctree<OverlapCorner, OverlapCornerGeometry, WorldCoords, dimworld, true>  Locator;
-
 private:
 
   /*   M E M B E R   V A R I A B L E S   */
@@ -273,18 +233,9 @@ private:
   /// access to the set of computed simplex overlaps in the merged grid
   OverlapManager _olm;
 
-
-  /* members needed for the identification of domain and target vertices in the merged grid */
-
-  /// @brief spatial map like an octree or quadtree for efficient search of point associated data
-  mutable Locator _olclocator;
-
-  /// @brief the data repository for the entities in the locator (no direct access to this)
-  std::vector<OverlapCorner>  _olcorners;
-
-  /// @brief the geometry accessing functor the entities in the locator
-  OverlapCornerGeometry* _olcgeometry;
-
+  /** \brief Vector field on the domain surface which prescribes the direction
+      in which the domain surface is projected onto the target surface
+   */
   SurfaceNormal _domnormals;
 
 
@@ -303,16 +254,8 @@ protected:
 public:
 
   PSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
-    _maxdist(max_distance),
-    _olclocator(typename Locator::BoxType(WorldCoords(0.0), WorldCoords(1.0))), _olcgeometry(NULL), _domnormals(domain_normals)
+    _maxdist(max_distance), _domnormals(domain_normals)
   {}
-
-
-  ~PSurfaceMerge()
-  {
-    if (this->_olcgeometry != NULL)
-      delete this->_olcgeometry;
-  }
 
 
   /*   M O D E L   S P E C I F I C   E X T E N D I N G   F U N C T I O N A L I T Y   */
@@ -535,66 +478,6 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   // initialize the merged grid overlap manager
   this->_olm.setOverlaps(overlaps);
 
-  // introduce a quadtree or octree for fast identification of domain and target
-  // vertices in the merged grid
-
-  // compute the total numbers of overlap simplex corners
-  unsigned int num_olcorners = dim * this->_olm.nOverlaps();
-
-  // re-initialize the point locator
-  WorldCoords lower(std::numeric_limits<ctype>::max()), upper(-std::numeric_limits<ctype>::max());
-
-  // compute the bounding box of the merged grid
-  typename Dune::FieldVector<WorldCoords, dim>::size_type j;
-  typename WorldCoords::size_type k;
-  for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
-  {
-    // can work with a reference here since no allocation is done in the next two loops
-    // (should save some calls to constructors)
-    const Dune::FieldVector<WorldCoords, dim>& corners = this->simplexCorners(i);
-    for (j = 0; j < dim; ++j)
-      for (k = 0; k < dim; ++k)
-      {
-        lower[k] = std::min(lower[k], corners[j][k]);
-        upper[k] = std::max(upper[k], corners[j][k]);
-      }
-  }
-
-  // increase a little, since "upper" boundary not inside locator domain
-  /** \todo This should be scaling invariant! */
-  lower -= 0.1;
-  upper += 0.1;
-
-  // get an estimate on how many levels will be needed in the octree,
-  // the default value for max_items/cell is 10, here it will be 8
-  int max_items_per_cell = 8;
-  int levels = 1;
-  while ((num_olcorners / pow((float) (1 << dim), levels)) > max_items_per_cell)
-    levels++;
-  // ...and to be on the safe side
-  levels += 4;
-  this->_olclocator.init(typename Locator::BoxType(lower, upper), levels, max_items_per_cell);
-
-  // now fill the locator...
-
-  // first allocate the data "repository" for the locator's content is be stored outside
-  this->_olcorners.resize(num_olcorners);
-
-  // create geometry "oracle" for the overlap corner structs in the point locator
-  this->_olcgeometry = new OverlapCornerGeometry(this->_olm);
-
-  // insert the data
-  unsigned int current_index = 0;
-  for (unsigned int i = 0; i < this->_olm.nOverlaps(); ++i)
-  {
-    for (int corner = 0; corner < dim; ++corner)
-    {
-      this->_olcorners[current_index].idx = i;
-      this->_olcorners[current_index].corner = corner;
-      this->_olclocator.insert(&this->_olcorners[current_index], this->_olcgeometry);
-      current_index++;
-    }
-  }
 }
 
 
