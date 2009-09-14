@@ -239,18 +239,6 @@ private:
   SurfaceNormal _domnormals;
 
 
-protected:
-
-  /**
-   * @brief get corners (orientation like domain) of simplex at given index
-   * @param idx index of a merged grid simplex, user must ensure that index is valid
-   * or else the result will be invalid
-   * @return const ref to an array of ordered coordinates denoting the corners and the orientation
-   * of the simplex IFF given index was valid
-   */
-  Dune::FieldVector<WorldCoords, dim> simplexCorners(unsigned int idx) const;
-
-
 public:
 
   PSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
@@ -564,20 +552,6 @@ bool PSurfaceMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, std
     indices[i] = this->_olm.domainIndex(first + i);             // return the CORRECT INDEX here!!!
   // ...return success
   return true;
-}
-
-
-template<int dim, int dimworld, typename T>
-Dune::FieldVector<typename PSurfaceMerge<dim, dimworld, T>::WorldCoords, dim> PSurfaceMerge<dim, dimworld, T>::simplexCorners(unsigned int idx) const
-{
-  // get the simplex overlap
-  const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
-  // copy the relevant fields from the points stored with the simplex overlap
-  Dune::FieldVector<WorldCoords, dim> result;
-  for (int i = 0; i < dim; ++i)       // #simplex_corners equals dim here
-    for (int j = 0; j < dim; ++j)             // #dimensions of coordinate space
-      result[i][j] = ip.points[i][j];
-  return result;
 }
 
 
