@@ -294,6 +294,8 @@ void ConformingMerge<dim, dimworld, T>::build(
 
   }
 
+  assert(pairs.size()==domainCoords_.size());
+
   // //////////////////////////////////////////////////////////////////////
   //   Make the actual intersections
   // //////////////////////////////////////////////////////////////////////
@@ -302,11 +304,16 @@ void ConformingMerge<dim, dimworld, T>::build(
 
   for (size_t i=0; i<_domi.size(); i++) {
 
-    std::set<unsigned int> domainSimplexSorted(_domi[i].begin(), _domi[i].end());
-
     // --------------------------------------------
     //  Find the corresponding target simplex
     // --------------------------------------------
+
+    // Assemble a set of the vertices that the target simplex has to consist of
+    std::set<unsigned int> domainSimplexSorted;
+    for (int j=0; j<_domi[i].size(); j++)
+      domainSimplexSorted.insert(pairs[_domi[i][j]][1]);
+
+    // Find the index of this target simplex
     int targetSimplexIdx = -1;
     for (size_t j=0; j<_tari.size(); j++) {
 
@@ -318,6 +325,8 @@ void ConformingMerge<dim, dimworld, T>::build(
       }
 
     }
+
+    assert(targetSimplexIdx != -1);
 
     intersections_[i].domainEntity_ = i;
     intersections_[i].targetEntity_ = targetSimplexIdx;
@@ -337,6 +346,8 @@ void ConformingMerge<dim, dimworld, T>::build(
       int globalTargetNumber = pairs[globalDomainNumber][1];
 
       // local number in the target simplex
+      assert(std::find(_tari[targetSimplexIdx].begin(),
+                       _tari[targetSimplexIdx].end(), globalTargetNumber) != _tari[targetSimplexIdx].end());
       int localTargetNumber = std::find(_tari[targetSimplexIdx].begin(),
                                         _tari[targetSimplexIdx].end(), globalTargetNumber)
                               - _tari[targetSimplexIdx].begin();
