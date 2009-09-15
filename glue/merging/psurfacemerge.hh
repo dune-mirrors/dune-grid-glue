@@ -449,7 +449,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
     _maxdist = 2;
   }
 
-  std::cout << "Building merged grid... (wait for finish!)" << std::endl;
+  std::cout << "PSurfaceMerge building merged grid..." << std::endl;
 
   // compute the merged grid using the psurface library
   this->_cm.build(_domc, _domi,

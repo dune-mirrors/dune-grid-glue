@@ -265,7 +265,7 @@ void ConformingMerge<dim, dimworld, T>::build(
     for (unsigned int j = 0; j < dimworld; ++j)
       targetCoords_[i][j] = target_coords[i*dimworld + j];
 
-  std::cout << "Building merged grid... (wait for finish!)" << std::endl;
+  std::cout << "ConformingMerge building merged grid..." << std::endl;
 
   // /////////////////////////////////////////////////////////////////////
   //   Compute correspondences between vertices
