@@ -24,7 +24,7 @@ void testIntersection(const IntersectionIt & rIIt)
   const Dune::QuadratureRule<double, dim>& quad = Dune::QuadratureRules<double, dim>::rule(rIIt->type(), 3);
 
   for (unsigned int l=0; l<quad.size(); l++) {
-#if 0
+
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
     // Test whether local domain position is consistent with global domain position
@@ -46,7 +46,7 @@ void testIntersection(const IntersectionIt & rIIt)
 
     // Here we assume that the two interface match geometrically:
     assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
-#endif
+
   }
 }
 
