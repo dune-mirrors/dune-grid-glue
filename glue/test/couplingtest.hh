@@ -82,6 +82,8 @@ void testCoupling(const GlueType& glue)
     typename GlueType::DomainIntersectionIterator rIIt    = glue.idomainbegin(*dit);
     typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
     for (; rIIt!=rIEndIt; ++rIIt) {
+      // as we only have a single grid, even when testing the
+      // parallel extractor, this assertion should be true
       assert (rIIt->entityDomain() == dit);
       testIntersection(rIIt);
       icount++;
