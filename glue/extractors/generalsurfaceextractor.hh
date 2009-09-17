@@ -101,7 +101,8 @@ public:
     : Codim1Extractor<GV>(gv)
   {
     std::cout << "This is GeneralSurfaceExtractor on a <" << GV::dimension
-              << "," << GV::dimensionworld << "> grid working in " << dimworld << " space!" << std::endl;
+              << "," << GV::dimensionworld << "> grid!"
+              << std::endl;
   }
 
   /*  F U N C T I O N A L I T Y  */
