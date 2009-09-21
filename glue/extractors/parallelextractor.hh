@@ -110,6 +110,9 @@ public:
 
   typedef typename GV::Grid::GlobalIdSet::IdType GlobalId;
 
+  typedef typename LX::Geometry Geometry;
+  typedef typename LX::LocalGeometry LocalGeometry;
+
   // types for the global setup
   struct GlobalCoordInfo
   {
@@ -461,61 +464,6 @@ public:
   }
 
 #if 0
-
-  /**
-   * @brief for given barycentric coords in a simplex compute world coordinates
-   *
-   * If both are to be computed, element and world coordinates, then use the
-   * combined method for efficiency!
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param wcoords to be filled with world coordinates
-   */
-  void globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
-  {
-    unsigned int l_index = 0;
-    bool have = contains(index, l_index);
-    assert(have);
-    return _lx.globalCoords(l_index, bcoords, wcoords);
-  }
-
-
-  /**
-   * @brief for given barycentric coords in a simplex compute element coordinates
-   *
-   * If both are to be computed, element and world coordinates, then use the
-   * combined method for efficiency!
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   */
-  void localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
-  {
-    unsigned int l_index = 0;
-    bool have = contains(index, l_index);
-    assert(have);
-    return _lx.localCoords(l_index, bcoords, ecoords);
-  }
-
-
-  /**
-   * @brief for given barycentric coords in a simplex compute element and world coordinates
-   *
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   * @param wcoords to be filled with world coordinates
-   */
-  void localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
-  {
-    unsigned int l_index = 0;
-    bool have = contains(index, l_index);
-    assert(have);
-    return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords);
-  }
-
-#endif
-
   /**
    * @brief for several given barycentric coords in a simplex compute world coordinates
    *
@@ -570,6 +518,25 @@ public:
     bool have = contains(index, l_index);
     assert(have);
     return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords);
+  }
+#endif
+
+  /** \brief Get World geometry of the extracted face */
+  Geometry geometry(unsigned int index) const
+  {
+    unsigned int l_index = 0;
+    bool have = contains(index, l_index);
+    assert(have);
+    return _lx.geometry(l_index);
+  }
+
+  /** \brief Get Geometry of the extracted face in element coordinates */
+  Geometry geometryLocal(unsigned int index) const
+  {
+    unsigned int l_index = 0;
+    bool have = contains(index, l_index);
+    assert(have);
+    return _lx.geometryLocal(l_index);
   }
 
 };
