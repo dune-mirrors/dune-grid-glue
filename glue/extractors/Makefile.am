@@ -2,9 +2,7 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 surfacesdir = $(includedir)/dune/glue/surfaces
-surfaces_HEADERS = gridextractor.hh\
-	gridextractorconcept.hh\
-	extractorselector.hh\
+surfaces_HEADERS = extractorselector.hh\
 	generalsurfaceextractor.hh\
 	simplicialmeshextractor.hh\
 	simplicialsurfaceextractor.hh\

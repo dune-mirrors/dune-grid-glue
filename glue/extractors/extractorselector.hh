@@ -19,10 +19,6 @@
 #ifndef EXTRACTORSELECTOR_HH_
 #define EXTRACTORSELECTOR_HH_
 
-#ifdef GRID_GLUE_USE_CONCEPTS
-#include "../misc/conceptchecking.hh"
-#include "GridExtractor.hh"
-#endif
 #include "gridextractiontraits.hh"
 #include "simplicialmeshextractor.hh"
 #include "simplicialsurfaceextractor.hh"
@@ -74,22 +70,12 @@ private:
 public:
 
   /// @brief export the type of the deduced extractor
-#ifdef GRID_GLUE_USE_CONCEPTS
-  typedef
-  typename ParallelHelper<
-      typename Helper<GSET, GSET::codimension, GSET::mesh>::ExtractorType,
-      GSET::parallel
-      >::ExtractorType
-  _ExtractorType;
-  typedef GridExtractor<_ExtractorType>  ExtractorType;
-#else
   typedef
   typename ParallelHelper<
       typename Helper<GSET, GSET::codimension, GSET::mesh>::ExtractorType,
       GSET::parallel
       >::ExtractorType
   ExtractorType;
-#endif
 };
 
 /*   S P E C I A L I Z A T I O N   F O R   P A R A L L E L    E X T R A C T O R   */
