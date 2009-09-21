@@ -27,7 +27,6 @@
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"
 #endif
-#include "../extractors/gridextractor.hh"
 #include "../merging/psurfacemerge.hh"
 #include "../extractors/vtksurfacewriter.hh"
 #include "../extractors/gridextractiontraits.hh"
