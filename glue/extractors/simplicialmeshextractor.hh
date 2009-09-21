@@ -229,44 +229,6 @@ public:
   }
 
 
-  void globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const;
-
-
-  void localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const;
-
-  /**
-   * @brief for given barycentric coords in a cube compute element and world coordinates
-   *
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   * @param wcoords to be filled with world coordinates
-   */
-  void localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const;
-
-
-  template<typename CoordContainerB, typename CoordContainerW>
-  void globalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerW &wcoords, int size) const;
-
-
-  template<typename CoordContainerB, typename CoordContainerE>
-  void localCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, int size) const;
-
-
-  /**
-   * @brief for several given barycentric coords in a simplex compute element and world coordinates
-   *
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   * @param wcoords to be filled with world coordinates
-   */
-  void localAndGlobalCoords(unsigned int index,
-                            const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &subEntityCoords,
-                            Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &elementCoords,
-                            Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords) const;
-
-
   /**
    * @brief gets for each vertex corner of given face (by index) the number of
    * the vertex in parent element's ordering
@@ -510,69 +472,5 @@ typename SimplicialMeshExtractor<GV>::LocalGeometry SimplicialMeshExtractor<GV>:
   return LocalGeometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
 }
 
-
-template<typename GV>
-inline void SimplicialMeshExtractor<GV>::globalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &wcoords) const
-{
-  wcoords = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().global(barycentricToReference(bcoords));
-}
-
-
-template<typename GV>
-inline void SimplicialMeshExtractor<GV>::localCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords) const
-{
-  ecoords = barycentricToReference(bcoords);
-}
-
-
-template<typename GV>
-inline void SimplicialMeshExtractor<GV>::localAndGlobalCoords(unsigned int index, const Dune::FieldVector<ctype, dimworld> &bcoords, Coords &ecoords, Coords &wcoords) const
-{
-  this->localCoords(index, bcoords, ecoords);
-  this->globalCoords(index, bcoords, wcoords);
-}
-
-
-template<typename GV>
-template<typename CoordContainerB, typename CoordContainerW>
-void SimplicialMeshExtractor<GV>::globalCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerW &wcoords, int size) const
-{
-  ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].self)->second->p;
-  for (int i = 0; i < size; ++i)
-  {
-    // compute global coordinates and pad with 0 in last coordinate
-    wcoords[i] = eptr->geometry().global(barycentricToReference(bcoords[i]));
-  }
-}
-
-
-template<typename GV>
-template<typename CoordContainerB, typename CoordContainerE>
-void SimplicialMeshExtractor<GV>::localCoords(unsigned int index, const CoordContainerB &bcoords, CoordContainerE &ecoords, int size) const
-{
-  for (int i = 0; i < size; ++i)
-    ecoords[i] = barycentricToReference(bcoords[i]);
-}
-
-
-template<typename GV>
-void SimplicialMeshExtractor<GV>::
-localAndGlobalCoords(unsigned int index,
-                     const Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &subEntityCoords,
-                     Dune::array<Dune::FieldVector<ctype,dim>, dim+1> &elementCoords,
-                     Dune::array<Dune::FieldVector<ctype,dimworld>, dim+1> &wcoords) const
-{
-  ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].self)->second->p;
-  for (int i = 0; i < elementCoords.size(); ++i)
-  {
-    elementCoords[i] = subEntityCoords[i];
-    // compute global coordinates
-    wcoords[i] = eptr->geometry().global(elementCoords[i]);
-  }
-}
-
-
-
-// TODO add all those local and global coordinates functions
 
 #endif // SIMPLICIALMESHEXTRACTOR_HH_
