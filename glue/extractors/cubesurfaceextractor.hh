@@ -136,10 +136,10 @@ public:
    */
   void update(const FaceDescriptor<GV>& descr);
 
-  /** \brief Get World geometry of the extracted face */
+  /** \brief Get world geometry of the extracted face */
   Geometry geometry(unsigned int index) const;
 
-  /** \brief Get Geometry of the extracted face in element coordinates */
+  /** \brief Get geometry of the extracted face in element coordinates */
   LocalGeometry geometryLocal(unsigned int index) const;
 
 
