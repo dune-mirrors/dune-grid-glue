@@ -88,6 +88,15 @@ inline K interpolateLinear(const Dune::FieldVector<K, 2>& values, const K clocal
   return (1.0-clocal)*values[0] + clocal*values[1];
 }
 
+template <typename K, int dimworld, int N>
+inline Dune::FieldVector<K,dimworld> interpolateLinear(const Dune::array<Dune::FieldVector<K, dimworld>, N>& values,
+                                                       const Dune::FieldVector<K, N-1>& local)
+{
+  Dune::FieldVector<K,dimworld> result = values[0];
+  for (int i=1; i<N; i++)
+    result.axpy(local[i-1], values[i]-values[0]);
+  return result;
+}
 
 /**
  * @brief generic linear interpolation for convenience
