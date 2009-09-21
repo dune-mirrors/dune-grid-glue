@@ -328,14 +328,12 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_domext.contains(domainIndex, unused))
     {
-      glue->_domext.localAndGlobalCoords(domainIndex, corners_subEntity_local, corners_element_local, corners_global);
-
       typename DomainExtractor::Geometry domainWorldGeometry = glue->_domext.geometry(domainIndex);
       typename DomainExtractor::LocalGeometry domainLocalGeometry = glue->_domext.geometryLocal(domainIndex);
 
       for (int i=0; i<corners_subEntity_local.size(); i++) {
-        assert( (corners_element_local[i] - domainLocalGeometry.global(corners_subEntity_local[i])).two_norm() < 1e-6);
-        assert( (corners_global[i] - domainWorldGeometry.global(corners_subEntity_local[i])).two_norm() < 1e-6);
+        corners_element_local[i] = domainLocalGeometry.global(corners_subEntity_local[i]);
+        corners_global[i]        = domainWorldGeometry.global(corners_subEntity_local[i]);
 
       }
 
@@ -368,15 +366,12 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_tarext.contains(targetIndex, unused))
     {
-      glue->_tarext.localAndGlobalCoords(targetIndex, corners_subEntity_local, corners_element_local, corners_global);
-
-      typename TargetExtractor::Geometry targetWorldGeometry = glue->_tarext.geometry(targetIndex);
+      typename TargetExtractor::Geometry targetWorldGeometry      = glue->_tarext.geometry(targetIndex);
       typename TargetExtractor::LocalGeometry targetLocalGeometry = glue->_tarext.geometryLocal(targetIndex);
 
       for (int i=0; i<corners_subEntity_local.size(); i++) {
-        assert( (corners_element_local[i] - targetLocalGeometry.global(corners_subEntity_local[i])).two_norm() < 1e-6);
-        assert( (corners_global[i] - targetWorldGeometry.global(corners_subEntity_local[i])).two_norm() < 1e-6);
-
+        corners_element_local[i] = targetLocalGeometry.global(corners_subEntity_local[i]);
+        corners_global[i]        = targetWorldGeometry.global(corners_subEntity_local[i]);
       }
 
       // set the corners of the geometries
