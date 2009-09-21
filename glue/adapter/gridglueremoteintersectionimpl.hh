@@ -331,7 +331,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
       typename DomainExtractor::Geometry domainWorldGeometry = glue->_domext.geometry(domainIndex);
       typename DomainExtractor::LocalGeometry domainLocalGeometry = glue->_domext.geometryLocal(domainIndex);
 
-      for (int i=0; i<corners_subEntity_local.size(); i++) {
+      for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
         corners_element_local[i] = domainLocalGeometry.global(corners_subEntity_local[i]);
         corners_global[i]        = domainWorldGeometry.global(corners_subEntity_local[i]);
 
@@ -369,7 +369,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
       typename TargetExtractor::Geometry targetWorldGeometry      = glue->_tarext.geometry(targetIndex);
       typename TargetExtractor::LocalGeometry targetLocalGeometry = glue->_tarext.geometryLocal(targetIndex);
 
-      for (int i=0; i<corners_subEntity_local.size(); i++) {
+      for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
         corners_element_local[i] = targetLocalGeometry.global(corners_subEntity_local[i]);
         corners_global[i]        = targetWorldGeometry.global(corners_subEntity_local[i]);
       }
