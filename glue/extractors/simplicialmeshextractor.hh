@@ -120,6 +120,12 @@ private:
 
 public:
 
+  using Codim0Extractor<GV>::codim;
+
+  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dimworld> > Geometry;
+
+  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dim> > LocalGeometry;
+
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
 
   /**
@@ -140,6 +146,12 @@ public:
    */
   void update(const ElementDescriptor<GV>& descr);
 
+
+  /** \brief Get World geometry of the extracted face */
+  Geometry geometry(unsigned int index) const;
+
+  /** \brief Get Geometry of the extracted face in element coordinates */
+  LocalGeometry geometryLocal(unsigned int index) const;
 
   /**
    * @brief delete everything build up so far and free the memory
@@ -468,6 +480,33 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
   //
   //	}
 
+}
+
+
+/** \brief Get World geometry of the extracted face */
+template<typename GV>
+typename SimplicialMeshExtractor<GV>::Geometry SimplicialMeshExtractor<GV>::geometry(unsigned int index) const
+{
+  std::vector<Coords> corners(simplex_corners);
+  for (int i = 0; i < simplex_corners; ++i)
+    corners[i] = this->_elmtInfo.find(this->_faces[index].self)->second->p->geometry().corner(i);
+
+  return Geometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
+}
+
+/** \brief Get Geometry of the extracted face in element coordinates */
+template<typename GV>
+typename SimplicialMeshExtractor<GV>::LocalGeometry SimplicialMeshExtractor<GV>::geometryLocal(unsigned int index) const
+{
+  std::vector<Coords> corners(simplex_corners);
+
+  const Dune::GenericReferenceElement<double,dim>& refElement
+    = Dune::GenericReferenceElements<double, dim>::general(Dune::GeometryType(Dune::GeometryType::simplex,dim));
+
+  for (int i = 0; i < simplex_corners; ++i)
+    corners[i] = refElement.position(i,dim);
+
+  return LocalGeometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
 }
 
 
