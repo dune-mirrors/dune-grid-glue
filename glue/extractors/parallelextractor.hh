@@ -32,6 +32,40 @@
 #include <dune/common/collectivecommunication.hh>
 #include <stdlib.h>
 
+template <typename COMM>
+class CommHelper
+{
+public:
+  CommHelper (const COMM & c) {}
+
+  template<typename BUF>
+  void allgather(const BUF & in, BUF & out, int)
+  {
+    out = in;
+  }
+};
+
+#if HAVE_MPI
+template <>
+class CommHelper< Dune::CollectiveCommunication<MPI_Comm> >
+{
+  typedef Dune::CollectiveCommunication<MPI_Comm> COMM;
+  const COMM & comm;
+public:
+  CommHelper (const COMM & c) : comm(c) {}
+
+  template<typename BUF>
+  void allgather(BUF & in, BUF & out, int outsz)
+  {
+    typedef typename BUF::value_type V;
+    MPI_Allgather(&in[0], in.size(),
+                  Dune::Generic_MPI_Datatype<V>::get(),
+                  &out[0], outsz,
+                  Dune::Generic_MPI_Datatype<V>::get(), comm);
+  }
+};
+#endif
+
 /**
  * @brief provides static methods for grid surface extraction
  *
@@ -215,19 +249,13 @@ public:
     // TODO: use more efficient communication
     typedef typename Grid::CollectiveCommunication Comm;
     const Comm & comm = _gv.grid().comm();
+    CommHelper<Comm> commHelper(comm);
 
     size_t globalCoordLocalSize = localCoordInfos.size();
     globalCoordLocalSize = comm.max(globalCoordLocalSize) + 2;
     size_t globalCoordSize = globalCoordLocalSize * comm.size();;
     globalCoordInfos.resize(globalCoordSize);
-#if HAVE_MPI
-    MPI_Allgather(&localCoordInfos[0], localCoordInfos.size(),
-                  Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(),
-                  &globalCoordInfos[0], globalCoordLocalSize,
-                  Dune::Generic_MPI_Datatype<GlobalCoordInfo>::get(), comm);
-#else
-    globalCoordInfos = localCoordInfos;
-#endif
+    commHelper.allgather(localCoordInfos, globalCoordInfos, globalCoordLocalSize);
 
     // communicate faces
     // TODO: use more efficient communication
@@ -235,14 +263,7 @@ public:
     globalFaceLocalSize = comm.max(globalFaceLocalSize);
     size_t globalFaceSize = globalFaceLocalSize * comm.size();
     globalFaceInfos.resize(globalFaceSize);
-#if HAVE_MPI
-    MPI_Allgather(&localFaceInfos[0], localFaceInfos.size(),
-                  Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(),
-                  &globalFaceInfos[0], globalFaceLocalSize,
-                  Dune::Generic_MPI_Datatype<GlobalFaceInfo>::get(), comm);
-#else
-    globalFaceInfos = localFaceInfos;
-#endif
+    commHelper.allgather(localFaceInfos, globalFaceInfos, globalFaceLocalSize);
 
     // sort and shrink vectors
     {
