@@ -325,13 +325,12 @@ int main(int argc, char *argv[]) try
   // Test a unit cube versus a grid one dimension lower
   test2d1dCouplingMatchingDimworld<3,MeshClassification::cube>();
 
-
-
   // /////////////////////////////////////////////////////////////
   //   Second set of tests: the grid have different dimensions,
   //   and the world dimension is different as well
   // /////////////////////////////////////////////////////////////
 
+#if 0
   // Test a unit square versus a grid one dimension lower
   test1d2dCoupling<2,MeshClassification::cube>();
   test1d2dCoupling<2,MeshClassification::simplex>();
@@ -342,6 +341,7 @@ int main(int argc, char *argv[]) try
 
   // Test a unit cube versus a grid one dimension lower
   test2d1dCoupling<3,MeshClassification::cube>();
+#endif
 
 }
 catch (Exception e) {
