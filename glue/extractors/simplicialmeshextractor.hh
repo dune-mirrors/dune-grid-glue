@@ -27,6 +27,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/grid/common/geometry.hh>
+#include <dune/grid/genericgeometry/geometry.hh>
 
 #include "surfacedescriptor.hh"
 #include <dune/glue/extractors/codim0extractor.hh>
