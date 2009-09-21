@@ -92,6 +92,12 @@ public:
 
 public:
 
+  using Codim1Extractor<GV>::codim;
+
+  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dimworld> > Geometry;
+
+  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dim> > LocalGeometry;
+
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
 
   /**
@@ -130,40 +136,11 @@ public:
    */
   void update(const FaceDescriptor<GV>& descr);
 
+  /** \brief Get World geometry of the extracted face */
+  Geometry geometry(unsigned int index) const;
 
-  /**
-   * @brief for given barycentric coords in a simplex compute world coordinates
-   *
-   * If both are to be computed, element and world coordinates, then use the
-   * combined method for efficiency!
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param wcoords to be filled with world coordinates
-   */
-  void globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const;
-
-
-  /**
-   * @brief for given barycentric coords in a simplex compute element coordinates
-   *
-   * If both are to be computed, element and world coordinates, then use the
-   * combined method for efficiency!
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   */
-  void localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const;
-
-
-  /**
-   * @brief for given barycentric coords in a simplex compute element and world coordinates
-   *
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   * @param wcoords to be filled with world coordinates
-   */
-  void localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const;
+  /** \brief Get Geometry of the extracted face in element coordinates */
+  LocalGeometry geometryLocal(unsigned int index) const;
 
 
   /**
@@ -369,58 +346,41 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
 }
 
 
+/** \brief Get World geometry of the extracted face */
 template<typename GV, bool rect>
-inline void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, const Coords &bcoords, Coords &wcoords) const
+typename CubeSurfaceExtractor<GV, rect>::Geometry CubeSurfaceExtractor<GV,rect>::geometry(unsigned int index) const
 {
-  // only interpolate barycentric in the given triangle => for flat quads this is exact!
-  Dune::array<Coords, simplex_corners> corners;
+  std::vector<Coords> corners(simplex_corners);
   for (int i = 0; i < simplex_corners; ++i)
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-  interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords, wcoords, dimworld);
+
+  return Geometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
 }
 
 
+/** \brief Get Geometry of the extracted face in element coordinates */
 template<typename GV, bool rect>
-inline void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index, const Coords &bcoords, Coords &ecoords) const
+typename CubeSurfaceExtractor<GV, rect>::LocalGeometry CubeSurfaceExtractor<GV,rect>::geometryLocal(unsigned int index) const
 {
-  if (rect)
-  {
-    Dune::array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->indexInInside(index);
-    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
-    // computing the locals is straight forward for flat rectangles,
-    // we only need the triangle's corners in element coordinate
-    if (this->_faces[index].first)
-    {
-      // the triangle's corners are (0 1 2) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
-    }
-    else
-    {
-      // the triangle's corners are (3 2 1) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
-    }
-    interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords, ecoords, dimworld);
-  }
-  else
-  {
-    Coords wcoords;
-    this->localAndGlobalCoords(index, bcoords, ecoords, wcoords);
-  }
-}
+  std::vector<Coords> corners(simplex_corners);
 
+  unsigned int num_in_self = this->indexInInside(index);
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
 
-template<typename GV, bool rect>
-inline void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index, const Coords &bcoords, Coords &ecoords, Coords &wcoords) const
-{
-  this->globalCoords(index, bcoords, wcoords);
-  // for rectangles avoid using world coordinates
-  if (rect)
-    this->localCoords(index, bcoords, ecoords);
-  else
-    ecoords = this->_elmtInfo.find(this->_faces[index].parent)->second->p->geometry().local(wcoords);
+  // computing the locals is straight forward for flat rectangles,
+  // we only need the triangle's corners in element coordinate
+  if (this->_faces[index].category == 1) {
+    // the triangle's corners are (0 1 2) using face indices
+    for (int i = 0; i < simplex_corners; ++i)
+      corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
+
+  } else {
+    // the triangle's corners are (3 2 1) using face indices
+    for (int i = 0; i < simplex_corners; ++i)
+      corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
+  }
+
+  return LocalGeometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
 }
 
 
@@ -478,11 +438,15 @@ void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index,
                                                           Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
                                                           Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords) const
 {
+  Geometry worldGeometry = geometry(index);
+  LocalGeometry localGeometry = geometryLocal(index);
+
   Dune::array<Dune::FieldVector<ctype,dim>, dimworld> barycentricCoords;
   for (int i=0; i<dimworld; i++)
     barycentricCoords[i] = referenceToBarycentric(subEntityCoords[i]);
 
   this->globalCoords(index, barycentricCoords, wcoords);
+
   // for rectangles avoid using world coordinates
   if (rect)
     this->localCoords(index, subEntityCoords, ecoords);
@@ -492,6 +456,12 @@ void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index,
     for (size_t i = 0; i < ecoords.size(); ++i)
       ecoords[i] = eptr->geometry().local(wcoords[i]);
   }
+
+  for (size_t i = 0; i < wcoords.size(); ++i) {
+    assert( (ecoords[i] - localGeometry.global(subEntityCoords[i])).two_norm() < 1e-6);
+    assert( (wcoords[i] - worldGeometry.global(subEntityCoords[i])).two_norm() < 1e-6);
+  }
+
 }
 
 #endif // CUBESURFACEEXTRACTOR_HH_
