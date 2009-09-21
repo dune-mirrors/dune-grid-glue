@@ -11,10 +11,10 @@
 #include <dune/glue/merging/psurfacemerge.hh>
 #include <dune/glue/adapter/gridglue.hh>
 
-template <class IntersectionIt, int domdim, int tardim, class ctype>
+template <class IntersectionIt, int domdimw, int tardimw, class ctype>
 void testIntersection(const IntersectionIt & rIIt,
-                      CoordinateTransformation<domdim, IntersectionIt::coorddim, ctype> & domTrafo,
-                      CoordinateTransformation<tardim, IntersectionIt::coorddim, ctype> & tarTrafo)
+                      CoordinateTransformation<domdimw, IntersectionIt::coorddim, ctype> & domTrafo,
+                      CoordinateTransformation<tardimw, IntersectionIt::coorddim, ctype> & tarTrafo)
 {
   // Dimension of the intersection
   const int dim = IntersectionIt::mydim;
@@ -58,7 +58,7 @@ class NoTransformation : public CoordinateTransformation<dim, dimw, ctype>
 {
 public:
   static
-  void assignIfNull(CoordinateTransformation<dim, dim, ctype>* & ptr)
+  void assignIfNull(CoordinateTransformation<dim, dimw, ctype>* & ptr)
   {
     assert(ptr != 0);
   }
@@ -92,8 +92,8 @@ public:
 
 template <class GlueType>
 void testCoupling(const GlueType& glue,
-                  CoordinateTransformation<GlueType::domdim, GlueType::dimworld, typename GlueType::ctype> * domTrafo = 0,
-                  CoordinateTransformation<GlueType::tardim, GlueType::dimworld, typename GlueType::ctype> * tarTrafo = 0 )
+                  CoordinateTransformation<GlueType::DomainExtractor::dimworld, GlueType::dimworld, typename GlueType::ctype> * domTrafo = 0,
+                  CoordinateTransformation<GlueType::TargetExtractor::dimworld, GlueType::dimworld, typename GlueType::ctype> * tarTrafo = 0 )
 {
   typedef typename GlueType::ctype ctype;
   //dune_static_assert(GlueType::domdim == GlueType::tardim, "For this test domain and target must have the same dimension");
@@ -104,8 +104,8 @@ void testCoupling(const GlueType& glue,
   // ///////////////////////////////////////
   //   set Identity trafo if necessary
   // ///////////////////////////////////////
-  NoTransformation<GlueType::domdim, GlueType::dimworld, ctype>::assignIfNull(domTrafo);
-  NoTransformation<GlueType::tardim, GlueType::dimworld, ctype>::assignIfNull(tarTrafo);
+  NoTransformation<GlueType::DomainExtractor::dimworld, GlueType::dimworld, ctype>::assignIfNull(domTrafo);
+  NoTransformation<GlueType::TargetExtractor::dimworld, GlueType::dimworld, ctype>::assignIfNull(tarTrafo);
 
   // ///////////////////////////////////////
   //   MergedGrid centric
