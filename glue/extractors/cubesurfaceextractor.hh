@@ -433,6 +433,7 @@ void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, const Coor
     corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
   for (size_t i = 0; i < bcoords.size(); ++i)
     interpolateBarycentric<simplex_corners, ctype, Dune::FieldVector<ctype, dimworld> >(corners, bcoords[i], wcoords[i], dimworld);
+
 }
 
 
@@ -461,7 +462,7 @@ void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index,
         corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
     }
     for (size_t i = 0; i < elementCoords.size(); ++i)
-      interpolateBarycentric<dimworld, ctype, Dune::FieldVector<ctype, dimworld> >(corners, referenceToBarycentric(subEntityCoords[i]), elementCoords[i], dimworld);
+      elementCoords[i] = interpolateLinear<double,dim,simplex_corners>(corners, subEntityCoords[i]);
   }
   else
   {
