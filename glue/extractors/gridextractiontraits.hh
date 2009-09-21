@@ -28,8 +28,7 @@ namespace MeshClassification
   {
     hybrid  = 0,
     simplex = 1,
-    cube    = 2,
-    rectangular = 3
+    cube    = 2
   };
 }
 

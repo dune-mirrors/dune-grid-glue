@@ -41,7 +41,7 @@
  * The template parameters
  * @li GV the grid class type
  */
-template<typename GV, bool rect = false>
+template<typename GV>
 class CubeSurfaceExtractor
   : public Codim1Extractor<GV>
 {
@@ -188,8 +188,8 @@ public:
 
 
 
-template<typename GV, bool rect>
-void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
+template<typename GV>
+void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 {
   // free everything there is in this object
   this->clear();
@@ -347,8 +347,8 @@ void CubeSurfaceExtractor<GV, rect>::update(const FaceDescriptor<GV>& descr)
 
 
 /** \brief Get World geometry of the extracted face */
-template<typename GV, bool rect>
-typename CubeSurfaceExtractor<GV, rect>::Geometry CubeSurfaceExtractor<GV,rect>::geometry(unsigned int index) const
+template<typename GV>
+typename CubeSurfaceExtractor<GV>::Geometry CubeSurfaceExtractor<GV>::geometry(unsigned int index) const
 {
   std::vector<Coords> corners(simplex_corners);
   for (int i = 0; i < simplex_corners; ++i)
@@ -359,8 +359,8 @@ typename CubeSurfaceExtractor<GV, rect>::Geometry CubeSurfaceExtractor<GV,rect>:
 
 
 /** \brief Get Geometry of the extracted face in element coordinates */
-template<typename GV, bool rect>
-typename CubeSurfaceExtractor<GV, rect>::LocalGeometry CubeSurfaceExtractor<GV,rect>::geometryLocal(unsigned int index) const
+template<typename GV>
+typename CubeSurfaceExtractor<GV>::LocalGeometry CubeSurfaceExtractor<GV>::geometryLocal(unsigned int index) const
 {
   std::vector<Coords> corners(simplex_corners);
 
@@ -384,9 +384,9 @@ typename CubeSurfaceExtractor<GV, rect>::LocalGeometry CubeSurfaceExtractor<GV,r
 }
 
 
-template<typename GV, bool rect>
+template<typename GV>
 template<typename CoordContainer>
-void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords) const
+void CubeSurfaceExtractor<GV>::globalCoords(unsigned int index, const CoordContainer &bcoords, CoordContainer &wcoords) const
 {
   Dune::array<Coords, simplex_corners> corners;
   for (int i = 0; i < simplex_corners; ++i)
@@ -397,46 +397,38 @@ void CubeSurfaceExtractor<GV, rect>::globalCoords(unsigned int index, const Coor
 }
 
 
-template<typename GV, bool rect>
-void CubeSurfaceExtractor<GV, rect>::localCoords(unsigned int index,
-                                                 const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &subEntityCoords,
-                                                 Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &elementCoords) const
+template<typename GV>
+void CubeSurfaceExtractor<GV>::localCoords(unsigned int index,
+                                           const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &subEntityCoords,
+                                           Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &elementCoords) const
 {
-  if (rect)
+  Dune::array<Coords, simplex_corners> corners;
+  unsigned int num_in_self = this->indexInInside(index);
+  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
+  // computing the locals is straight forward for flat rectangles,
+  // we only need the triangle's corners in element coordinate
+  if (this->_faces[index].category == 1)
   {
-    Dune::array<Coords, simplex_corners> corners;
-    unsigned int num_in_self = this->indexInInside(index);
-    Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
-    // computing the locals is straight forward for flat rectangles,
-    // we only need the triangle's corners in element coordinate
-    if (this->_faces[index].category == 1)
-    {
-      // the triangle's corners are (0 1 2) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
-    }
-    else
-    {
-      // the triangle's corners are (3 2 1) using face indices
-      for (int i = 0; i < simplex_corners; ++i)
-        corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
-    }
-    for (size_t i = 0; i < elementCoords.size(); ++i)
-      elementCoords[i] = interpolateLinear<double,dim,simplex_corners>(corners, subEntityCoords[i]);
+    // the triangle's corners are (0 1 2) using face indices
+    for (int i = 0; i < simplex_corners; ++i)
+      corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
   }
   else
   {
-    Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> wcoords;
-    this->localAndGlobalCoords(index, subEntityCoords, elementCoords, wcoords);
+    // the triangle's corners are (3 2 1) using face indices
+    for (int i = 0; i < simplex_corners; ++i)
+      corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
   }
+  for (size_t i = 0; i < elementCoords.size(); ++i)
+    elementCoords[i] = interpolateLinear<double,dim,simplex_corners>(corners, subEntityCoords[i]);
 }
 
 
-template<typename GV, bool rect>
-void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index,
-                                                          const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &subEntityCoords,
-                                                          Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
-                                                          Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords) const
+template<typename GV>
+void CubeSurfaceExtractor<GV>::localAndGlobalCoords(unsigned int index,
+                                                    const Dune::array<Dune::FieldVector<ctype,dim-1>, dimworld> &subEntityCoords,
+                                                    Dune::array<Dune::FieldVector<ctype,dim>, dimworld> &ecoords,
+                                                    Dune::array<Dune::FieldVector<ctype,dimworld>, dimworld> &wcoords) const
 {
   Geometry worldGeometry = geometry(index);
   LocalGeometry localGeometry = geometryLocal(index);
@@ -448,14 +440,9 @@ void CubeSurfaceExtractor<GV, rect>::localAndGlobalCoords(unsigned int index,
   this->globalCoords(index, barycentricCoords, wcoords);
 
   // for rectangles avoid using world coordinates
-  if (rect)
-    this->localCoords(index, subEntityCoords, ecoords);
-  else
-  {
-    ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
-    for (size_t i = 0; i < ecoords.size(); ++i)
-      ecoords[i] = eptr->geometry().local(wcoords[i]);
-  }
+  ElementPtr eptr = this->_elmtInfo.find(this->_faces[index].parent)->second->p;
+  for (size_t i = 0; i < ecoords.size(); ++i)
+    ecoords[i] = eptr->geometry().local(wcoords[i]);
 
   for (size_t i = 0; i < wcoords.size(); ++i) {
     assert( (ecoords[i] - localGeometry.global(subEntityCoords[i])).two_norm() < 1e-6);

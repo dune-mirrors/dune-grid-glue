@@ -125,14 +125,7 @@ template<typename GSET>
 template<typename LSET>
 struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::cube>
 {
-  typedef CubeSurfaceExtractor<typename LSET::GridView, false>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::rectangular>
-{
-  typedef CubeSurfaceExtractor<typename LSET::GridView, true>  ExtractorType;
+  typedef CubeSurfaceExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 template<typename GSET>
@@ -160,13 +153,6 @@ struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::simplex>
 template<typename GSET>
 template<typename LSET>
 struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::cube>
-{
-  typedef CubeMeshExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::rectangular>
 {
   typedef CubeMeshExtractor<typename LSET::GridView>  ExtractorType;
 };
