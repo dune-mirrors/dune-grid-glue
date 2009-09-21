@@ -313,7 +313,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     // coordinates within the subentity that contains the remote intersection
     Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
 
-    for (int i = 0; i < coorddim; ++i)
+    for (int i = 0; i < nSimplexCorners; ++i)
       corners_subEntity_local[i] = glue->_merg->domainParentLocal(mergeindex, i);
 
     // a face number is only important if dealing with surfaces, not meshes
@@ -353,7 +353,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     // coordinates within the subentity that contains the remote intersection
     Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
 
-    for (int i = 0; i < coorddim; ++i)
+    for (int i = 0; i < nSimplexCorners; ++i)
       corners_subEntity_local[i] = glue->_merg->targetParentLocal(mergeindex, i);
 
     // Coordinates of the remote intersection corners wrt the element coordinate system
