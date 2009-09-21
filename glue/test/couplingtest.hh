@@ -11,8 +11,10 @@
 #include <dune/glue/merging/psurfacemerge.hh>
 #include <dune/glue/adapter/gridglue.hh>
 
-template <class IntersectionIt>
-void testIntersection(const IntersectionIt & rIIt)
+template <class IntersectionIt, int domdim, int tardim, class ctype>
+void testIntersection(const IntersectionIt & rIIt,
+                      CoordinateTransformation<domdim, IntersectionIt::coorddim, ctype> & domTrafo,
+                      CoordinateTransformation<tardim, IntersectionIt::coorddim, ctype> & tarTrafo)
 {
   // Dimension of the intersection
   const int dim = IntersectionIt::mydim;
@@ -45,18 +47,65 @@ void testIntersection(const IntersectionIt & rIIt)
     assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
 
     // Here we assume that the two interface match geometrically:
-    assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
+    assert( (domTrafo(globalDomainPos)-tarTrafo(globalTargetPos)).two_norm() < 1e-6 );
 
   }
 }
 
-template <class GlueType>
-void testCoupling(const GlueType& glue)
+
+template<int dim, int dimw, typename ctype>
+class NoTransformation : public CoordinateTransformation<dim, dimw, ctype>
 {
+public:
+  static
+  void assignIfNull(CoordinateTransformation<dim, dim, ctype>* & ptr)
+  {
+    assert(ptr != 0);
+  }
+
+  /** \brief Map a point to a new position */
+  // this works only for dim == dimw
+  virtual Dune::FieldVector<ctype, dim> operator()(const Dune::FieldVector<ctype, dimw>& c) const
+  {
+    assert(false);
+  }
+};
+
+template<int dim, typename ctype>
+class NoTransformation<dim, dim, ctype> : public CoordinateTransformation<dim, dim, ctype>
+{
+public:
+  static
+  void assignIfNull(CoordinateTransformation<dim, dim, ctype>* & ptr)
+  {
+    if (ptr == 0)
+      ptr = new NoTransformation<dim, dim, ctype>;
+  }
+
+  /** \brief Map a point to a new position */
+  // this works only for dim == dimw
+  virtual Dune::FieldVector<ctype, dim> operator()(const Dune::FieldVector<ctype, dim>& c) const
+  {
+    return c;
+  }
+};
+
+template <class GlueType>
+void testCoupling(const GlueType& glue,
+                  CoordinateTransformation<GlueType::domdim, GlueType::dimworld, typename GlueType::ctype> * domTrafo = 0,
+                  CoordinateTransformation<GlueType::tardim, GlueType::dimworld, typename GlueType::ctype> * tarTrafo = 0 )
+{
+  typedef typename GlueType::ctype ctype;
   //dune_static_assert(GlueType::domdim == GlueType::tardim, "For this test domain and target must have the same dimension");
 
   int dim = GlueType::domdim;
   dim = GlueType::tardim;
+
+  // ///////////////////////////////////////
+  //   set Identity trafo if necessary
+  // ///////////////////////////////////////
+  NoTransformation<GlueType::domdim, GlueType::dimworld, ctype>::assignIfNull(domTrafo);
+  NoTransformation<GlueType::tardim, GlueType::dimworld, ctype>::assignIfNull(tarTrafo);
 
   // ///////////////////////////////////////
   //   MergedGrid centric
@@ -65,7 +114,7 @@ void testCoupling(const GlueType& glue)
   typename GlueType::RemoteIntersectionIterator rIIt    = glue.iremotebegin();
   typename GlueType::RemoteIntersectionIterator rIEndIt = glue.iremoteend();
   for (; rIIt!=rIEndIt; ++rIIt)
-    testIntersection(rIIt);
+    testIntersection(rIIt, *domTrafo, *tarTrafo);
 
   // ///////////////////////////////////////
   //   Domain Entity centric
@@ -86,7 +135,7 @@ void testCoupling(const GlueType& glue)
       // as we only have a single grid, even when testing the
       // parallel extractor, this assertion should be true
       assert (rIIt->entityDomain() == dit);
-      testIntersection(rIIt);
+      testIntersection(rIIt, *domTrafo, *tarTrafo);
       icount++;
     }
 
@@ -98,7 +147,7 @@ void testCoupling(const GlueType& glue)
       typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityDomain() == dit);
-        testIntersection(rIIt);
+        testIntersection(rIIt, *domTrafo, *tarTrafo);
         icount2++;
       }
     }
@@ -123,7 +172,7 @@ void testCoupling(const GlueType& glue)
     typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
     for (; rIIt!=rIEndIt; ++rIIt) {
       assert (rIIt->entityTarget() == tit);
-      testIntersection(rIIt);
+      testIntersection(rIIt, *domTrafo, *tarTrafo);
       icount++;
     }
 
@@ -135,7 +184,7 @@ void testCoupling(const GlueType& glue)
       typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityTarget() == tit);
-        testIntersection(rIIt);
+        testIntersection(rIIt, *domTrafo, *tarTrafo);
         icount2++;
       }
     }

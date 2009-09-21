@@ -233,7 +233,7 @@ public:
     return 1.0;
   }
 
-  const CoordinateTransformation<dim, dim, double> * trafo()
+  CoordinateTransformation<dim, dim, double> * trafo()
   {
     return 0;
   }
@@ -256,6 +256,11 @@ public:
     FieldVector<bool,dim> periodic(false);
     int overlap = 1;
 
+    if (tar)
+    {
+      elements = 4;
+    }
+
     GridType * gridp = new GridType(size, elements, periodic, overlap);
     return *gridp;
   }
@@ -267,7 +272,7 @@ public:
     return 1.0;
   }
 
-  const CoordinateTransformation<dim, dim, double> * trafo()
+  CoordinateTransformation<dim, dim, double> * trafo()
   {
     double shift = 0.0;
     if (tar)
@@ -334,7 +339,7 @@ void testParallelCubeGrids()
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue);
+  testCoupling(glue, domGen.trafo(), tarGen.trafo());
 
 }
 
@@ -352,8 +357,8 @@ int main(int argc, char *argv[]) try
   testNonMatchingCubeGrids<2,MeshClassification::cube>();
   testParallelCubeGrids<2,Seq,Seq,MeshClassification::cube>();
   testParallelCubeGrids<2,Par,Seq,MeshClassification::cube>();
-  //testParallelCubeGrids<2,Seq,Par,MeshClassification::cube>();
-  //testParallelCubeGrids<2,Par,Par,MeshClassification::cube>();
+  testParallelCubeGrids<2,Seq,Par,MeshClassification::cube>();
+  testParallelCubeGrids<2,Par,Par,MeshClassification::cube>();
 
   // Test two unit squares, extract boundaries using the SimplexSurfaceExtractor
   // Should work, because the boundary consists of 1d simplices
@@ -361,12 +366,16 @@ int main(int argc, char *argv[]) try
   testNonMatchingCubeGrids<2,MeshClassification::simplex>();
   testParallelCubeGrids<2,Seq,Seq,MeshClassification::simplex>();
   testParallelCubeGrids<2,Par,Seq,MeshClassification::simplex>();
+  testParallelCubeGrids<2,Seq,Par,MeshClassification::simplex>();
+  testParallelCubeGrids<2,Par,Par,MeshClassification::simplex>();
 
   // Test two unit squares, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<2,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<2,MeshClassification::hybrid>();
   testParallelCubeGrids<2,Seq,Seq,MeshClassification::hybrid>();
   testParallelCubeGrids<2,Par,Seq,MeshClassification::hybrid>();
+  testParallelCubeGrids<2,Seq,Par,MeshClassification::hybrid>();
+  testParallelCubeGrids<2,Par,Par,MeshClassification::hybrid>();
 
   // 3d Tests
   typedef MeshGenerator<3,false>  Seq3d;
@@ -375,12 +384,12 @@ int main(int argc, char *argv[]) try
   // Test two unit cubes, extract boundaries using the CubeSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::cube>();
   testNonMatchingCubeGrids<3,MeshClassification::cube>();
-  // testParallelCubeGrids<3,Seq3d,Seq3d,MeshClassification::cube>();
+  testParallelCubeGrids<3,Seq3d,Seq3d,MeshClassification::cube>();
 
   // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
-  // testParallelCubeGrids<3,Seq3d,Seq3d,MeshClassification::hybrid>();
+  testParallelCubeGrids<3,Seq3d,Seq3d,MeshClassification::hybrid>();
 
 }
 catch (Exception e) {
