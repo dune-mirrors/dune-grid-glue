@@ -55,7 +55,8 @@ void testCoupling(const GlueType& glue)
 {
   //dune_static_assert(GlueType::domdim == GlueType::tardim, "For this test domain and target must have the same dimension");
 
-  const int dim = GlueType::domdim;
+  int dim = GlueType::domdim;
+  dim = GlueType::tardim;
 
   // ///////////////////////////////////////
   //   MergedGrid centric
