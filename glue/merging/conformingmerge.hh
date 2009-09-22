@@ -272,7 +272,7 @@ void ConformingMerge<dim, dimworld, T>::build(
   //   \todo This is only the naive quadratic algorithm
   // /////////////////////////////////////////////////////////////////////
 
-  std::vector<Dune::array<int, 2> > pairs;
+  std::vector<int> pairs(domainCoords_.size(), -1);
 
   // Loop over first boundary
   for (int i=0; i<domainCoords_.size(); i++) {
@@ -282,10 +282,7 @@ void ConformingMerge<dim, dimworld, T>::build(
 
       if ((domainCoords_[i]-targetCoords_[j]).two_norm() < tolerance_) {
 
-        Dune::array<int, 2> newPair;
-        newPair[0] = i;
-        newPair[1] = j;
-        pairs.push_back(newPair);
+        pairs[i] = j;
         break;
 
       }
@@ -294,13 +291,13 @@ void ConformingMerge<dim, dimworld, T>::build(
 
   }
 
-  assert(pairs.size()==domainCoords_.size());
+  std::cout << "ConformingMerge: " << pairs.size() - std::count(pairs.begin(), pairs.end(), -1) << " node pairs found" << std::endl;
 
   // //////////////////////////////////////////////////////////////////////
   //   Make the actual intersections
   // //////////////////////////////////////////////////////////////////////
 
-  intersections_.resize(_domi.size());
+  intersections_.resize(0);
 
   for (size_t i=0; i<_domi.size(); i++) {
 
@@ -311,7 +308,12 @@ void ConformingMerge<dim, dimworld, T>::build(
     // Assemble a set of the vertices that the target simplex has to consist of
     std::set<unsigned int> domainSimplexSorted;
     for (int j=0; j<_domi[i].size(); j++)
-      domainSimplexSorted.insert(pairs[_domi[i][j]][1]);
+      if (pairs[_domi[i][j]] != -1)
+        domainSimplexSorted.insert(pairs[_domi[i][j]]);
+
+    // Do nothing if not all of the vertices of this simplex could be matched on the other side
+    if (domainSimplexSorted.size() != _domi[i].size())
+      continue;
 
     // Find the index of this target simplex
     int targetSimplexIdx = -1;
@@ -326,36 +328,39 @@ void ConformingMerge<dim, dimworld, T>::build(
 
     }
 
-    assert(targetSimplexIdx != -1);
+    // We have found a conforming intersection.  Let's store it!
+    if (targetSimplexIdx != -1) {
 
-    intersections_[i].domainEntity_ = i;
-    intersections_[i].targetEntity_ = targetSimplexIdx;
+      intersections_.push_back(ConformingRemoteIntersection());
+      intersections_.back().domainEntity_ = i;
+      intersections_.back().targetEntity_ = targetSimplexIdx;
 
-    const Dune::GenericReferenceElement<T,dim>& refElement
-      = Dune::GenericReferenceElements<T,dim>::general(Dune::GeometryType(Dune::GeometryType::simplex,dim));
+      const Dune::GenericReferenceElement<T,dim>& refElement
+        = Dune::GenericReferenceElements<T,dim>::general(Dune::GeometryType(Dune::GeometryType::simplex,dim));
 
-    // Loop over the vertices of the intersection
-    for (int j=0; j<refElement.size(dim); j++) {
+      // Loop over the vertices of the intersection
+      for (int j=0; j<refElement.size(dim); j++) {
 
-      // local coordinates in the domain
-      // \todo This is so trivial we may not even want to save it...
-      intersections_[i].domainLocal_[j] = refElement.position(j,dim);
+        // local coordinates in the domain
+        // \todo This is so trivial we may not even want to save it...
+        intersections_.back().domainLocal_[j] = refElement.position(j,dim);
 
-      // global vertex number on the target side
-      int globalDomainNumber = _domi[i][j];
-      int globalTargetNumber = pairs[globalDomainNumber][1];
+        // global vertex number on the target side
+        int globalDomainNumber = _domi[i][j];
+        int globalTargetNumber = pairs[globalDomainNumber];
 
-      // local number in the target simplex
-      assert(std::find(_tari[targetSimplexIdx].begin(),
-                       _tari[targetSimplexIdx].end(), globalTargetNumber) != _tari[targetSimplexIdx].end());
-      int localTargetNumber = std::find(_tari[targetSimplexIdx].begin(),
-                                        _tari[targetSimplexIdx].end(), globalTargetNumber)
-                              - _tari[targetSimplexIdx].begin();
+        // local number in the target simplex
+        assert(std::find(_tari[targetSimplexIdx].begin(),
+                         _tari[targetSimplexIdx].end(), globalTargetNumber) != _tari[targetSimplexIdx].end());
+        int localTargetNumber = std::find(_tari[targetSimplexIdx].begin(),
+                                          _tari[targetSimplexIdx].end(), globalTargetNumber)
+                                - _tari[targetSimplexIdx].begin();
 
-      intersections_[i].targetLocal_[localTargetNumber] = refElement.position(j,dim);
+        intersections_.back().targetLocal_[localTargetNumber] = refElement.position(j,dim);
+
+      }
 
     }
-
 
   }
 
