@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) try
   //   but the world dimension is the same for both of them.
   // /////////////////////////////////////////////////////////////
 
-  Test a unit square versus a grid one dimension lower
+  // Test a unit square versus a grid one dimension lower
   test1d2dCouplingMatchingDimworld<2,MeshClassification::cube>();
   test1d2dCouplingMatchingDimworld<2,MeshClassification::simplex>();
 
