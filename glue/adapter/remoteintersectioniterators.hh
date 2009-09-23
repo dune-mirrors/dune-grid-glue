@@ -52,11 +52,6 @@ namespace RemoteIntersectionInterface
 
     typedef RemoteIntersection<RemoteIntersectionImpl>  ThisRemoteIntersection;
 
-    enum { coorddim = RemoteIntersectionImpl::coorddim };
-
-    enum { mydim = RemoteIntersectionImpl::mydim };
-
-
     typedef typename RemoteIntersectionImpl::DomainGridView DomainGridView;
 
     typedef typename DomainGridView::Grid DomainGridType;
@@ -73,15 +68,6 @@ namespace RemoteIntersectionInterface
     typedef typename TargetGridView::Traits::template Codim<0>::Entity TargetEntity;
 
     typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEntityPointer;
-
-
-    typedef typename RemoteIntersectionImpl::DomainLocalGeometry DomainLocalGeometry;
-
-    typedef typename RemoteIntersectionImpl::DomainGeometry DomainGeometry;
-
-    typedef typename RemoteIntersectionImpl::TargetLocalGeometry TargetLocalGeometry;
-
-    typedef typename RemoteIntersectionImpl::TargetGeometry TargetGeometry;
 
 
     typedef typename RemoteIntersectionImpl::ctype ctype;
