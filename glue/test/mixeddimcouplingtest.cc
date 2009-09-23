@@ -264,7 +264,7 @@ void test1d2dCoupling()
 }
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification>
+template <int dim, MeshClassification::MeshType ExtractorClassification, bool par=false>
 void test2d1dCoupling()
 {
 
@@ -295,8 +295,8 @@ void test2d1dCoupling()
   typedef typename GridType1d::LevelGridView DomGridView;
   typedef typename GridType2d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::cube> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::cube, par> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification, par> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) try
   //   but the world dimension is the same for both of them.
   // /////////////////////////////////////////////////////////////
 
-  // Test a unit square versus a grid one dimension lower
+  Test a unit square versus a grid one dimension lower
   test1d2dCouplingMatchingDimworld<2,MeshClassification::cube>();
   test1d2dCouplingMatchingDimworld<2,MeshClassification::simplex>();
 
@@ -355,11 +355,20 @@ int main(int argc, char *argv[]) try
   test1d2dCoupling<2,MeshClassification::simplex>();
 
   // Test a unit square versus a grid one dimension lower
+  std::cout << "==== 2d 1d cube ============================================\n";
   test2d1dCoupling<2,MeshClassification::cube>();
+  test2d1dCoupling<2,MeshClassification::cube, true>();
+  std::cout << "============================================================\n";
+  std::cout << "==== 2d 1d simplex =========================================\n";
   test2d1dCoupling<2,MeshClassification::simplex>();
+  test2d1dCoupling<2,MeshClassification::simplex, true>();
+  std::cout << "============================================================\n";
 
   // Test a unit cube versus a grid one dimension lower
+  std::cout << "==== 3d 2d cube ============================================\n";
   test2d1dCoupling<3,MeshClassification::cube>();
+  test2d1dCoupling<3,MeshClassification::cube, true>();
+  std::cout << "============================================================\n";
 
 }
 catch (Exception e) {
