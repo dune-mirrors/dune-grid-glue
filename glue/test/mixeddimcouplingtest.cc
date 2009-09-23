@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/nullptr.hh>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/common/quadraturerules.hh>
 
@@ -54,6 +55,22 @@ public:
   virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr) const
   {
     return true;
+  }
+};
+
+
+
+/** \brief trafo from dim to dim+1 */
+template<int dim, int dimw, class ctype>
+class MixedDimTrafo : public CoordinateTransformation<dim,dimw,ctype>
+{
+public:
+  virtual Dune::FieldVector<ctype, dimw> operator()(const Dune::FieldVector<ctype, dim>& c) const
+  {
+    Dune::FieldVector<ctype, dimw> x(0);
+    for (int i=0; i<dim ; i++)
+      x[i] = c[i];
+    return x;
   }
 };
 
@@ -230,6 +247,9 @@ void test1d2dCoupling()
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
 
+  MixedDimTrafo<dim-1,dim,double> trafo;   // transform dim-1 to dim
+  glue.builder().setTargetTransformation(&trafo);
+
   glue.builder().build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
@@ -239,7 +259,7 @@ void test1d2dCoupling()
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue);
+  testCoupling(glue, (CoordinateTransformation<dim,dim,double>*)nullptr, &trafo);
 
 }
 
@@ -291,6 +311,9 @@ void test2d1dCoupling()
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
 
+  MixedDimTrafo<dim-1,dim,double> trafo;   // transform dim-1 to dim
+  glue.builder().setDomainTransformation(&trafo);
+
   glue.builder().build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
@@ -300,12 +323,9 @@ void test2d1dCoupling()
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue);
+  testCoupling(glue, &trafo, (CoordinateTransformation<dim,dim,double>*)nullptr);
 
 }
-
-
-
 
 int main(int argc, char *argv[]) try
 {
@@ -330,7 +350,6 @@ int main(int argc, char *argv[]) try
   //   and the world dimension is different as well
   // /////////////////////////////////////////////////////////////
 
-#if 0
   // Test a unit square versus a grid one dimension lower
   test1d2dCoupling<2,MeshClassification::cube>();
   test1d2dCoupling<2,MeshClassification::simplex>();
@@ -341,7 +360,6 @@ int main(int argc, char *argv[]) try
 
   // Test a unit cube versus a grid one dimension lower
   test2d1dCoupling<3,MeshClassification::cube>();
-#endif
 
 }
 catch (Exception e) {
