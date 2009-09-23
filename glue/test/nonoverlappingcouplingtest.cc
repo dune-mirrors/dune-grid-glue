@@ -70,9 +70,9 @@ class ShiftTrafo : public CoordinateTransformation<dim,dim,double>
 public:
   ShiftTrafo(double x) : shift(x) {};
 
-  virtual Dune::FieldVector<double, 2> operator()(const Dune::FieldVector<double, 2>& c) const
+  virtual Dune::FieldVector<double, dim> operator()(const Dune::FieldVector<double, dim>& c) const
   {
-    Dune::FieldVector<double, 2> x(c);
+    Dune::FieldVector<double, dim> x(c);
     x[0] += shift;
     return x;
   }
@@ -353,43 +353,59 @@ int main(int argc, char *argv[]) try
   typedef MeshGenerator<2,true>   Par;
 
   // Test two unit squares, extract boundaries using the CubeSurrfaceExtractor
+  std::cout << "==== 2D cube ===============================================\n";
   testMatchingCubeGrids<2,MeshClassification::cube>();
   testNonMatchingCubeGrids<2,MeshClassification::cube>();
   testParallelCubeGrids<2,Seq,Seq,MeshClassification::cube>();
   testParallelCubeGrids<2,Par,Seq,MeshClassification::cube>();
   testParallelCubeGrids<2,Seq,Par,MeshClassification::cube>();
   testParallelCubeGrids<2,Par,Par,MeshClassification::cube>();
+  std::cout << "============================================================\n";
 
   // Test two unit squares, extract boundaries using the SimplexSurfaceExtractor
   // Should work, because the boundary consists of 1d simplices
+  std::cout << "==== 2D simplex ============================================\n";
   testMatchingCubeGrids<2,MeshClassification::simplex>();
   testNonMatchingCubeGrids<2,MeshClassification::simplex>();
   testParallelCubeGrids<2,Seq,Seq,MeshClassification::simplex>();
   testParallelCubeGrids<2,Par,Seq,MeshClassification::simplex>();
   testParallelCubeGrids<2,Seq,Par,MeshClassification::simplex>();
   testParallelCubeGrids<2,Par,Par,MeshClassification::simplex>();
+  std::cout << "============================================================\n";
 
   // Test two unit squares, extract boundaries using the GeneralSurfaceExtractor
+  std::cout << "==== 2D hybrid =============================================\n";
   testMatchingCubeGrids<2,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<2,MeshClassification::hybrid>();
   testParallelCubeGrids<2,Seq,Seq,MeshClassification::hybrid>();
   testParallelCubeGrids<2,Par,Seq,MeshClassification::hybrid>();
   testParallelCubeGrids<2,Seq,Par,MeshClassification::hybrid>();
   testParallelCubeGrids<2,Par,Par,MeshClassification::hybrid>();
+  std::cout << "============================================================\n";
 
   // 3d Tests
   typedef MeshGenerator<3,false>  Seq3d;
   typedef MeshGenerator<3,true>   Par3d;
 
   // Test two unit cubes, extract boundaries using the CubeSurfaceExtractor
+  std::cout << "==== 3D cube ===============================================\n";
   testMatchingCubeGrids<3,MeshClassification::cube>();
   testNonMatchingCubeGrids<3,MeshClassification::cube>();
   testParallelCubeGrids<3,Seq3d,Seq3d,MeshClassification::cube>();
+  testParallelCubeGrids<3,Par3d,Seq3d,MeshClassification::cube>();
+  testParallelCubeGrids<3,Seq3d,Par3d,MeshClassification::cube>();
+  testParallelCubeGrids<3,Par3d,Par3d,MeshClassification::cube>();
+  std::cout << "============================================================\n";
 
   // Test two unit cubes, extract boundaries using the GeneralSurfaceExtractor
+  std::cout << "==== 3D hybrid =============================================\n";
   testMatchingCubeGrids<3,MeshClassification::hybrid>();
   testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
   testParallelCubeGrids<3,Seq3d,Seq3d,MeshClassification::hybrid>();
+  testParallelCubeGrids<3,Par3d,Seq3d,MeshClassification::hybrid>();
+  testParallelCubeGrids<3,Seq3d,Par3d,MeshClassification::hybrid>();
+  testParallelCubeGrids<3,Par3d,Par3d,MeshClassification::hybrid>();
+  std::cout << "============================================================\n";
 
 }
 catch (Exception e) {
