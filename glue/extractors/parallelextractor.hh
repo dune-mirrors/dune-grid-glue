@@ -95,7 +95,6 @@ public:
   typedef typename GV::Grid Grid;
   typedef typename GV::Grid::ctype ctype;
   typedef typename LX::SimplexTopology SimplexTopology;
-  typedef typename LX::FaceInfo FaceInfo;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
