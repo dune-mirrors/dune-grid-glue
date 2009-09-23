@@ -217,13 +217,6 @@ public:
   SimplexGeometry()
   {}
 
-
-  //		SimplexGeometry& operator=(const SimplexGeometry& geom)
-  //		{
-  //			Base::operator=(Base(geom));
-  //			return *this;
-  //		}
-
   /**
    * @brief Setup method with a geometry type and a set of corners
    * @param type the geometry type of this subface, i.e. most likely a simplex in 1D or 2D
