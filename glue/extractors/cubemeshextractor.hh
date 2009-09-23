@@ -68,6 +68,7 @@ public:
 
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimworld>                                Coords;
+  typedef Dune::FieldVector<ctype, dim>                                     GridCoords;
   typedef Dune::array<unsigned int, simplex_corners>                        SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
@@ -457,7 +458,7 @@ typename CubeMeshExtractor<GV>::Geometry CubeMeshExtractor<GV>::geometry(unsigne
 template<typename GV>
 typename CubeMeshExtractor<GV>::LocalGeometry CubeMeshExtractor<GV>::geometryLocal(unsigned int index) const
 {
-  std::vector<Coords> corners(simplex_corners);
+  std::vector<GridCoords> corners(simplex_corners);
 
   const Dune::GenericReferenceElement<double,dim>& refElement
     = Dune::GenericReferenceElements<double, dim>::general(Dune::GeometryType(Dune::GeometryType::simplex,dim));
