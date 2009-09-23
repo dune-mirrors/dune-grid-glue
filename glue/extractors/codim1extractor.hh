@@ -43,7 +43,6 @@
 template<typename GV>
 class Codim1Extractor
 {
-  /** \todo This should rather be protected */
 public:
 
   enum {dimworld = GV::dimensionworld};
@@ -80,7 +79,7 @@ public:
   typedef typename GV::IndexSet IndexSet;
   typedef typename IndexSet::IndexType IndexType;
 
-
+protected:
   /************************** PRIVATE SUBCLASSES **********************/
 
   /**
