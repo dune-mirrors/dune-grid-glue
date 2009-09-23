@@ -52,6 +52,11 @@ namespace RemoteIntersectionInterface
 
     typedef RemoteIntersection<RemoteIntersectionImpl>  ThisRemoteIntersection;
 
+    enum { coorddim = RemoteIntersectionImpl::coorddim };
+
+    enum { mydim = RemoteIntersectionImpl::mydim };
+
+
     typedef typename RemoteIntersectionImpl::DomainGridView DomainGridView;
 
     typedef typename DomainGridView::Grid DomainGridType;
