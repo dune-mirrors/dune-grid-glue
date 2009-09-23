@@ -101,7 +101,6 @@ void testCoupling(const GlueType& glue,
                   CoordinateTransformation<GlueType::TargetExtractor::dimworld, GlueType::dimworld, typename GlueType::ctype> * tarTrafo = 0 )
 {
   typedef typename GlueType::ctype ctype;
-  //dune_static_assert(GlueType::domdim == GlueType::tardim, "For this test domain and target must have the same dimension");
 
   int dim = GlueType::domdim;
   dim = GlueType::tardim;
