@@ -109,6 +109,7 @@ public:
   typedef typename IndexSet::IndexType IndexType;
 
   typedef typename GV::Grid::GlobalIdSet::IdType GlobalId;
+  typedef std::pair<GlobalId, size_t>                              GlobalFaceId;
 
   typedef typename LX::Geometry Geometry;
   typedef typename LX::LocalGeometry LocalGeometry;
@@ -139,7 +140,7 @@ public:
   struct GlobalFaceInfo
   {
     GlobalSimplexTopology v;
-    GlobalId i;
+    GlobalFaceId i;
     bool valid;
 
     GlobalFaceInfo() : valid(false) {}
@@ -161,12 +162,12 @@ private:
 
   const GV& _gv;
   LX _lx;
+  // map between local and global _face_ index
   std::vector<unsigned int>  _local2global;
   std::vector<unsigned int>  _global2local;
   // global data
   std::vector<Coords> _coords;
   std::vector<SimplexTopology> _faces;
-  std::vector<GlobalId> _faceId;
 
 public:
 
@@ -174,6 +175,7 @@ public:
   bool contains (unsigned int global, unsigned int & local) const
   {
     local = _global2local[global];
+    assert(local == global);
     return (local != (unsigned int)(-1));
   }
 
@@ -233,13 +235,17 @@ public:
       std::vector<SimplexTopology> faces;
       _lx.getFaces(faces);
       localFaceInfos.resize(faces.size());
+      size_t Xsub = 0;
       for (unsigned int i=0; i<faces.size(); i++)
       {
         for (int v=0; v<simplex_corners; v++)
         {
           localFaceInfos[i].v[v] = localCoordInfos[faces[i][v]].i;
         }
-        localFaceInfos[i].i = _gv.grid().globalIdSet().id(* _lx.element(i));
+        localFaceInfos[i].i.first = _gv.grid().globalIdSet().id(* _lx.element(i));
+        if (i>0 && localFaceInfos[i].i.first != localFaceInfos[i-1].i.first)
+          Xsub = 0;
+        localFaceInfos[i].i.second = Xsub++;
         localFaceInfos[i].valid = true;
       }
     }
@@ -268,9 +274,9 @@ public:
     globalFaceInfos.resize(globalFaceSize);
     commHelper.allgather(localFaceInfos, globalFaceInfos, globalFaceLocalSize);
 
-    // sort and shrink vectors
+    // sort and shrink coordinate vector
+    std::sort(globalCoordInfos.begin(), globalCoordInfos.end());
     {
-      std::sort(globalCoordInfos.begin(), globalCoordInfos.end());
       typename std::vector<GlobalCoordInfo>::iterator where =
         std::unique(globalCoordInfos.begin(), globalCoordInfos.end());
       --where;
@@ -281,6 +287,7 @@ public:
     assert(globalCoordInfos.front().valid == true);
     globalCoordSize = globalCoordInfos.size();
 
+    // sort and shrink face vector
     std::sort(globalFaceInfos.begin(), globalFaceInfos.end());
     {
       typename std::vector<GlobalFaceInfo>::iterator where =
@@ -297,7 +304,6 @@ public:
       std::map<GlobalId, unsigned int> coordIndex;       // quick access to vertex index, give an ID
       _coords.resize(globalCoordSize);
       _faces.resize(globalFaceSize);
-      _faceId.resize(globalFaceSize);
 
       for (size_t c=0; c<globalCoordSize; ++c)
       {
@@ -306,17 +312,14 @@ public:
       }
 
       for (size_t f=0; f<globalFaceSize; ++f)
-      {
         for (size_t c=0; c<simplex_corners; ++c)
           _faces[f][c] = coordIndex[globalFaceInfos[f].v[c]];
-        _faceId[f] = globalFaceInfos[f].i;
-      }
     }
 
     // setup local/global mappings
     {
       // create a temporary map for quick lookup
-      std::map<GlobalId, unsigned int> globalIndex;
+      std::map<GlobalFaceId, unsigned int> globalIndex;
       for (size_t f=0; f<globalFaceInfos.size(); ++f)
       {
         globalIndex[globalFaceInfos[f].i] = f;
@@ -330,7 +333,7 @@ public:
     }
     {
       // create a temporary map for quick lookup
-      std::map<GlobalId, unsigned int> localIndex;
+      std::map<GlobalFaceId, unsigned int> localIndex;
       for (size_t f=0; f<localFaceInfos.size(); ++f)
       {
         localIndex[localFaceInfos[f].i] = f;
@@ -340,7 +343,7 @@ public:
       _global2local.resize(globalFaceInfos.size());
       for (unsigned int i = 0; i<globalFaceInfos.size(); i++)
       {
-        typename std::map<GlobalId, unsigned int>::iterator where =
+        typename std::map<GlobalFaceId, unsigned int>::iterator where =
           localIndex.find(globalFaceInfos[i].i);
         if (where != localIndex.end())
           _global2local[i] = where->second;
@@ -348,6 +351,16 @@ public:
           _global2local[i] = (unsigned int)-1;
       }
     }
+
+    // DEBUG
+    std::cout << "DEBUG: l2g ";
+    for (size_t i=0; i<_local2global.size(); i++)
+      std::cout << i << "/" << _local2global[i] << " ";
+    std::cout << std::endl;
+    std::cout << "DEBUG: g2l ";
+    for (size_t i=0; i<_global2local.size(); i++)
+      std::cout << i << "/" << _global2local[i] << " ";
+    std::cout << std::endl;
   };
 
   /*  G E T T E R S  */
@@ -360,8 +373,7 @@ public:
   void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
   {
     coords.resize(_coords.size());
-    for (unsigned int i = 0; i < _coords.size(); ++i)
-      coords[i] = _coords[i];
+    std::copy(_coords.begin(), _coords.end(), coords.begin());
   }
 
 
@@ -448,22 +460,23 @@ public:
     return _lx.element(l_index);
   }
 
-
+#if 0
   /**
    * @brief gets the vertex for a given coordinate index
    * throws an exception if index not valid
    * @param index the index of the coordinate
    * @return a reference to the vertex' stored pointer
    */
-  const VertexPtr& vertex(unsigned int index) const
+  const VertexPtr& vertex(unsigned int vindex) const
   {
-    unsigned int l_index = 0;
-    bool have = contains(index, l_index);
-    assert(have);
-    return _lx.vertex(l_index);
+    assert(false);
+    // unsigned int l_index = 0;
+    // bool have = contains(index, l_index);
+    // assert(have);
+    // return _lx.vertex(l_index);
   }
 
-#if 0
+
   /**
    * @brief for several given barycentric coords in a simplex compute world coordinates
    *
