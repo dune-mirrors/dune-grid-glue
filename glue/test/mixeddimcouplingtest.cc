@@ -64,12 +64,15 @@ public:
 template<int dim, int dimw, class ctype>
 class MixedDimTrafo : public CoordinateTransformation<dim,dimw,ctype>
 {
+  double yOffset_;
 public:
+  MixedDimTrafo(double yOffset) : yOffset_(yOffset) {}
   virtual Dune::FieldVector<ctype, dimw> operator()(const Dune::FieldVector<ctype, dim>& c) const
   {
-    Dune::FieldVector<ctype, dimw> x(0);
-    for (int i=0; i<dim ; i++)
-      x[i] = c[i];
+    Dune::FieldVector<ctype, dimw> x(1.0);
+    x[0] = c[0];
+    for (int i=2; i<dim ; i++)
+      x[i] = c[i-1];
     return x;
   }
 };
@@ -200,7 +203,7 @@ void test2d1dCouplingMatchingDimworld()
 
 
 template <int dim, MeshClassification::MeshType ExtractorClassification>
-void test1d2dCoupling()
+void test1d2dCoupling(double slice=0.0)
 {
 
   // ///////////////////////////////////////
@@ -241,13 +244,13 @@ void test1d2dCoupling()
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
-  HorizontalFaceDescriptor<DomGridView> domdesc(0);
+  HorizontalFaceDescriptor<DomGridView> domdesc(slice);
   AllElementsDescriptor<TarGridView>  tardesc;
 
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
 
-  MixedDimTrafo<dim-1,dim,double> trafo;   // transform dim-1 to dim
+  MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
   glue.builder().setTargetTransformation(&trafo);
 
   glue.builder().build();
@@ -265,7 +268,7 @@ void test1d2dCoupling()
 
 
 template <int dim, MeshClassification::MeshType ExtractorClassification, bool par=false>
-void test2d1dCoupling()
+void test2d1dCoupling(double slice=0.0)
 {
 
   // ///////////////////////////////////////
@@ -299,19 +302,19 @@ void test2d1dCoupling()
   typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification, par> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
-
+  glue/test/
   PSurfaceMerge<dim-1,dim,double> merger;
   merger.setMaxDistance(0.01);
 
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), 0 /*&merger*/);
+  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
 
   AllElementsDescriptor<DomGridView>  domdesc;
-  HorizontalFaceDescriptor<TarGridView> tardesc(0);
+  HorizontalFaceDescriptor<TarGridView> tardesc(slice);
 
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
 
-  MixedDimTrafo<dim-1,dim,double> trafo;   // transform dim-1 to dim
+  MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
   glue.builder().setDomainTransformation(&trafo);
 
   glue.builder().build();
@@ -329,6 +332,7 @@ void test2d1dCoupling()
 
 int main(int argc, char *argv[]) try
 {
+#ifndef ONLY_TEST_WORKING_VERSION
   // /////////////////////////////////////////////////////////////
   //   First set of tests: the grid have different dimensions,
   //   but the world dimension is the same for both of them.
@@ -348,11 +352,12 @@ int main(int argc, char *argv[]) try
   // /////////////////////////////////////////////////////////////
   //   Second set of tests: the grid have different dimensions,
   //   and the world dimension is different as well
+  //   -- grids match at y==0.0
   // /////////////////////////////////////////////////////////////
 
   // Test a unit square versus a grid one dimension lower
-  test1d2dCoupling<2,MeshClassification::cube>();
-  test1d2dCoupling<2,MeshClassification::simplex>();
+  test1d2dCoupling<2,MeshClassification::cube>(1.0);
+  test1d2dCoupling<2,MeshClassification::simplex>(1.0);
 
   // Test a unit square versus a grid one dimension lower
   std::cout << "==== 2d 1d cube ============================================\n";
@@ -369,6 +374,41 @@ int main(int argc, char *argv[]) try
   test2d1dCoupling<3,MeshClassification::cube>();
   test2d1dCoupling<3,MeshClassification::cube, true>();
   std::cout << "============================================================\n";
+#endif
+  // /////////////////////////////////////////////////////////////
+  //   Third set of tests: the grid have different dimensions,
+  //   and the world dimension is different as well
+  //   -- grids match at y==1.0
+  // /////////////////////////////////////////////////////////////
+
+  // Test a unit square versus a grid one dimension lower
+  std::cout << "==== 1d 2d cube ============================================\n";
+  test1d2dCoupling<2,MeshClassification::cube>(1.0);
+  std::cout << "==== 1d 2d simplex =========================================\n";
+  test1d2dCoupling<2,MeshClassification::simplex>(1.0);
+  std::cout << "============================================================\n";
+
+  // Test a unit square versus a grid one dimension lower
+  std::cout << "==== 2d 1d cube ============================================\n";
+  test2d1dCoupling<2,MeshClassification::cube>(1.0);
+#ifndef ONLY_TEST_WORKING_VERSION
+  test2d1dCoupling<2,MeshClassification::cube, true>(1.0);
+#endif
+  std::cout << "============================================================\n";
+  std::cout << "==== 2d 1d simplex =========================================\n";
+  test2d1dCoupling<2,MeshClassification::simplex>(1.0);
+#ifndef ONLY_TEST_WORKING_VERSION
+  test2d1dCoupling<2,MeshClassification::simplex, true>(1.0);
+#endif
+  std::cout << "============================================================\n";
+
+  // Test a unit cube versus a grid one dimension lower
+#ifndef ONLY_TEST_WORKING_VERSION
+  std::cout << "==== 3d 2d cube ============================================\n";
+  test2d1dCoupling<3,MeshClassification::cube>(1.0);
+  test2d1dCoupling<3,MeshClassification::cube, true>(1.0);
+  std::cout << "============================================================\n";
+#endif
 
 }
 catch (Exception e) {
