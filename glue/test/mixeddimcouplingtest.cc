@@ -302,7 +302,7 @@ void test2d1dCoupling(double slice=0.0)
   typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification, par> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
-  glue/test/
+
   PSurfaceMerge<dim-1,dim,double> merger;
   merger.setMaxDistance(0.01);
 
