@@ -355,43 +355,6 @@ public:
     return true;
   }
 
-#if 0
-  /**
-   * @brief getter for the index of an entity of codim cc
-   * @return the index specified by the grid's index set
-   */
-  template<int cc>
-  IndexType index(const typename GV::Traits::template Codim<cc>::Entity& e) const
-  {
-    return indexSet().template index<cc>(e);
-  }
-
-
-  /**
-   * @brief gets index of coordinate in _coords associated with given vertex
-   * @return the index if possible, -1 else
-   */
-  int coordinateIndex(const Vertex& v) const
-  {
-    typename VertexInfoMap::const_iterator it = _vtxInfo.find(index<dim>(v));
-    return (it == _vtxInfo.end()) ? -1 : it->second->idx;
-  }
-
-
-  /**
-   * @brief gets for each vertex corner of given face (by index) the number of
-   * the vertex in parent element's ordering
-   * @param index the face's index
-   * @param corner the index of the corner
-   * @return -1 <=> index invalid or array not filled, else index
-   */
-  int numCornerInParent(unsigned int index, unsigned int corner) const
-  {
-    return (index >= this->_faces.size() || corner >= simplex_corners) ?
-           -1 : this->_faces[index].corners[corner].num;
-  }
-#endif
-
   /**
    * @brief gets the parent element for a given face index,
    * throws an exception if index not valid
