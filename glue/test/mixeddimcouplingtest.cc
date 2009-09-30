@@ -332,7 +332,6 @@ void test2d1dCoupling(double slice=0.0)
 
 int main(int argc, char *argv[]) try
 {
-#define ONLY_TEST_WORKING_VERSION
 #ifndef ONLY_TEST_WORKING_VERSION
   // /////////////////////////////////////////////////////////////
   //   First set of tests: the grid have different dimensions,

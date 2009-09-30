@@ -22,15 +22,13 @@
 #include <dune/common/geometrytype.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 
+
+
 template <int dim>
 int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
 {
   const Dune::GenericReferenceElement<double,dim>& refElement =
     Dune::GenericReferenceElements<double, dim>::general(type);
-
-  // edges
-  if (dim == 1)
-    return vertex;
 
   // Triangle
   if (type.isTriangle() && face==1)
