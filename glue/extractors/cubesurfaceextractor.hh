@@ -31,6 +31,7 @@
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
+#include "../misc/geometry.hh"
 #include "surfacedescriptor.hh"
 
 
@@ -185,7 +186,7 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
     // cell reference element
     Dune::GenericReferenceElement<ctype, dim> refElem =
-      Dune::GenericReferenceElement<ctype, dim> generic(elit->type());
+      Dune::GenericReferenceElements<ctype, dim>::general(elit->type());
 
     // iterate over all intersections of codim 1 and test if the
     // boundary intersections are to be added to the surface
@@ -199,20 +200,20 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           descr.contains(elit, face_index)) {
 
         // Make sure the face is a cube
-        if (! refElem.size(face_index,1,dim) != cube_corners)
-          DUNE_THROW(Dune::GridError, "found non-cube boundary entity: " << is->type());
+        if (refElem.size(face_index,1,dim) != cube_corners)
+          DUNE_THROW(Dune::GridError, "found non-cube boundary entity (" << refElem.size(face_index,1,dim) << " corners)");
 
         // now we only have to care about the 3D case, i.e. the quadrilateral
         // face has to be divided into two triangles
-        unsigned int vertex_indices[4];
-        unsigned int vertex_numbers[4];
+        unsigned int vertex_indices[4];         // index in global vector
+        unsigned int vertex_numbers[4];         // index in parent entity
 
         // get the vertex pointers for the quadrilateral's corner vertices
         // and try for each of them whether it is already inserted or not
         for (int i = 0; i < cube_corners; ++i)
         {
           // get the number of the vertex in the parent element
-          vertex_numbers[i] = orientedSubface<dim>(elit->type(), face_index, i);
+          vertex_numbers[i] = refElem.subEntity(face_index,1,i,dim);          //orientedSubface<dim>(elit->type(), face_index, i);
 
           // get the vertex pointer and the index from the index set
           VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
@@ -234,6 +235,35 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           {
             // only remember the vertex' index
             vertex_indices[i] = vimit->second->idx;
+          }
+        }
+
+        // check normal vector & flip face if necessary
+        {
+          static Dune::FieldVector<ctype, dim-1> c(0.5);
+          static Dune::array<Dune::FieldVector<ctype, dim>, dim-1> A;
+          for (int i=0; i<dim-1; i++)
+            A[i] = elit->geometry().corner(vertex_numbers[1<<i]) -
+                   // here we use some expert knowledge      ^^^^
+                   // the ref element and about psurface
+                   elit->geometry().corner(vertex_numbers[0]);
+          Dune::FieldVector<ctype, dim> Nis = is->outerNormal(c);
+          Dune::FieldVector<ctype, dim> Nface = computeNormal(A);
+          assert(Nis * Nface != 0.0);
+          if (Nis * Nface < 0.0)
+          {
+            // do the flip
+            for (int i = 0; i < cube_corners; i+=2)
+            {
+              // swap i and i+1
+              int x = vertex_indices[i];
+              vertex_indices[i] = vertex_indices[i+1];
+              vertex_indices[i+1] = x;
+
+              x = vertex_numbers[i];
+              vertex_numbers[i] = vertex_numbers[i+1];
+              vertex_numbers[i+1] = x;
+            }
           }
         }
 
