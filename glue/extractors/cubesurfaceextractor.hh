@@ -73,7 +73,7 @@ public:
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dimworld>                           Coords;
+  typedef Dune::FieldVector<ctype, dimworld>                       Coords;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
@@ -178,18 +178,22 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
     IndexType eindex = this->indexSet().template index<0>(*elit);
 
+    std::set<unsigned int> faces;
+
     // iterate over all intersections of codim 1 and test if the
     // boundary intersections are to be added to the surface
     for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
     {
+      unsigned int face_index = is->indexInInside();
+
       // only look at boundary faces
-      if (is->boundary() && descr.contains(elit, is->indexInInside())) {
+      if (is->boundary() &&
+          faces.find(face_index) == faces.end() &&
+          descr.contains(elit, face_index)) {
 
         // Make sure the face is a cube
         if (!is->type().isCube())
           DUNE_THROW(Dune::GridError, "found non-cube boundary entity: " << is->type());
-
-        unsigned int face_index = is->indexInInside();
 
         // now we only have to care about the 3D case, i.e. the quadrilateral
         // face has to be divided into two triangles
@@ -253,6 +257,9 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           temp_faces.back().corners[2].num = vertex_numbers[1];
         }
       }        // end if is contained
+
+      // remember we already checked this face
+      faces.insert(face_index);
 
     }             // end loop over intersections
 
