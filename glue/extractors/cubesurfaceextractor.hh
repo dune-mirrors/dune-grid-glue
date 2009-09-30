@@ -30,6 +30,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 #include "surfacedescriptor.hh"
 
 
@@ -176,9 +177,15 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     // count number of selected faces for this element
     size_t simplex_count = 0;
 
+    // element index
     IndexType eindex = this->indexSet().template index<0>(*elit);
 
+    // make sure each face is handle only once
     std::set<unsigned int> faces;
+
+    // cell reference element
+    Dune::GenericReferenceElement<ctype, dim> refElem =
+      Dune::GenericReferenceElement<ctype, dim> generic(elit->type());
 
     // iterate over all intersections of codim 1 and test if the
     // boundary intersections are to be added to the surface
@@ -192,7 +199,7 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
           descr.contains(elit, face_index)) {
 
         // Make sure the face is a cube
-        if (!is->type().isCube())
+        if (! refElem.size(face_index,1,dim) != cube_corners)
           DUNE_THROW(Dune::GridError, "found non-cube boundary entity: " << is->type());
 
         // now we only have to care about the 3D case, i.e. the quadrilateral
