@@ -173,7 +173,23 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       // flip cell if necessary
       if (this->positiveNormalDirection())
       {
-        assert(false);
+        switch ((int)dim) {
+        case 1 :
+        case 2 :
+        {
+          int x = vertex_indices[0];
+          vertex_indices[0] = vertex_indices[1];
+          vertex_indices[1] = x;
+
+          x = vertex_numbers[0];
+          vertex_numbers[0] = vertex_numbers[1];
+          vertex_numbers[1] = x;
+
+          break;
+        }
+        default :
+          assert(false);
+        }
       }
 
       // add a new face to the temporary collection
@@ -208,36 +224,6 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
     // in the coordinates array
     current->coord = it1->second->p->geometry().corner(0);
   }
-
-#if 0
-  // now add the vertices' parent faces in the _vertexFaces map.
-  // therefore iterate over all indices in the _index array...
-  {
-    std::vector<unsigned int> refcount(this->_coords.size(), 0);
-
-    // for each coordinate count the references in the _indices array
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-        refcount[this->_faces[i].corners[j]]++;
-
-    // allocate the right amount of storage for each vertex's references
-    for (unsigned int i = 0; i < this->_coords.size(); ++i)
-    {
-      // allocate an array and initialize its first element with its length
-      refcount[i] = 0;                   // used as "pointer" in next loop
-    }
-
-    // add the references
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-    {
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-      {
-        unsigned int ref = this->_faces[i].corners[j];
-        refcount[ref]++;
-      }
-    }
-  }
-#endif
 
 }
 
