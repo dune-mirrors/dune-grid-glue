@@ -92,10 +92,6 @@ public:
 
   using Codim1Extractor<GV>::codim;
 
-  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dimworld> > Geometry;
-
-  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dim> > LocalGeometry;
-
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
 
   /**
@@ -133,13 +129,6 @@ public:
    * @param descr a descriptor that "selects" the faces to add to the surface
    */
   void update(const FaceDescriptor<GV>& descr);
-
-
-  /** \brief Get world geometry of the extracted face */
-  Geometry geometry(unsigned int index) const;
-
-  /** \brief Get geometry of the extracted face in element coordinates */
-  LocalGeometry geometryLocal(unsigned int index) const;
 
 }; // end of class GeneralSurfaceExtractor
 
@@ -385,44 +374,6 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     current->coord = it1->second->p->geometry().corner(0);
   }
 
-}
-
-
-/** \brief Get World geometry of the extracted face */
-template<typename GV>
-typename GeneralSurfaceExtractor<GV>::Geometry GeneralSurfaceExtractor<GV>::geometry(unsigned int index) const
-{
-  std::vector<Coords> corners(simplex_corners);
-  for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
-
-  return Geometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
-}
-
-
-/** \brief Get Geometry of the extracted face in element coordinates */
-template<typename GV>
-typename GeneralSurfaceExtractor<GV>::LocalGeometry GeneralSurfaceExtractor<GV>::geometryLocal(unsigned int index) const
-{
-  std::vector<Coords> corners(simplex_corners);
-
-  unsigned int num_in_self = this->indexInInside(index);
-  Dune::GeometryType gt = this->_elmtInfo.find(this->_faces[index].parent)->second->p->type();
-
-  // computing the locals is straight forward for flat rectangles,
-  // we only need the triangle's corners in element coordinate
-  if (this->_faces[index].category <= 1) {
-    // the triangle's corners are (0 1 2) using face indices
-    for (int i = 0; i < simplex_corners; ++i)
-      corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, i);
-
-  } else {
-    // the triangle's corners are (3 2 1) using face indices
-    for (int i = 0; i < simplex_corners; ++i)
-      corners[i] = cornerLocalInRefElement<ctype, dimworld>(gt, num_in_self, 3-i);
-  }
-
-  return LocalGeometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
 }
 
 #endif // GENERALSURFACEEXTRACTOR_HH_

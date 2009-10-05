@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 /*
- *  Filename:    SimplicialSurfaceExtractor.hh
+ *  Filename:    codim1extractor.hh
  *  Version:     1.0
  *  Created on:  Jun 23, 2009
  *  Author:      Oliver Sander
@@ -78,6 +78,10 @@ public:
   // index sets and index types
   typedef typename GV::IndexSet IndexSet;
   typedef typename IndexSet::IndexType IndexType;
+
+  // transformations
+  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dimworld> > Geometry;
+  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dim> > LocalGeometry;
 
 protected:
   /************************** PRIVATE SUBCLASSES **********************/
@@ -382,6 +386,13 @@ public:
     return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
   }
 #endif
+
+  /** \brief Get world geometry of the extracted face */
+  Geometry geometry(unsigned int index) const;
+
+  /** \brief Get geometry of the extracted face in element coordinates */
+  LocalGeometry geometryLocal(unsigned int index) const;
+
 };
 
 
@@ -392,6 +403,36 @@ Codim1Extractor<GV>::~Codim1Extractor()
 }
 
 
+/** \brief Get World geometry of the extracted face */
+template<typename GV>
+typename Codim1Extractor<GV>::Geometry Codim1Extractor<GV>::geometry(unsigned int index) const
+{
+  std::vector<Coords> corners(simplex_corners);
+  for (int i = 0; i < simplex_corners; ++i)
+    corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
 
+  return Geometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
+}
+
+
+/** \brief Get Geometry of the extracted face in element coordinates */
+template<typename GV>
+typename Codim1Extractor<GV>::LocalGeometry Codim1Extractor<GV>::geometryLocal(unsigned int index) const
+{
+  std::vector<Coords> corners(simplex_corners);
+
+  // get face info
+  const FaceInfo & face = this->_faces[index];
+  Dune::GeometryType facetype(Dune::GeometryType::simplex, dim-codim);
+  // get reference element
+  Dune::GeometryType celltype(Dune::GeometryType::cube, dim);
+  const Dune::GenericReferenceElement<ctype, dim> & re =
+    Dune::GenericReferenceElements<ctype, dim>::general(celltype);
+
+  for (int i = 0; i < simplex_corners; ++i)
+    corners[i] = re.position(face.corners[i].num,dim);
+
+  return LocalGeometry(facetype, corners);
+}
 
 #endif // DUNE_CODIM_1_EXTRACTOR_HH_

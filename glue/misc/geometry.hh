@@ -297,30 +297,4 @@ void printGeometry(const GEO &geo, const char *name)
 }
 
 
-
-/**
- * @brief computes the local coordinate of a given face's particular corner
- * if the corner was determined using orientedSubface
- *
- * !!WARNING!!
- * This only works for codim 1 faces!
- *
- * @param gt the geometry type of the element
- * @param face the index of the element's face
- * @param corner the index of the face's corner
- * @return local coordinates for the corner in the element's local coordinates
- */
-template<typename K, int dim>
-Dune::FieldVector<K, dim> cornerLocalInRefElement(const Dune::GeometryType& type, int face, int vertex)
-{
-  unsigned int cornerlocal = orientedSubface<dim>(type, face, vertex);
-
-  const Dune::GenericReferenceElement<double,dim>& refElement =
-    Dune::GenericReferenceElements<double, dim>::general(type);
-
-  // return the vertex' center of gravity, i.e. the vertex' location
-  return refElement.position(cornerlocal, dim);
-}
-
-
 #endif // GEOMETRY_H_
