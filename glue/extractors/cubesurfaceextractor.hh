@@ -51,26 +51,11 @@ public:
 
   /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
 
-  enum
-  {
-    dimworld = GV::dimensionworld
-  };
-
-  enum
-  {
-    dim = GV::dimension
-  };
-
-  /// @brief compile time number of corners of surface simplices
-  enum
-  {
-    simplex_corners = dim
-  };
-
-  enum
-  {
-    cube_corners = 1 << (dim-1)
-  };
+  using Codim1Extractor<GV>::codim;
+  using Codim1Extractor<GV>::dim;
+  using Codim1Extractor<GV>::dimworld;
+  using Codim1Extractor<GV>::simplex_corners;
+  using Codim1Extractor<GV>::cube_corners;
 
   typedef GV GridView;
 
@@ -91,10 +76,10 @@ public:
 
   // import typedefs from base class
   typedef typename Codim1Extractor<GV>::FaceInfo FaceInfo;
-
-public:
-
-  using Codim1Extractor<GV>::codim;
+  typedef typename Codim1Extractor<GV>::ElementInfo ElementInfo;
+  typedef typename Codim1Extractor<GV>::CoordinateInfo CoordinateInfo;
+  typedef typename Codim1Extractor<GV>::VertexInfo VertexInfo;
+  typedef typename Codim1Extractor<GV>::VertexInfoMap VertexInfoMap;
 
   /*  C O N S T R U C T O R S   A N D   D E S T R U C T O R S  */
 
@@ -193,10 +178,8 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         if (refElem.size(face_index,1,dim) != cube_corners)
           DUNE_THROW(Dune::GridError, "found non-cube boundary entity (" << refElem.size(face_index,1,dim) << " corners)");
 
-        // now we only have to care about the 3D case, i.e. the quadrilateral
-        // face has to be divided into two triangles
-        unsigned int vertex_indices[4];         // index in global vector
-        unsigned int vertex_numbers[4];         // index in parent entity
+        unsigned int vertex_indices[cube_corners];         // index in global vector
+        unsigned int vertex_numbers[cube_corners];         // index in parent entity
 
         // get the vertex pointers for the quadrilateral's corner vertices
         // and try for each of them whether it is already inserted or not
@@ -211,11 +194,11 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
           // if the vertex is not yet inserted in the vertex info map
           // it is a new one -> it will be inserted now!
-          typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
+          typename VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
           if (vimit == this->_vtxInfo.end())
           {
             // insert into the map
-            this->_vtxInfo[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, vptr);
+            this->_vtxInfo[vindex] = new VertexInfo(vertex_index, vptr);
             // remember this vertex' index
             vertex_indices[i] = vertex_index;
             // increase the current index
@@ -290,7 +273,7 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
     // add element entry with the offset of the first simplex and the number of simplices
     if (simplex_count != 0)
-      this->_elmtInfo[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, simplex_count);
+      this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, simplex_count);
     simplex_index += simplex_count;
 
   }       // end loop over elements
@@ -302,11 +285,11 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
   // now first write the array with the coordinates...
   this->_coords.resize(this->_vtxInfo.size());
-  typename Codim1Extractor<GV>::VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
+  typename VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
   for (; it1 != this->_vtxInfo.end(); ++it1)
   {
     // get a pointer to the associated info object
-    typename Codim1Extractor<GV>::CoordinateInfo* current = &this->_coords[it1->second->idx];
+    CoordinateInfo* current = &this->_coords[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping
