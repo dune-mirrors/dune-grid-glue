@@ -178,7 +178,7 @@ public:
     extractGrid(this->_glue._tarext, tarcoords, tarfaces, _tartrafo);
 
 #ifdef WRITE_TO_VTK
-    const int dimw = Parent::dimw;
+    const int dimw = Parent::dimworld;
     const char prefix[] = "GridGlue::Builder::build() : ";
     const char domainsurf[] = "/tmp/vtk-domain-test";
     const char targetsurf[] = "/tmp/vtk-target-test";
