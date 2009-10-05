@@ -351,15 +351,6 @@ public:
       }
     }
 
-    // DEBUG
-    std::cout << "DEBUG: l2g ";
-    for (size_t i=0; i<_local2global.size(); i++)
-      std::cout << i << "/" << _local2global[i] << " ";
-    std::cout << std::endl;
-    std::cout << "DEBUG: g2l ";
-    for (size_t i=0; i<_global2local.size(); i++)
-      std::cout << i << "/" << _global2local[i] << " ";
-    std::cout << std::endl;
   };
 
   /*  G E T T E R S  */
@@ -551,6 +542,11 @@ public:
     return _lx.geometryLocal(l_index);
   }
 
+  // export codim0 method
+  bool & positiveNormalDirection()
+  {
+    return _lx.positiveNormalDirection();
+  }
 };
 
 #endif // DUNE_CODIM_1_EXTRACTOR_HH_
