@@ -180,7 +180,7 @@ namespace Dune
     /**
      * @brief Get the number of objects at an intersection.
      */
-    static int getSize(const Type& commInfo, size_t i)
+    static size_t getSize(const Type& commInfo, size_t i)
     {
       // get RemoteIntersection
       typedef typename Type::GridGlue::RemoteIntersection RemoteIntersection;
