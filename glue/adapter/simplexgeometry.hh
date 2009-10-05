@@ -27,7 +27,6 @@
 #include <dune/grid/genericgeometry/geometrytraits.hh>
 #include <dune/grid/genericgeometry/cornermapping.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
-#include <dune/grid/genericgeometry/misc.hh>
 
 #include "../misc/geometry.hh"
 
@@ -142,7 +141,6 @@ protected:
 
   /// @brief normal computation module specialized for the case of full-dimensional or
   /// manifold grids
-  template<bool>
   struct CommonNormalComputer
   {
     static Dune::FieldVector<typename G::ctype, coorddim> outerNormal(const This& geom, const Dune::FieldVector<typename G::ctype, mydim>& local)
@@ -177,7 +175,6 @@ protected:
   /// @brief for normal computation for hyperdimensional grids
   /// Note: This degenerates to determining the simplex' orientation.
   /// The normal then always points to the "added" dimension.
-  template<bool>
   struct LiftingNormalComputer
   {
     static Dune::FieldVector<typename G::ctype, coorddim + 1> outerNormal(const SimplexGeometry<mydim, coorddim, G>& geom, const Dune::FieldVector<typename G::ctype, mydim>& local)
@@ -203,7 +200,7 @@ protected:
     }
   };
 
-  typedef Dune::GenericGeometry::ProtectedIf<mydim == coorddim, LiftingNormalComputer, CommonNormalComputer> NormalComputer;
+  typedef typename Dune::SelectType<mydim == coorddim, LiftingNormalComputer, CommonNormalComputer>::Type NormalComputer;
 
 public:
 
