@@ -114,7 +114,9 @@ public:
   /** \brief Dimension of the domain extractor */
   enum {
     /** \brief Dimension of the domain extractor */
-    domdim = DomainExtractor::dim
+    domdim = DomainExtractor::dim,
+    /** \brief WOrld dimension of the domain extractor */
+    domdimworld = DomainExtractor::dimworld
   };
 
   /** \brief Grid view of the target grid */
@@ -129,7 +131,9 @@ public:
   /** \brief Dimension of the target extractor */
   enum {
     /** \brief Dimension of the target extractor */
-    tardim = TargetExtractor::dim
+    tardim = TargetExtractor::dim,
+    /** \brief World dimension of the target extractor */
+    tardimworld = TargetExtractor::dimworld
   };
 
 
@@ -337,6 +341,9 @@ public:
 #endif
   /*  S E T T E R S  */
 
+  DomainExtractor & domainExtractor() { return _domext; }
+
+  TargetExtractor & targetExtractor() { return _tarext; }
 
   /*   G E T T E R S   */
 

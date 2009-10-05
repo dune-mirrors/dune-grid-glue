@@ -366,7 +366,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     unsigned int unused;
     if (glue->_tarext.contains(targetIndex, unused))
     {
-      typename TargetExtractor::Geometry targetWorldGeometry      = glue->_tarext.geometry(targetIndex);
+      typename TargetExtractor::Geometry targetWorldGeometry = glue->_tarext.geometry(targetIndex);
       typename TargetExtractor::LocalGeometry targetLocalGeometry = glue->_tarext.geometryLocal(targetIndex);
 
       for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
