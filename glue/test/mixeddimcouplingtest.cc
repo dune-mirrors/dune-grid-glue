@@ -69,7 +69,7 @@ public:
   MixedDimTrafo(double yOffset) : yOffset_(yOffset) {}
   virtual Dune::FieldVector<ctype, dimw> operator()(const Dune::FieldVector<ctype, dim>& c) const
   {
-    Dune::FieldVector<ctype, dimw> x(1.0);
+    Dune::FieldVector<ctype, dimw> x(yOffset_);
     x[0] = c[0];
     for (int i=2; i<dim ; i++)
       x[i] = c[i-1];
