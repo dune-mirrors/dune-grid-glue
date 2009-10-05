@@ -60,6 +60,7 @@ public:
 
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
+  typedef Dune::FieldVector<ctype, dim>                            LocalCoords;
   typedef Dune::array<unsigned int, simplex_corners>               SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
@@ -395,7 +396,7 @@ typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int inde
 template<typename GV, int cd>
 typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigned int index) const
 {
-  std::vector<Coords> corners(simplex_corners);
+  std::vector<LocalCoords> corners(simplex_corners);
 
   // get face info
   const FaceInfo & face = this->_faces[index];
