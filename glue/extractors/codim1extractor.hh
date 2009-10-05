@@ -156,32 +156,15 @@ protected:
     FaceInfo()
     {}
 
-    FaceInfo(unsigned int index_, IndexType parent_, unsigned int num_in_parent_, unsigned int category_)
-      :       parent(parent_), index(index_), num_in_parent(num_in_parent_), category(category_)
+    FaceInfo(IndexType parent_, unsigned int num_in_parent_)
+      :   parent(parent_), num_in_parent(num_in_parent_)
     {}
 
     /// @brief the index of the parent element (from index set)
     IndexType parent;
 
-    /// @brief the index of this face (in internal storage scheme) // NEEDED??
-    unsigned int index : 27;
-
     /// @brief the number of the face in the parent element
     unsigned int num_in_parent : 3;
-
-    /// @brief flag telling whether this is the first of two triangles
-    /// refining the associated face
-
-    /// 0: triangle face
-    /// 1: first of two tris refining a quadrilateral
-    /// 2: second of two tris refining a quadrilateral
-    unsigned int category : 2;
-
-    enum {
-      triangle = 0,
-      first = 1,
-      second = 2
-    };
 
     /// @brief the corner indices plus the numbers of the vertices in the parent element
     CornerInfo corners[dim];     // sim = numer of vertices in a simplex

@@ -202,7 +202,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             // we have a triangle here
 
             // add a new face to the temporary collection
-            temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, FaceInfo::triangle));
+            temp_faces.push_back(FaceInfo(eindex, *sit));
 
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < face_corners; ++i)
@@ -244,7 +244,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             // we have a triangle here
 
             // add a new face to the temporary collection
-            temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, FaceInfo::triangle));
+            temp_faces.push_back(FaceInfo(eindex, *sit));
 
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < simplex_corners; ++i)
@@ -322,7 +322,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
 
             // add a new face to the temporary collection for the first tri
-            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, FaceInfo::first));
+            temp_faces.push_back(FaceInfo(eindex, *sit));
             temp_faces.back().corners[0].idx = vertex_indices[0];
             temp_faces.back().corners[1].idx = vertex_indices[1];
             temp_faces.back().corners[2].idx = vertex_indices[2];
@@ -332,7 +332,7 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             temp_faces.back().corners[2].num = vertex_numbers[2];
 
             // add a new face to the temporary collection for the second tri
-            temp_faces.push_back(FaceInfo(simplex_index++, eindex, *sit, FaceInfo::second));
+            temp_faces.push_back(FaceInfo(eindex, *sit));
             temp_faces.back().corners[0].idx = vertex_indices[3];
             temp_faces.back().corners[1].idx = vertex_indices[2];
             temp_faces.back().corners[2].idx = vertex_indices[1];
@@ -340,6 +340,8 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             temp_faces.back().corners[0].num = vertex_numbers[3];
             temp_faces.back().corners[1].num = vertex_numbers[2];
             temp_faces.back().corners[2].num = vertex_numbers[1];
+
+            simplex_index+=2;
             break;
           default :
             DUNE_THROW(Dune::NotImplemented, "the extractor does only work for triangle and quadrilateral faces (" << face_corners << " corners)");

@@ -196,7 +196,7 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
           // add a new face to the temporary collection
-          temp_faces.push_back(FaceInfo(simplex_index, eindex, *sit, FaceInfo::triangle));
+          temp_faces.push_back(FaceInfo(eindex, *sit));
 
           // try for each of the faces vertices whether it is already inserted or not
           for (int i = 0; i < simplex_corners; ++i)
