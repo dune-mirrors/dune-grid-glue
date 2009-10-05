@@ -103,7 +103,6 @@ void test1d2dCouplingMatchingDimworld()
 
   GridType1d cubeGrid1(elements1d, lower1d, upper1d);
 
-
   // ////////////////////////////////////////
   //   Set up coupling at their interface
   // ////////////////////////////////////////
@@ -225,7 +224,6 @@ void test1d2dCoupling(double slice=0.0)
   FieldVector<double,dim-1> upper1d(1);
 
   GridType1d cubeGrid1(elements1d, lower1d, upper1d);
-
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface

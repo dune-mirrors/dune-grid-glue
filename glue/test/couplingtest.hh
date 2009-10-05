@@ -52,6 +52,13 @@ void testIntersection(const IntersectionIt & rIIt,
     assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
 
     // Here we assume that the two interface match geometrically:
+    if ( ! (domTrafo(globalDomainPos)-tarTrafo(globalTargetPos)).two_norm() < 1e-6 )
+    {
+      std::cerr << "globalDomainPos = " << globalDomainPos << "\n";
+      std::cerr << "globalTargetPos = " << globalTargetPos << "\n";
+      std::cerr << "domTrafo(globalDomainPos) = " << domTrafo(globalDomainPos) << "\n";
+      std::cerr << "tarTrafo(globalTargetPos) = " << tarTrafo(globalTargetPos) << "\n";
+    }
     assert( (domTrafo(globalDomainPos)-tarTrafo(globalTargetPos)).two_norm() < 1e-6 );
 
   }
