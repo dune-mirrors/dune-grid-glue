@@ -21,6 +21,7 @@
 #define GRIDGLUE_HH_
 
 #include <dune/common/array.hh>
+#include <dune/common/exception.hh>
 
 #define QUICKHACK_INDEX 1
 
@@ -42,6 +43,7 @@
 #include <dune/istl/plocalindex.hh>
 #include <dune/istl/remoteindices.hh>
 #include <dune/istl/communicator.hh>
+#include <dune/istl/interface.hh>
 
 /**
  * @class GridGlue
