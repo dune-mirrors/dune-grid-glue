@@ -186,7 +186,8 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         for (int i = 0; i < cube_corners; ++i)
         {
           // get the number of the vertex in the parent element
-          vertex_numbers[i] = refElem.subEntity(face_index,1,i,dim);          //orientedSubface<dim>(elit->type(), face_index, i);
+          // vertex_numbers[i] = refElem.subEntity(face_index,1,i,dim);
+          vertex_numbers[i] = orientedSubface<dim>(elit->type(), face_index, i);
 
           // get the vertex pointer and the index from the index set
           VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
@@ -212,6 +213,7 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         }
 
         // check normal vector & flip face if necessary
+#if 0
         {
           static Dune::FieldVector<ctype, dim-1> c(0.5);
           static Dune::array<Dune::FieldVector<ctype, dim>, dim-1> A;
@@ -239,6 +241,7 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
             }
           }
         }
+#endif
 
         // add a new face to the temporary collection
         simplex_count ++;
