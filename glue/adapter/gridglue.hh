@@ -531,7 +531,7 @@ public:
     typedef Dune::EnumItem <Dune::PartitionType, Dune::InteriorEntity> InteriorFlags;
     typedef Dune::EnumItem <Dune::PartitionType, Dune::OverlapEntity>  OverlapFlags;
     typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::GhostEntity>  AllFlags;
-    Dune::Interface < PIndexSet > interface;
+    Dune::Interface interface;
     switch (iftype)
     {
     case Dune::InteriorBorder_InteriorBorder_Interface :
@@ -566,7 +566,7 @@ public:
     commInfo.data = &data;
 
     // create communicator
-    Dune::BufferedCommunicator<PIndexSet> bComm ;
+    Dune::BufferedCommunicator bComm ;
     bComm.template build< CommInfo >(commInfo, commInfo, interface);
 
     // do communication
