@@ -21,7 +21,7 @@
 #define GRIDGLUE_HH_
 
 #include <dune/common/array.hh>
-#include <dune/common/exception.hh>
+#include <dune/common/exceptions.hh>
 
 #define QUICKHACK_INDEX 1
 
