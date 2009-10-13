@@ -174,7 +174,7 @@ public:
   bool contains (unsigned int global, unsigned int & local) const
   {
     local = _global2local[global];
-    assert(local == global);
+    // assert(local == global);
     return (local != (unsigned int)(-1));
   }
 
@@ -449,80 +449,6 @@ public:
     assert(have);
     return _lx.element(l_index);
   }
-
-#if 0
-  /**
-   * @brief gets the vertex for a given coordinate index
-   * throws an exception if index not valid
-   * @param index the index of the coordinate
-   * @return a reference to the vertex' stored pointer
-   */
-  const VertexPtr& vertex(unsigned int vindex) const
-  {
-    assert(false);
-    // unsigned int l_index = 0;
-    // bool have = contains(index, l_index);
-    // assert(have);
-    // return _lx.vertex(l_index);
-  }
-
-
-  /**
-   * @brief for several given barycentric coords in a simplex compute world coordinates
-   *
-   * If both are to be computed, element and world coordinates, then use the
-   * combined method for efficiency!
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param wcoords to be filled with world coordinates
-   */
-  template<typename BCoordContainer, typename CoordContainer>
-  void globalCoords(unsigned int index, const BCoordContainer &bcoords, CoordContainer &wcoords) const
-  {
-    unsigned int l_index = 0;
-    bool have = contains(index, l_index);
-    assert(have);
-    return _lx.globalCoords(l_index, bcoords, wcoords);
-  }
-
-
-  /**
-   * @brief for several given barycentric coords in a simplex compute element coordinates
-   *
-   * If both are to be computed, element and world coordinates, then use the
-   * combined method for efficiency!
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   */
-  template<typename BCoordContainer, typename CoordContainer>
-  void localCoords(unsigned int index, const BCoordContainer &bcoords, CoordContainer &ecoords) const
-  {
-    int l_index = 0;
-    bool have = contains(index, l_index);
-    assert(have);
-    return _lx.localCoords(l_index, bcoords, ecoords);
-  }
-
-
-  /**
-   * @brief for several given barycentric coords in a simplex compute element and world coordinates
-   *
-   * @param index the index of the simplex
-   * @param bcoords the barycentric coordinates
-   * @param ecoords to be filled with element coordinates
-   * @param wcoords to be filled with world coordinates
-   * @return
-   */
-  template<typename BCoordContainer, typename ECoordContainer, typename WCoordContainer>
-  void localAndGlobalCoords(unsigned int index, const BCoordContainer &bcoords, ECoordContainer &ecoords, WCoordContainer &wcoords) const
-  {
-    unsigned int l_index = 0;
-    bool have = contains(index, l_index);
-    assert(have);
-    return _lx.localAndGlobalCoords(l_index, bcoords, ecoords, wcoords);
-  }
-#endif
 
   /** \brief Get World geometry of the extracted face */
   Geometry geometry(unsigned int index) const
