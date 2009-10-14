@@ -566,10 +566,10 @@ WARN_LOGFILE           =
 
 INPUT                  = @srcdir@/mainpage \
                          @srcdir@/modules \
-                         @top_srcdir@/glue/adapter \
-                         @top_srcdir@/glue/merging \
-                         @top_srcdir@/glue/misc \
-                         @top_srcdir@/glue/surfaces
+                         @top_srcdir@/dune/glue/adapter \
+                         @top_srcdir@/dune/glue/merging \
+                         @top_srcdir@/dune/glue/misc \
+                         @top_srcdir@/dune/glue/surfaces
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
