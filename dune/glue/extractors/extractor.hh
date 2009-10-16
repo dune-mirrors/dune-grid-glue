@@ -28,6 +28,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
+#include <dune/grid/common/grid.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
 
 /**

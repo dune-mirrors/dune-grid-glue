@@ -19,6 +19,8 @@
 #ifndef COORDINATETRANSFORMATION_HH
 #define COORDINATETRANSFORMATION_HH
 
+#include <dune/common/fvector.hh>
+
 /** \brief Base class for vertex transformations
     \tparam gridDimworld The dimension of the grid world
     \tparam couplingDimworld The dimension of the coupling world.  This may be larger than gridDimworld
