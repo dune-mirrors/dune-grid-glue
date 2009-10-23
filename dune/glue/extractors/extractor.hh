@@ -32,7 +32,7 @@
 #include <dune/grid/genericgeometry/geometry.hh>
 
 /**
- * @brief provides static methods for grid extraction
+ * @brief Provides codimension-independent methods for grid extraction
  *
  * \tparam GV the grid view type
  * \tparam cd codimension of the extracted entities
@@ -402,8 +402,9 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   // get face info
   const FaceInfo & face = this->_faces[index];
   Dune::GeometryType facetype(Dune::GeometryType::simplex, dim-codim);
+
   // get reference element
-  Dune::GeometryType celltype(Dune::GeometryType::cube, dim);
+  Dune::GeometryType celltype = _elmtInfo.find(face.parent)->second->p->type();
   const Dune::GenericReferenceElement<ctype, dim> & re =
     Dune::GenericReferenceElements<ctype, dim>::general(celltype);
 
