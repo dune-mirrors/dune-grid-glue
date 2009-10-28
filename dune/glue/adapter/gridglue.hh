@@ -750,7 +750,9 @@ int GridGlue<GET1, GET2>::targetEntityNextFace(const TargetElement& e, int index
 template<typename GET1, typename GET2>
 typename GridGlue<GET1, GET2>::RemoteIntersectionIterator GridGlue<GET1, GET2>::iremotebegin() const
 {
-  return RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->_intersections[0]));
+  return (this->_intersections.size() > 0)
+         ? RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->_intersections[0]))
+         : RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->NULL_INTERSECTION));
 }
 
 
