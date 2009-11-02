@@ -389,7 +389,7 @@ public:
    * matcher and configure it before its "build" member is called.
    * @return a (non-const) reference the object
    */
-  const Merger* merger()
+  const Merger* merger() const
   {
     return this->_merg;
   }
