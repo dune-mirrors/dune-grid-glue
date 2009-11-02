@@ -462,7 +462,34 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   std::vector<IntersectionPrimitive<float> > overlaps;
   this->_cm.getOverlaps(overlaps);
 
+  // ////////////////////////////////////////////////////////////////////////
+  //   If dim==dimworld we have inverted the target simplices above.
+  //   Hence we have to revert the local coordinates before returning them.
+  // ////////////////////////////////////////////////////////////////////////
+
+  if (dim==dimworld) {
+
+    for (size_t i=0; i<overlaps.size(); i++) {
+
+      if (dim==1) {
+        // Replacing 1-x is the proper coordinate inversion
+        for (int j=0; j<2; j++)
+          overlaps[i].localCoords[1][j][0] = 1 - overlaps[i].localCoords[1][j][0];
+      } else {
+        // The coordinates returned by psurface are the barycentric one.
+        // Hence it is sufficient to swap the first two coordinates.
+        for (int j=0; j<3; j++)
+          std::swap(overlaps[i].localCoords[1][j][0], overlaps[i].localCoords[1][j][1]);
+      }
+
+    }
+
+  }
+
+  // //////////////////////////////////////////////
   // initialize the merged grid overlap manager
+  // //////////////////////////////////////////////
+
   this->_olm.setOverlaps(overlaps);
 
 }
