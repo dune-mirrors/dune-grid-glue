@@ -6,14 +6,10 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([dune/glue/adapter/gridglue.hh])
 AM_CONFIG_HEADER([config.h])
 
-
 # we need no more than the standard DE-stuff
 # this module depends on dune-common dune-grid
 # this implies checking for [dune-common], [dune-grid]
 DUNE_CHECK_ALL
-
-# the infamous Dune --> . symlink
-DUNE_SYMLINK
 
 # implicitly set the Dune-flags everywhere
 AC_SUBST(AM_CPPFLAGS, $DUNE_CPPFLAGS)
