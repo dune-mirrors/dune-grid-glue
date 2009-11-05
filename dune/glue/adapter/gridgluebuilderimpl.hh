@@ -75,7 +75,6 @@ private:
   void extractGrid (const Extractor & ext,
                     std::vector<typename Parent::ctype> & coords,
                     std::vector<unsigned int> & faces,
-                    //const typename Parent::Transformation* trafo) const
                     const CoordinateTransformation<Extractor::dimworld, Parent::dimworld, typename Parent::ctype>* trafo) const
   {
     std::vector<typename Extractor::Coords> tempcoords;
