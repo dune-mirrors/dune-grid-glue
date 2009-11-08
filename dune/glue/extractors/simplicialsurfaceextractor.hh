@@ -34,6 +34,7 @@
 #include "surfacedescriptor.hh"
 
 #include <dune/glue/extractors/codim1extractor.hh>
+#include <dune/glue/misc/orientedsubface.hh>
 
 
 
