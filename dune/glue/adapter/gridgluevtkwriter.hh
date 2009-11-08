@@ -7,13 +7,13 @@
  *  Author:      Gerrit Buse
  *  ---------------------------------
  *  Project:     dune-grid-glue
- *  Description: Class thougth to make graphical debugging of couplings easier.
+ *  Description: Class thought to make graphical debugging of couplings easier.
  *  subversion:  $Id$
  *
  */
 /**
  * @file GridGlueVtkWriter.hh
- * @brief Class thougth to make graphical debugging of couplings easier.
+ * @brief Class thought to make graphical debugging of couplings easier.
  */
 
 #ifndef GRIDGLUEVTKWRITER_HH_
@@ -73,8 +73,6 @@ public:
     const int dimw = Glue::dimworld;
 
     typedef typename Glue::ctype ctype;
-
-    Dune::GeometryType gt(Dune::GeometryType::simplex, dimw);
 
     typedef std::list<int> FaceList;
     FaceList faces, parts, face_corners;
