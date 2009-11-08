@@ -28,16 +28,14 @@
 #ifdef GRID_GLUE_USE_CONCEPTS
 #include "../misc/conceptchecking.hh"
 #endif
-#include "../merging/psurfacemerge.hh"
-#include "../extractors/vtksurfacewriter.hh"
 #include "../extractors/gridextractiontraits.hh"
 #include "../extractors/extractorselector.hh"
 #include "../extractors/surfacedescriptor.hh"
-#include "simplexgeometry.hh"
 #include "remoteintersection.hh"
 #include "remoteintersectioniterators.hh"
 #include "coordinatetransformation.hh"
 #include "gridgluecommunicate.hh"
+#include <dune/glue/merging/merger.hh>
 
 #include <dune/istl/indexset.hh>
 #include <dune/istl/plocalindex.hh>
@@ -289,8 +287,8 @@ protected:
     }
 
     std::cout << "GridGlue::updateIntersections : The number of overlaps is " << _index_sz
-              << " with " << _dindex_sz << " domain and "
-              << " with " << _tindex_sz << " target entities" << std::endl;
+              << " with " << _dindex_sz << " domain entities"
+              << " and " << _tindex_sz << " target entities" << std::endl;
 
     ////// create ParallelIndexSet & RemoteIndices
 #if HAVE_MPI

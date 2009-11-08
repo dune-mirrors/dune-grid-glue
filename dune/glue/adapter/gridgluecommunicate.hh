@@ -8,8 +8,9 @@
    @brief Describes the parallel communication interface class for Dune::GridGlue
  */
 
-#include <dune/grid/common/datahandleif.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
+#include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/gridenums.hh>
 
 #include <dune/istl/communicator.hh>
 
