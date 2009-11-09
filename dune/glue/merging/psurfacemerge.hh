@@ -92,7 +92,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent domain simplex' index of @c a smaller
    */
-  static bool domainParentSmaller(const IntersectionPrimitive<float>& a, const IntersectionPrimitive<float>& b)
+  static bool domainParentSmaller(const IntersectionPrimitive<dim,float>& a, const IntersectionPrimitive<dim,float>& b)
   {
     return a.tris[0] < b.tris[0];
   }
@@ -103,7 +103,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent target simplex' index of @c a smaller
    */
-  static bool targetParentSmaller(const IntersectionPrimitive<float>* a, const IntersectionPrimitive<float>* b)
+  static bool targetParentSmaller(const IntersectionPrimitive<dim,float>* a, const IntersectionPrimitive<dim,float>* b)
   {
     return a->tris[1] < b->tris[1];
   }
@@ -127,7 +127,7 @@ private:
      * from the given array
      * @param unordered array containing all overlap simplices
      */
-    void setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered);
+    void setOverlaps(const std::vector<IntersectionPrimitive<dim,float> >& unordered);
 
     /**
      * @brief getter for the number of simplex overlaps in the merged grid
@@ -158,7 +158,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntersectionPrimitive<float>& domain(unsigned int idx) const
+    const IntersectionPrimitive<dim,float>& domain(unsigned int idx) const
     {
       return this->domOrder[idx];
     }
@@ -168,7 +168,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntersectionPrimitive<float>& target(unsigned int idx) const
+    const IntersectionPrimitive<dim,float>& target(unsigned int idx) const
     {
       return *this->tarOrder[idx];
     }
@@ -187,14 +187,14 @@ private:
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending domain parent simplex indices (see _domi)
-    std::vector<IntersectionPrimitive<float> > domOrder;
+    std::vector<IntersectionPrimitive<dim,float> > domOrder;
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending target parent simplex indices (see _tari)
-    std::vector<IntersectionPrimitive<float>*> tarOrder;
+    std::vector<IntersectionPrimitive<dim,float>*> tarOrder;
 
     /// @brief used to recompute original index of an overlap in "tarOrder"
-    IntersectionPrimitive<float>*         baseptr;
+    IntersectionPrimitive<dim,float>*         baseptr;
   };
 
 
@@ -226,7 +226,7 @@ private:
   /* members associated with the merged grid */
 
   /// @brief make use of psurface contact mapping functionality
-  ContactMapping<dim+1> _cm;
+  ContactMapping<dim+1,ctype> _cm;
 
   /// @brief provides an interface for convenient and efficient
   /// access to the set of computed simplex overlaps in the merged grid
@@ -459,7 +459,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   std::cout << "Finished building merged grid!" << std::endl;
 
   // get the representation from the contact mapping object
-  std::vector<IntersectionPrimitive<float> > overlaps;
+  std::vector<IntersectionPrimitive<dim,float> > overlaps;
   this->_cm.getOverlaps(overlaps);
 
   // ////////////////////////////////////////////////////////////////////////
@@ -585,7 +585,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
+  const IntersectionPrimitive<dim,float>& ip = this->_olm.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
@@ -614,7 +614,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<float>& ip = this->_olm.domain(idx);
+  const IntersectionPrimitive<dim,float>& ip = this->_olm.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
@@ -640,7 +640,7 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 /* IMPLEMENTATION OF   O V E R L A P  M A N A G E R  SUBCLASS */
 
 template<int dim, int dimworld, typename T>
-void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<float> >& unordered)
+void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<dim,float> >& unordered)
 {
   this->domOrder.resize(unordered.size());
   this->tarOrder.resize(unordered.size(), NULL);
