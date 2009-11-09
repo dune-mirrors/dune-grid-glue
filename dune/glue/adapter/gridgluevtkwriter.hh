@@ -59,12 +59,10 @@ struct Nametraits<int>
 };
 
 
+/** \brief Write remote intersections to a vtk file for debugging purposes
+ */
 class GridGlueVtkWriter
 {
-private:
-
-protected:
-
 
 public:
   template<typename Glue>
@@ -98,6 +96,7 @@ public:
     bool hyper = dimw > DomainGridType::dimension;
 
     const DomainGridView& domgv = glue.domainGridView();
+
     // remember the entities that have been mapped
     std::list<DomainEPtr> domeptrs(0, (DomainEPtr) domgv.template begin<0>());
 
@@ -251,43 +250,22 @@ public:
     // WRITE CELL DATA
     // ---------------
     ctype accum = 0.0, delta = 1.0 / (ctype) (parents-1);
-    if (dimw == 2)
+
+    fgrid << "CELL_DATA " << parents << std::endl;
+    fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+    fgrid << "LOOKUP_TABLE default" << std::endl;
+
+    fmerged << "CELL_DATA " << overlaps << std::endl;
+    fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+    fmerged << "LOOKUP_TABLE default" << std::endl;
+
+    for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
     {
-      fgrid << "CELL_DATA " << parents << std::endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fgrid << "LOOKUP_TABLE default" << std::endl;
-
-      fmerged << "CELL_DATA " << overlaps << std::endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fmerged << "LOOKUP_TABLE default" << std::endl;
-
-      for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
-      {
-        // "encode" the parent with one color...
-        fgrid << accum << std::endl;
-        // ...and mark all of its merged grid parts with the same color
-        for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << std::endl;
-      }
-    }
-    else             // dimw == 3
-    {
-      fgrid << "CELL_DATA " << parents << std::endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fgrid << "LOOKUP_TABLE default" << std::endl;
-
-      fmerged << "CELL_DATA " << overlaps << std::endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fmerged << "LOOKUP_TABLE default" << std::endl;
-
-      for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
-      {
-        // "encode" the parent with one color...
-        fgrid << accum << std::endl;
-        // ...and mark all of its merged grid parts with the same color
-        for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << std::endl;
-      }
+      // "encode" the parent with one color...
+      fgrid << accum << std::endl;
+      // ...and mark all of its merged grid parts with the same color
+      for (int j = 0; j < *faceit; ++j)
+        fmerged << accum << std::endl;
     }
 
     fgrid.close();
@@ -478,43 +456,22 @@ public:
     // ---------------
     accum = 0.0;
     delta = 1.0 / (ctype) (parents-1);
-    if (dimw == 2)
+
+    fgrid << "CELL_DATA " << parents << std::endl;
+    fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+    fgrid << "LOOKUP_TABLE default" << std::endl;
+
+    fmerged << "CELL_DATA " << overlaps << std::endl;
+    fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+    fmerged << "LOOKUP_TABLE default" << std::endl;
+
+    for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
     {
-      fgrid << "CELL_DATA " << parents << std::endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fgrid << "LOOKUP_TABLE default" << std::endl;
-
-      fmerged << "CELL_DATA " << overlaps << std::endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fmerged << "LOOKUP_TABLE default" << std::endl;
-
-      for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
-      {
-        // "encode" the parent with one color...
-        fgrid << accum << std::endl;
-        // ...and mark all of its merged grid parts with the same color
-        for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << std::endl;
-      }
-    }
-    else             // dimw == 3
-    {
-      fgrid << "CELL_DATA " << parents << std::endl;
-      fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fgrid << "LOOKUP_TABLE default" << std::endl;
-
-      fmerged << "CELL_DATA " << overlaps << std::endl;
-      fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-      fmerged << "LOOKUP_TABLE default" << std::endl;
-
-      for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
-      {
-        // "encode" the parent with one color...
-        fgrid << accum << std::endl;
-        // ...and mark all of its merged grid parts with the same color
-        for (int j = 0; j < *faceit; ++j)
-          fmerged << accum << std::endl;
-      }
+      // "encode" the parent with one color...
+      fgrid << accum << std::endl;
+      // ...and mark all of its merged grid parts with the same color
+      for (int j = 0; j < *faceit; ++j)
+        fmerged << accum << std::endl;
     }
 
     fgrid.close();
