@@ -21,6 +21,7 @@
 
 #include <dune/glue/extractors/surfacedescriptor.hh>
 #include <dune/glue/adapter/gridglue.hh>
+#include <dune/glue/extractors/vtksurfacewriter.hh>
 
 template <typename GV, int codim>
 struct ExtractorTypeTraits {};
