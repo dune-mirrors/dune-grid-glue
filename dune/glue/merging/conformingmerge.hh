@@ -73,10 +73,10 @@ private:
   struct ConformingRemoteIntersection
   {
     // Local coordinates in the domain entity
-    std::tr1::array<Dune::FieldVector<T,dim>, dim+1> domainLocal_;
+    Dune::array<Dune::FieldVector<T,dim>, dim+1> domainLocal_;
 
     // Local coordinates in the domain entity
-    std::tr1::array<Dune::FieldVector<T,dim>, dim+1> targetLocal_;
+    Dune::array<Dune::FieldVector<T,dim>, dim+1> targetLocal_;
 
     //
     int domainEntity_;
@@ -105,10 +105,10 @@ private:
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
-  std::vector<std::tr1::array<int,dim+1> >         _domi;
+  std::vector<Dune::array<int,dim+1> >         _domi;
 
   /// @brief target indices (internal copy)
-  std::vector<std::tr1::array<int,dim+1> >         _tari;
+  std::vector<Dune::array<int,dim+1> >         _tari;
 
   /** \brief The computed intersections */
   std::vector<ConformingRemoteIntersection> intersections_;
