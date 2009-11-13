@@ -4,6 +4,13 @@
 #define DUNE_MERGER_HH
 
 
+/** \brief Abstract base for all classes that take extraced grids and build sets of intersections
+
+   \tparam ctype The type used for coordinates (assumed to be the same for both grids)
+   \tparam domainDim Dimension of the domain grid
+   \tparam targetDim Dimension of the target grid
+   \tparam dimworld Dimension of the world space where the coupling takes place
+ */
 template <class ctype, int domainDim, int targetDim, int dimworld>
 class Merger
 {
@@ -32,9 +39,11 @@ public:
    * @param target_simplices just like with the domain_simplices and domain_coords
    */
   virtual void build(const std::vector<ctype>& domain_coords,
-                     const std::vector<unsigned int>& domain_simplices,
+                     const std::vector<unsigned int>& domain_elements,
+                     const std::vector<Dune::GeometryType>& domain_element_types,
                      const std::vector<ctype>& target_coords,
-                     const std::vector<unsigned int>& target_simplices) = 0;
+                     const std::vector<unsigned int>& target_elements,
+                     const std::vector<Dune::GeometryType>& target_element_types) = 0;
 
   /** @brief get the number of simplices in the merged grid
       The indices are then in 0..nSimplices()-1

@@ -13,15 +13,11 @@
  */
 /**
  * @file
- * @brief
- * Standard implementation of the SurfaceMerge concept for the use in 2d and 3d.
+ * @brief Standard implementation of the SurfaceMerge concept for the use in 2d and 3d.
+ *
  * Uses psurface routines to compute the merged grid  and provides access to it
  * via the interface specified by the concept.
  *
- * While this adapter is correctly implemented and thoroughly tested there are still some problems with the
- * implementation behind it. E.g. in a case where edges are mapped onto other edges the code is not stable
- * and the program might crash. Specifying a normal field in the 3d case does not guarantee the expected
- * improvements in the mapping either.
  */
 
 #ifndef PSURFACEMERGE_HH
@@ -62,7 +58,7 @@ class PSurfaceMerge
 
   // The psurface library itself always expects dimworld to be dim+1
   // To be able to handle the case dim==dimworld we keep an artificial world
-  // around which the additional dimension
+  // around with the additional dimension
   enum {psurfaceDimworld = dimworld + (dim==dimworld)};
 
 public:
@@ -285,15 +281,17 @@ public:
    * introduced here.
    *
    * @param domain_coords the domain vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param domain_simplices array with all domain simplices represented as corner indices into @c domain_coords;
+   * @param domain_elements array with all domain simplices represented as corner indices into @c domain_coords;
    * the simplices are just written to this array one after another
    * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param target_simplices just like with the domain_simplices and domain_coords
+   * @param target_elements just like with the domain_elements and domain_coords
    */
   void build(const std::vector<T>& domain_coords,
-             const std::vector<unsigned int>& domain_simplices,
+             const std::vector<unsigned int>& domain_elements,
+             const std::vector<Dune::GeometryType>& domain_element_types,
              const std::vector<T>& target_coords,
-             const std::vector<unsigned int>& target_simplices
+             const std::vector<unsigned int>& target_elements,
+             const std::vector<Dune::GeometryType>& target_element_types
              );
 
 
@@ -390,37 +388,80 @@ public:
 template<int dim, int dimworld, typename T>
 void PSurfaceMerge<dim, dimworld, T>::build(
   const std::vector<T>& domain_coords,
-  const std::vector<unsigned int>& domain_simplices,
+  const std::vector<unsigned int>& domain_elements,
+  const std::vector<Dune::GeometryType>& domain_element_types,
   const std::vector<T>& target_coords,
-  const std::vector<unsigned int>& target_simplices
+  const std::vector<unsigned int>& target_elements,
+  const std::vector<Dune::GeometryType>& target_element_types
   )
 {
+  // //////////////////////////////////////////
+  //   check input data for consistency
+  // //////////////////////////////////////////
+
+  // first the domain side
+  int expectedCorners = 0;
+
+  for (size_t i=0; i<domain_element_types.size(); i++) {
+
+    // Check whether GeometryType has the correct dimension
+    if (domain_element_types[i].dim() != dim)
+      DUNE_THROW(Dune::GridError, "You cannot hand a " << domain_element_types[i]
+                                                       << " to a " << dim << "-dimensional PSurfaceMerge!");
+
+    expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(domain_element_types[i]).size(dim);
+
+  }
+
+  if (domain_elements.size() != expectedCorners)
+    DUNE_THROW(Dune::GridError, domain_elements.size() << " element corners were handed over, "
+               " but " << expectedCorners << " were expected!");
+
+  // now the same for the target side
+  expectedCorners = 0;
+
+  for (size_t i=0; i<target_element_types.size(); i++) {
+
+    // Check whether GeometryType has the correct dimension
+    if (target_element_types[i].dim() != dim)
+      DUNE_THROW(Dune::GridError, "You cannot hand a " << target_element_types[i]
+                                                       << " to a " << dim << "-dimensional PSurfaceMerge!");
+
+    expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(target_element_types[i]).size(dim);
+
+  }
+
+  if (target_elements.size() != expectedCorners)
+    DUNE_THROW(Dune::GridError, target_elements.size() << " element corners were handed over, "
+               " but " << expectedCorners << " were expected!");
+
+
   // copy domain and target simplices to internal arrays
   // (cannot keep refs since outside modification would destroy information)
-  this->_domi.resize(domain_simplices.size()/(dim+1));
-  this->_tari.resize(target_simplices.size()/(dim+1));
+  this->_domi.resize(domain_elements.size()/(dim+1));
+  this->_tari.resize(target_elements.size()/(dim+1));
 
-  for (unsigned int i = 0; i < domain_simplices.size()/(dim+1); ++i)
+  for (unsigned int i = 0; i < domain_elements.size()/(dim+1); ++i)
     for (int j=0; j<dim+1; j++)
-      this->_domi[i][j] = domain_simplices[i*(dim+1)+j];
+      this->_domi[i][j] = domain_elements[i*(dim+1)+j];
 
   if (dim!=dimworld) {
 
     // dim==dimworld-1: just copy the two arrays
-    for (unsigned int i = 0; i < target_simplices.size()/(dim+1); ++i)
+    for (unsigned int i = 0; i < target_elements.size()/(dim+1); ++i)
       for (int j=0; j<dim+1; j++)
-        this->_tari[i][j] = target_simplices[i*(dim+1)+j];
+        this->_tari[i][j] = target_elements[i*(dim+1)+j];
 
   } else {
 
     // dim==dimworld: "hen grids are artificially embedded in a dim+1 space,
     // the second grid needs to have its orientation reversed.
     // That way, the 'surface normals' of the two grids point towards each other.
-    for (unsigned int i = 0; i < target_simplices.size()/(dim+1); ++i) {
-      _tari[i][0] = target_simplices[i*(dim+1)+1];
-      _tari[i][1] = target_simplices[i*(dim+1)+0];
+    for (unsigned int i = 0; i < target_elements.size()/(dim+1); ++i) {
+      _tari[i][0] = target_elements[i*(dim+1)+1];
+      _tari[i][1] = target_elements[i*(dim+1)+0];
       if (dim==2)
-        _tari[i][2] = target_simplices[i*(dim+1)+2];
+        _tari[i][2] = target_elements[i*(dim+1)+2];
     }
 
   }

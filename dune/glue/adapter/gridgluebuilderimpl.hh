@@ -196,8 +196,18 @@ public:
     STDOUTLN(prefix << "Done writing target surface!");
 #endif // WRITE_TO_VTK
 
+    // Set up the array of element types.  Currently we simply hand over a vector full of simplices
+    // This is an intermediate solution.  In the long run, splitting up the elements into simplices
+    // should be done by the mergers (if at all necessary) instead of the extractors.
+
+    std::vector<Dune::GeometryType> domainElementTypes(domfaces.size()/(Parent::DomainExtractor::simplex_corners),
+                                                       Dune::GeometryType(Dune::GeometryType::simplex,DomainGridView::dimension-codim1));
+    std::vector<Dune::GeometryType> targetElementTypes(tarfaces.size()/(Parent::TargetExtractor::simplex_corners),
+                                                       Dune::GeometryType(Dune::GeometryType::simplex,TargetGridView::dimension-codim2));
+
     // start the actual build process
-    this->_glue._merg->build(domcoords, domfaces, tarcoords, tarfaces);
+    this->_glue._merg->build(domcoords, domfaces, domainElementTypes,
+                             tarcoords, tarfaces, targetElementTypes);
 
     // the intersections need to be recomputed
     this->_glue.updateIntersections();
