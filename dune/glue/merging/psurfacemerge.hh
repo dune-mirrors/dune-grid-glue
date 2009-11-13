@@ -31,8 +31,8 @@
 #include <algorithm>
 #include <limits>
 
-#include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/bitsetvector.hh>
 
 #include <dune/glue/misc/geometry.hh>
 #include <dune/glue/merging/merger.hh>
@@ -398,7 +398,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   // //////////////////////////////////////////
   //   check input data for consistency
   // //////////////////////////////////////////
-
+#ifndef NDEBUG
   // first the domain side
   int expectedCorners = 0;
 
@@ -434,39 +434,122 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   if (target_elements.size() != expectedCorners)
     DUNE_THROW(Dune::GridError, target_elements.size() << " element corners were handed over, "
                " but " << expectedCorners << " were expected!");
+#endif
 
+  // //////////////////////////////////////////////////////////////////////////////////
+  //   copy domain and target simplices to internal arrays
+  //   split quadrilaterals to triangles because psurface can only handle triangles
+  // //////////////////////////////////////////////////////////////////////////////////
 
-  // copy domain and target simplices to internal arrays
-  // (cannot keep refs since outside modification would destroy information)
-  this->_domi.resize(domain_elements.size()/(dim+1));
-  this->_tari.resize(target_elements.size()/(dim+1));
+  // First count the number of simplices we expect
+  int numDomainSimplices = 0;
+  int numTargetSimplices = 0;
 
-  for (unsigned int i = 0; i < domain_elements.size()/(dim+1); ++i)
-    for (int j=0; j<dim+1; j++)
-      this->_domi[i][j] = domain_elements[i*(dim+1)+j];
-
-  if (dim!=dimworld) {
-
-    // dim==dimworld-1: just copy the two arrays
-    for (unsigned int i = 0; i < target_elements.size()/(dim+1); ++i)
-      for (int j=0; j<dim+1; j++)
-        this->_tari[i][j] = target_elements[i*(dim+1)+j];
-
+  if (dim==1) {
+    numDomainSimplices = domain_element_types.size();
+    numTargetSimplices = target_element_types.size();
   } else {
 
-    // dim==dimworld: "hen grids are artificially embedded in a dim+1 space,
-    // the second grid needs to have its orientation reversed.
-    // That way, the 'surface normals' of the two grids point towards each other.
-    for (unsigned int i = 0; i < target_elements.size()/(dim+1); ++i) {
-      _tari[i][0] = target_elements[i*(dim+1)+1];
-      _tari[i][1] = target_elements[i*(dim+1)+0];
-      if (dim==2)
-        _tari[i][2] = target_elements[i*(dim+1)+2];
+    for (size_t i=0; i<domain_element_types.size(); i++)
+      if (domain_element_types[i].isSimplex())
+        numDomainSimplices++;
+      else if (domain_element_types[i].isQuadrilateral())
+        numDomainSimplices += 2;
+      else
+        DUNE_THROW(Dune::GridError, "Unknown element " << domain_element_types[i] << " found!");
+
+    for (size_t i=0; i<target_element_types.size(); i++)
+      if (target_element_types[i].isSimplex())
+        numTargetSimplices++;
+      else if (target_element_types[i].isQuadrilateral())
+        numTargetSimplices += 2;
+      else
+        DUNE_THROW(Dune::GridError, "Unknown element " << target_element_types[i] << " found!");
+
+  }
+
+  this->_domi.resize(numDomainSimplices);
+  this->_tari.resize(numTargetSimplices);
+
+  // copy and split the domain surface
+  Dune::BitSetVector<1> domainIsSecondTriangle(numDomainSimplices, false);
+
+  int vertexCounter = 0;
+  int simplexCounter = 0;
+
+  for (unsigned int i = 0; i < domain_element_types.size(); ++i) {
+
+    // dim is known at compile time, hence if dim==1 the following conditional is removed
+    if (dim == 1 || domain_element_types[i].isSimplex()) {
+      for (int j=0; j<dim+1; j++)
+        _domi[simplexCounter][j] = domain_elements[vertexCounter++];
+      simplexCounter++;
+    } else {
+      // quadrilateral: split it in two triangles
+      _domi[simplexCounter][0] = domain_elements[vertexCounter];
+      _domi[simplexCounter][1] = domain_elements[vertexCounter+1];
+      _domi[simplexCounter][2] = domain_elements[vertexCounter+2];
+
+      simplexCounter++;
+
+      _domi[simplexCounter][0] = domain_elements[vertexCounter+3];
+      _domi[simplexCounter][1] = domain_elements[vertexCounter+2];
+      _domi[simplexCounter][2] = domain_elements[vertexCounter+1];
+
+      domainIsSecondTriangle[simplexCounter] = true;
+
+      simplexCounter++;
+      vertexCounter += 4;
     }
 
   }
-  // copy the coordinates to internal arrays of coordinates
-  // (again cannot just keep refs and this representation has advantages)
+
+  // copy and split the target surface
+  Dune::BitSetVector<1> targetIsSecondTriangle(numTargetSimplices, false);
+
+  vertexCounter  = 0;
+  simplexCounter = 0;
+
+  for (unsigned int i = 0; i < target_element_types.size(); ++i) {
+
+    // dim is known at compile time, hence if dim==1 the following conditional is removed
+    if (dim==1 || target_element_types[i].isSimplex()) {
+      for (int j=0; j<dim+1; j++)
+        _tari[simplexCounter][j] = target_elements[vertexCounter++];
+      simplexCounter++;
+    } else {
+      // quadrilateral: split it in two triangles
+      _tari[simplexCounter][0] = target_elements[vertexCounter];
+      _tari[simplexCounter][1] = target_elements[vertexCounter+1];
+      _tari[simplexCounter][2] = target_elements[vertexCounter+2];
+
+      simplexCounter++;
+
+      _tari[simplexCounter][0] = target_elements[vertexCounter+3];
+      _tari[simplexCounter][1] = target_elements[vertexCounter+2];
+      _tari[simplexCounter][2] = target_elements[vertexCounter+1];
+
+      targetIsSecondTriangle[simplexCounter] = true;
+
+      simplexCounter++;
+      vertexCounter += 4;
+    }
+
+  }
+
+  if (dim==dimworld) {
+
+    // dim==dimworld: Then grids are artificially embedded in a dim+1 space,
+    // the second grid needs to have its orientation reversed.
+    // That way, the 'surface normals' of the two grids point towards each other.
+    for (unsigned int i = 0; i < numTargetSimplices; ++i)
+      std::swap(_tari[i][0],_tari[i][1]);
+
+  }
+
+  // ////////////////////////////////////////////////////////////
+  //   copy the coordinates to internal arrays of coordinates
+  // ////////////////////////////////////////////////////////////
   this->_domc.resize(domain_coords.size() / dimworld);
   for (unsigned int i = 0; i < this->_domc.size(); ++i)
     for (unsigned int j = 0; j < dimworld; ++j)
@@ -526,6 +609,13 @@ void PSurfaceMerge<dim, dimworld, T>::build(
     }
 
   }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //  If overlaps refer to triangular elements that have been created
+  //  by splitting a quadrilateral we have to reorder the element references
+  //  and the local coordinates.
+  ///////////////////////////////////////////////////////////////////////////////
+
 
   // //////////////////////////////////////////////
   // initialize the merged grid overlap manager
