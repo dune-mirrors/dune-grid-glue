@@ -135,9 +135,11 @@ public:
    * @param target_simplices just like with the domain_simplices and domain_coords
    */
   void build(const std::vector<T>& domain_coords,
-             const std::vector<unsigned int>& domain_simplices,
+             const std::vector<unsigned int>& domain_elements,
+             const std::vector<Dune::GeometryType>& domain_element_types,
              const std::vector<T>& target_coords,
-             const std::vector<unsigned int>& target_simplices
+             const std::vector<unsigned int>& target_elements,
+             const std::vector<Dune::GeometryType>& target_element_types
              );
 
 
@@ -234,24 +236,34 @@ public:
 template<int dim, int dimworld, typename T>
 void ConformingMerge<dim, dimworld, T>::build(
   const std::vector<T>& domain_coords,
-  const std::vector<unsigned int>& domain_simplices,
+  const std::vector<unsigned int>& domain_elements,
+  const std::vector<Dune::GeometryType>& domain_element_types,
   const std::vector<T>& target_coords,
-  const std::vector<unsigned int>& target_simplices
+  const std::vector<unsigned int>& target_elements,
+  const std::vector<Dune::GeometryType>& target_element_types
   )
 {
-  // copy domain and target simplices to internal arrays
-  // (cannot keep refs since outside modification would destroy information)
-  this->_domi.resize(domain_simplices.size()/(dim+1));
-  this->_tari.resize(target_simplices.size()/(dim+1));
+  for (size_t i=0; i<domain_element_types.size(); i++)
+    if (!domain_element_types[i].isSimplex())
+      DUNE_THROW(Dune::GridError, "ConformingMerge is only implemented for simplicial elements!");
 
-  for (unsigned int i = 0; i < domain_simplices.size()/(dim+1); ++i)
+  for (size_t i=0; i<target_element_types.size(); i++)
+    if (!target_element_types[i].isSimplex())
+      DUNE_THROW(Dune::GridError, "ConformingMerge is only implemented for simplicial elements!");
+
+  // copy domain and target elements to internal arrays
+  // (cannot keep refs since outside modification would destroy information)
+  this->_domi.resize(domain_elements.size()/(dim+1));
+  this->_tari.resize(target_elements.size()/(dim+1));
+
+  for (unsigned int i = 0; i < domain_elements.size()/(dim+1); ++i)
     for (int j=0; j<dim+1; j++)
-      _domi[i][j] = domain_simplices[i*(dim+1)+j];
+      _domi[i][j] = domain_elements[i*(dim+1)+j];
 
   // dim==dimworld-1: just copy the two arrays
-  for (unsigned int i = 0; i < target_simplices.size()/(dim+1); ++i)
+  for (unsigned int i = 0; i < target_elements.size()/(dim+1); ++i)
     for (int j=0; j<dim+1; j++)
-      _tari[i][j] = target_simplices[i*(dim+1)+j];
+      _tari[i][j] = target_elements[i*(dim+1)+j];
 
   // copy the coordinates to internal arrays of coordinates
   // (again cannot just keep refs and this representation has advantages)
