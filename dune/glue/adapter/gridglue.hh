@@ -275,7 +275,7 @@ protected:
     for (unsigned int i = 0; i < this->_merg->nSimplices(); ++i)
     {
       RemoteIntersectionImpl ri(this, i);
-      if ((ri.hasTarget() || ri.hasDomain()))
+      // if ((ri.hasTarget() || ri.hasDomain()))
       {
         if (ri.hasDomain())
           ri.domainIndex() = _dindex_sz++;
