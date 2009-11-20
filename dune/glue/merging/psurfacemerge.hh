@@ -476,6 +476,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
 
   // copy and split the domain surface
   Dune::BitSetVector<1> domainIsSecondTriangle(numDomainSimplices, false);
+  std::vector<int> unsplitDomainElementNumbers(numDomainSimplices);
 
   int vertexCounter = 0;
   int simplexCounter = 0;
@@ -486,13 +487,18 @@ void PSurfaceMerge<dim, dimworld, T>::build(
     if (dim == 1 || domain_element_types[i].isSimplex()) {
       for (int j=0; j<dim+1; j++)
         _domi[simplexCounter][j] = domain_elements[vertexCounter++];
+
+      unsplitDomainElementNumbers[simplexCounter] = i;
+
       simplexCounter++;
+
     } else {
       // quadrilateral: split it in two triangles
       _domi[simplexCounter][0] = domain_elements[vertexCounter];
       _domi[simplexCounter][1] = domain_elements[vertexCounter+1];
       _domi[simplexCounter][2] = domain_elements[vertexCounter+2];
 
+      unsplitDomainElementNumbers[simplexCounter] = i;
       simplexCounter++;
 
       _domi[simplexCounter][0] = domain_elements[vertexCounter+3];
@@ -500,6 +506,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
       _domi[simplexCounter][2] = domain_elements[vertexCounter+1];
 
       domainIsSecondTriangle[simplexCounter] = true;
+      unsplitDomainElementNumbers[simplexCounter] = i;
 
       simplexCounter++;
       vertexCounter += 4;
@@ -509,6 +516,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
 
   // copy and split the target surface
   Dune::BitSetVector<1> targetIsSecondTriangle(numTargetSimplices, false);
+  std::vector<int> unsplitTargetElementNumbers(numTargetSimplices);
 
   vertexCounter  = 0;
   simplexCounter = 0;
@@ -519,6 +527,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(
     if (dim==1 || target_element_types[i].isSimplex()) {
       for (int j=0; j<dim+1; j++)
         _tari[simplexCounter][j] = target_elements[vertexCounter++];
+
+      unsplitTargetElementNumbers[simplexCounter] = i;
       simplexCounter++;
     } else {
       // quadrilateral: split it in two triangles
@@ -526,6 +536,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
       _tari[simplexCounter][1] = target_elements[vertexCounter+1];
       _tari[simplexCounter][2] = target_elements[vertexCounter+2];
 
+      unsplitTargetElementNumbers[simplexCounter] = i;
       simplexCounter++;
 
       _tari[simplexCounter][0] = target_elements[vertexCounter+3];
@@ -534,6 +545,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(
 
       targetIsSecondTriangle[simplexCounter] = true;
 
+      unsplitTargetElementNumbers[simplexCounter] = i;
       simplexCounter++;
       vertexCounter += 4;
     }
@@ -613,12 +625,80 @@ void PSurfaceMerge<dim, dimworld, T>::build(
 
   }
 
-  ///////////////////////////////////////////////////////////////////////////////
+  // /////////////////////////////////////////////////////////////////////////////
   //  If overlaps refer to triangular elements that have been created
   //  by splitting a quadrilateral we have to reorder the element references
   //  and the local coordinates.
-  ///////////////////////////////////////////////////////////////////////////////
+  // /////////////////////////////////////////////////////////////////////////////
 
+  for (int i=0; i<overlaps.size(); i++) {
+
+    //
+    if (domainIsSecondTriangle[overlaps[i].tris[0]][0]) {
+
+      assert(dim==2);
+
+      // loop over the intersection corners
+      for (int j=0; j<dim+1; j++) {
+
+        // kinda umstaendlich: go from barycentric to reference coords, do the transformation
+        // there, then go back to barycentric coordinates.  Streamlining this is left for later.
+        Dune::FieldVector<double,dim+1> barycentric;
+        barycentric[0] = overlaps[i].localCoords[0][j][0];
+        barycentric[1] = overlaps[i].localCoords[0][j][1];
+        barycentric[2] = 1 - barycentric[0] - barycentric[1];
+
+        Dune::FieldVector<double,dim> ref = barycentricToReference(barycentric);
+
+        // this is the actual transformation.  (0,0) becomes (1,1), (1,0) becomes (0,1),  (0,1) becomes (1,0)
+        ref *= -1;
+        ref +=  1;
+
+        // back to barycentric
+        barycentric = referenceToBarycentric(ref);
+        overlaps[i].localCoords[0][j][0] = barycentric[0];
+        overlaps[i].localCoords[0][j][1] = barycentric[1];
+
+      }
+
+    }
+
+    if (targetIsSecondTriangle[overlaps[i].tris[1]][0]) {
+
+      assert(dim==2);
+
+      // loop over the intersection corners
+      for (int j=0; j<dim+1; j++) {
+
+        // kinda umstaendlich: go from barycentric to reference coords, do the transformation
+        // there, then go back to barycentric coordinates.  Streamlining this is left for later.
+        Dune::FieldVector<double,dim+1> barycentric;
+        barycentric[0] = overlaps[i].localCoords[1][j][0];
+        barycentric[1] = overlaps[i].localCoords[1][j][1];
+        barycentric[2] = 1 - barycentric[0] - barycentric[1];
+
+        Dune::FieldVector<double,dim> ref = barycentricToReference(barycentric);
+
+        // this is the actual transformation.  (0,0) becomes (1,1), (1,0) becomes (0,1),  (0,1) becomes (1,0)
+        ref *= -1;
+        ref +=  1;
+
+        // back to barycentric
+        barycentric = referenceToBarycentric(ref);
+        overlaps[i].localCoords[1][j][0] = barycentric[0];
+        overlaps[i].localCoords[1][j][1] = barycentric[1];
+
+      }
+
+
+    }
+
+    // The numbers in overlaps[].tri refer to the split elements.
+    // Replace that with the actual numbers
+    overlaps[i].tris[0] = unsplitDomainElementNumbers[overlaps[i].tris[0]];
+    overlaps[i].tris[1] = unsplitTargetElementNumbers[overlaps[i].tris[1]];
+
+  }
 
   // //////////////////////////////////////////////
   // initialize the merged grid overlap manager
