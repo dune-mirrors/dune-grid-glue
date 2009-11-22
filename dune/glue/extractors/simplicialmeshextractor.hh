@@ -160,28 +160,6 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
         }
       }
 
-      // flip cell if necessary
-      if (this->positiveNormalDirection())
-      {
-        switch ((int)dim) {
-        case 1 :
-        case 2 :
-        {
-          int x = vertex_indices[0];
-          vertex_indices[0] = vertex_indices[1];
-          vertex_indices[1] = x;
-
-          x = vertex_numbers[0];
-          vertex_numbers[0] = vertex_numbers[1];
-          vertex_numbers[1] = x;
-
-          break;
-        }
-        default :
-          assert(false);
-        }
-      }
-
       // add a new face to the temporary collection
       temp_faces.push_back(FaceInfo(eindex,0));
       element_index++;

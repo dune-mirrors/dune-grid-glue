@@ -30,14 +30,9 @@ public:
    * @param gv the grid view object to work with
    */
   Codim0Extractor(const GV& gv)
-    :  Extractor<GV,0>(gv), _positiveNormalDirection(false)
+    :  Extractor<GV,0>(gv)
   {}
 
-  bool & positiveNormalDirection() { return _positiveNormalDirection; }
-  const bool & positiveNormalDirection() const { return _positiveNormalDirection; }
-
-protected:
-  bool _positiveNormalDirection;
 };
 
 #endif // DUNE_CODIM_0_EXTRACTOR_HH_
