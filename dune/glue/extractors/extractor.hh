@@ -162,8 +162,13 @@ protected:
     /// @brief the number of the face in the parent element
     unsigned int num_in_parent : 3;
 
-    /// @brief the corner indices plus the numbers of the vertices in the parent element
-    CornerInfo corners[simplex_corners];     // sim = numer of vertices in a simplex
+    /** @brief the corner indices plus the numbers of the vertices in the parent element
+
+       This array has the length cube_corners, because currently that is an upper bound
+       for the number of corners of an element.  If more general element types appear we
+       need to change this.
+     */
+    CornerInfo corners[cube_corners];         // sim = numer of vertices in a simplex
   };
 
 
