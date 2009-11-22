@@ -51,8 +51,6 @@ public:
   using Codim0Extractor<GV>::codim;
   using Codim0Extractor<GV>::dim;
   using Codim0Extractor<GV>::dimworld;
-  using Codim0Extractor<GV>::simplex_corners;
-  using Codim0Extractor<GV>::cube_corners;
 
   typedef GV GridView;
 
@@ -64,8 +62,6 @@ public:
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   static const Dune::PartitionIteratorType PType = Dune::All_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
-
-  typedef typename GV::IntersectionIterator IsIter;
 
   // index sets and index types
   typedef typename GV::IndexSet IndexSet;
@@ -105,28 +101,23 @@ template<typename GV>
 void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 {
   // In this first pass iterate over all entities of codim 0.
-  // For each codim 1 intersection check if it is part of the boundary and if so,
-  // get its corner vertices, find resp. store them together with their associated index,
-  // and remember the indices of the boundary faces' corners.
+  // Get its corner vertices, find resp. store them together with their associated index,
+  // and remember the indices of the corners.
 
   // free everything there is in this object
   this->clear();
 
   // several counter for consecutive indexing are needed
-  size_t simplex_index = 0;
+  size_t element_index = 0;
   size_t vertex_index = 0;
 
   // a temporary container where newly acquired face
   // information can be stored at first
   std::deque<FaceInfo> temp_faces;
 
-  // iterate over all codim 0 elemets on the grid
+  // iterate over all codim 0 elements on the grid
   for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
   {
-    // check if there are unwanted geometric shapes
-    // if one appears => exit with error
-    if (!elit->type().isSimplex())
-      DUNE_THROW(Dune::GridError, "Expected simplicial grid but found a " << elit->type());
 
     IndexType eindex = this->indexSet().template index<0>(*elit);
 
@@ -135,19 +126,18 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
     if (descr.contains(elit))
     {
       // add an entry to the element info map, the index will be set properly later
-      this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, 1);
+      this->_elmtInfo[eindex] = new ElementInfo(element_index, elit, 1);
 
-      unsigned int vertex_indices[simplex_corners];       // index in global vector
-      unsigned int vertex_numbers[simplex_corners];       // index in parent entity
+      int numCorners = elit->template count<dim>();
+      unsigned int vertex_indices[numCorners];       // index in global vector
+      unsigned int vertex_numbers[numCorners];       // index in parent entity
 
       // try for each of the faces vertices whether it is already inserted or not
-      for (int i = 0; i < simplex_corners; ++i)
+      for (int i = 0; i < numCorners; ++i)
       {
         vertex_numbers[i] = i;
 
         // get the vertex pointer and the index from the index set
-        // Note that the orientation is always the same for all simplices,
-        // i.e. CCW which is 0,1 in 2D and 0,1,2 in 3D
         VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
         IndexType vindex = this->indexSet().template index<dim>(*vptr);
 
@@ -194,8 +184,8 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 
       // add a new face to the temporary collection
       temp_faces.push_back(FaceInfo(eindex,0));
-      simplex_index++;
-      for (int i=0; i<simplex_corners; i++) {
+      element_index++;
+      for (int i=0; i<numCorners; i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];
         // remember the vertices' numbers in parent element's vertices
         temp_faces.back().corners[i].num = vertex_numbers[i];
@@ -205,7 +195,7 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
   }   // end loop over elements
 
   // allocate the array for the face specific information...
-  this->_faces.resize(simplex_index);
+  this->_faces.resize(element_index);
   // ...and fill in the data from the temporary containers
   copy(temp_faces.begin(), temp_faces.end(), this->_faces.begin());
 
