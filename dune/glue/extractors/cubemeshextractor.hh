@@ -173,23 +173,6 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
         }
       }
 
-      // flip cell if necessary
-      if (this->positiveNormalDirection())
-      {
-        // do the flip
-        for (int i = 0; i < cube_corners; i+=2)
-        {
-          // swap i and i+1
-          int x = vertex_indices[i];
-          vertex_indices[i] = vertex_indices[i+1];
-          vertex_indices[i+1] = x;
-
-          x = vertex_numbers[i];
-          vertex_numbers[i] = vertex_numbers[i+1];
-          vertex_numbers[i+1] = x;
-        }
-      }
-
       // add a new face to the temporary collection
       temp_faces.push_back(FaceInfo(eindex,0));
       simplex_index++;
