@@ -3,6 +3,10 @@
 #ifndef DUNE_MERGER_HH
 #define DUNE_MERGER_HH
 
+#include <vector>
+
+#include <dune/common/fvector.hh>
+#include <dune/common/geometrytype.hh>
 
 /** \brief Abstract base for all classes that take extraced grids and build sets of intersections
 
