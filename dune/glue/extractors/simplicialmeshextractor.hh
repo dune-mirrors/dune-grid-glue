@@ -68,7 +68,7 @@ public:
   typedef typename IndexSet::IndexType IndexType;
 
   // import typedefs from base class
-  typedef typename Codim0Extractor<GV>::FaceInfo FaceInfo;
+  typedef typename Codim0Extractor<GV>::SubEntityInfo SubEntityInfo;
   typedef typename Codim0Extractor<GV>::ElementInfo ElementInfo;
   typedef typename Codim0Extractor<GV>::VertexInfo VertexInfo;
   typedef typename Codim0Extractor<GV>::CoordinateInfo CoordinateInfo;
@@ -113,7 +113,7 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 
   // a temporary container where newly acquired face
   // information can be stored at first
-  std::deque<FaceInfo> temp_faces;
+  std::deque<SubEntityInfo> temp_faces;
 
   // iterate over all codim 0 elements on the grid
   for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -161,7 +161,7 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       }
 
       // add a new face to the temporary collection
-      temp_faces.push_back(FaceInfo(eindex,0));
+      temp_faces.push_back(SubEntityInfo(eindex,0));
       element_index++;
       for (int i=0; i<numCorners; i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];
@@ -173,9 +173,9 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
   }   // end loop over elements
 
   // allocate the array for the face specific information...
-  this->_faces.resize(element_index);
+  this->subEntities_.resize(element_index);
   // ...and fill in the data from the temporary containers
-  copy(temp_faces.begin(), temp_faces.end(), this->_faces.begin());
+  copy(temp_faces.begin(), temp_faces.end(), this->subEntities_.begin());
 
   // now first write the array with the coordinates...
   this->_coords.resize(this->_vtxInfo.size());

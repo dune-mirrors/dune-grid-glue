@@ -143,18 +143,16 @@ protected:
 
 
   /**
-   * @class FaceInfo
-   * @brief simple struct holding some packed information about a codimension 1 entity
-   * to its parent codim 0 entity
+   * @brief Holds some information about an element's subentity involved in a coupling
    */
-  struct FaceInfo
+  struct SubEntityInfo
   {
-    FaceInfo()
+    SubEntityInfo()
     {
       geometryType_.makeSimplex(dim-codim);
     }
 
-    FaceInfo(IndexType parent_, unsigned int num_in_parent_)
+    SubEntityInfo(IndexType parent_, unsigned int num_in_parent_)
       :   parent(parent_), num_in_parent(num_in_parent_)
     {
       geometryType_.makeSimplex(dim-codim);
@@ -193,8 +191,8 @@ protected:
   /// @brief all information about the corner vertices of the extracted
   std::vector<CoordinateInfo>   _coords;
 
-  /// @brief all information about the extracted faces
-  std::vector<FaceInfo>         _faces;
+  /// @brief all information about the extracted subEntities
+  std::vector<SubEntityInfo> subEntities_;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
@@ -239,8 +237,8 @@ public:
       this->_coords.swap(dummy);
     }
     {
-      std::vector<FaceInfo> dummy;
-      this->_faces.swap(dummy);
+      std::vector<SubEntityInfo> dummy;
+      this->subEntities_.swap(dummy);
     }
 
     // first free all manually allocated vertex/element info items...
@@ -285,9 +283,9 @@ public:
   /** \brief Get the list of geometry types */
   void getGeometryTypes(std::vector<Dune::GeometryType>& geometryTypes) const
   {
-    geometryTypes.resize(_faces.size());
-    for (size_t i=0; i<_faces.size(); i++)
-      geometryTypes[i] = _faces[i].geometryType_;
+    geometryTypes.resize(subEntities_.size());
+    for (size_t i=0; i<subEntities_.size(); i++)
+      geometryTypes[i] = subEntities_[i].geometryType_;
   }
 
 
@@ -299,10 +297,10 @@ public:
    */
   void getFaces(std::vector<SimplexTopology>& faces) const
   {
-    faces.resize(this->_faces.size());
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
+    faces.resize(this->subEntities_.size());
+    for (unsigned int i = 0; i < this->subEntities_.size(); ++i)
       for (unsigned int j = 0; j < simplex_corners; ++j)
-        faces[i][j] = this->_faces[i].corners[j].idx;
+        faces[i][j] = this->subEntities_[i].corners[j].idx;
   }
 
 
@@ -338,7 +336,7 @@ public:
    */
   int indexInInside(unsigned int index) const
   {
-    return index < this->_faces.size() ? this->_faces[index].num_in_parent : -1;
+    return index < this->subEntities_.size() ? this->subEntities_[index].num_in_parent : -1;
   }
 
   /**
@@ -365,9 +363,9 @@ public:
    */
   const ElementPtr& element(unsigned int index) const
   {
-    if (index >= this->_faces.size())
+    if (index >= this->subEntities_.size())
       DUNE_THROW(Dune::GridError, "invalid face index");
-    return (this->_elmtInfo.find(this->_faces[index].parent))->second->p;
+    return (this->_elmtInfo.find(this->subEntities_[index].parent))->second->p;
   }
 
 #if 1
@@ -407,7 +405,7 @@ typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int inde
 {
   std::vector<Coords> corners(simplex_corners);
   for (int i = 0; i < simplex_corners; ++i)
-    corners[i] = this->_coords[this->_faces[index].corners[i].idx].coord;
+    corners[i] = this->_coords[this->subEntities_[index].corners[i].idx].coord;
 
   return Geometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
 }
@@ -420,7 +418,7 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   std::vector<LocalCoords> corners(simplex_corners);
 
   // get face info
-  const FaceInfo & face = this->_faces[index];
+  const SubEntityInfo & face = this->subEntities_[index];
   Dune::GeometryType facetype(Dune::GeometryType::simplex, dim-codim);
 
   // get reference element

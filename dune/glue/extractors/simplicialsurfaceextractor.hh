@@ -90,7 +90,7 @@ public:
   typedef typename IndexSet::IndexType IndexType;
 
   // import typedefs from base class
-  typedef typename Codim1Extractor<GV>::FaceInfo FaceInfo;
+  typedef typename Codim1Extractor<GV>::SubEntityInfo SubEntityInfo;
 
 public:
 
@@ -158,7 +158,7 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
     // a temporary container where newly acquired face
     // information can be stored at first
-    std::deque<FaceInfo> temp_faces;
+    std::deque<SubEntityInfo> temp_faces;
 
     // iterate over all codim 0 elemets on the grid
     for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -197,7 +197,7 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
           // add a new face to the temporary collection
-          temp_faces.push_back(FaceInfo(eindex, *sit));
+          temp_faces.push_back(SubEntityInfo(eindex, *sit));
 
           // try for each of the faces vertices whether it is already inserted or not
           for (int i = 0; i < simplex_corners; ++i)
@@ -239,9 +239,9 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     }             // end loop over elements
 
     // allocate the array for the face specific information...
-    this->_faces.resize(simplex_index);
+    this->subEntities_.resize(simplex_index);
     // ...and fill in the data from the temporary containers
-    copy(temp_faces.begin(), temp_faces.end(), this->_faces.begin());
+    copy(temp_faces.begin(), temp_faces.end(), this->subEntities_.begin());
   }
 
 

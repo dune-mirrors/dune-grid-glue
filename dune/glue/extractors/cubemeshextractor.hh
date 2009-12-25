@@ -72,7 +72,7 @@ public:
   typedef typename IndexSet::IndexType IndexType;
 
   // import typedefs from base class
-  typedef typename Codim0Extractor<GV>::FaceInfo FaceInfo;
+  typedef typename Codim0Extractor<GV>::SubEntityInfo SubEntityInfo;
   typedef typename Codim0Extractor<GV>::ElementInfo ElementInfo;
   typedef typename Codim0Extractor<GV>::VertexInfo VertexInfo;
   typedef typename Codim0Extractor<GV>::CoordinateInfo CoordinateInfo;
@@ -122,7 +122,7 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
 
   // a temporary container where newly acquired face
   // information can be stored at first
-  std::deque<FaceInfo> temp_faces;
+  std::deque<SubEntityInfo> temp_faces;
 
   // iterate over all codim 0 elemets on the grid
   for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
@@ -174,7 +174,7 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       }
 
       // add a new face to the temporary collection
-      temp_faces.push_back(FaceInfo(eindex,0));
+      temp_faces.push_back(SubEntityInfo(eindex,0));
       simplex_index++;
       for (int i=0; i<simplex_corners; i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];
@@ -185,7 +185,7 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       // now introduce the second triangle subdividing the quadrilateral
       if (dim==2) {
         // add a new face to the temporary collection for the 2nd triangle
-        temp_faces.push_back(FaceInfo(eindex,0));
+        temp_faces.push_back(SubEntityInfo(eindex,0));
         temp_faces.back().corners[0].idx = vertex_indices[3];
         temp_faces.back().corners[1].idx = vertex_indices[2];
         temp_faces.back().corners[2].idx = vertex_indices[1];
@@ -199,9 +199,9 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
   }   // end loop over elements
 
   // allocate the array for the face specific information...
-  this->_faces.resize(simplex_index);
+  this->subEntities_.resize(simplex_index);
   // ...and fill in the data from the temporary containers
-  copy(temp_faces.begin(), temp_faces.end(), this->_faces.begin());
+  copy(temp_faces.begin(), temp_faces.end(), this->subEntities_.begin());
 
   // now first write the array with the coordinates...
   this->_coords.resize(this->_vtxInfo.size());
