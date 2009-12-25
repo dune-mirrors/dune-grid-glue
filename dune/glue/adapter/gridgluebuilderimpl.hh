@@ -73,15 +73,16 @@ private:
   const typename Parent::TargetTransformation*    _tartrafo;
 
   template<typename Extractor>
-  void extractGrid (const Extractor & ext,
+  void extractGrid (const Extractor & extractor,
                     std::vector<typename Parent::ctype> & coords,
                     std::vector<unsigned int> & faces,
+                    std::vector<Dune::GeometryType>& geometryTypes,
                     const CoordinateTransformation<Extractor::dimworld, Parent::dimworld, typename Parent::ctype>* trafo) const
   {
     std::vector<typename Extractor::Coords> tempcoords;
     std::vector<typename Parent::DomainExtractor::SimplexTopology> tempfaces;
 
-    ext.getCoords(tempcoords);
+    extractor.getCoords(tempcoords);
     coords.clear();
     coords.reserve(Parent::dimworld*tempcoords.size());
 
@@ -104,12 +105,18 @@ private:
       }
     }
 
-    ext.getFaces(tempfaces);
+    extractor.getFaces(tempfaces);
     faces.clear();
     faces.reserve(Parent::DomainExtractor::simplex_corners*tempfaces.size());
-    for (unsigned int i = 0; i < tempfaces.size(); ++i)
+
+    for (unsigned int i = 0; i < tempfaces.size(); ++i) {
       for (int j = 0; j < Parent::DomainExtractor::simplex_corners; ++j)
         faces.push_back(tempfaces[i][j]);
+    }
+
+    // get the list of geometry types from the extractor
+    extractor.getGeometryTypes(geometryTypes);
+
   }
 
 public:
@@ -168,8 +175,10 @@ public:
 
     std::vector<typename Parent::ctype> domcoords;
     std::vector<unsigned int> domfaces;
+    std::vector<Dune::GeometryType> domainElementTypes;
     std::vector<typename Parent::ctype> tarcoords;
     std::vector<unsigned int> tarfaces;
+    std::vector<Dune::GeometryType> targetElementTypes;
 
     /*
      * extract global surface grids
@@ -177,8 +186,8 @@ public:
 
     // retrieve the coordinate and topology information from the extractors
     // and apply transformations if necessary
-    extractGrid(this->_glue._domext, domcoords, domfaces, _domtrafo);
-    extractGrid(this->_glue._tarext, tarcoords, tarfaces, _tartrafo);
+    extractGrid(this->_glue._domext, domcoords, domfaces, domainElementTypes, _domtrafo);
+    extractGrid(this->_glue._tarext, tarcoords, tarfaces, targetElementTypes, _tartrafo);
 
 #ifdef WRITE_TO_VTK
     const int dimw = Parent::dimworld;
@@ -197,14 +206,6 @@ public:
     STDOUTLN(prefix << "Done writing target surface!");
 #endif // WRITE_TO_VTK
 
-    // Set up the array of element types.  Currently we simply hand over a vector full of simplices
-    // This is an intermediate solution.  In the long run, splitting up the elements into simplices
-    // should be done by the mergers (if at all necessary) instead of the extractors.
-
-    std::vector<Dune::GeometryType> domainElementTypes(domfaces.size()/(Parent::DomainExtractor::simplex_corners),
-                                                       Dune::GeometryType(Dune::GeometryType::simplex,DomainGridView::dimension-codim1));
-    std::vector<Dune::GeometryType> targetElementTypes(tarfaces.size()/(Parent::TargetExtractor::simplex_corners),
-                                                       Dune::GeometryType(Dune::GeometryType::simplex,TargetGridView::dimension-codim2));
 
     // start the actual build process
     this->_glue._merg->build(domcoords, domfaces, domainElementTypes,

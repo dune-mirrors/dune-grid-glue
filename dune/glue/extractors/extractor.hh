@@ -150,17 +150,24 @@ protected:
   struct FaceInfo
   {
     FaceInfo()
-    {}
+    {
+      geometryType_.makeSimplex(dim-codim);
+    }
 
     FaceInfo(IndexType parent_, unsigned int num_in_parent_)
       :   parent(parent_), num_in_parent(num_in_parent_)
-    {}
+    {
+      geometryType_.makeSimplex(dim-codim);
+    }
 
     /// @brief the index of the parent element (from index set)
     IndexType parent;
 
     /// @brief the number of the face in the parent element
     unsigned int num_in_parent : 3;
+
+    /** \brief The GeometryType of the subentity */
+    Dune::GeometryType geometryType_;
 
     /** @brief the corner indices plus the numbers of the vertices in the parent element
 
@@ -273,6 +280,14 @@ public:
   unsigned int nCoords() const
   {
     return _coords.size();
+  }
+
+  /** \brief Get the list of geometry types */
+  void getGeometryTypes(std::vector<Dune::GeometryType>& geometryTypes) const
+  {
+    geometryTypes.resize(_faces.size());
+    for (size_t i=0; i<_faces.size(); i++)
+      geometryTypes[i] = _faces[i].geometryType_;
   }
 
 
