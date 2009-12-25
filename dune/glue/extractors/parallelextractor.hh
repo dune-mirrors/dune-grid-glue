@@ -376,6 +376,14 @@ public:
     return _coords.size();
   }
 
+  /** \brief Get the list of geometry types
+      \todo This is not implemented, as I don't know how to implemented it properly.
+      Before implementing this please check whether it is still needed at all.
+   */
+  void getGeometryTypes(std::vector<Dune::GeometryType>& geometryTypes) const
+  {
+    DUNE_THROW(Dune::NotImplemented, "getGeometryTypes() for ParallelExtractor");
+  }
 
   /**
    * @brief getter for the indices array
