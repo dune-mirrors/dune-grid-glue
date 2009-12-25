@@ -20,9 +20,7 @@
 #define DUNE_EXTRACTOR_HH
 
 #include <vector>
-#include <deque>
 #include <map>
-#include <set>
 #include <algorithm>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
