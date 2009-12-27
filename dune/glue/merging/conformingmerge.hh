@@ -7,21 +7,14 @@
  *  Author:      Oliver Sander
  *  ---------------------------------
  *  Project:     dune-grid-glue
- *  Description: implementation of the SurfaceMerge concept for conforming interfaces
+ *  Description: implementation of the Merger concept for conforming interfaces
  *  subversion:  $Id$
  *
  */
 /**
  * @file
  * @brief
- * Standard implementation of the SurfaceMerge concept for the use in 2d and 3d.
- * Uses psurface routines to compute the merged grid  and provides access to it
- * via the interface specified by the concept.
- *
- * While this adapter is correctly implemented and thoroughly tested there are still some problems with the
- * implementation behind it. E.g. in a case where edges are mapped onto other edges the code is not stable
- * and the program might crash. Specifying a normal field in the 3d case does not guarantee the expected
- * improvements in the mapping either.
+ * Implementation of the Merger concept for conforming interfaces
  */
 
 #ifndef CONFORMING_MERGE_HH
@@ -45,7 +38,7 @@
 #include <dune/glue/merging/merger.hh>
 
 
-/** \brief Implementation of the SurfaceMerge concept for conforming interfaces
+/** \brief Implementation of the Merger concept for conforming interfaces
 
    \tparam dim Grid dimension of the coupling grids.  Must be the same for both sides
    \tparam dimworld  Dimension of the world coordinates.
