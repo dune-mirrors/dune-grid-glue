@@ -32,7 +32,7 @@ public:
 
 
 template <int dim>
-void testCubeGrids()
+void testCubeGrids(Merger<double,dim,dim,dim>& merger)
 {
 
   // /////////////////////////////////////////////////////////////////
@@ -65,8 +65,6 @@ void testCubeGrids()
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
-  PSurfaceMerge<dim,dim,double> merger;
-
   GlueType glue(grid0.leafView(), grid1.leafView(), &merger);
 
   AllElementsDescriptor<DomGridView> domdesc;
@@ -90,7 +88,7 @@ void testCubeGrids()
 
 
 template <int dim>
-void testSimplexGrids()
+void testSimplexGrids(Merger<double,dim,dim,dim>& merger)
 {
 
   // /////////////////////////////////////////////////////////////////
@@ -121,8 +119,6 @@ void testSimplexGrids()
   typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::simplex> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::simplex> TarTraits;
 
-  PSurfaceMerge<dim,dim,double> merger;
-
   GridGlue<DomTraits,TarTraits> glue(grid0.leafView(), grid1.leafView(), &merger);
 
   AllElementsDescriptor<DomGridView> domdesc;
@@ -145,7 +141,7 @@ void testSimplexGrids()
 }
 
 
-void testTriangleGridsUG()
+void testTriangleGridsUG(Merger<double,2,2,2>& merger)
 {
   const int dim = 2;
 
@@ -211,8 +207,6 @@ void testTriangleGridsUG()
   typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::simplex> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::simplex> TarTraits;
 
-  PSurfaceMerge<dim,dim,double> merger;
-
   GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
 
   AllElementsDescriptor<DomGridView> domdesc;
@@ -236,7 +230,7 @@ void testTriangleGridsUG()
 
 
 template <int dim>
-void testHybridGridsUG()
+void testHybridGridsUG(Merger<double,dim,dim,dim>& merger)
 {
   // /////////////////////////////////////////////////////////////////////////
   //   Create the hybrid test grid from dune-grid twice and shift it once
@@ -258,8 +252,6 @@ void testHybridGridsUG()
 
   typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::simplex> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::simplex> TarTraits;
-
-  PSurfaceMerge<dim,dim,double> merger;
 
   GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
 
@@ -285,14 +277,20 @@ void testHybridGridsUG()
 
 int main()
 {
+  // //////////////////////////////////////////////////////////
+  //   Test with the PSurfaceMerge implementation
+  // //////////////////////////////////////////////////////////
 
-  testCubeGrids<1>();
-  testCubeGrids<2>();
+  PSurfaceMerge<1,1,double> psurfaceMerge1d;
+  PSurfaceMerge<2,2,double> psurfaceMerge2d;
 
-  testSimplexGrids<1>();
+  testCubeGrids<1>(psurfaceMerge1d);
+  testCubeGrids<2>(psurfaceMerge2d);
+
+  testSimplexGrids<1>(psurfaceMerge1d);
 #if HAVE_UG
-  testTriangleGridsUG();
-  //testHybridGridsUG<2>();
-  //testHybridGridsUG<3>();
+  testTriangleGridsUG(psurfaceMerge2d);
+  testHybridGridsUG<2>(psurfaceMerge2d);
 #endif
+
 }
