@@ -74,7 +74,7 @@ private:
 
   template<typename Extractor>
   void extractGrid (const Extractor & extractor,
-                    std::vector<typename Parent::ctype> & coords,
+                    std::vector<Dune::FieldVector<typename Parent::ctype, Parent::dimworld> > & coords,
                     std::vector<unsigned int> & faces,
                     std::vector<Dune::GeometryType>& geometryTypes,
                     const CoordinateTransformation<Extractor::dimworld, Parent::dimworld, typename Parent::ctype>* trafo) const
@@ -84,7 +84,7 @@ private:
 
     extractor.getCoords(tempcoords);
     coords.clear();
-    coords.reserve(Parent::dimworld*tempcoords.size());
+    coords.reserve(tempcoords.size());
 
     if (trafo != NULL)
     {
@@ -92,17 +92,15 @@ private:
       for (size_t i = 0; i < tempcoords.size(); ++i)
       {
         typename Parent::Coords temp = (*trafo)(tempcoords[i]);
+        coords.push_back(Dune::FieldVector<typename Parent::ctype, Parent::dimworld>());
         for (size_t j = 0; j < Parent::dimworld; ++j)
-          coords.push_back(temp[j]);
+          coords.back()[j] = temp[j];
       }
     }
     else
     {
       for (unsigned int i = 0; i < tempcoords.size(); ++i)
-      {
-        for (size_t j = 0; j < Parent::dimworld; ++j)
-          coords.push_back(tempcoords[i][j]);
-      }
+        coords.push_back(tempcoords[i]);
     }
 
     extractor.getFaces(tempfaces);
@@ -172,10 +170,10 @@ public:
       this->_glue._intersections.swap(dummy);
     }
 
-    std::vector<typename Parent::ctype> domcoords;
+    std::vector<Dune::FieldVector<typename Parent::ctype, Parent::dimworld> > domcoords;
     std::vector<unsigned int> domfaces;
     std::vector<Dune::GeometryType> domainElementTypes;
-    std::vector<typename Parent::ctype> tarcoords;
+    std::vector<Dune::FieldVector<typename Parent::ctype, Parent::dimworld> > tarcoords;
     std::vector<unsigned int> tarfaces;
     std::vector<Dune::GeometryType> targetElementTypes;
 

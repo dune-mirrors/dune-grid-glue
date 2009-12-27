@@ -87,15 +87,6 @@ private:
   /// @brief maximum distance between two matched points in the mapping
   T tolerance_;
 
-  /* geometric data for both domain and targt */
-
-  /// @brief domain coordinates
-  std::vector<Dune::FieldVector<double,dimworld> >   domainCoords_;
-
-  /// @brief target coordinates
-  std::vector<Dune::FieldVector<double,dimworld> >   targetCoords_;
-
-
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
@@ -128,10 +119,10 @@ public:
    * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
    * @param target_simplices just like with the domain_simplices and domain_coords
    */
-  void build(const std::vector<T>& domain_coords,
+  void build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
              const std::vector<unsigned int>& domain_elements,
              const std::vector<Dune::GeometryType>& domain_element_types,
-             const std::vector<T>& target_coords,
+             const std::vector<Dune::FieldVector<T,dimworld> >& target_coords,
              const std::vector<unsigned int>& target_elements,
              const std::vector<Dune::GeometryType>& target_element_types
              );
@@ -228,14 +219,13 @@ public:
 
 
 template<int dim, int dimworld, typename T>
-void ConformingMerge<dim, dimworld, T>::build(
-  const std::vector<T>& domain_coords,
-  const std::vector<unsigned int>& domain_elements,
-  const std::vector<Dune::GeometryType>& domain_element_types,
-  const std::vector<T>& target_coords,
-  const std::vector<unsigned int>& target_elements,
-  const std::vector<Dune::GeometryType>& target_element_types
-  )
+void ConformingMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<T,dimworld> >& domainCoords,
+                                              const std::vector<unsigned int>& domain_elements,
+                                              const std::vector<Dune::GeometryType>& domain_element_types,
+                                              const std::vector<Dune::FieldVector<T,dimworld> >& targetCoords,
+                                              const std::vector<unsigned int>& target_elements,
+                                              const std::vector<Dune::GeometryType>& target_element_types
+                                              )
 {
   for (size_t i=0; i<domain_element_types.size(); i++)
     if (!domain_element_types[i].isSimplex())
@@ -259,18 +249,6 @@ void ConformingMerge<dim, dimworld, T>::build(
     for (int j=0; j<dim+1; j++)
       _tari[i][j] = target_elements[i*(dim+1)+j];
 
-  // copy the coordinates to internal arrays of coordinates
-  // (again cannot just keep refs and this representation has advantages)
-  domainCoords_.resize(domain_coords.size() / dimworld);
-  for (unsigned int i = 0; i < domainCoords_.size(); ++i)
-    for (unsigned int j = 0; j < dimworld; ++j)
-      domainCoords_[i][j] = domain_coords[i*dimworld + j];
-
-  targetCoords_.resize(target_coords.size() / dimworld);
-  for (unsigned int i = 0; i < targetCoords_.size(); ++i)
-    for (unsigned int j = 0; j < dimworld; ++j)
-      targetCoords_[i][j] = target_coords[i*dimworld + j];
-
   std::cout << "ConformingMerge building merged grid..." << std::endl;
 
   // /////////////////////////////////////////////////////////////////////
@@ -278,15 +256,15 @@ void ConformingMerge<dim, dimworld, T>::build(
   //   \todo This is only the naive quadratic algorithm
   // /////////////////////////////////////////////////////////////////////
 
-  std::vector<int> pairs(domainCoords_.size(), -1);
+  std::vector<int> pairs(domainCoords.size(), -1);
 
   // Loop over first boundary
-  for (int i=0; i<domainCoords_.size(); i++) {
+  for (int i=0; i<domainCoords.size(); i++) {
 
     // Loop over second boundary
-    for (int j=0; j<targetCoords_.size(); j++) {
+    for (int j=0; j<targetCoords.size(); j++) {
 
-      if ((domainCoords_[i]-targetCoords_[j]).two_norm() < tolerance_) {
+      if ((domainCoords[i]-targetCoords[j]).two_norm() < tolerance_) {
 
         pairs[i] = j;
         break;

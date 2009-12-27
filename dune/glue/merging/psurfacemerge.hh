@@ -204,7 +204,7 @@ private:
   /// @brief maximum distance between two matched points in the mapping
   T _maxdist;
 
-  /* geometric data for both domain and targt */
+  /* geometric data for both domain and target */
 
   /// @brief domain coordinates
   std::vector<std::tr1::array<double,psurfaceDimworld> >   _domc;
@@ -289,10 +289,10 @@ public:
    * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
    * @param target_elements just like with the domain_elements and domain_coords
    */
-  void build(const std::vector<T>& domain_coords,
+  void build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
              const std::vector<unsigned int>& domain_elements,
              const std::vector<Dune::GeometryType>& domain_element_types,
-             const std::vector<T>& target_coords,
+             const std::vector<Dune::FieldVector<T,dimworld> >& target_coords,
              const std::vector<unsigned int>& target_elements,
              const std::vector<Dune::GeometryType>& target_element_types
              );
@@ -389,14 +389,13 @@ public:
 
 
 template<int dim, int dimworld, typename T>
-void PSurfaceMerge<dim, dimworld, T>::build(
-  const std::vector<T>& domain_coords,
-  const std::vector<unsigned int>& domain_elements,
-  const std::vector<Dune::GeometryType>& domain_element_types,
-  const std::vector<T>& target_coords,
-  const std::vector<unsigned int>& target_elements,
-  const std::vector<Dune::GeometryType>& target_element_types
-  )
+void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
+                                            const std::vector<unsigned int>& domain_elements,
+                                            const std::vector<Dune::GeometryType>& domain_element_types,
+                                            const std::vector<Dune::FieldVector<T,dimworld> >& target_coords,
+                                            const std::vector<unsigned int>& target_elements,
+                                            const std::vector<Dune::GeometryType>& target_element_types
+                                            )
 {
   // //////////////////////////////////////////
   //   check input data for consistency
@@ -565,15 +564,15 @@ void PSurfaceMerge<dim, dimworld, T>::build(
   // ////////////////////////////////////////////////////////////
   //   copy the coordinates to internal arrays of coordinates
   // ////////////////////////////////////////////////////////////
-  this->_domc.resize(domain_coords.size() / dimworld);
+  this->_domc.resize(domain_coords.size());
   for (unsigned int i = 0; i < this->_domc.size(); ++i)
     for (unsigned int j = 0; j < dimworld; ++j)
-      this->_domc[i][j] = domain_coords[i*dimworld + j];
+      this->_domc[i][j] = domain_coords[i][j];
 
-  this->_tarc.resize(target_coords.size() / dimworld);
+  this->_tarc.resize(target_coords.size());
   for (unsigned int i = 0; i < this->_tarc.size(); ++i)
     for (unsigned int j = 0; j < dimworld; ++j)
-      this->_tarc[i][j] = target_coords[i*dimworld + j];
+      this->_tarc[i][j] = target_coords[i][j];
 
   // psurface doesn't actually support the case dim==dimworld.  Therefore we
   // use a trick: we just embed everything in a space of dimension dimworld+1

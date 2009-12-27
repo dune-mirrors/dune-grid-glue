@@ -42,10 +42,10 @@ public:
    * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
    * @param target_simplices just like with the domain_simplices and domain_coords
    */
-  virtual void build(const std::vector<ctype>& domain_coords,
+  virtual void build(const std::vector<Dune::FieldVector<ctype,dimworld> >& domain_coords,
                      const std::vector<unsigned int>& domain_elements,
                      const std::vector<Dune::GeometryType>& domain_element_types,
-                     const std::vector<ctype>& target_coords,
+                     const std::vector<Dune::FieldVector<ctype,dimworld> >& target_coords,
                      const std::vector<unsigned int>& target_elements,
                      const std::vector<Dune::GeometryType>& target_element_types) = 0;
 
