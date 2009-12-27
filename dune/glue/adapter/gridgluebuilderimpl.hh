@@ -107,10 +107,9 @@ private:
 
     extractor.getFaces(tempfaces);
     faces.clear();
-    faces.reserve(Parent::DomainExtractor::simplex_corners*tempfaces.size());
 
     for (unsigned int i = 0; i < tempfaces.size(); ++i) {
-      for (int j = 0; j < Parent::DomainExtractor::simplex_corners; ++j)
+      for (int j = 0; j < tempfaces[i].size(); ++j)
         faces.push_back(tempfaces[i][j]);
     }
 
