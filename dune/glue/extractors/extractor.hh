@@ -44,12 +44,6 @@ public:
   enum {dim      = GV::dimension};
   enum {codim    = cd};
 
-  /// @brief compile time number of corners of surface simplices
-  enum
-  {
-    simplex_corners = dim-codim+1
-  };
-
   enum
   {
     cube_corners = 1 << (dim-codim)
@@ -60,7 +54,7 @@ public:
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
   typedef Dune::FieldVector<ctype, dim>                            LocalCoords;
-  typedef Dune::array<unsigned int, simplex_corners>               SimplexTopology;
+  typedef Dune::array<unsigned int, dim-codim+1>               SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
@@ -154,6 +148,11 @@ protected:
       :   parent(parent_), num_in_parent(num_in_parent_)
     {
       geometryType_.makeSimplex(dim-codim);
+    }
+
+    unsigned int nCorners() const
+    {
+      return Dune::GenericReferenceElements<ctype, dim-codim>::general(geometryType_).size(dim-codim);
     }
 
     /// @brief the index of the parent element (from index set)
@@ -297,7 +296,7 @@ public:
   {
     faces.resize(this->subEntities_.size());
     for (unsigned int i = 0; i < this->subEntities_.size(); ++i)
-      for (unsigned int j = 0; j < simplex_corners; ++j)
+      for (unsigned int j = 0; j < subEntities_[i].nCorners(); ++j)
         faces[i][j] = this->subEntities_[i].corners[j].idx;
   }
 
@@ -401,11 +400,11 @@ Extractor<GV,cd>::~Extractor()
 template<typename GV, int cd>
 typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int index) const
 {
-  std::vector<Coords> corners(simplex_corners);
-  for (int i = 0; i < simplex_corners; ++i)
+  std::vector<Coords> corners(subEntities_[index].nCorners());
+  for (int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = this->_coords[this->subEntities_[index].corners[i].idx].coord;
 
-  return Geometry(Dune::GeometryType(Dune::GeometryType::simplex,dim-codim), corners);
+  return Geometry(subEntities_[index].geometryType_, corners);
 }
 
 
@@ -413,18 +412,18 @@ typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int inde
 template<typename GV, int cd>
 typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigned int index) const
 {
-  std::vector<LocalCoords> corners(simplex_corners);
+  std::vector<LocalCoords> corners(subEntities_[index].nCorners());
 
   // get face info
   const SubEntityInfo & face = this->subEntities_[index];
-  Dune::GeometryType facetype(Dune::GeometryType::simplex, dim-codim);
+  Dune::GeometryType facetype = subEntities_[index].geometryType_;
 
   // get reference element
   Dune::GeometryType celltype = _elmtInfo.find(face.parent)->second->p->type();
   const Dune::GenericReferenceElement<ctype, dim> & re =
     Dune::GenericReferenceElements<ctype, dim>::general(celltype);
 
-  for (int i = 0; i < simplex_corners; ++i)
+  for (int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = re.position(face.corners[i].num,dim);
 
   return LocalGeometry(facetype, corners);

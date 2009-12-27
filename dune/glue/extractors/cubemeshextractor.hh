@@ -51,7 +51,6 @@ public:
   using Codim0Extractor<GV>::codim;
   using Codim0Extractor<GV>::dim;
   using Codim0Extractor<GV>::dimworld;
-  using Codim0Extractor<GV>::simplex_corners;
   using Codim0Extractor<GV>::cube_corners;
 
   typedef GV GridView;
@@ -176,7 +175,7 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       // add a new face to the temporary collection
       temp_faces.push_back(SubEntityInfo(eindex,0));
       simplex_index++;
-      for (int i=0; i<simplex_corners; i++) {
+      for (int i=0; i<temp_faces.back().nCorners(); i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];
         // remember the vertices' numbers in parent element's vertices
         temp_faces.back().corners[i].num = vertex_numbers[i];

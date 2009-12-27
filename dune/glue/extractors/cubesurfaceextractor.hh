@@ -54,7 +54,6 @@ public:
   using Codim1Extractor<GV>::codim;
   using Codim1Extractor<GV>::dim;
   using Codim1Extractor<GV>::dimworld;
-  using Codim1Extractor<GV>::simplex_corners;
   using Codim1Extractor<GV>::cube_corners;
 
   typedef GV GridView;
