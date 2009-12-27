@@ -7,6 +7,7 @@
 #include <dune/grid/uggrid.hh>
 #endif
 #include <dune/grid/common/quadraturerules.hh>
+#include <doc/grids/gridfactory/hybridtestgrids.hh>
 
 #include <dune/glue/extractors/surfacedescriptor.hh>
 #include <dune/glue/extractors/gridextractiontraits.hh>
@@ -234,6 +235,54 @@ void testTriangleGridsUG()
 }
 
 
+template <int dim>
+void testHybridGridsUG()
+{
+  // /////////////////////////////////////////////////////////////////////////
+  //   Create the hybrid test grid from dune-grid twice and shift it once
+  //   wrt the other grid.
+  // /////////////////////////////////////////////////////////////////////////
+
+  typedef UGGrid<dim> GridType;
+
+  std::auto_ptr<Dune::UGGrid<dim> > grid0(make2DHybridTestGrid<Dune::UGGrid<dim> >());
+  std::auto_ptr<Dune::UGGrid<dim> > grid1(make2DHybridTestGrid<Dune::UGGrid<dim> >());
+
+
+  // ////////////////////////////////////////
+  //   Set up an overlapping coupling
+  // ////////////////////////////////////////
+
+  typedef typename GridType::LeafGridView DomGridView;
+  typedef typename GridType::LeafGridView TarGridView;
+
+  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::simplex> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::simplex> TarTraits;
+
+  PSurfaceMerge<dim,dim,double> merger;
+
+  GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
+
+  AllElementsDescriptor<DomGridView> domdesc;
+  AllElementsDescriptor<TarGridView> tardesc;
+
+  glue.builder().setDomainDescriptor(domdesc);
+  glue.builder().setTargetDescriptor(tardesc);
+
+  glue.builder().build();
+
+  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
+  assert(merger.nSimplices() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(glue);
+
+}
+
+
 int main()
 {
 
@@ -243,5 +292,7 @@ int main()
   testSimplexGrids<1>();
 #if HAVE_UG
   testTriangleGridsUG();
+  //testHybridGridsUG<2>();
+  //testHybridGridsUG<3>();
 #endif
 }
