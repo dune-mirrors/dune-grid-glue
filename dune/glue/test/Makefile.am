@@ -13,11 +13,14 @@ check_PROGRAMS = $(TESTPROGS)
 TESTS = $(TESTPROGS)
 
 AM_CPPFLAGS += $(PSURFACE_CPPFLAGS)
-AM_LDFLAGS += $(LOCAL_LIBS) $(PSURFACE_LDFLAGS) $(PSURFACE_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS)
+AM_LDFLAGS  += $(PSURFACE_LDFLAGS) $(AMIRAMESH_LDFLAGS)
+LDADD        = $(LOCAL_LIBS) $(PSURFACE_LIBS) $(AMIRAMESH_LIBS)
+
 
 # If UG is available we can test pyramids and prisms
 AM_CPPFLAGS += $(UG_CPPFLAGS)
-AM_LDFLAGS  += $(UG_LDFLAGS) $(UG_LIBS)
+AM_LDFLAGS  += $(UG_LDFLAGS)
+LDADD       += $(UG_LIBS)
 
 # define the programs
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
