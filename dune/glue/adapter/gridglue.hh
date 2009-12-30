@@ -269,26 +269,27 @@ protected:
   {
     // build the intersections array again
     this->_intersections.resize(this->_merg->nSimplices(), this->NULL_INTERSECTION);
-    _index_sz = 0;
     _dindex_sz = 0;
     _tindex_sz = 0;
     for (unsigned int i = 0; i < this->_merg->nSimplices(); ++i)
     {
+
       RemoteIntersectionImpl ri(this, i);
-      // if ((ri.hasTarget() || ri.hasDomain()))
-      {
-        if (ri.hasDomain())
-          ri.domainIndex() = _dindex_sz++;
-        if (ri.hasTarget())
-          ri.targetIndex() = _tindex_sz++;
-        ri.index() = _index_sz;
-        this->_intersections[_index_sz++] = ri;
-      }
+      if (ri.hasDomain())
+        ri.domainIndex() = _dindex_sz++;
+      if (ri.hasTarget())
+        ri.targetIndex() = _tindex_sz++;
+      ri.index() = i;
+      this->_intersections[i] = ri;
+
     }
 
-    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << _index_sz
+    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << _merg->nSimplices()
               << " with " << _dindex_sz << " domain entities"
               << " and " << _tindex_sz << " target entities" << std::endl;
+
+    // store the number of remote intersection for later use
+    _index_sz = _merg->nSimplices();
 
     ////// create ParallelIndexSet & RemoteIndices
 #if HAVE_MPI
