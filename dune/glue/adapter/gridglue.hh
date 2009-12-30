@@ -799,10 +799,10 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
 template<typename GET1, typename GET2>
 typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::idomainbegin(const DomainElement& e) const
 {
-  // first check if the element forms a part of the extracted surface
+  // first check if the element has at least one extracted subEntity
   int first, count;
-  bool in_surface = this->_domext.faceIndices(e, first, count);
-  if (!in_surface)
+  bool hasExtractedSubEntity = this->_domext.faceIndices(e, first, count);
+  if (!hasExtractedSubEntity)
     return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
 
 
@@ -810,7 +810,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   std::vector<unsigned int> global_results(0, 0);
   std::vector<unsigned int> local_results;
 
-  // iterate over all simplices to check if there is more than one simplix refining the face
+  // iterate over all simplices to check if there is more than one simplex refining the face
   bool found_sth = false;
   count += first;
   while (first < count)
@@ -835,10 +835,10 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
 template<typename GET1, typename GET2>
 typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::itargetbegin(const TargetElement& e, int num) const
 {
-  // first check if the element forms a part of the extracted surface
+  // first check if the element has at least one extracted subEntity
   int first, count;
-  bool in_surface = this->_tarext.faceIndices(e, first, count);
-  if (!in_surface) return itargetend();
+  bool hasExtractedSubEntity = this->_tarext.faceIndices(e, first, count);
+  if (!hasExtractedSubEntity) return itargetend();
 
   count += first;
   while (first < count)
