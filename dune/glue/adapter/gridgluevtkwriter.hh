@@ -119,10 +119,10 @@ public:
         faces.push_back(face);
         domeptrs.push_back(pit);
 
-        // count and remember the corners of this face
+        // count and remember the corners of this subEntity
         const Dune::GenericReferenceElement<ctype, dimw>& refElement =
           Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
-        int size = refElement.size(face, 1, dimw);
+        int size = refElement.size(face, Glue::DomainExtractor::codim, dimw);
         face_corners.push_back(size);
         face_corner_count += size;
 
@@ -144,7 +144,7 @@ public:
     // WRITE POINTS
     // ----------------
 
-    fgrid << "DATASET POLYDATA\nPOINTS " << (dimw == 2 ? parents*4 : face_corner_count) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fgrid << "DATASET POLYDATA\nPOINTS " << face_corner_count << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
     fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*3 << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     faceit = faces.begin();
@@ -310,7 +310,7 @@ public:
         // count and remember the corners of this face
         const Dune::GenericReferenceElement<ctype, dimw>& refElement =
           Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
-        int size = refElement.size(face, 1, dimw);
+        int size = refElement.size(face, Glue::TargetExtractor::codim, dimw);
         face_corners.push_back(size);
         face_corner_count += size;
 
@@ -332,7 +332,7 @@ public:
     // WRITE POINTS
     // ----------------
 
-    fgrid << "DATASET POLYDATA\nPOINTS " << (dimw == 2 ? parents*4 : face_corner_count) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fgrid << "DATASET POLYDATA\nPOINTS " << face_corner_count << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
     fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dimw == 2 ? 4 : 3) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     faceit = faces.begin();
