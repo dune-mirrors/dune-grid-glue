@@ -93,6 +93,10 @@ public:
     const int domdimw = DomainGridType::dimensionworld;
 
     bool pad = dimw > domdimw;
+    std::string coordinatePadding;
+    for (int i=1; i<dimw; i++)
+      coordinatePadding += " 0";
+
     bool hyper = dimw > DomainGridType::dimension;
 
     const DomainGridView& domgv = glue.domainGridView();
@@ -143,7 +147,7 @@ public:
     // ----------------
 
     fgrid << "DATASET POLYDATA\nPOINTS " << (dimw == 2 ? parents*4 : face_corner_count) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
-    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dimw == 2 ? 4 : 3) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*3 << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     faceit = faces.begin();
     facecornerit = face_corners.begin();
@@ -161,13 +165,8 @@ public:
         }
         else                         // full-dimensional grid
         {
-          Dune::GeometryType temp_gt = (*pit)->type();
-          for (int i = 0; i < 2; ++i)
-          {
-            int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
-                  << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
-          }
+          for (int i=0; i<(*pit)->geometry().corners(); i++)
+            fgrid << (*pit)->geometry().corner(i) << coordinatePadding << std::endl;
         }
       }
       else                   // dimw == 3
@@ -203,16 +202,8 @@ public:
       // write the merged grid refinement of this surface part
       for (typename Glue::DomainIntersectionIterator domisit = glue.idomainbegin(**pit, *faceit); domisit != glue.idomainend(); ++domisit)
       {
-        if (dimw == 2)
-        {
-          fmerged << domisit->intersectionDomainGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
-                  << domisit->intersectionDomainGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
-                  << domisit->intersectionDomainGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                  << domisit->intersectionDomainGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
-        }
-        else                         // dimw == 3
-          for (int i = 0; i < 3; ++i)
-            fmerged << domisit->intersectionDomainGlobal().corner(i) << (pad ? " 0" : "  ") << std::endl;
+        for (int i = 0; i < domisit->intersectionDomainGlobal().corners(); ++i)
+          fmerged << domisit->intersectionDomainGlobal().corner(i) << coordinatePadding << std::endl;
       }
     }
 
@@ -222,12 +213,12 @@ public:
     if (dimw == 2)
     {
       fgrid << "POLYGONS " << parents << " " << 5*parents << std::endl;
-      fmerged << "POLYGONS " << overlaps << " " << 5*overlaps << std::endl;
+      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << std::endl;
 
-      for (int i = 0; i < 2*parents; i += 2)
-        fgrid << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
-      for (int i = 0; i < 2*overlaps; i += 2)
-        fmerged << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
+      for (int i = 0; i < 4*parents; i += 4)
+        fgrid << "4 " << i << " " << i+1 << " " << i+3 << " " << i+2 << std::endl;
+      for (int i = 0; i < 3*overlaps; i += 3)
+        fmerged << "3 " << i << " " << i+1 << " " << i+2 << std::endl;
     }
     else             // dimw == 3
     {
