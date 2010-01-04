@@ -118,15 +118,12 @@ public:
         faces.push_back(face);
         domeptrs.push_back(pit);
 
-        if (dimw == 3)
-        {
-          // count and remember the corners of this face
-          const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-            Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
-          int size = refElement.size(face, 1, dimw);
-          face_corners.push_back(size);
-          face_corner_count += size;
-        }
+        // count and remember the corners of this face
+        const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+          Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
+        int size = refElement.size(face, 1, dimw);
+        face_corners.push_back(size);
+        face_corner_count += size;
 
         parents++;
 
@@ -309,15 +306,12 @@ public:
         faces.push_back(face);
         tareptrs.push_back(pit);
 
-        if (dimw == 3)
-        {
-          // count and remember the corners of this face
-          const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-            Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
-          int size = refElement.size(face, 1, dimw);
-          face_corners.push_back(size);
-          face_corner_count += size;
-        }
+        // count and remember the corners of this face
+        const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+          Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
+        int size = refElement.size(face, 1, dimw);
+        face_corners.push_back(size);
+        face_corner_count += size;
 
         parents++;
 
