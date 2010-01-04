@@ -25,8 +25,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/geometrytype.hh>
 
-#include <dune/glue/misc/orientedsubface.hh>
-
 /**
  * @brief transforms Dune-style local coordinates in 1D and 2D to
  * barycentric coordinates.
