@@ -8,7 +8,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
 
-/** \brief Abstract base for all classes that take extraced grids and build sets of intersections
+/** \brief Abstract base for all classes that take extracted grids and build sets of intersections
 
    \tparam ctype The type used for coordinates (assumed to be the same for both grids)
    \tparam domainDim Dimension of the domain grid
