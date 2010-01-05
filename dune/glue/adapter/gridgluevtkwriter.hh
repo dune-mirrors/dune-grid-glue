@@ -263,8 +263,6 @@ public:
 
     const TargetGridView& targv = glue.targetGridView();
 
-    pad = dimw > tardimw;
-
     // remember the entities that have been mapped
     std::list<TargetEPtr> tareptrs(0, targv.template begin<0>());
 
@@ -314,109 +312,78 @@ public:
     // ----------------
 
     fgrid << "DATASET POLYDATA\nPOINTS " << face_corner_count << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
-    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dimw == 2 ? 4 : 3) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*3 << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     faceit = faces.begin();
     facecornerit = face_corners.begin();
     for (typename std::list<TargetEPtr>::const_iterator pit = tareptrs.begin(); pit != tareptrs.end(); ++pit, ++faceit)
     {
-      // write the target element
-      if (dimw == 2)
-      {
-        if (dimw > TargetGridType::dimension)
-        {
-          fgrid << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0\n"
-                << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
-                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
-        }
-        else                         // full-dimensional grid
-        {
-          Dune::GeometryType temp_gt = (*pit)->type();
-          for (int i = 0; i < 2; ++i)
-          {
-            int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0\n"
-                  << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << " 0.01" << std::endl;
-          }
-        }
-      }
-      else                   // dimw == 3
-      {
-        if (dimw > TargetGridType::dimension)
-        {
-          // write 3 or 4 points, depending on face geometry
-          for (int i = 0; i < 3; ++i)
-          {
-            if (i == 2 && (*facecornerit) == 4)
-              fgrid << (*pit)->geometry().corner(3) << (pad ? " 0" : "  ") << std::endl;
-            fgrid << (*pit)->geometry().corner(i) << (pad ? " 0" : "  ") << std::endl;
-          }
-        }
-        else                         // full-dimensional grid
-        {
-          Dune::GeometryType temp_gt = (*pit)->type();
-          // write 3 or 4 points, depending on face geometry
-          for (int i = 0; i < 3; ++i)
-          {
-            if (i == 2 && (*facecornerit) == 4)
-            {
-              int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, 3);
-              fgrid << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
-            }
-            int corner = orientedSubface<TargetGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template subEntity<TargetGridType::dimension>(corner)->geometry().corner(0) << std::endl;
-          }
 
-        }
-        facecornerit++;
-      }
+      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+
+      // Write the current subentity into the fgrid file
+      for (int i=0; i<refElement.size(*faceit, Glue::TargetExtractor::codim, dimw); i++)
+        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::TargetExtractor::codim, i, dimw))
+              << coordinatePadding
+              << std::endl;
 
       // write the merged grid refinement of this surface part
       for (typename Glue::TargetIntersectionIterator tarisit = glue.itargetbegin(**pit, *faceit); tarisit != glue.itargetend(); ++tarisit)
       {
-        if (dimw == 2)
-        {
-          fmerged << tarisit->intersectionTargetGlobal().corner(0) << (pad ? " 0" : "  ") << " 0\n"
-                  << tarisit->intersectionTargetGlobal().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
-                  << tarisit->intersectionTargetGlobal().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                  << tarisit->intersectionTargetGlobal().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
-        }
-        else                         // dimw == 3
-          for (int i = 0; i < 3; ++i)
-            fmerged << tarisit->intersectionTargetGlobal().corner(i) << (pad ? " 0" : "  ") << std::endl;
+        // Later down we assume that all remote intersections are simplices
+        assert(tarisit->intersectionTargetGlobal().type().isSimplex());
+
+        for (int i = 0; i < tarisit->intersectionTargetGlobal().corners(); ++i)
+          fmerged << tarisit->intersectionTargetGlobal().corner(i) << coordinatePadding << std::endl;
       }
     }
 
     // WRITE POLYGONS
     // ----------------
 
-    if (dimw == 2)
-    {
-      fgrid << "POLYGONS " << parents << " " << 5*parents << std::endl;
-      fmerged << "POLYGONS " << overlaps << " " << 5*overlaps << std::endl;
+    fgrid << "POLYGONS " << parents << " " << parents + face_corner_count << std::endl;
 
-      for (int i = 0; i < 2*parents; i += 2)
-        fgrid << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
-      for (int i = 0; i < 2*overlaps; i += 2)
-        fmerged << "4 " << 2*i << " " << 2*(i+1) << " " << 2*(i+1)+1 << " " << 2*i+1 << std::endl;
-    }
-    else             // dimw == 3
-    {
-      fgrid << "POLYGONS " << parents << " " << parents + face_corner_count;
-      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << std::endl;
+    facecornerit = face_corners.begin();
+    face_corner_count = 0;
 
-      facecornerit = face_corners.begin();
-      face_corner_count = 0;
-      for (int i = 0; i < parents; ++i, ++facecornerit)
-      {
-        fgrid << "\n" << (*facecornerit);
-        for (int i = 0; i < (*facecornerit); ++i, ++face_corner_count)
-          fgrid << " " << face_corner_count;
+    faceit = faces.begin();
+    facecornerit = face_corners.begin();
+    for (typename std::list<TargetEPtr>::const_iterator pit = tareptrs.begin();
+         pit != tareptrs.end();
+         ++pit, ++faceit) {
+
+      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+
+      int size = refElement.size(*faceit, Glue::TargetExtractor::codim, dimw);
+
+      fgrid << size;
+
+      // vtk expects the vertices to by cyclically ordered
+      // therefore unfortunately we have to deal with several element types on a case-by-case basis
+      if (refElement.type(*faceit,Glue::TargetExtractor::codim).isQuadrilateral()) {
+        fgrid << " " << face_corner_count << " " << face_corner_count+1
+              << " " << face_corner_count+3 << " " << face_corner_count+2;
+
+        face_corner_count += 4;
+      } else {
+        for (int j = 0; j <size; ++j)
+          fgrid << " " << face_corner_count++;
       }
+
       fgrid << std::endl;
-      for (int i = 0; i < overlaps; ++i)
-        fmerged << "3 " << 3*i << " " << 3*i+1 << " " << 3*i+2 << std::endl;
+    }
+    fgrid << std::endl;
+
+    int targetSimplexCorners = dimw-Glue::TargetExtractor::codim+1;
+    fmerged << "POLYGONS " << overlaps << " " << (targetSimplexCorners+1)*overlaps << std::endl;
+
+    for (int i = 0; i < overlaps; ++i) {
+      fmerged << targetSimplexCorners;
+      for (int j=0; j<targetSimplexCorners; j++)
+        fmerged << " " << targetSimplexCorners*i+j;
+      fmerged << std::endl;
     }
 
     // WRITE CELL DATA
