@@ -98,8 +98,6 @@ public:
     for (int i=1; i<dimw; i++)
       coordinatePadding += " 0";
 
-    bool hyper = dimw > DomainGridType::dimension;
-
     const DomainGridView& domgv = glue.domainGridView();
 
     // remember the entities that have been mapped
@@ -151,53 +149,17 @@ public:
     facecornerit = face_corners.begin();
     for (typename std::list<DomainEPtr>::const_iterator pit = domeptrs.begin(); pit != domeptrs.end(); ++pit, ++faceit)
     {
-      // write the domain element
-      if (dimw == 2)
-      {
-        if (hyper)
-        {
-          fgrid << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0\n"
-                << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
-                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0\n"
-                << (*pit)->geometry().corner(1) << (pad ? " 0" : "  ") << " 0.01" << std::endl;
-        }
-        else                         // full-dimensional grid
-        {
-          for (int i=0; i<(*pit)->geometry().corners(); i++)
-            fgrid << (*pit)->geometry().corner(i) << coordinatePadding << std::endl;
-        }
-      }
-      else                   // dimw == 3
-      {
-        if (hyper)
-        {
-          // write 3 or 4 points, depending on face geometry
-          for (int i = 0; i < 3; ++i)
-          {
-            if (i == 2 && (*facecornerit) == 4)
-              fgrid << (*pit)->geometry().corner(3) << (pad ? " 0" : "  ") << std::endl;
-            fgrid << (*pit)->geometry().corner(i) << (pad ? " 0" : "  ") << std::endl;
-          }
-        }
-        else                         // full-dimensional grid
-        {
-          Dune::GeometryType temp_gt = (*pit)->type();
-          // write 3 or 4 points, depending on face geometry
-          for (int i = 0; i < 3; ++i)
-          {
-            if (i == 2 && (*facecornerit) == 4)
-            {
-              int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, 3);
-              fgrid << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
-            }
-            int corner = orientedSubface<DomainGridType::dimension>(temp_gt, *faceit, i);
-            fgrid << (*pit)->template subEntity<DomainGridType::dimension>(corner)->geometry().corner(0) << std::endl;
-          }
-        }
-        facecornerit++;
-      }
 
-      // write the merged grid refinement of this surface part
+      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+
+      // Write the current subentity into the fgrid file
+      for (int i=0; i<refElement.size(*faceit, Glue::DomainExtractor::codim, dimw); i++)
+        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::DomainExtractor::codim, i, dimw))
+              << coordinatePadding
+              << std::endl;
+
+      // write the remote intersections of the current subentity into the fmerged file
       for (typename Glue::DomainIntersectionIterator domisit = glue.idomainbegin(**pit, *faceit); domisit != glue.idomainend(); ++domisit)
       {
         for (int i = 0; i < domisit->intersectionDomainGlobal().corners(); ++i)
@@ -282,7 +244,6 @@ public:
     const TargetGridView& targv = glue.targetGridView();
 
     pad = dimw > tardimw;
-    hyper = dimw > TargetGridType::dimension;
 
     // remember the entities that have been mapped
     std::list<TargetEPtr> tareptrs(0, targv.template begin<0>());
@@ -342,7 +303,7 @@ public:
       // write the target element
       if (dimw == 2)
       {
-        if (hyper)
+        if (dimw > TargetGridType::dimension)
         {
           fgrid << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0\n"
                 << (*pit)->geometry().corner(0) << (pad ? " 0" : "  ") << " 0.01\n"
@@ -362,7 +323,7 @@ public:
       }
       else                   // dimw == 3
       {
-        if (hyper)
+        if (dimw > TargetGridType::dimension)
         {
           // write 3 or 4 points, depending on face geometry
           for (int i = 0; i < 3; ++i)
