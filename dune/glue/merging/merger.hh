@@ -119,7 +119,7 @@ public:
    * (parent's index can be obtained via "domainParent")
    * @param idx the index of the merged grid simplex
    * @param corner the index of the simplex' corner
-   * @return barycentric coordinates in parent domain simplex
+   * @return local coordinates in parent domain
    */
   virtual DomainCoords domainParentLocal(unsigned int idx, unsigned int corner) const = 0;
 
@@ -128,7 +128,7 @@ public:
    * (parent's index can be obtained via "targetParent")
    * @param idx the index of the merged grid simplex
    * @param corner the index of the simplex' corner
-   * @return barycentric coordinates in parent target simplex
+   * @return local coordinates in parent target
    */
   virtual TargetCoords targetParentLocal(unsigned int idx, unsigned int corner) const = 0;
 
