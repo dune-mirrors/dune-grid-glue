@@ -26,7 +26,7 @@
 #define QUICKHACK_INDEX 1
 
 #ifdef GRID_GLUE_USE_CONCEPTS
-#include <dune/glue/conceptchecking.hh>
+#include <dune/glue/common/conceptchecking.hh>
 #endif
 #include "../extractors/gridextractiontraits.hh"
 #include "../extractors/extractorselector.hh"

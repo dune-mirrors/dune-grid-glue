@@ -20,7 +20,7 @@
 #define REMOTEINTERSECTIONITERATORS_HH_
 
 #ifdef GRID_GLUE_USE_CONCEPTS
-#include <dune/glue/conceptchecking.hh>
+#include <dune/glue/common/conceptchecking.hh>
 #include "remoteintersectionconcepts.hh"
 #endif
 #include "remoteintersection.hh"
