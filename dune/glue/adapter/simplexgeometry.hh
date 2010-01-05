@@ -28,8 +28,6 @@
 #include <dune/grid/genericgeometry/cornermapping.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 
-#include "../misc/geometry.hh"
-
 
 /**
  * @class LocalSimplexGeometryTraits

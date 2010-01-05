@@ -37,7 +37,6 @@
 
 #include <dune/grid/common/grid.hh>
 
-#include <dune/glue/misc/geometry.hh>
 #include <dune/glue/merging/merger.hh>
 
 #include <psurface/ContactMapping.h>

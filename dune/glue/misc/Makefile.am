@@ -2,7 +2,6 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 miscdir = $(includedir)/dune/glue/misc
-misc_HEADERS = box.hh conceptchecking.hh \
-	geometry.hh multidimoctree.hh
+misc_HEADERS = box.hh conceptchecking.hh multidimoctree.hh
 
 include $(top_srcdir)/am/global-rules

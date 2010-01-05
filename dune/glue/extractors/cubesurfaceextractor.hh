@@ -31,7 +31,6 @@
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
-#include "../misc/geometry.hh"
 #include "surfacedescriptor.hh"
 
 

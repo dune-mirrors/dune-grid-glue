@@ -34,7 +34,6 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
-#include <dune/glue/misc/geometry.hh>
 #include <dune/glue/merging/merger.hh>
 
 
