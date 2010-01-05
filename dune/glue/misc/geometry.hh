@@ -25,52 +25,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/geometrytype.hh>
 
-/**
- * @brief transforms Dune-style local coordinates in 1D and 2D to
- * barycentric coordinates.
- * Since the dimension of bar. coords is one higher than that of
- * the Dune local coords, a local coordinate for Dune's coordinate
- * system's origin is introduced which is located at corner 0 in
- * edges and triangles.
- *
- * @param
- * @return
- */
-template<typename K, int dim>
-inline Dune::FieldVector<K, dim-1> barycentricToReference(const Dune::FieldVector<K, dim>& bar)
-{
-  Dune::FieldVector<K, dim-1> result;
-  for (int i=0; i<dim-1; i++)
-    result[i] = bar[i+1];
-
-  return result;
-}
-
-
-/**
- * @brief transforms Dune-style local coordinates in 1D and 2D to
- * barycentric coordinates.
- * Since the dimension of bar. coords is one higher than that of
- * the Dune local coords, a local coordinate for Dune's coordinate
- * system's origin is introduced which is located at corner 0 in
- * edges and triangles.
- *
- * @param
- * @return
- */
-template<typename K, int dim>
-inline Dune::FieldVector<K, dim+1> referenceToBarycentric(const Dune::FieldVector<K, dim>& ref)
-{
-  Dune::FieldVector<K, dim+1> result;
-  result[0] = 1.0;
-  for (int i=0; i<dim; i++) {
-    result[i+1] = ref[i];
-    result[0] -= ref[i];
-  }
-
-  return result;
-}
-
 
 template<typename K>
 Dune::FieldVector<K, 3> computeNormal(const Dune::array<Dune::FieldVector<K, 3>, 2>& v)

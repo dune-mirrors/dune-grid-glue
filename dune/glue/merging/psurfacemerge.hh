@@ -86,6 +86,35 @@ private:
   /*   P R I V A T E   H E L P E R S   */
 
   /**
+   * @brief transforms barycentric coordinates to Dune-style local coordinates
+   */
+  static Dune::FieldVector<ctype, dim> barycentricToReference(const Dune::FieldVector<ctype, dim+1>& bar)
+  {
+    Dune::FieldVector<ctype, dim> result;
+    for (int i=0; i<dim; i++)
+      result[i] = bar[i+1];
+
+    return result;
+  }
+
+
+  /**
+   * @brief transforms Dune-style local coordinates to barycentric coordinates.
+   */
+  static Dune::FieldVector<ctype, dim+1> referenceToBarycentric(const Dune::FieldVector<ctype, dim>& ref)
+  {
+    Dune::FieldVector<ctype, dim+1> result;
+    result[0] = 1.0;
+    for (int i=0; i<dim; i++) {
+      result[i+1] = ref[i];
+      result[0] -= ref[i];
+    }
+
+    return result;
+  }
+
+
+  /**
    * @brief compare function dep. on parent domain simplex
    * @param a first item
    * @param b second item
