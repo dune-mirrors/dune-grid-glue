@@ -314,16 +314,12 @@ computeIntersection(const Dune::GeometryType& domainElementType,
       intersections_.push_back(RemoteSimplicialIntersection());
 
       // Compute local coordinates in the domain element
-      intersections_.back().domainLocal_[0] = (lowerBound - domainElementCorners[0][0])
-                                              / (domainElementCorners[1][0] - domainElementCorners[0][0]);
-      intersections_.back().domainLocal_[1] = (upperBound - domainElementCorners[0][0])
-                                              / (domainElementCorners[1][0] - domainElementCorners[0][0]);
+      intersections_.back().domainLocal_[0] = domainGeometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      intersections_.back().domainLocal_[1] = domainGeometry.local(Dune::FieldVector<T,dim>(upperBound));
 
       // Compute local coordinates in the target element
-      intersections_.back().targetLocal_[0] = (lowerBound - targetElementCorners[0][0])
-                                              / (targetElementCorners[1][0] - targetElementCorners[0][0]);
-      intersections_.back().targetLocal_[1] = (upperBound - targetElementCorners[0][0])
-                                              / (targetElementCorners[1][0] - targetElementCorners[0][0]);
+      intersections_.back().targetLocal_[0] = targetGeometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      intersections_.back().targetLocal_[1] = targetGeometry.local(Dune::FieldVector<T,dim>(upperBound));
 
       // Set indices
       intersections_.back().domainEntity_ = domainIndex;
