@@ -24,7 +24,7 @@
 #include <dune/common/geometrytype.hh>
 
 #ifdef GRID_GLUE_USE_CONCEPTS
-#include "../misc/conceptchecking.hh"
+#include <dune/common/conceptchecking.hh>
 #include "remoteIntersectionconcepts.hh"
 #endif
 
