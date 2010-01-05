@@ -162,6 +162,9 @@ public:
       // write the remote intersections of the current subentity into the fmerged file
       for (typename Glue::DomainIntersectionIterator domisit = glue.idomainbegin(**pit, *faceit); domisit != glue.idomainend(); ++domisit)
       {
+        // Later down we assume that all remote intersections are simplices
+        assert(domisit->intersectionDomainGlobal().type().isSimplex());
+
         for (int i = 0; i < domisit->intersectionDomainGlobal().corners(); ++i)
           fmerged << domisit->intersectionDomainGlobal().corner(i) << coordinatePadding << std::endl;
       }
@@ -170,33 +173,50 @@ public:
     // WRITE POLYGONS
     // ----------------
 
-    if (dimw == 2)
-    {
-      fgrid << "POLYGONS " << parents << " " << 5*parents << std::endl;
-      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << std::endl;
+    fgrid << "POLYGONS " << parents << " " << parents + face_corner_count << std::endl;
 
-      for (int i = 0; i < 4*parents; i += 4)
-        fgrid << "4 " << i << " " << i+1 << " " << i+3 << " " << i+2 << std::endl;
-      for (int i = 0; i < 3*overlaps; i += 3)
-        fmerged << "3 " << i << " " << i+1 << " " << i+2 << std::endl;
-    }
-    else             // dimw == 3
-    {
-      fgrid << "POLYGONS " << parents << " " << parents + face_corner_count;
-      fmerged << "POLYGONS " << overlaps << " " << 4*overlaps << std::endl;
+    facecornerit = face_corners.begin();
+    face_corner_count = 0;
 
-      facecornerit = face_corners.begin();
-      face_corner_count = 0;
-      for (int i = 0; i < parents; ++i, ++facecornerit)
-      {
-        fgrid << "\n" << (*facecornerit);
-        for (int i = 0; i < (*facecornerit); ++i, ++face_corner_count)
-          fgrid << " " << face_corner_count;
+    faceit = faces.begin();
+    facecornerit = face_corners.begin();
+    for (typename std::list<DomainEPtr>::const_iterator pit = domeptrs.begin();
+         pit != domeptrs.end();
+         ++pit, ++faceit) {
+
+      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
+        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+
+      int size = refElement.size(*faceit, Glue::DomainExtractor::codim, dimw);
+
+      fgrid << size;
+
+      // vtk expects the vertices to by cyclically ordered
+      // therefore unfortunately we have to deal with several element types on a case-by-case basis
+      if (refElement.type(*faceit,Glue::DomainExtractor::codim).isQuadrilateral()) {
+        fgrid << " " << face_corner_count << " " << face_corner_count+1
+              << " " << face_corner_count+3 << " " << face_corner_count+2;
+
+        face_corner_count += 4;
+      } else {
+        for (int j = 0; j <size; ++j)
+          fgrid << " " << face_corner_count++;
       }
+
       fgrid << std::endl;
-      for (int i = 0; i < overlaps; ++i)
-        fmerged << "3 " << 3*i << " " << 3*i+1 << " " << 3*i+2 << std::endl;
     }
+    fgrid << std::endl;
+
+    int domainSimplexCorners = dimw-Glue::DomainExtractor::codim+1;
+    fmerged << "POLYGONS " << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
+
+    for (int i = 0; i < overlaps; ++i) {
+      fmerged << domainSimplexCorners;
+      for (int j=0; j<domainSimplexCorners; j++)
+        fmerged << " " << domainSimplexCorners*i+j;
+      fmerged << std::endl;
+    }
+
 
     // WRITE CELL DATA
     // ---------------
