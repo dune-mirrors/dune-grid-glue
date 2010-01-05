@@ -611,4 +611,4 @@ typename CGALMerge<dim, T>::LocalCoords CGALMerge<dim, T>::targetParentLocal(uns
   return intersections_[idx].targetLocal_[corner];
 }
 
-#endif // CONFORMING_MERGE_HH
+#endif // CGAL_MERGE_HH
