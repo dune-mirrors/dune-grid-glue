@@ -13,8 +13,10 @@
 #include <dune/glue/extractors/gridextractiontraits.hh>
 #include <dune/glue/adapter/gridglue.hh>
 
+#if HAVE_PSURFACE
 #include <dune/glue/merging/psurfacemerge.hh>
-#ifdef HAVE_CGAL
+#endif
+#if HAVE_CGAL
 #include <dune/glue/merging/cgalmerge.hh>
 #endif
 
@@ -284,6 +286,7 @@ int main()
   // //////////////////////////////////////////////////////////
   //   Test with the PSurfaceMerge implementation
   // //////////////////////////////////////////////////////////
+#if HAVE_PSURFACE
   PSurfaceMerge<1,1,double> psurfaceMerge1d;
   PSurfaceMerge<2,2,double> psurfaceMerge2d;
 
@@ -295,12 +298,13 @@ int main()
   testTriangleGridsUG(psurfaceMerge2d);
   testHybridGridsUG<2>(psurfaceMerge2d);
 #endif
+#endif
 
   // //////////////////////////////////////////////////////////
   //   Test with the CGALMerge implementation
   // //////////////////////////////////////////////////////////
 
-#ifdef HAVE_CGAL
+#if HAVE_CGAL
   CGALMerge<1,double> cgalMerge1d;
   CGALMerge<2,double> cgalMerge2d;
 
