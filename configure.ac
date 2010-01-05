@@ -21,7 +21,7 @@ AC_CONFIG_FILES([Makefile
   dune/glue/Makefile
   dune/glue/adapter/Makefile
   dune/glue/merging/Makefile
-  dune/glue/misc/Makefile
+  dune/glue/common/Makefile
   dune/glue/extractors/Makefile
   dune/glue/test/Makefile
   doc/Makefile
