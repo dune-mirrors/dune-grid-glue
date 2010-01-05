@@ -3,12 +3,10 @@
 #include <iostream>
 
 #include <dune/common/fvector.hh>
-#include <dune/grid/sgrid.hh>
 #include <dune/grid/common/quadraturerules.hh>
 
 #include <dune/glue/extractors/surfacedescriptor.hh>
 #include <dune/glue/extractors/gridextractiontraits.hh>
-#include <dune/glue/merging/psurfacemerge.hh>
 #include <dune/glue/adapter/gridglue.hh>
 
 template <class IntersectionIt, int domdimw, int tardimw, class ctype>
