@@ -147,6 +147,7 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger)
 }
 
 
+#if HAVE_UG
 void testTriangleGridsUG(Merger<double,2,2,2>& merger)
 {
   const int dim = 2;
@@ -279,6 +280,7 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger)
   testCoupling(glue);
 
 }
+#endif
 
 
 int main()
