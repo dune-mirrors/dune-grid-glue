@@ -16,8 +16,8 @@
  * @brief classes implementing automatic selection of suitable grid extractors for different grids through specialization
  */
 
-#ifndef EXTRACTORSELECTOR_HH_
-#define EXTRACTORSELECTOR_HH_
+#ifndef EXTRACTORSELECTOR_HH
+#define EXTRACTORSELECTOR_HH
 
 #include "gridextractiontraits.hh"
 #include "simplicialmeshextractor.hh"
