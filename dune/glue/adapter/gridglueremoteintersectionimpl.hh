@@ -124,14 +124,9 @@ public:
 
   /** \brief Copy constructor */
   RemoteIntersectionImpl(const RemoteIntersectionImpl & impl)
-    : _glue(impl._glue), _mergeindex(impl._mergeindex),
-      _index(impl._index), _domainindex(impl._domainindex),
-      _targetindex(impl._targetindex),
-      _domlgeom(impl._domlgeom),
-      _domggeom(impl._domggeom),
-      _tarlgeom(impl._tarlgeom),
-      _targgeom(impl._targgeom)
-  {}
+  {
+    *this = impl;
+  }
 
   /** \brief Assignment operator */
   RemoteIntersectionImpl& operator=(const RemoteIntersectionImpl& impl)
@@ -317,8 +312,6 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
 
     for (int i = 0; i < nSimplexCorners; ++i)
       corners_subEntity_local[i] = glue->_merg->domainParentLocal(mergeindex, i);
-
-    // a face number is only important if dealing with surfaces, not meshes
 
     // Coordinates of the remote intersection corners wrt the element coordinate system
     Dune::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
