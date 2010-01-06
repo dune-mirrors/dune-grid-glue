@@ -54,7 +54,6 @@ public:
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
   typedef Dune::FieldVector<ctype, dim>                            LocalCoords;
-  typedef Dune::array<unsigned int, dim-codim+1>               SimplexTopology;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
@@ -286,17 +285,16 @@ public:
 
 
   /**
-   * @brief getter for the indices array
-   * It is strongly recommended not to modify its contents.
-   * Deallocation is done in this class.
-   * @return the _indices array
+   * @brief Get the corners of the extracted subentities
    */
-  void getFaces(std::vector<SimplexTopology>& faces) const
+  void getFaces(std::vector<std::vector<unsigned int> >& faces) const
   {
     faces.resize(this->subEntities_.size());
-    for (unsigned int i = 0; i < this->subEntities_.size(); ++i)
+    for (unsigned int i = 0; i < this->subEntities_.size(); ++i) {
+      faces[i].resize(subEntities_[i].nCorners());
       for (unsigned int j = 0; j < subEntities_[i].nCorners(); ++j)
         faces[i][j] = this->subEntities_[i].corners[j].idx;
+    }
   }
 
 
