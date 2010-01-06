@@ -130,24 +130,10 @@ struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::hybrid>
 /*   2D mesh is extracted and interpreted as 2D manifold in 3D   */
 
 template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::simplex>
+template<typename LSET,MeshClassification::MeshType mtype>
+struct ExtractorSelector<GSET>::Helper<LSET, 0, mtype>
 {
-  typedef SimplicialMeshExtractor<typename LSET::GridView>  ExtractorType;
+  typedef Codim0Extractor<typename LSET::GridView>  ExtractorType;
 };
 
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::cube>
-{
-  typedef CubeMeshExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 0, MeshClassification::hybrid>
-{
-  //		typedef GeneralMeshExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-#endif // EXTRACTORSELECTOR_HH_
+#endif // EXTRACTORSELECTOR_HH

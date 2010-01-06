@@ -4,9 +4,7 @@
 surfacesdir = $(includedir)/dune/glue/surfaces
 surfaces_HEADERS = extractorselector.hh\
 	generalsurfaceextractor.hh\
-	simplicialmeshextractor.hh\
 	simplicialsurfaceextractor.hh\
-	cubemeshextractor.hh\
 	cubesurfaceextractor.hh\
 	surfacedescriptor.hh\
 	gridextractiontraits.hh\
