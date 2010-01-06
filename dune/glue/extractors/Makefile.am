@@ -2,12 +2,14 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 surfacesdir = $(includedir)/dune/glue/surfaces
-surfaces_HEADERS = extractorselector.hh\
+surfaces_HEADERS = codim0extractor.hh codim1extractor.hh extractor.hh \
+        extractorselector.hh\
 	generalsurfaceextractor.hh\
 	simplicialsurfaceextractor.hh\
 	cubesurfaceextractor.hh\
 	surfacedescriptor.hh\
 	gridextractiontraits.hh\
+        parallelextractor.hh \
 	vtksurfacewriter.hh
 
 include $(top_srcdir)/am/global-rules
