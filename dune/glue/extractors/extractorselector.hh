@@ -20,10 +20,9 @@
 #define EXTRACTORSELECTOR_HH
 
 #include "gridextractiontraits.hh"
-#include "simplicialmeshextractor.hh"
+#include "codim0extractor.hh"
 #include "simplicialsurfaceextractor.hh"
 #include "cubesurfaceextractor.hh"
-#include "cubemeshextractor.hh"
 #include "generalsurfaceextractor.hh"
 #include "parallelextractor.hh"
 
