@@ -239,14 +239,30 @@ computeIntersection(const Dune::GeometryType& domainElementType,
 
     // Construct the two input polygons.
     Polygon_2 P;
-    for (std::size_t i=0; i<domainElementCorners.size(); i++)
-      P.push_back (Point_2 (domainElementCorners[i][0], domainElementCorners[i][1]));
+    if (domainElementType.isQuadrilateral()) {
+      // Vertex renumbering Dune --> CGAL
+      P.push_back( Point_2(domainElementCorners[0][0], domainElementCorners[0][1]));
+      P.push_back( Point_2(domainElementCorners[1][0], domainElementCorners[1][1]));
+      P.push_back( Point_2(domainElementCorners[3][0], domainElementCorners[3][1]));
+      P.push_back( Point_2(domainElementCorners[2][0], domainElementCorners[2][1]));
+
+    } else
+      for (std::size_t i=0; i<domainElementCorners.size(); i++)
+        P.push_back (Point_2 (domainElementCorners[i][0], domainElementCorners[i][1]));
 
     //std::cout << "P = "; print_polygon (P);
 
     Polygon_2 Q;
-    for (std::size_t i=0; i<targetElementCorners.size(); i++)
-      Q.push_back (Point_2 (targetElementCorners[i][0], targetElementCorners[i][1]));
+    if (targetElementType.isQuadrilateral()) {
+      // Vertex renumbering Dune --> CGAL
+      Q.push_back( Point_2(targetElementCorners[0][0], targetElementCorners[0][1]));
+      Q.push_back( Point_2(targetElementCorners[1][0], targetElementCorners[1][1]));
+      Q.push_back( Point_2(targetElementCorners[3][0], targetElementCorners[3][1]));
+      Q.push_back( Point_2(targetElementCorners[2][0], targetElementCorners[2][1]));
+
+    } else
+      for (std::size_t i=0; i<targetElementCorners.size(); i++)
+        Q.push_back (Point_2 (targetElementCorners[i][0], targetElementCorners[i][1]));
 
     //std::cout << "Q = "; print_polygon (Q);
 
