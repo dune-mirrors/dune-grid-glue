@@ -173,7 +173,8 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       }
 
       // add a new face to the temporary collection
-      temp_faces.push_back(SubEntityInfo(eindex,0));
+      temp_faces.push_back(SubEntityInfo(eindex,0,
+                                         Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
       simplex_index++;
       for (int i=0; i<temp_faces.back().nCorners(); i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];
@@ -184,7 +185,8 @@ void CubeMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       // now introduce the second triangle subdividing the quadrilateral
       if (dim==2) {
         // add a new face to the temporary collection for the 2nd triangle
-        temp_faces.push_back(SubEntityInfo(eindex,0));
+        temp_faces.push_back(SubEntityInfo(eindex,0,
+                                           Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
         temp_faces.back().corners[0].idx = vertex_indices[3];
         temp_faces.back().corners[1].idx = vertex_indices[2];
         temp_faces.back().corners[2].idx = vertex_indices[1];

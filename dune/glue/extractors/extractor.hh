@@ -144,11 +144,10 @@ protected:
       geometryType_.makeSimplex(dim-codim);
     }
 
-    SubEntityInfo(IndexType parent_, unsigned int num_in_parent_)
-      :   parent(parent_), num_in_parent(num_in_parent_)
-    {
-      geometryType_.makeSimplex(dim-codim);
-    }
+    SubEntityInfo(IndexType parent_, unsigned int num_in_parent_,
+                  const Dune::GeometryType& geometryType)
+      : parent(parent_), num_in_parent(num_in_parent_), geometryType_(geometryType)
+    {}
 
     unsigned int nCorners() const
     {

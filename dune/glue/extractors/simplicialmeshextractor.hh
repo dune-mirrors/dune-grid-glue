@@ -161,7 +161,7 @@ void SimplicialMeshExtractor<GV>::update(const ElementDescriptor<GV>& descr)
       }
 
       // add a new face to the temporary collection
-      temp_faces.push_back(SubEntityInfo(eindex,0));
+      temp_faces.push_back(SubEntityInfo(eindex,0,elit->type()));
       element_index++;
       for (int i=0; i<numCorners; i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];

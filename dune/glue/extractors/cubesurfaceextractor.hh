@@ -243,7 +243,8 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
         // add a new face to the temporary collection
         simplex_count ++;
-        temp_faces.push_back(SubEntityInfo(eindex, face_index));
+        temp_faces.push_back(SubEntityInfo(eindex, face_index,
+                                           Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
         for (int i=0; i<dim; i++) {
           temp_faces.back().corners[i].idx = vertex_indices[i];
           // remember the vertices' numbers in parent element's vertices
@@ -256,7 +257,8 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
         if (dim==3) {
           // add a new face to the temporary collection for the second tri
           simplex_count++;
-          temp_faces.push_back(SubEntityInfo(eindex, face_index));
+          temp_faces.push_back(SubEntityInfo(eindex, face_index,
+                                             Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
           temp_faces.back().corners[0].idx = vertex_indices[3];
           temp_faces.back().corners[1].idx = vertex_indices[2];
           temp_faces.back().corners[2].idx = vertex_indices[1];
