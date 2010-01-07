@@ -32,6 +32,9 @@ dnl fi
 
 AC_LANG_POP([C++])
 
+# Store LIBS
+AC_SUBST(CGAL_LIBS)
+
 # Define the preprocessor macro HAVE_CGAL in config.h if cgal has been found
 if test "$acx_cgal_found" == yes; then
         AC_DEFINE(HAVE_CGAL, 1, [Define to 1 if the cgal library is found])
@@ -39,8 +42,6 @@ fi
 
 # Mention in the module summary that cgal has been found
 DUNE_ADD_SUMMARY_ENTRY([cgal],[$acx_cgal_found])
-
-
 
 AC_MSG_CHECKING(CGAL)
 if test "$acx_cgal_found" == yes; then 
