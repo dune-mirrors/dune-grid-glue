@@ -1,6 +1,6 @@
 # -*- tab-width: 4; indent-tabs-mode: nil -*-
 
-TESTPROGS = nonoverlappingcouplingtest overlappingcouplingtest mixeddimcouplingtest orientedsubfacetest
+TESTPROGS = nonoverlappingcouplingtest overlappingcouplingtest orientedsubfacetest mixeddimcouplingtest
 
 if MPI
 TESTPROGS += nonoverlappingcouplingtest_mpi
@@ -14,7 +14,7 @@ TESTS = $(TESTPROGS)
 
 AM_CPPFLAGS += $(PSURFACE_CPPFLAGS)
 AM_LDFLAGS  += $(PSURFACE_LDFLAGS) $(AMIRAMESH_LDFLAGS)
-LDADD        = $(LOCAL_LIBS) $(PSURFACE_LIBS) $(AMIRAMESH_LIBS)
+LDADD        = $(LOCAL_LIBS) $(PSURFACE_LIBS) $(AMIRAMESH_LIBS) $(CGAL_LIBS)
 
 
 # If UG is available we can test pyramids and prisms
