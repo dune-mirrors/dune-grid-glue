@@ -189,18 +189,20 @@ public:
 #ifdef WRITE_TO_VTK
     const int dimw = Parent::dimworld;
     const char prefix[] = "GridGlue::Builder::build() : ";
-    const char domainsurf[] = "/tmp/vtk-domain-test";
-    const char targetsurf[] = "/tmp/vtk-target-test";
+    char domainsurf[256];
+    sprintf(domainsurf, "/tmp/vtk-domain-test-%i", mpi_rank);
+    char targetsurf[256];
+    sprintf(targetsurf, "/tmp/vtk-target-test-%i", mpi_rank);
 
-    STDOUTLN(prefix << "Writing domain surface to '" << domainsurf << ".vtk'...");
+    std::cout << prefix << "Writing domain surface to '" << domainsurf << ".vtk'...\n";
     VtkSurfaceWriter vtksw(domainsurf);
     vtksw.writeSurface(domcoords, domfaces, dimw, dimw);
-    STDOUTLN(prefix << "Done writing domain surface!");
+    std::cout << prefix << "Done writing domain surface!\n";
 
-    STDOUTLN(prefix << "Writing target surface to '" << targetsurf << ".vtk'...");
+    std::cout << prefix << "Writing target surface to '" << targetsurf << ".vtk'...\n";
     vtksw.setFilename(targetsurf);
     vtksw.writeSurface(tarcoords, tarfaces, dimw, dimw);
-    STDOUTLN(prefix << "Done writing target surface!");
+    std::cout << prefix << "Done writing target surface!\n";
 #endif // WRITE_TO_VTK
 
 

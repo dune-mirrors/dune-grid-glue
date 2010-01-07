@@ -20,6 +20,8 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
+#include <dune/grid/genericgeometry/geometry.hh>
+
 #include <dune/glue/merging/standardmerge.hh>
 
 #ifdef HAVE_CGAL  // without CGAL we can still handle 1d problems
