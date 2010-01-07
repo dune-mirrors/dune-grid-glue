@@ -31,10 +31,10 @@
 #include <dune/common/array.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
-#include "surfacedescriptor.hh"
 
-#include <dune/glue/extractors/codim1extractor.hh>
-#include <dune/glue/common/orientedsubface.hh>
+#include "surfacedescriptor.hh"
+#include "codim1extractor.hh"
+#include "../common/orientedsubface.hh"
 
 
 

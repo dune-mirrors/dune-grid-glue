@@ -32,7 +32,8 @@
 #include <dune/grid/common/geometry.hh>
 
 #include "surfacedescriptor.hh"
-#include <dune/glue/extractors/codim1extractor.hh>
+#include "codim1extractor.hh"
+#include "../common/orientedsubface.hh"
 
 /**
  * @brief grid extractor implementation for arbitrary surface grids (tris and/or quads on surface)

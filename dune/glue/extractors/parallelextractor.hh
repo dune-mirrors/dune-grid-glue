@@ -32,6 +32,10 @@
 #include <dune/common/collectivecommunication.hh>
 #include <stdlib.h>
 
+#if HAVE_MPI
+#include <dune/common/mpicollectivecommunication.hh>
+#endif
+
 template <typename COMM>
 class CommHelper
 {

@@ -19,6 +19,7 @@
 #ifndef DUNE_CODIM_0_EXTRACTOR_HH
 #define DUNE_CODIM_0_EXTRACTOR_HH
 
+#include <deque>
 #include "extractor.hh"
 #include "surfacedescriptor.hh"
 
