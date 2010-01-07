@@ -5,7 +5,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/grid/uggrid.hh>
 
-#include <dune/glue/misc/geometry.hh>
+#include <dune/glue/common/orientedsubface.hh>
 
 using namespace Dune;
 
