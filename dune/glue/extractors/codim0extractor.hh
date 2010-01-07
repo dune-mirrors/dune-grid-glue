@@ -31,15 +31,7 @@ public:
   /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
   using Extractor<GV,0>::codim;
   using Extractor<GV,0>::dim;
-#if 0
-  using Codim0Extractor<GV>::dimworld;
 
-  typedef GV GridView;
-
-  typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dimworld>                                Coords;
-
-#endif
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
   static const Dune::PartitionIteratorType PType = Dune::All_Partition;

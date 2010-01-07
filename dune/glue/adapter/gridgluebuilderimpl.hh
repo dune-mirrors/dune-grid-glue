@@ -80,7 +80,7 @@ private:
                     const CoordinateTransformation<Extractor::dimworld, Parent::dimworld, typename Parent::ctype>* trafo) const
   {
     std::vector<typename Extractor::Coords> tempcoords;
-    std::vector<std::vector<unsigned int> > tempfaces;
+    std::vector<typename Extractor::VertexVector> tempfaces;
 
     extractor.getCoords(tempcoords);
     coords.clear();

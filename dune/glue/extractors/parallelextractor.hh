@@ -90,7 +90,6 @@ public:
   enum { dim      = LX::dim };
   enum { dimw     = LX::dimworld };
   enum { codim    = LX::codim };
-  enum { simplex_corners = LX::simplex_corners };
 
   typedef typename LX::GridView GV;
   typedef typename LX::GridView GridView;
@@ -98,7 +97,7 @@ public:
 
   typedef typename GV::Grid Grid;
   typedef typename GV::Grid::ctype ctype;
-  typedef typename LX::SimplexTopology SimplexTopology;
+  typedef typename LX::VertexVector VertexVector;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
@@ -139,10 +138,10 @@ public:
       return (! valid && ! other.valid) || (valid && other.valid && i == other.i);
     }
   };
-  typedef Dune::array<GlobalId, simplex_corners> GlobalSimplexTopology;
+  typedef std::vector<GlobalId> GlobalEntityTopology;
   struct GlobalFaceInfo
   {
-    GlobalSimplexTopology v;
+    GlobalEntityTopology v;
     GlobalFaceId i;
     bool valid;
 
@@ -170,7 +169,7 @@ private:
   std::vector<unsigned int>  _global2local;
   // global data
   std::vector<Coords> _coords;
-  std::vector<SimplexTopology> _faces;
+  std::vector<VertexVector> _faces;
 
 public:
 
@@ -235,13 +234,15 @@ public:
 
     // get face data
     {
-      std::vector<SimplexTopology> faces;
+      std::vector<VertexVector> faces;
       _lx.getFaces(faces);
       localFaceInfos.resize(faces.size());
       size_t Xsub = 0;
       for (unsigned int i=0; i<faces.size(); i++)
       {
-        for (int v=0; v<simplex_corners; v++)
+        size_t corners = faces[i].size();
+        localFaceInfos[i].v.resize(corners);
+        for (int v=0; v<corners; v++)
         {
           localFaceInfos[i].v[v] = localCoordInfos[faces[i][v]].i;
         }
@@ -315,8 +316,12 @@ public:
       }
 
       for (size_t f=0; f<globalFaceSize; ++f)
-        for (size_t c=0; c<simplex_corners; ++c)
+      {
+        size_t corners = globalFaceInfos[f].v.size();
+        _faces[f].resize(corners);
+        for (size_t c=0; c<corners; ++c)
           _faces[f][c] = coordIndex[globalFaceInfos[f].v[c]];
+      }
     }
 
     // setup local/global mappings
@@ -395,12 +400,11 @@ public:
    * Deallocation is done in this class.
    * @return the _indices array
    */
-  void getFaces(std::vector<SimplexTopology>& faces) const
+  void getFaces(std::vector<VertexVector>& faces) const
   {
     faces.resize(this->_faces.size());
     for (unsigned int i = 0; i < this->_faces.size(); ++i)
-      for (unsigned int j = 0; j < simplex_corners; ++j)
-        faces[i][j] = this->_faces[i][j];
+      faces[i] = this->_faces[i];
   }
 
 

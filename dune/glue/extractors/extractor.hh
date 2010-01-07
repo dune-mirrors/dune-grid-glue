@@ -62,6 +62,8 @@ public:
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
 
+  typedef std::vector<unsigned int>                                VertexVector;
+
   // index sets and index types
   typedef typename GV::IndexSet IndexSet;
   typedef typename IndexSet::IndexType IndexType;
@@ -164,7 +166,7 @@ protected:
 
     /** @brief the corner indices plus the numbers of the vertices in the parent element
 
-       This array has the length cube_corners, because currently that is an upper bound
+       This array has the length cube_corners, because currently that is an upper boun d
        for the number of corners of an element.  If more general element types appear we
        need to change this.
      */
@@ -287,7 +289,7 @@ public:
   /**
    * @brief Get the corners of the extracted subentities
    */
-  void getFaces(std::vector<std::vector<unsigned int> >& faces) const
+  void getFaces(std::vector<VertexVector>& faces) const
   {
     faces.resize(this->subEntities_.size());
     for (unsigned int i = 0; i < this->subEntities_.size(); ++i) {
