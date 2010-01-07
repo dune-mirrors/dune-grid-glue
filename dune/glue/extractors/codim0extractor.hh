@@ -20,6 +20,7 @@
 #define DUNE_CODIM_0_EXTRACTOR_HH
 
 #include "extractor.hh"
+#include "surfacedescriptor.hh"
 
 template<typename GV>
 class Codim0Extractor : public Extractor<GV,0>
