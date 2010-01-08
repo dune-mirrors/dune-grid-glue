@@ -92,15 +92,21 @@ private:
       for (size_t i = 0; i < tempcoords.size(); ++i)
       {
         typename Parent::Coords temp = (*trafo)(tempcoords[i]);
-        coords.push_back(Dune::FieldVector<typename Parent::ctype, Parent::dimworld>());
-        for (size_t j = 0; j < Parent::dimworld; ++j)
-          coords.back()[j] = temp[j];
+        coords.push_back(temp);
+        // coords.push_back(Dune::FieldVector<typename Parent::ctype, Parent::dimworld>());
+        // for (size_t j = 0; j < Parent::dimworld; ++j)
+        //     coords.back()[j] = temp[j];
       }
     }
     else
     {
       for (unsigned int i = 0; i < tempcoords.size(); ++i)
-        coords.push_back(tempcoords[i]);
+      {
+        assert(Parent::dimworld == Extractor::dimworld);
+        coords.push_back(Dune::FieldVector<typename Parent::ctype, Parent::dimworld>());
+        for (size_t j = 0; j < Parent::dimworld; ++j)
+          coords.back()[j] = tempcoords[i][j];
+      }
     }
 
     extractor.getFaces(tempfaces);
