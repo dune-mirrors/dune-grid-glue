@@ -19,6 +19,7 @@
 #if HAVE_CGAL
 #include <dune/glue/merging/cgalmerge.hh>
 #endif
+#include <dune/glue/merging/conformingmerge.hh>
 
 #include <dune/glue/test/couplingtest.hh>
 
@@ -319,5 +320,24 @@ int main()
 
   testHybridGridsUG<2>(cgalMerge2d);
 #endif
+#endif
+
+
+  // //////////////////////////////////////////////////////////
+  //   Test with the ConformingMerge implementation
+  // //////////////////////////////////////////////////////////
+
+  ConformingMerge<1,1,double> conformingMerge1d;
+  ConformingMerge<2,2,double> conformingMerge2d;
+  ConformingMerge<3,3,double> conformingMerge3d;
+
+  testCubeGrids<1>(conformingMerge1d);
+  testCubeGrids<2>(conformingMerge2d);
+
+  testSimplexGrids<1>(conformingMerge1d);
+#if HAVE_UG
+  testTriangleGridsUG(conformingMerge2d);
+
+  testHybridGridsUG<2>(conformingMerge2d);
 #endif
 }
