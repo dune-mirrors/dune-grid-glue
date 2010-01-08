@@ -138,10 +138,12 @@ public:
       return (! valid && ! other.valid) || (valid && other.valid && i == other.i);
     }
   };
-  typedef std::vector<GlobalId> GlobalEntityTopology;
+  // typedef std::vector<GlobalId> GlobalEntityTopology;
   struct GlobalFaceInfo
   {
-    GlobalEntityTopology v;
+    // GlobalEntityTopology v;
+    GlobalId v[(1<<dim-codim)];
+    char corners;
     GlobalFaceId i;
     bool valid;
 
@@ -170,6 +172,59 @@ private:
   // global data
   std::vector<Coords> _coords;
   std::vector<VertexVector> _faces;
+  std::vector<Dune::GeometryType> _geometryTypes;
+
+  Dune::GeometryType guessGeomType(int corners) const
+  {
+    Dune::GeometryType type;
+    switch (dim-codim)
+    {
+    case 0 :
+      type.makeVertex();
+      break;
+    case 1 :
+      type.makeLine();
+      break;
+    case 2 :
+      switch (corners) {
+      case 3 :
+        type.makeTriangle();
+        break;
+      case 4 :
+        type.makeQuadrilateral();
+        break;
+      default :
+        DUNE_THROW(Dune::Exception,
+                   "impossible intersection (dim=" <<
+                   dim-codim << ", " << corners << " corners)");
+      }
+      break;
+    case 3 :
+      switch (corners) {
+      case 4 :
+        type.makeTetrahedron();
+        break;
+      case 5 :
+        type.makePyramid();
+        break;
+      case 6 :
+        type.makePrism();
+        break;
+      case 8 :
+        type.makeHexahedron();
+        break;
+      default :
+        DUNE_THROW(Dune::Exception,
+                   "impossible intersection (dim=" <<
+                   dim-codim << ", " << corners << " corners)");
+      }
+      break;
+    default :
+      DUNE_THROW(Dune::NotImplemented,
+                 "Only intersections up to dim=3 are supported");
+    }
+    return type;
+  }
 
 public:
 
@@ -218,6 +273,7 @@ public:
     // obtain local data
     std::vector<GlobalCoordInfo> localCoordInfos;
     std::vector<GlobalFaceInfo> localFaceInfos;
+    std::vector<Dune::GeometryType> localGeometryTypes;
 
     // get vertex data
     {
@@ -241,7 +297,8 @@ public:
       for (unsigned int i=0; i<faces.size(); i++)
       {
         size_t corners = faces[i].size();
-        localFaceInfos[i].v.resize(corners);
+        // localFaceInfos[i].v.resize(corners);
+        localFaceInfos[i].corners = corners;
         for (int v=0; v<corners; v++)
         {
           localFaceInfos[i].v[v] = localCoordInfos[faces[i][v]].i;
@@ -257,6 +314,7 @@ public:
     // merge parallel data
     std::vector<GlobalCoordInfo> globalCoordInfos;
     std::vector<GlobalFaceInfo>  globalFaceInfos;
+    std::vector<Dune::GeometryType> globalGeometryTypes;
 
     // communicate coordinates
     // TODO: use more efficient communication
@@ -303,6 +361,15 @@ public:
     }
     globalFaceSize = globalFaceInfos.size();
 
+    // sort and shrink geometry types vector
+    std::sort(globalGeometryTypes.begin(), globalGeometryTypes.end());
+    {
+      typename std::vector<Dune::GeometryType>::iterator where =
+        std::unique(globalGeometryTypes.begin(), globalGeometryTypes.end());
+      globalGeometryTypes.erase(where, globalGeometryTypes.end());
+    }
+    _geometryTypes = globalGeometryTypes;
+
     // setup parallel coords and faces
     {
       std::map<GlobalId, unsigned int> coordIndex;       // quick access to vertex index, give an ID
@@ -317,7 +384,8 @@ public:
 
       for (size_t f=0; f<globalFaceSize; ++f)
       {
-        size_t corners = globalFaceInfos[f].v.size();
+        // size_t corners = globalFaceInfos[f].v.size();
+        size_t corners = globalFaceInfos[f].corners;
         _faces[f].resize(corners);
         for (size_t c=0; c<corners; ++c)
           _faces[f][c] = coordIndex[globalFaceInfos[f].v[c]];
@@ -385,13 +453,14 @@ public:
     return _coords.size();
   }
 
-  /** \brief Get the list of geometry types
-      \todo This is not implemented, as I don't know how to implemented it properly.
-      Before implementing this please check whether it is still needed at all.
+  /**
+   * @brief Get the list of geometry types
    */
   void getGeometryTypes(std::vector<Dune::GeometryType>& geometryTypes) const
   {
-    DUNE_THROW(Dune::NotImplemented, "getGeometryTypes() for ParallelExtractor");
+    geometryTypes.resize(_faces.size());
+    for (size_t i=0; i<_faces.size(); i++)
+      geometryTypes[i] = guessGeomType(_faces[i].size());
   }
 
   /**
