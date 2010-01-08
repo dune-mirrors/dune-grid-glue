@@ -69,7 +69,7 @@ public:
    * @param gv the grid view object to work with
    */
   Codim0Extractor(const GV& gv)
-    :  Extractor<GV,0>(gv)
+    :  Extractor<GV,0>(gv), _positiveNormalDirection(false)
   {
     std::cout << "This is Codim0Extractor on a <"
               << GV::dimension << "," << GV::dimensionworld << "> grid!" << std::endl;
@@ -79,6 +79,11 @@ public:
    */
   void update(const ElementDescriptor<GV>& descr);
 
+  bool & positiveNormalDirection() { return _positiveNormalDirection; }
+  const bool & positiveNormalDirection() const { return _positiveNormalDirection; }
+
+protected:
+  bool _positiveNormalDirection;
 };
 
 
@@ -145,6 +150,46 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
         {
           // only remember the vertex' index
           vertex_indices[i] = vimit->second->idx;
+        }
+      }
+
+      // flip cell if necessary
+      if (_positiveNormalDirection)
+      {
+        // choose element type
+        if (dim > elit->type().isCube())
+        {
+          for (int i = 0; i < (1<<dim); i+=2)
+          {
+            // swap i and i+1
+            int x = vertex_indices[i];
+            vertex_indices[i] = vertex_indices[i+1];
+            vertex_indices[i+1] = x;
+
+            x = vertex_numbers[i];
+            vertex_numbers[i] = vertex_numbers[i+1];
+            vertex_numbers[i+1] = x;
+          }
+        }
+        if (elit->type().isSimplex())
+        {
+          switch ((int)dim) {
+          case 1 :
+          case 2 :
+          {
+            int x = vertex_indices[0];
+            vertex_indices[0] = vertex_indices[1];
+            vertex_indices[1] = x;
+
+            x = vertex_numbers[0];
+            vertex_numbers[0] = vertex_numbers[1];
+            vertex_numbers[1] = x;
+
+            break;
+          }
+          default :
+            assert(false);
+          }
         }
       }
 

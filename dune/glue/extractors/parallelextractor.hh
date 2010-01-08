@@ -556,7 +556,7 @@ public:
   // export codim0 method
   bool & positiveNormalDirection()
   {
-    // return _lx.positiveNormalDirection();
+    return _lx.positiveNormalDirection();
   }
 };
 

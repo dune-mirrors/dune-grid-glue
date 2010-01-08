@@ -126,7 +126,7 @@ void test1d2dCouplingMatchingDimworld()
 
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
-  //    glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
+  glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
 
   glue.builder().build();
 
@@ -189,7 +189,7 @@ void test2d1dCouplingMatchingDimworld()
 
   glue.builder().setDomainDescriptor(domdesc);
   glue.builder().setTargetDescriptor(tardesc);
-  //    glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
+  glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
 
   glue.builder().build();
 
@@ -254,7 +254,7 @@ void test1d2dCoupling(double slice=0.0)
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
   glue.builder().setTargetTransformation(&trafo);
-  //    glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
+  glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
 
   glue.builder().build();
 
@@ -319,7 +319,7 @@ void test2d1dCoupling(double slice=0.0)
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
   glue.builder().setDomainTransformation(&trafo);
-  //    glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
+  glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
 
   glue.builder().build();
 
