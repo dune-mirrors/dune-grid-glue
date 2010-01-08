@@ -181,29 +181,29 @@ protected:
   /************************** MEMBER VARIABLES ************************/
 
   /// @brief the grid object to extract the surface from
-  const GV&                       _gv;
+  const GV&                       gv_;
 
   /*        Geometrical and Topological Information                */
 
   /// @brief all information about the corner vertices of the extracted
-  std::vector<CoordinateInfo>   _coords;
+  std::vector<CoordinateInfo>   coords_;
 
   /// @brief all information about the extracted subEntities
-  std::vector<SubEntityInfo> _subEntities;
+  std::vector<SubEntityInfo> subEntities_;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
   /// Maps a vertex' index (from index set) to an object holding the locally
-  /// associated index of the vertex' coordinate in _coords and an entity
+  /// associated index of the vertex' coordinate in coords_ and an entity
   /// pointer to the codim<dim> entity.
-  VertexInfoMap _vtxInfo;
+  VertexInfoMap vtxInfo_;
 
   /// @brief a map enabling faster access to elements and faces
   ///
   /// Maps an element's index (from index set) to an object holding the locally
   /// associated index of its first face in _indices (if there are more they are
   /// positioned consecutively) and an entity pointer to the codim<0> entity.
-  ElementInfoMap _elmtInfo;
+  ElementInfoMap elmtInfo_;
 
 public:
 
@@ -214,7 +214,7 @@ public:
    * @param gv the grid view object to work with
    */
   Extractor(const GV& gv)
-    :  _gv(gv)
+    :  gv_(gv)
   {}
 
   /** \brief Destructor frees allocated memory */
@@ -231,25 +231,25 @@ public:
     // by a std::vector
     {
       std::vector<CoordinateInfo> dummy;
-      this->_coords.swap(dummy);
+      this->coords_.swap(dummy);
     }
     {
       std::vector<SubEntityInfo> dummy;
-      this->_subEntities.swap(dummy);
+      this->subEntities_.swap(dummy);
     }
 
     // first free all manually allocated vertex/element info items...
-    for (typename VertexInfoMap::iterator it = this->_vtxInfo.begin();
-         it != this->_vtxInfo.end(); ++it)
+    for (typename VertexInfoMap::iterator it = this->vtxInfo_.begin();
+         it != this->vtxInfo_.end(); ++it)
       if (it->second != NULL)
         delete it->second;
-    for (typename ElementInfoMap::iterator it = this->_elmtInfo.begin();
-         it != this->_elmtInfo.end(); ++it)
+    for (typename ElementInfoMap::iterator it = this->elmtInfo_.begin();
+         it != this->elmtInfo_.end(); ++it)
       if (it->second != NULL)
         delete it->second;
     // ...then clear the maps themselves, too
-    this->_vtxInfo.clear();
-    this->_elmtInfo.clear();
+    this->vtxInfo_.clear();
+    this->elmtInfo_.clear();
   }
 
 
@@ -262,9 +262,9 @@ public:
    */
   void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
   {
-    coords.resize(_coords.size());
-    for (unsigned int i = 0; i < _coords.size(); ++i)
-      coords[i] = _coords[i].coord;
+    coords.resize(coords_.size());
+    for (unsigned int i = 0; i < coords_.size(); ++i)
+      coords[i] = coords_[i].coord;
   }
 
 
@@ -274,15 +274,15 @@ public:
    */
   unsigned int nCoords() const
   {
-    return _coords.size();
+    return coords_.size();
   }
 
   /** \brief Get the list of geometry types */
   void getGeometryTypes(std::vector<Dune::GeometryType>& geometryTypes) const
   {
-    geometryTypes.resize(_subEntities.size());
-    for (size_t i=0; i<_subEntities.size(); i++)
-      geometryTypes[i] = _subEntities[i].geometryType_;
+    geometryTypes.resize(subEntities_.size());
+    for (size_t i=0; i<subEntities_.size(); i++)
+      geometryTypes[i] = subEntities_[i].geometryType_;
   }
 
 
@@ -291,11 +291,11 @@ public:
    */
   void getFaces(std::vector<VertexVector>& faces) const
   {
-    faces.resize(this->_subEntities.size());
-    for (unsigned int i = 0; i < this->_subEntities.size(); ++i) {
-      faces[i].resize(_subEntities[i].nCorners());
-      for (unsigned int j = 0; j < _subEntities[i].nCorners(); ++j)
-        faces[i][j] = this->_subEntities[i].corners[j].idx;
+    faces.resize(this->subEntities_.size());
+    for (unsigned int i = 0; i < this->subEntities_.size(); ++i) {
+      faces[i].resize(subEntities_[i].nCorners());
+      for (unsigned int j = 0; j < subEntities_[i].nCorners(); ++j)
+        faces[i][j] = this->subEntities_[i].corners[j].idx;
     }
   }
 
@@ -311,8 +311,8 @@ public:
   bool faceIndices(const Element& e, int& first, int& count) const
   {
     typename ElementInfoMap::const_iterator it =
-      this->_elmtInfo.find(this->indexSet().template index<0>(e));
-    if (it == this->_elmtInfo.end())
+      this->elmtInfo_.find(this->indexSet().template index<0>(e));
+    if (it == this->elmtInfo_.end())
     {
       first = -1;
       count = 0;
@@ -332,7 +332,7 @@ public:
    */
   int indexInInside(unsigned int index) const
   {
-    return index < this->_subEntities.size() ? this->_subEntities[index].num_in_parent : -1;
+    return index < this->subEntities_.size() ? this->subEntities_[index].num_in_parent : -1;
   }
 
   /**
@@ -341,7 +341,7 @@ public:
    */
   const IndexSet& indexSet() const
   {
-    return _gv.indexSet();
+    return gv_.indexSet();
   }
 
 
@@ -359,9 +359,9 @@ public:
    */
   const ElementPtr& element(unsigned int index) const
   {
-    if (index >= this->_subEntities.size())
+    if (index >= this->subEntities_.size())
       DUNE_THROW(Dune::GridError, "invalid face index");
-    return (this->_elmtInfo.find(this->_subEntities[index].parent))->second->p;
+    return (this->elmtInfo_.find(this->subEntities_[index].parent))->second->p;
   }
 
 #if 1
@@ -373,9 +373,9 @@ public:
    */
   const VertexPtr& vertex(unsigned int index) const
   {
-    if (index >= this->_coords.size())
+    if (index >= this->coords_.size())
       DUNE_THROW(Dune::GridError, "invalid coordinate index");
-    return (this->_vtxInfo.find(this->_coords[index].vtxindex))->second->p;
+    return (this->vtxInfo_.find(this->coords_[index].vtxindex))->second->p;
   }
 #endif
 
@@ -399,11 +399,11 @@ Extractor<GV,cd>::~Extractor()
 template<typename GV, int cd>
 typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int index) const
 {
-  std::vector<Coords> corners(_subEntities[index].nCorners());
-  for (int i = 0; i < _subEntities[index].nCorners(); ++i)
-    corners[i] = this->_coords[this->_subEntities[index].corners[i].idx].coord;
+  std::vector<Coords> corners(subEntities_[index].nCorners());
+  for (int i = 0; i < subEntities_[index].nCorners(); ++i)
+    corners[i] = this->coords_[this->subEntities_[index].corners[i].idx].coord;
 
-  return Geometry(_subEntities[index].geometryType_, corners);
+  return Geometry(subEntities_[index].geometryType_, corners);
 }
 
 
@@ -411,18 +411,18 @@ typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int inde
 template<typename GV, int cd>
 typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigned int index) const
 {
-  std::vector<LocalCoords> corners(_subEntities[index].nCorners());
+  std::vector<LocalCoords> corners(subEntities_[index].nCorners());
 
   // get face info
-  const SubEntityInfo & face = this->_subEntities[index];
-  Dune::GeometryType facetype = _subEntities[index].geometryType_;
+  const SubEntityInfo & face = this->subEntities_[index];
+  Dune::GeometryType facetype = subEntities_[index].geometryType_;
 
   // get reference element
-  Dune::GeometryType celltype = _elmtInfo.find(face.parent)->second->p->type();
+  Dune::GeometryType celltype = elmtInfo_.find(face.parent)->second->p->type();
   const Dune::GenericReferenceElement<ctype, dim> & re =
     Dune::GenericReferenceElements<ctype, dim>::general(celltype);
 
-  for (int i = 0; i < _subEntities[index].nCorners(); ++i)
+  for (int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = re.position(face.corners[i].num,dim);
 
   return LocalGeometry(facetype, corners);

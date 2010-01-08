@@ -185,7 +185,7 @@ computeIntersection(const Dune::GeometryType& domainElementType,
 
   //     std::vector<Coords> corners(subEntities_[index].nCorners());
   //     for (int i = 0; i < subEntities_[index].nCorners(); ++i)
-  //         corners[i] = this->_coords[this->subEntities_[index].corners[i].idx].coord;
+  //         corners[i] = this->coords_[this->subEntities_[index].corners[i].idx].coord;
 
   Geometry domainGeometry(domainElementType, domainElementCorners);
   Geometry targetGeometry(targetElementType, targetElementCorners);

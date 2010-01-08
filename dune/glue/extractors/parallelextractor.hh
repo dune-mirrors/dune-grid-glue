@@ -164,15 +164,15 @@ public:
 
 private:
 
-  const GV& _gv;
-  LX _lx;
+  const GV& gv_;
+  LX lx_;
   // map between local and global _face_ index
-  std::vector<unsigned int>  _local2global;
-  std::vector<unsigned int>  _global2local;
+  std::vector<unsigned int>  local2global_;
+  std::vector<unsigned int>  global2local_;
   // global data
-  std::vector<Coords> _coords;
-  std::vector<VertexVector> _faces;
-  std::vector<Dune::GeometryType> _geometryTypes;
+  std::vector<Coords> coords_;
+  std::vector<VertexVector> faces_;
+  std::vector<Dune::GeometryType> geometryTypes_;
 
   Dune::GeometryType guessGeomType(int corners) const
   {
@@ -231,7 +231,7 @@ public:
   // methods
   bool contains (unsigned int global, unsigned int & local) const
   {
-    local = _global2local[global];
+    local = global2local_[global];
     // assert(local == global);
     return (local != (unsigned int)(-1));
   }
@@ -243,7 +243,7 @@ public:
    * @param gv the grid view object to work with
    */
   ParallelExtractor(const GV& gv)
-    :  _gv(gv), _lx(gv)
+    :  gv_(gv), lx_(gv)
   {}
 
   /** \brief Destructor frees allocated memory */
@@ -259,8 +259,8 @@ public:
    */
   void clear()
   {
-    _lx.clear();
-    _global2local.clear();
+    lx_.clear();
+    global2local_.clear();
   }
 
   // TODO: doku, get Descriptor Type from LX
@@ -268,7 +268,7 @@ public:
   void update(const Descriptor& descr)
   {
     // setup local extractor
-    _lx.update(descr);
+    lx_.update(descr);
 
     // obtain local data
     std::vector<GlobalCoordInfo> localCoordInfos;
@@ -278,12 +278,12 @@ public:
     // get vertex data
     {
       std::vector<Coords> coords;
-      _lx.getCoords(coords);
+      lx_.getCoords(coords);
       localCoordInfos.resize(coords.size());
       for (unsigned int i=0; i<coords.size(); i++)
       {
         localCoordInfos[i].c = coords[i];
-        localCoordInfos[i].i = _gv.grid().globalIdSet().id(* _lx.vertex(i));
+        localCoordInfos[i].i = gv_.grid().globalIdSet().id(* lx_.vertex(i));
         localCoordInfos[i].valid = true;
       }
     }
@@ -291,7 +291,7 @@ public:
     // get face data
     {
       std::vector<VertexVector> faces;
-      _lx.getFaces(faces);
+      lx_.getFaces(faces);
       localFaceInfos.resize(faces.size());
       size_t Xsub = 0;
       for (unsigned int i=0; i<faces.size(); i++)
@@ -303,7 +303,7 @@ public:
         {
           localFaceInfos[i].v[v] = localCoordInfos[faces[i][v]].i;
         }
-        localFaceInfos[i].i.first = _gv.grid().globalIdSet().id(* _lx.element(i));
+        localFaceInfos[i].i.first = gv_.grid().globalIdSet().id(* lx_.element(i));
         if (i>0 && localFaceInfos[i].i.first != localFaceInfos[i-1].i.first)
           Xsub = 0;
         localFaceInfos[i].i.second = Xsub++;
@@ -319,7 +319,7 @@ public:
     // communicate coordinates
     // TODO: use more efficient communication
     typedef typename Grid::CollectiveCommunication Comm;
-    const Comm & comm = _gv.grid().comm();
+    const Comm & comm = gv_.grid().comm();
     CommHelper<Comm> commHelper(comm);
 
     size_t globalCoordLocalSize = localCoordInfos.size();
@@ -368,27 +368,27 @@ public:
         std::unique(globalGeometryTypes.begin(), globalGeometryTypes.end());
       globalGeometryTypes.erase(where, globalGeometryTypes.end());
     }
-    _geometryTypes = globalGeometryTypes;
+    geometryTypes_ = globalGeometryTypes;
 
     // setup parallel coords and faces
     {
       std::map<GlobalId, unsigned int> coordIndex;       // quick access to vertex index, give an ID
-      _coords.resize(globalCoordSize);
-      _faces.resize(globalFaceSize);
+      coords_.resize(globalCoordSize);
+      faces_.resize(globalFaceSize);
 
       for (size_t c=0; c<globalCoordSize; ++c)
       {
         coordIndex[globalCoordInfos[c].i] = c;
-        _coords[c] = globalCoordInfos[c].c;
+        coords_[c] = globalCoordInfos[c].c;
       }
 
       for (size_t f=0; f<globalFaceSize; ++f)
       {
         // size_t corners = globalFaceInfos[f].v.size();
         size_t corners = globalFaceInfos[f].corners;
-        _faces[f].resize(corners);
+        faces_[f].resize(corners);
         for (size_t c=0; c<corners; ++c)
-          _faces[f][c] = coordIndex[globalFaceInfos[f].v[c]];
+          faces_[f][c] = coordIndex[globalFaceInfos[f].v[c]];
       }
     }
 
@@ -401,10 +401,10 @@ public:
         globalIndex[globalFaceInfos[f].i] = f;
       }
       // "copy" map to _local2global
-      _local2global.resize(localFaceInfos.size());
+      local2global_.resize(localFaceInfos.size());
       for (unsigned int i = 0; i<localFaceInfos.size(); i++)
       {
-        _local2global[i] = globalIndex[localFaceInfos[i].i];
+        local2global_[i] = globalIndex[localFaceInfos[i].i];
       }
     }
     {
@@ -416,15 +416,15 @@ public:
       }
       // "copy" map to _global2local
       // not all entries are contained in the map, if not the entry is "-1"
-      _global2local.resize(globalFaceInfos.size());
+      global2local_.resize(globalFaceInfos.size());
       for (unsigned int i = 0; i<globalFaceInfos.size(); i++)
       {
         typename std::map<GlobalFaceId, unsigned int>::iterator where =
           localIndex.find(globalFaceInfos[i].i);
         if (where != localIndex.end())
-          _global2local[i] = where->second;
+          global2local_[i] = where->second;
         else
-          _global2local[i] = (unsigned int)-1;
+          global2local_[i] = (unsigned int)-1;
       }
     }
 
@@ -439,8 +439,8 @@ public:
    */
   void getCoords(std::vector<Dune::FieldVector<ctype, dimworld> >& coords) const
   {
-    coords.resize(_coords.size());
-    std::copy(_coords.begin(), _coords.end(), coords.begin());
+    coords.resize(coords_.size());
+    std::copy(coords_.begin(), coords_.end(), coords.begin());
   }
 
 
@@ -450,7 +450,7 @@ public:
    */
   unsigned int nCoords() const
   {
-    return _coords.size();
+    return coords_.size();
   }
 
   /**
@@ -458,9 +458,9 @@ public:
    */
   void getGeometryTypes(std::vector<Dune::GeometryType>& geometryTypes) const
   {
-    geometryTypes.resize(_faces.size());
-    for (size_t i=0; i<_faces.size(); i++)
-      geometryTypes[i] = guessGeomType(_faces[i].size());
+    geometryTypes.resize(faces_.size());
+    for (size_t i=0; i<faces_.size(); i++)
+      geometryTypes[i] = guessGeomType(faces_[i].size());
   }
 
   /**
@@ -471,9 +471,9 @@ public:
    */
   void getFaces(std::vector<VertexVector>& faces) const
   {
-    faces.resize(this->_faces.size());
-    for (unsigned int i = 0; i < this->_faces.size(); ++i)
-      faces[i] = this->_faces[i];
+    faces.resize(this->faces_.size());
+    for (unsigned int i = 0; i < this->faces_.size(); ++i)
+      faces[i] = this->faces_[i];
   }
 
 
@@ -487,10 +487,10 @@ public:
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
-    if (_lx.faceIndices(e, first, count))
+    if (lx_.faceIndices(e, first, count))
     {
       // convert local index to global index
-      first = _local2global[first];
+      first = local2global_[first];
       return true;
     }
     return false;
@@ -507,7 +507,7 @@ public:
     unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.indexInInside(l_index);
+    return lx_.indexInInside(l_index);
   }
 
 
@@ -517,7 +517,7 @@ public:
    */
   const IndexSet& indexSet() const
   {
-    return _lx.indexSet();
+    return lx_.indexSet();
   }
 
 
@@ -532,7 +532,7 @@ public:
     unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.element(l_index);
+    return lx_.element(l_index);
   }
 
   /** \brief Get World geometry of the extracted face */
@@ -541,7 +541,7 @@ public:
     unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.geometry(l_index);
+    return lx_.geometry(l_index);
   }
 
   /** \brief Get Geometry of the extracted face in element coordinates */
@@ -550,13 +550,13 @@ public:
     unsigned int l_index = 0;
     bool have = contains(index, l_index);
     assert(have);
-    return _lx.geometryLocal(l_index);
+    return lx_.geometryLocal(l_index);
   }
 
   // export codim0 method
   bool & positiveNormalDirection()
   {
-    return _lx.positiveNormalDirection();
+    return lx_.positiveNormalDirection();
   }
 };
 

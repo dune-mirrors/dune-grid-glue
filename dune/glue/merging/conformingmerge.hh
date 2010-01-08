@@ -89,10 +89,10 @@ private:
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
-  std::vector<Dune::array<int,dim+1> >         _domi;
+  std::vector<Dune::array<int,dim+1> >         domi_;
 
   /// @brief target indices (internal copy)
-  std::vector<Dune::array<int,dim+1> >         _tari;
+  std::vector<Dune::array<int,dim+1> >         tari_;
 
   /** \brief The computed intersections */
   std::vector<ConformingRemoteIntersection> intersections_;
@@ -236,17 +236,17 @@ void ConformingMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVecto
 
   // copy domain and target elements to internal arrays
   // (cannot keep refs since outside modification would destroy information)
-  this->_domi.resize(domain_elements.size()/(dim+1));
-  this->_tari.resize(target_elements.size()/(dim+1));
+  this->domi_.resize(domain_elements.size()/(dim+1));
+  this->tari_.resize(target_elements.size()/(dim+1));
 
   for (unsigned int i = 0; i < domain_elements.size()/(dim+1); ++i)
     for (int j=0; j<dim+1; j++)
-      _domi[i][j] = domain_elements[i*(dim+1)+j];
+      domi_[i][j] = domain_elements[i*(dim+1)+j];
 
   // dim==dimworld-1: just copy the two arrays
   for (unsigned int i = 0; i < target_elements.size()/(dim+1); ++i)
     for (int j=0; j<dim+1; j++)
-      _tari[i][j] = target_elements[i*(dim+1)+j];
+      tari_[i][j] = target_elements[i*(dim+1)+j];
 
   std::cout << "ConformingMerge building merged grid..." << std::endl;
 
@@ -282,7 +282,7 @@ void ConformingMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVecto
 
   intersections_.resize(0);
 
-  for (size_t i=0; i<_domi.size(); i++) {
+  for (size_t i=0; i<domi_.size(); i++) {
 
     // --------------------------------------------
     //  Find the corresponding target simplex
@@ -290,19 +290,19 @@ void ConformingMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVecto
 
     // Assemble a set of the vertices that the target simplex has to consist of
     std::set<unsigned int> domainSimplexSorted;
-    for (int j=0; j<_domi[i].size(); j++)
-      if (pairs[_domi[i][j]] != -1)
-        domainSimplexSorted.insert(pairs[_domi[i][j]]);
+    for (int j=0; j<domi_[i].size(); j++)
+      if (pairs[domi_[i][j]] != -1)
+        domainSimplexSorted.insert(pairs[domi_[i][j]]);
 
     // Do nothing if not all of the vertices of this simplex could be matched on the other side
-    if (domainSimplexSorted.size() != _domi[i].size())
+    if (domainSimplexSorted.size() != domi_[i].size())
       continue;
 
     // Find the index of this target simplex
     int targetSimplexIdx = -1;
-    for (size_t j=0; j<_tari.size(); j++) {
+    for (size_t j=0; j<tari_.size(); j++) {
 
-      std::set<unsigned int> targetSimplexSorted(_tari[j].begin(), _tari[j].end());
+      std::set<unsigned int> targetSimplexSorted(tari_[j].begin(), tari_[j].end());
 
       if (domainSimplexSorted == targetSimplexSorted) {
         targetSimplexIdx = j;
@@ -329,15 +329,15 @@ void ConformingMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVecto
         intersections_.back().domainLocal_[j] = refElement.position(j,dim);
 
         // global vertex number on the target side
-        int globalDomainNumber = _domi[i][j];
+        int globalDomainNumber = domi_[i][j];
         int globalTargetNumber = pairs[globalDomainNumber];
 
         // local number in the target simplex
-        assert(std::find(_tari[targetSimplexIdx].begin(),
-                         _tari[targetSimplexIdx].end(), globalTargetNumber) != _tari[targetSimplexIdx].end());
-        int localTargetNumber = std::find(_tari[targetSimplexIdx].begin(),
-                                          _tari[targetSimplexIdx].end(), globalTargetNumber)
-                                - _tari[targetSimplexIdx].begin();
+        assert(std::find(tari_[targetSimplexIdx].begin(),
+                         tari_[targetSimplexIdx].end(), globalTargetNumber) != tari_[targetSimplexIdx].end());
+        int localTargetNumber = std::find(tari_[targetSimplexIdx].begin(),
+                                          tari_[targetSimplexIdx].end(), globalTargetNumber)
+                                - tari_[targetSimplexIdx].begin();
 
         intersections_.back().targetLocal_[localTargetNumber] = refElement.position(j,dim);
 

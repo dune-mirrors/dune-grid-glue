@@ -28,22 +28,22 @@ public:
   ~Box()
   {}
 
-  Box(const C& lower, const C& upper) : _lower(lower), _upper(upper)
+  Box(const C& lower, const C& upper) : lower_(lower), upper_(upper)
   {
     for (int i = 0; i < dim; ++i)
-      _center[i] = 0.5*(upper[i]+lower[i]);
+      center_[i] = 0.5*(upper[i]+lower[i]);
   }
 
-  Box(const Box& b) : _lower(b._lower), _upper(b._upper)
+  Box(const Box& b) : lower_(b.lower_), upper_(b.upper_)
   {
     for (int i = 0; i < dim; ++i)
-      _center[i] = 0.5*(_upper[i]+_lower[i]);
+      center_[i] = 0.5*(upper_[i]+lower_[i]);
   }
 
   bool contains(const C& c) const
   {
     for (int i = 0; i < dim; ++i)
-      if (c[i] < this->_lower[i] || c[i] >= this->_upper[i])
+      if (c[i] < this->lower_[i] || c[i] >= this->upper_[i])
         return false;
     return true;
   }
@@ -51,36 +51,36 @@ public:
   bool intersects(const Box& b)
   {
     for (int i = 0; i < dim; ++i)
-      if (this->_lower[i] >= b._upper[i] || b._lower[i] >= this->_upper[i])
+      if (this->lower_[i] >= b.upper_[i] || b.lower_[i] >= this->upper_[i])
         return false;
     return true;
   }
 
   const C& center() const
   {
-    return this->_center;
+    return this->center_;
   }
 
 
   double size(int i)
   {
-    return _upper[i]-_lower[i];
+    return upper_[i]-lower_[i];
   }
 
   const C& lower() const
   {
-    return _lower;
+    return lower_;
   }
 
   const C& upper() const
   {
-    return _upper;
+    return upper_;
   }
 
 private:
-  C _lower;
-  C _upper;
-  C _center;
+  C lower_;
+  C upper_;
+  C center_;
 };
 
 #ifdef Vector3r_h
@@ -94,17 +94,17 @@ private:
 
 public:
   Box(const C& lower, const C& upper) :
-    _lower(lower), _upper(upper), _center(0.5*(upper[0]+lower[0]), 0.5*(upper[1]+lower[1]), 0.5*(upper[2]+lower[2]))
+    lower_(lower), upper_(upper), center_(0.5*(upper[0]+lower[0]), 0.5*(upper[1]+lower[1]), 0.5*(upper[2]+lower[2]))
   {}
 
   Box(const Box& b) :
-    _lower(b._lower), _upper(b._upper), _center(0.5*(upper[0]+lower[0]), 0.5*(upper[1]+lower[1]), 0.5*(upper[2]+lower[2]))
+    lower_(b.lower_), upper_(b.upper_), center_(0.5*(upper[0]+lower[0]), 0.5*(upper[1]+lower[1]), 0.5*(upper[2]+lower[2]))
   {}
 
   bool contains(const C& c) const
   {
     for (int i = 0; i < 3; ++i)
-      if (c[i] < this->_lower[i] || c[i] >= this->_upper[i])
+      if (c[i] < this->lower_[i] || c[i] >= this->upper_[i])
         return false;
     return true;
   }
@@ -112,35 +112,35 @@ public:
   bool intersects(const Box& b)
   {
     for (int i = 0; i < 3; ++i)
-      if (this->_lower[i] >= b._upper[i] || b._lower[i] >= this->_upper[i])
+      if (this->lower_[i] >= b.upper_[i] || b.lower_[i] >= this->upper_[i])
         return false;
     return true;
   }
 
   const C& center() const
   {
-    return this->_center;
+    return this->center_;
   }
 
   double size(int i) const
   {
-    return _upper[i]-_lower[i];
+    return upper_[i]-lower_[i];
   }
 
-  const C& _lower() const
+  const C& lower_() const
   {
-    return this->_lower;
+    return this->lower_;
   }
 
-  const C& _upper() const
+  const C& upper_() const
   {
-    return this->_upper;
+    return this->upper_;
   }
 
 private:
-  C _lower;
-  C _upper;
-  C _center;
+  C lower_;
+  C upper_;
+  C center_;
 };
 #endif
 

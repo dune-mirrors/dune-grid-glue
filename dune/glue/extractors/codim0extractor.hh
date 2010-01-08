@@ -69,7 +69,7 @@ public:
    * @param gv the grid view object to work with
    */
   Codim0Extractor(const GV& gv)
-    :  Extractor<GV,0>(gv), _positiveNormalDirection(false)
+    :  Extractor<GV,0>(gv), positiveNormalDirection_(false)
   {
     std::cout << "This is Codim0Extractor on a <"
               << GV::dimension << "," << GV::dimensionworld << "> grid!" << std::endl;
@@ -79,11 +79,11 @@ public:
    */
   void update(const ElementDescriptor<GV>& descr);
 
-  bool & positiveNormalDirection() { return _positiveNormalDirection; }
-  const bool & positiveNormalDirection() const { return _positiveNormalDirection; }
+  bool & positiveNormalDirection() { return positiveNormalDirection_; }
+  const bool & positiveNormalDirection() const { return positiveNormalDirection_; }
 
 protected:
-  bool _positiveNormalDirection;
+  bool positiveNormalDirection_;
 };
 
 
@@ -106,10 +106,10 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
   std::deque<SubEntityInfo> temp_faces;
 
   // Make a set of consecutive indices for the elements, irrespective of the element types
-  Dune::MultipleCodimMultipleGeomTypeMapper<GV, P0Layout > elementMapper(this->_gv);
+  Dune::MultipleCodimMultipleGeomTypeMapper<GV, P0Layout > elementMapper(this->gv_);
 
   // iterate over all codim 0 elements on the grid
-  for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
+  for (ElementIter elit = this->gv_.template begin<0>(); elit != this->gv_.template end<0>(); ++elit)
   {
 
     IndexType eindex = elementMapper.map(*elit);
@@ -119,7 +119,7 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
     if (descr.contains(elit))
     {
       // add an entry to the element info map, the index will be set properly later
-      this->_elmtInfo[eindex] = new ElementInfo(element_index, elit, 1);
+      this->elmtInfo_[eindex] = new ElementInfo(element_index, elit, 1);
 
       int numCorners = elit->template count<dim>();
       unsigned int vertex_indices[numCorners];       // index in global vector
@@ -136,11 +136,11 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
 
         // if the vertex is not yet inserted in the vertex info map
         // it is a new one -> it will be inserted now!
-        typename VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
-        if (vimit == this->_vtxInfo.end())
+        typename VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
+        if (vimit == this->vtxInfo_.end())
         {
           // insert into the map
-          this->_vtxInfo[vindex] = new VertexInfo(vertex_index, vptr);
+          this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
           // remember this vertex' index
           vertex_indices[i] = vertex_index;
           // increase the current index
@@ -154,7 +154,7 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
       }
 
       // flip cell if necessary
-      if (_positiveNormalDirection)
+      if (positiveNormalDirection_)
       {
         // choose element type
         if (dim > elit->type().isCube())
@@ -206,17 +206,17 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
   }   // end loop over elements
 
   // allocate the array for the face specific information...
-  this->_subEntities.resize(element_index);
+  this->subEntities_.resize(element_index);
   // ...and fill in the data from the temporary containers
-  copy(temp_faces.begin(), temp_faces.end(), this->_subEntities.begin());
+  copy(temp_faces.begin(), temp_faces.end(), this->subEntities_.begin());
 
   // now first write the array with the coordinates...
-  this->_coords.resize(this->_vtxInfo.size());
-  typename VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
-  for (; it1 != this->_vtxInfo.end(); ++it1)
+  this->coords_.resize(this->vtxInfo_.size());
+  typename VertexInfoMap::const_iterator it1 = this->vtxInfo_.begin();
+  for (; it1 != this->vtxInfo_.end(); ++it1)
   {
     // get a pointer to the associated info object
-    CoordinateInfo* current = &this->_coords[it1->second->idx];
+    CoordinateInfo* current = &this->coords_[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping

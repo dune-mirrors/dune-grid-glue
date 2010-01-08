@@ -37,7 +37,7 @@ private:
 public:
 
 
-  VtkSurfaceWriter(const char* filename) : _filename(filename)
+  VtkSurfaceWriter(const char* filename) : filename_(filename)
   {}
 
   ~VtkSurfaceWriter()
@@ -46,7 +46,7 @@ public:
   void setFilename(const char* name)
   {
     if (std::strlen(name) > 0)
-      this->_filename = name;
+      this->filename_ = name;
   }
 
 
@@ -55,7 +55,7 @@ public:
   {
     std::ofstream fos;
     char buffer[64];
-    sprintf(buffer, "%s.vtk", this->_filename);
+    sprintf(buffer, "%s.vtk", this->filename_);
     fos.open(buffer);
     fos << std::setprecision(8) << std::setw(1);
     // write preamble
@@ -75,7 +75,7 @@ public:
   {
     std::ofstream fos;
     char buffer[64];
-    sprintf(buffer, "%s.vtk", this->_filename);
+    sprintf(buffer, "%s.vtk", this->filename_);
     fos.open(buffer);
     fos << std::setprecision(8) << std::setw(1);
     // write preamble
@@ -96,7 +96,7 @@ public:
   {
     std::ofstream fos;
     char buffer[64];
-    sprintf(buffer, "%s.vtk", this->_filename);
+    sprintf(buffer, "%s.vtk", this->filename_);
     fos.open(buffer);
     fos << std::setprecision(8) << std::setw(1);
     // write preamble
@@ -207,7 +207,7 @@ protected:
 
 
 private:
-  const char*  _filename;
+  const char*  filename_;
 };
 
 

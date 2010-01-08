@@ -212,25 +212,25 @@ private:
   /*   M E M B E R   V A R I A B L E S   */
 
   /// @brief the "domain" grid view
-  const DomainGridView&        _domgv;
+  const DomainGridView&        domgv_;
 
   /// @brief the "target" grid view
-  const TargetGridView&        _targv;
+  const TargetGridView&        targv_;
 
   /// @brief the domain surface extractor
-  DomainExtractor _domext;
+  DomainExtractor domext_;
 
   /// @brief the target surface extractor
-  TargetExtractor _tarext;
+  TargetExtractor tarext_;
 
   /// @brief the surface merging utility
-  Merger* _merg;
+  Merger* merg_;
 
   /// @brief the builder utility
-  Builder _builder;
+  Builder builder_;
 
   /// @brief number of intersections
-  unsigned int _index_sz;
+  unsigned int index__sz;
 
   /// @brief number of domain intersections
   unsigned int _dindex_sz;
@@ -257,7 +257,7 @@ private:
 #endif
 
   /// @brief a vector with intersection elements
-  mutable std::vector<RemoteIntersectionImpl>   _intersections;
+  mutable std::vector<RemoteIntersectionImpl>   intersections_;
 
 protected:
 
@@ -268,10 +268,10 @@ protected:
   void updateIntersections()
   {
     // build the intersections array again
-    this->_intersections.resize(this->_merg->nSimplices(), this->NULL_INTERSECTION);
+    this->intersections_.resize(this->merg_->nSimplices(), this->NULL_INTERSECTION);
     _dindex_sz = 0;
     _tindex_sz = 0;
-    for (unsigned int i = 0; i < this->_merg->nSimplices(); ++i)
+    for (unsigned int i = 0; i < this->merg_->nSimplices(); ++i)
     {
 
       RemoteIntersectionImpl ri(this, i);
@@ -280,16 +280,16 @@ protected:
       if (ri.hasTarget())
         ri.targetIndex() = _tindex_sz++;
       ri.index() = i;
-      this->_intersections[i] = ri;
+      this->intersections_[i] = ri;
 
     }
 
-    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << _merg->nSimplices()
+    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << merg_->nSimplices()
               << " with " << _dindex_sz << " domain entities"
               << " and " << _tindex_sz << " target entities" << std::endl;
 
     // store the number of remote intersection for later use
-    _index_sz = _merg->nSimplices();
+    index__sz = merg_->nSimplices();
 
     ////// create ParallelIndexSet & RemoteIndices
 #if HAVE_MPI
@@ -342,9 +342,9 @@ public:
 #endif
   /*  S E T T E R S  */
 
-  DomainExtractor & domainExtractor() { return _domext; }
+  DomainExtractor & domainExtractor() { return domext_; }
 
-  TargetExtractor & targetExtractor() { return _tarext; }
+  TargetExtractor & targetExtractor() { return tarext_; }
 
   /*   G E T T E R S   */
 
@@ -354,7 +354,7 @@ public:
    */
   const DomainGridView& domainGridView() const
   {
-    return this->_domgv;
+    return this->domgv_;
   }
 
 
@@ -364,7 +364,7 @@ public:
    */
   const TargetGridView& targetGridView() const
   {
-    return this->_targv;
+    return this->targv_;
   }
 
 
@@ -374,7 +374,7 @@ public:
    */
   Builder& builder()
   {
-    return this->_builder;
+    return this->builder_;
   }
 
 
@@ -390,7 +390,7 @@ public:
    */
   const Merger* merger() const
   {
-    return this->_merg;
+    return this->merg_;
   }
 
   /*   F U N C T I O N A L I T Y   */
@@ -666,7 +666,7 @@ public:
   // indexset size
   size_t indexSet_size() const
   {
-    return _index_sz;
+    return index__sz;
   }
 
   size_t domainIndexSet_size() const
@@ -682,7 +682,7 @@ public:
 
   RemoteIntersection getIntersection(int i) const
   {
-    return RemoteIntersection(_intersections[i]);
+    return RemoteIntersection(intersections_[i]);
   }
 
 };
@@ -695,14 +695,14 @@ GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& 
 #else
 GridGlue<GET1, GET2>::GridGlue(const DomainGridView & gv1, const TargetGridView & gv2, Merger* merger)
 #endif
-  : _domgv(gv1), _targv(gv2),
-    _domext(gv1), _tarext(gv2), _merg(merger),
-    _builder(*const_cast<GridGlue<GET1, GET2>*>(this)),
+  : domgv_(gv1), targv_(gv2),
+    domext_(gv1), tarext_(gv2), merg_(merger),
+    builder_(*const_cast<GridGlue<GET1, GET2>*>(this)),
     NULL_INTERSECTION(this),
 #if HAVE_MPI
     mpicomm(m),
 #endif
-    _intersections(0, NULL_INTERSECTION)
+    intersections_(0, NULL_INTERSECTION)
 {
   std::cout << "GridGlue: Constructor succeeded!" << std::endl;
 }
@@ -713,17 +713,17 @@ int GridGlue<GET1, GET2>::domainEntityNextFace(const DomainElement& e, int index
 {
   int first, count;
   // first check if the element forms a part of the extracted surface
-  if (!this->_domext.faceIndices(e, first, count))
+  if (!this->domext_.faceIndices(e, first, count))
     return -1;
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count && (this->_domext.indexInInside(first) < index || !this->_merg->domainSimplexMatched(first)))
+  while (first < count &&    (this->domext_.indexInInside(first) < index || !this->merg_->domainSimplexMatched(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
   else
-    return this->_domext.indexInInside(first);             // found, return the face's number
+    return this->domext_.indexInInside(first);     // found, return the face's number
 }
 
 
@@ -732,25 +732,25 @@ int GridGlue<GET1, GET2>::targetEntityNextFace(const TargetElement& e, int index
 {
   int first, count;
   // first check if the element forms a part of the extracted surface
-  if (!this->_tarext.faceIndices(e, first, count))
+  if (!this->tarext_.faceIndices(e, first, count))
     return -1;
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count && (this->_tarext.indexInInside(first) < index || !this->_merg->targetSimplexMatched(first)))
+  while (first < count && (this->tarext_.indexInInside(first) < index || !this->merg_->targetSimplexMatched(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
   else
-    return this->_tarext.indexInInside(first);             // found, return the face's number
+    return this->tarext_.indexInInside(first);     // found, return the face's number
 }
 
 
 template<typename GET1, typename GET2>
 typename GridGlue<GET1, GET2>::RemoteIntersectionIterator GridGlue<GET1, GET2>::iremotebegin() const
 {
-  return (this->_intersections.size() > 0)
-         ? RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->_intersections[0]))
+  return (this->intersections_.size() > 0)
+         ? RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->intersections_[0]))
          : RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->NULL_INTERSECTION));
 }
 
@@ -760,22 +760,22 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
 {
   // first check if the element forms a part of the extracted surface
   int first, count;
-  bool in_surface = this->_domext.faceIndices(e, first, count);
+  bool in_surface = this->domext_.faceIndices(e, first, count);
   if (!in_surface)
     return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
 
   count += first;
   while (first < count)
   {
-    if (this->_domext.indexInInside(first) == num && this->_merg->domainSimplexMatched(first))
+    if (this->domext_.indexInInside(first) == num && this->merg_->domainSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
       std::vector<unsigned int> local_results;
 
       // get the remote intersections
-      this->_merg->domainSimplexRefined(first, global_results);
-      while (++first < count && this->_domext.indexInInside(first) == num && this->_merg->domainSimplexRefined(first, local_results))
+      this->merg_->domainSimplexRefined(first, global_results);
+      while (++first < count && this->domext_.indexInInside(first) == num && this->merg_->domainSimplexRefined(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
@@ -783,7 +783,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
 
       // if sth. has been found, return the iterator
       if (global_results.size() > 0)
-        return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->_intersections[global_results[0]], global_results));
+        return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
 
       // else leave the loop
       break;
@@ -801,7 +801,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
 {
   // first check if the element has at least one extracted subEntity
   int first, count;
-  bool hasExtractedSubEntity = this->_domext.faceIndices(e, first, count);
+  bool hasExtractedSubEntity = this->domext_.faceIndices(e, first, count);
   if (!hasExtractedSubEntity)
     return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
 
@@ -815,7 +815,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->_merg->domainSimplexRefined(first, local_results))
+    if (this->merg_->domainSimplexRefined(first, local_results))
     {
       if (local_results.size() > 0)
         found_sth = true;
@@ -826,7 +826,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   }
 
   if (found_sth)
-    return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->_intersections[global_results[0]], global_results));
+    return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
   else
     return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
 }
@@ -837,21 +837,21 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
 {
   // first check if the element has at least one extracted subEntity
   int first, count;
-  bool hasExtractedSubEntity = this->_tarext.faceIndices(e, first, count);
+  bool hasExtractedSubEntity = this->tarext_.faceIndices(e, first, count);
   if (!hasExtractedSubEntity) return itargetend();
 
   count += first;
   while (first < count)
   {
-    if (this->_tarext.indexInInside(first) == num && this->_merg->targetSimplexMatched(first))
+    if (this->tarext_.indexInInside(first) == num && this->merg_->targetSimplexMatched(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
       std::vector<unsigned int> local_results;
 
       // get the remote intersections
-      this->_merg->targetSimplexRefined(first, global_results);
-      while (++first < count && this->_tarext.indexInInside(first) == num && this->_merg->targetSimplexRefined(first, local_results))
+      this->merg_->targetSimplexRefined(first, global_results);
+      while (++first < count && this->tarext_.indexInInside(first) == num && this->merg_->targetSimplexRefined(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
@@ -859,7 +859,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
 
       // if sth. has been found, return the iterator
       if (global_results.size() > 0)
-        return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->_intersections[global_results[0]], global_results));
+        return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
 
       // else leave the loop
       break;
@@ -877,7 +877,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
 {
   // first check if the element forms a part of the extracted surface
   int first, count;
-  bool in_surface = this->_tarext.faceIndices(e, first, count);
+  bool in_surface = this->tarext_.faceIndices(e, first, count);
   if (!in_surface) return itargetend();
 
 
@@ -890,7 +890,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->_merg->targetSimplexRefined(first, local_results))
+    if (this->merg_->targetSimplexRefined(first, local_results))
     {
       if (local_results.size() > 0)
         found_sth = true;
@@ -901,7 +901,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   }
 
   if (found_sth)
-    return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->_intersections[global_results[0]], global_results));
+    return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
   else
     return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
 }

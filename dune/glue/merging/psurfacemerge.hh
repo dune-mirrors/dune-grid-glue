@@ -213,11 +213,11 @@ private:
   private:
 
     /// @brief the computed merged grid simplices sorted after
-    /// ascending domain parent simplex indices (see _domi)
+    /// ascending domain parent simplex indices (see domi_)
     std::vector<IntersectionPrimitive<dim,float> > domOrder;
 
     /// @brief the computed merged grid simplices sorted after
-    /// ascending target parent simplex indices (see _tari)
+    /// ascending target parent simplex indices (see tari_)
     std::vector<IntersectionPrimitive<dim,float>*> tarOrder;
 
     /// @brief used to recompute original index of an overlap in "tarOrder"
@@ -230,45 +230,45 @@ private:
   /*   M E M B E R   V A R I A B L E S   */
 
   /// @brief maximum distance between two matched points in the mapping
-  T _maxdist;
+  T maxdist_;
 
   /* geometric data for both domain and target */
 
   /// @brief domain coordinates
-  std::vector<std::tr1::array<double,psurfaceDimworld> >   _domc;
+  std::vector<std::tr1::array<double,psurfaceDimworld> >   domc_;
 
   /// @brief target coordinates
-  std::vector<std::tr1::array<double,psurfaceDimworld> >   _tarc;
+  std::vector<std::tr1::array<double,psurfaceDimworld> >   tarc_;
 
 
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
-  std::vector<std::tr1::array<int,dim+1> >         _domi;
+  std::vector<std::tr1::array<int,dim+1> >         domi_;
 
   /// @brief target indices (internal copy)
-  std::vector<std::tr1::array<int,dim+1> >         _tari;
+  std::vector<std::tr1::array<int,dim+1> >         tari_;
 
 
   /* members associated with the merged grid */
 
   /// @brief make use of psurface contact mapping functionality
-  ContactMapping<dim+1,ctype> _cm;
+  ContactMapping<dim+1,ctype> cm_;
 
   /// @brief provides an interface for convenient and efficient
   /// access to the set of computed simplex overlaps in the merged grid
-  OverlapManager _olm;
+  OverlapManager olm_;
 
   /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
    */
-  SurfaceNormal _domnormals;
+  SurfaceNormal domnormals_;
 
 
 public:
 
   PSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
-    _maxdist(max_distance), _domnormals(domain_normals)
+    maxdist_(max_distance), domnormals_(domain_normals)
   {}
 
 
@@ -285,7 +285,7 @@ public:
   void setMaxDistance(ctype value)
   {
     if (value > 0.0)
-      this->_maxdist = value;
+      this->maxdist_ = value;
   }
 
 
@@ -299,7 +299,7 @@ public:
    */
   void setDomainNormals(const SurfaceNormal value)
   {
-    this->_domnormals = value;
+    this->domnormals_ = value;
   }
 
 
@@ -498,8 +498,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
   }
 
-  this->_domi.resize(numDomainSimplices);
-  this->_tari.resize(numTargetSimplices);
+  this->domi_.resize(numDomainSimplices);
+  this->tari_.resize(numTargetSimplices);
 
   // copy and split the domain surface
   Dune::BitSetVector<1> domainIsSecondTriangle(numDomainSimplices, false);
@@ -513,7 +513,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
     // dim is known at compile time, hence if dim==1 the following conditional is removed
     if (dim == 1 || domain_element_types[i].isSimplex()) {
       for (int j=0; j<dim+1; j++)
-        _domi[simplexCounter][j] = domain_elements[vertexCounter++];
+        domi_[simplexCounter][j] = domain_elements[vertexCounter++];
 
       unsplitDomainElementNumbers[simplexCounter] = i;
 
@@ -521,16 +521,16 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
     } else {
       // quadrilateral: split it in two triangles
-      _domi[simplexCounter][0] = domain_elements[vertexCounter];
-      _domi[simplexCounter][1] = domain_elements[vertexCounter+1];
-      _domi[simplexCounter][2] = domain_elements[vertexCounter+2];
+      domi_[simplexCounter][0] = domain_elements[vertexCounter];
+      domi_[simplexCounter][1] = domain_elements[vertexCounter+1];
+      domi_[simplexCounter][2] = domain_elements[vertexCounter+2];
 
       unsplitDomainElementNumbers[simplexCounter] = i;
       simplexCounter++;
 
-      _domi[simplexCounter][0] = domain_elements[vertexCounter+3];
-      _domi[simplexCounter][1] = domain_elements[vertexCounter+2];
-      _domi[simplexCounter][2] = domain_elements[vertexCounter+1];
+      domi_[simplexCounter][0] = domain_elements[vertexCounter+3];
+      domi_[simplexCounter][1] = domain_elements[vertexCounter+2];
+      domi_[simplexCounter][2] = domain_elements[vertexCounter+1];
 
       domainIsSecondTriangle[simplexCounter] = true;
       unsplitDomainElementNumbers[simplexCounter] = i;
@@ -553,22 +553,22 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
     // dim is known at compile time, hence if dim==1 the following conditional is removed
     if (dim==1 || target_element_types[i].isSimplex()) {
       for (int j=0; j<dim+1; j++)
-        _tari[simplexCounter][j] = target_elements[vertexCounter++];
+        tari_[simplexCounter][j] = target_elements[vertexCounter++];
 
       unsplitTargetElementNumbers[simplexCounter] = i;
       simplexCounter++;
     } else {
       // quadrilateral: split it in two triangles
-      _tari[simplexCounter][0] = target_elements[vertexCounter];
-      _tari[simplexCounter][1] = target_elements[vertexCounter+1];
-      _tari[simplexCounter][2] = target_elements[vertexCounter+2];
+      tari_[simplexCounter][0] = target_elements[vertexCounter];
+      tari_[simplexCounter][1] = target_elements[vertexCounter+1];
+      tari_[simplexCounter][2] = target_elements[vertexCounter+2];
 
       unsplitTargetElementNumbers[simplexCounter] = i;
       simplexCounter++;
 
-      _tari[simplexCounter][0] = target_elements[vertexCounter+3];
-      _tari[simplexCounter][1] = target_elements[vertexCounter+2];
-      _tari[simplexCounter][2] = target_elements[vertexCounter+1];
+      tari_[simplexCounter][0] = target_elements[vertexCounter+3];
+      tari_[simplexCounter][1] = target_elements[vertexCounter+2];
+      tari_[simplexCounter][2] = target_elements[vertexCounter+1];
 
       targetIsSecondTriangle[simplexCounter] = true;
 
@@ -585,48 +585,48 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
     // the second grid needs to have its orientation reversed.
     // That way, the 'surface normals' of the two grids point towards each other.
     for (unsigned int i = 0; i < numTargetSimplices; ++i)
-      std::swap(_tari[i][0],_tari[i][1]);
+      std::swap(tari_[i][0],tari_[i][1]);
 
   }
 
   // ////////////////////////////////////////////////////////////
   //   copy the coordinates to internal arrays of coordinates
   // ////////////////////////////////////////////////////////////
-  this->_domc.resize(domain_coords.size());
-  for (unsigned int i = 0; i < this->_domc.size(); ++i)
+  this->domc_.resize(domain_coords.size());
+  for (unsigned int i = 0; i < this->domc_.size(); ++i)
     for (unsigned int j = 0; j < dimworld; ++j)
-      this->_domc[i][j] = domain_coords[i][j];
+      this->domc_[i][j] = domain_coords[i][j];
 
-  this->_tarc.resize(target_coords.size());
-  for (unsigned int i = 0; i < this->_tarc.size(); ++i)
+  this->tarc_.resize(target_coords.size());
+  for (unsigned int i = 0; i < this->tarc_.size(); ++i)
     for (unsigned int j = 0; j < dimworld; ++j)
-      this->_tarc[i][j] = target_coords[i][j];
+      this->tarc_[i][j] = target_coords[i][j];
 
   // psurface doesn't actually support the case dim==dimworld.  Therefore we
   // use a trick: we just embed everything in a space of dimension dimworld+1
   if (dim==dimworld) {
-    for (unsigned int i = 0; i < this->_domc.size(); ++i)
-      _domc[i][dim] = 0;
+    for (unsigned int i = 0; i < this->domc_.size(); ++i)
+      domc_[i][dim] = 0;
 
-    for (unsigned int i = 0; i < this->_domc.size(); ++i)
-      _tarc[i][dim] = 1;
+    for (unsigned int i = 0; i < this->domc_.size(); ++i)
+      tarc_[i][dim] = 1;
 
     // Needs to be more than 1
-    _maxdist = 2;
+    maxdist_ = 2;
   }
 
   std::cout << "PSurfaceMerge building merged grid..." << std::endl;
 
   // compute the merged grid using the psurface library
-  this->_cm.build(_domc, _domi,
-                  _tarc, _tari,
-                  this->_maxdist, this->_domnormals);
+  this->cm_.build(domc_, domi_,
+                  tarc_, tari_,
+                  this->maxdist_, this->domnormals_);
 
   std::cout << "Finished building merged grid!" << std::endl;
 
   // get the representation from the contact mapping object
   std::vector<IntersectionPrimitive<dim,float> > overlaps;
-  this->_cm.getOverlaps(overlaps);
+  this->cm_.getOverlaps(overlaps);
 
   // ////////////////////////////////////////////////////////////////////////
   //   If dim==dimworld we have inverted the target simplices above.
@@ -731,7 +731,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   // initialize the merged grid overlap manager
   // //////////////////////////////////////////////
 
-  this->_olm.setOverlaps(overlaps);
+  this->olm_.setOverlaps(overlaps);
 
 }
 
@@ -739,7 +739,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
 {
-  return this->_olm.nOverlaps();
+  return this->olm_.nOverlaps();
 }
 
 
@@ -747,7 +747,7 @@ template<int dim, int dimworld, typename T>
 inline bool PSurfaceMerge<dim, dimworld, T>::domainSimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstDomainParent" is in the valid range
-  return (this->_olm.firstDomainParent(idx) < this->_olm.nOverlaps());
+  return (this->olm_.firstDomainParent(idx) < this->olm_.nOverlaps());
 }
 
 
@@ -755,14 +755,14 @@ template<int dim, int dimworld, typename T>
 inline bool PSurfaceMerge<dim, dimworld, T>::targetSimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstTargetParent" is in the valid range
-  return (this->_olm.firstTargetParent(idx) < this->_olm.nOverlaps());
+  return (this->olm_.firstTargetParent(idx) < this->olm_.nOverlaps());
 }
 
 
 template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::domainParent(unsigned int idx) const
 {
-  return this->_olm.domain(idx).tris[0];
+  return this->olm_.domain(idx).tris[0];
 }
 
 
@@ -770,24 +770,24 @@ template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::targetParent(unsigned int idx) const
 {
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
-  return this->_olm.domain(idx).tris[1];
+  return this->olm_.domain(idx).tris[1];
 }
 
 
 template<int dim, int dimworld, typename T>
 bool PSurfaceMerge<dim, dimworld, T>::domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
-  unsigned int first = this->_olm.firstDomainParent(idx);
+  unsigned int first = this->olm_.firstDomainParent(idx);
   unsigned int count = 0;
   // if the result is an index outside the range abort with error
-  if (first >= this->_olm.nOverlaps())
+  if (first >= this->olm_.nOverlaps())
   {
     indices.resize(0);
     return false;
   }
   // in case of a valid index:
   // ...count the number of simplex overlaps with given domain parent
-  while (first + count < this->_olm.nOverlaps() && static_cast<unsigned int>(this->_olm.domain(first + count).tris[0]) == idx)
+  while (first + count < this->olm_.nOverlaps() && static_cast<unsigned int>(this->olm_.domain(first + count).tris[0]) == idx)
     count++;
   // ...fill the vector with the indices of the overlaps
   indices.resize(count);
@@ -801,22 +801,22 @@ bool PSurfaceMerge<dim, dimworld, T>::domainSimplexRefined(unsigned int idx, std
 template<int dim, int dimworld, typename T>
 bool PSurfaceMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
-  unsigned int first = this->_olm.firstTargetParent(idx);
+  unsigned int first = this->olm_.firstTargetParent(idx);
   unsigned int count = 0;
   // if the result is an index outside the range abort with error
-  if (first >= this->_olm.nOverlaps())
+  if (first >= this->olm_.nOverlaps())
   {
     indices.resize(0);
     return false;
   }
   // in case of a valid index:
   // ...count the number of simplex overlaps with given domain parent
-  while (first + count < this->_olm.nOverlaps() && static_cast<unsigned int>(this->_olm.target(first + count).tris[1]) == idx)
+  while (first + count < this->olm_.nOverlaps() && static_cast<unsigned int>(this->olm_.target(first + count).tris[1]) == idx)
     count++;
   // ...fill the vector with the indices of the overlaps
   indices.resize(count);
   for (unsigned int i = 0; i < count; ++i)
-    indices[i] = this->_olm.domainIndex(first + i);             // return the CORRECT INDEX here!!!
+    indices[i] = this->olm_.domainIndex(first + i);     // return the CORRECT INDEX here!!!
   // ...return success
   return true;
 }
@@ -826,7 +826,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<dim,float>& ip = this->_olm.domain(idx);
+  const IntersectionPrimitive<dim,float>& ip = this->olm_.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
@@ -855,7 +855,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<dim,float>& ip = this->_olm.domain(idx);
+  const IntersectionPrimitive<dim,float>& ip = this->olm_.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;

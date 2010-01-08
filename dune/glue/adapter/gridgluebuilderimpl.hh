@@ -58,19 +58,19 @@ private:
 
 private:
 
-  Parent& _glue;
+  Parent& glue_;
 
   typedef typename ExtractorTypeTraits<DomainGridView, codim1>::Type DomainDescriptor;
 
   typedef typename ExtractorTypeTraits<TargetGridView, codim2>::Type TargetDescriptor;
 
-  const DomainDescriptor*                   _domelmntdescr;
+  const DomainDescriptor*                   domelmntdescr_;
 
-  const TargetDescriptor*                   _tarelmntdescr;
+  const TargetDescriptor*                   tarelmntdescr_;
 
-  const typename Parent::DomainTransformation*    _domtrafo;
+  const typename Parent::DomainTransformation*    domtrafo_;
 
-  const typename Parent::TargetTransformation*    _tartrafo;
+  const typename Parent::TargetTransformation*    tartrafo_;
 
   template<typename Extractor>
   void extractGrid (const Extractor & extractor,
@@ -125,55 +125,55 @@ private:
 public:
 
   BuilderImpl(Parent& glue_)
-    : _glue(glue_),
-      _domelmntdescr(NULL),
-      _tarelmntdescr(NULL),
-      _domtrafo(NULL),_tartrafo(NULL)
+    : glue_(glue_),
+      domelmntdescr_(NULL),
+      tarelmntdescr_(NULL),
+      domtrafo_(NULL),tartrafo_(NULL)
   {}
 
 
   void setDomainDescriptor(const DomainDescriptor& descr)
   {
-    this->_domelmntdescr = &descr;
+    this->domelmntdescr_ = &descr;
   }
 
 
   void setTargetDescriptor(const TargetDescriptor& descr)
   {
-    this->_tarelmntdescr = &descr;
+    this->tarelmntdescr_ = &descr;
   }
 
 
   void setDomainTransformation(const typename Parent::DomainTransformation* trafo)
   {
-    this->_domtrafo = trafo;
+    this->domtrafo_ = trafo;
   }
 
 
   void setTargetTransformation(const typename Parent::TargetTransformation* trafo)
   {
-    this->_tartrafo = trafo;
+    this->tartrafo_ = trafo;
   }
 
 
   void build()
   {
     // setup the domain surface extractor
-    if (this->_domelmntdescr != NULL)
-      this->_glue._domext.update(*this->_domelmntdescr);
+    if (this->domelmntdescr_ != NULL)
+      this->glue_.domext_.update(*this->domelmntdescr_);
     else
       DUNE_THROW(Dune::Exception, "GridGlue::Builder : no domain surface descriptor set");
 
     // setup the target surface extractor
-    if (this->_tarelmntdescr != NULL)
-      this->_glue._tarext.update(*this->_tarelmntdescr);
+    if (this->tarelmntdescr_ != NULL)
+      this->glue_.tarext_.update(*this->tarelmntdescr_);
     else
       DUNE_THROW(Dune::Exception, "GridGlue::Builder : no target surface descriptor set");
 
     // clear the contents from the current intersections array
     {
-      std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->_glue.NULL_INTERSECTION);
-      this->_glue._intersections.swap(dummy);
+      std::vector<typename Parent::RemoteIntersectionImpl> dummy(0, this->glue_.NULL_INTERSECTION);
+      this->glue_.intersections_.swap(dummy);
     }
 
     std::vector<Dune::FieldVector<typename Parent::ctype, Parent::dimworld> > domcoords;
@@ -189,8 +189,8 @@ public:
 
     // retrieve the coordinate and topology information from the extractors
     // and apply transformations if necessary
-    extractGrid(this->_glue._domext, domcoords, domfaces, domainElementTypes, _domtrafo);
-    extractGrid(this->_glue._tarext, tarcoords, tarfaces, targetElementTypes, _tartrafo);
+    extractGrid(this->glue_.domext_, domcoords, domfaces, domainElementTypes, domtrafo_);
+    extractGrid(this->glue_.tarext_, tarcoords, tarfaces, targetElementTypes, tartrafo_);
 
 #ifdef WRITE_TO_VTK
     const int dimw = Parent::dimworld;
@@ -213,11 +213,11 @@ public:
 
 
     // start the actual build process
-    this->_glue._merg->build(domcoords, domfaces, domainElementTypes,
+    this->glue_.merg_->build(domcoords, domfaces, domainElementTypes,
                              tarcoords, tarfaces, targetElementTypes);
 
     // the intersections need to be recomputed
-    this->_glue.updateIntersections();
+    this->glue_.updateIntersections();
   }
 };
 

@@ -37,42 +37,42 @@ public:
 
 private:
 
-  const Parent*              _glue;
+  const Parent*              glue_;
 
-  RemoteIntersection _intersection;
+  RemoteIntersection intersection_;
 
-  unsigned int _index;
+  unsigned int index_;
 
 
 public:
 
   RemoteIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_)
-    : _glue(intersectionImpl_._glue),
-      _intersection(intersectionImpl_),
-      _index(intersectionImpl_.index())
+    : glue_(intersectionImpl_.glue_),
+      intersection_(intersectionImpl_),
+      index_(intersectionImpl_.index())
   {}
 
 
   const RemoteIntersection& dereference() const
   {
-    if (this->_index == this->_glue->NULL_INTERSECTION.index())
+    if (this->index_ == this->glue_->NULL_INTERSECTION.index())
       DUNE_THROW(Dune::GridError, "dereferencing end iterator");
-    return this->_intersection;
+    return this->intersection_;
   }
 
 
   void increment()
   {
-    if (++this->_index < this->_glue->_index_sz)
-      this->_intersection = this->_glue->_intersections[this->_index];
+    if (++this->index_ < this->glue_->index__sz)
+      this->intersection_ = this->glue_->intersections_[this->index_];
     else
-      this->_index = this->_glue->NULL_INTERSECTION.index();
+      this->index_ = this->glue_->NULL_INTERSECTION.index();
   }
 
 
   bool equals(const RemoteIntersectionIteratorImpl& iter) const
   {
-    return iter._index == this->_index;
+    return iter.index_ == this->index_;
   }
 
 };
@@ -94,75 +94,75 @@ public:
 
 private:
 
-  const Parent*              _glue;
+  const Parent*              glue_;
 
-  RemoteIntersection _intersection;
+  RemoteIntersection intersection_;
 
-  unsigned int _index;
+  unsigned int index_;
 
   unsigned int _domain_parent;
 
-  unsigned int _current;
+  unsigned int current_;
 
-  std::vector<unsigned int>  _parts;
+  std::vector<unsigned int>  parts_;
 
 
 public:
 
   DomainIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const std::vector<unsigned int>& parts_)
-    : _glue(intersectionImpl_._glue),
-      _intersection(intersectionImpl_),
-      _index(intersectionImpl_.index()),
+    : glue_(intersectionImpl_.glue_),
+      intersection_(intersectionImpl_),
+      index_(intersectionImpl_.index()),
       _domain_parent(0),
-      _current(0)
+      current_(0)
   {
-    if (this->_index < 0 || this->_glue->_index_sz <= this->_index)
+    if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_domain_parent = this->_glue->_merg->domainParent(this->_index);
-    this->_parts.resize(parts_.size());
-    copy(parts_.begin(), parts_.end(), this->_parts.begin());
+    this->_domain_parent = this->glue_->merg_->domainParent(this->index_);
+    this->parts_.resize(parts_.size());
+    copy(parts_.begin(), parts_.end(), this->parts_.begin());
   }
 
 
   DomainIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_)
-    : _glue(intersectionImpl_._glue),
-      _intersection(intersectionImpl_),
-      _index(intersectionImpl_.index()),
+    : glue_(intersectionImpl_.glue_),
+      intersection_(intersectionImpl_),
+      index_(intersectionImpl_.index()),
       _domain_parent(0),
-      _current(0)
+      current_(0)
   {
-    if (this->_index < 0 || this->_glue->_index_sz <= this->_index)
+    if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_domain_parent = this->_glue->_merg->domainParent(this->_index);
+    this->_domain_parent = this->glue_->merg_->domainParent(this->index_);
   }
 
 
   const RemoteIntersection& dereference() const
   {
-    if (this->_index == this->_glue->NULL_INTERSECTION.index())
+    if (this->index_ == this->glue_->NULL_INTERSECTION.index())
       DUNE_THROW(Dune::GridError, "dereferencing end iterator");
-    return this->_intersection;
+    return this->intersection_;
   }
 
 
   void increment()
   {
-    if (++this->_current < this->_parts.size())
+    if (++this->current_ < this->parts_.size())
     {
-      const RemoteIntersectionImpl& next = this->_glue->_intersections[this->_parts[this->_current]];
-      this->_index = next.index();
-      this->_intersection = next;
+      const RemoteIntersectionImpl& next = this->glue_->intersections_[this->parts_[this->current_]];
+      this->index_ = next.index();
+      this->intersection_ = next;
     }
     else
-      this->_index = this->_glue->NULL_INTERSECTION.index();
+      this->index_ = this->glue_->NULL_INTERSECTION.index();
   }
 
 
   bool equals(const DomainIntersectionIteratorImpl& iter) const
   {
-    return iter._index == this->_index;
+    return iter.index_ == this->index_;
   }
 
 };
@@ -188,76 +188,76 @@ public:
 
 private:
 
-  const Parent*              _glue;
+  const Parent*              glue_;
 
-  RemoteIntersection _intersection;
+  RemoteIntersection intersection_;
 
-  unsigned int _index;
+  unsigned int index_;
 
   unsigned int _target_parent;
 
-  unsigned int _current;
+  unsigned int current_;
 
-  std::vector<unsigned int>  _parts;
+  std::vector<unsigned int>  parts_;
 
 
 public:
 
   TargetIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const std::vector<unsigned int>& parts_)
-    : _glue(intersectionImpl_._glue),
-      _intersection(intersectionImpl_),
-      _index(intersectionImpl_.index()),
+    : glue_(intersectionImpl_.glue_),
+      intersection_(intersectionImpl_),
+      index_(intersectionImpl_.index()),
       _target_parent(0),
-      _current(0)
+      current_(0)
   {
-    if (this->_index < 0 || this->_glue->_index_sz <= this->_index)
+    if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_target_parent = this->_glue->_merg->targetParent(this->_index);
-    this->_parts.resize(parts_.size());
-    copy(parts_.begin(), parts_.end(), this->_parts.begin());
+    this->_target_parent = this->glue_->merg_->targetParent(this->index_);
+    this->parts_.resize(parts_.size());
+    copy(parts_.begin(), parts_.end(), this->parts_.begin());
   }
 
 
   TargetIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_)
-    : _glue(intersectionImpl_._glue),
-      _intersection(intersectionImpl_),
-      _index(intersectionImpl_.index()),
+    : glue_(intersectionImpl_.glue_),
+      intersection_(intersectionImpl_),
+      index_(intersectionImpl_.index()),
       _target_parent(0),
-      _current(0)
+      current_(0)
   {
-    if (this->_index < 0 || this->_glue->_index_sz <= this->_index)
+    if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_target_parent = this->_glue->_merg->targetParent(this->_index);
+    this->_target_parent = this->glue_->merg_->targetParent(this->index_);
   }
 
 public:
 
   const RemoteIntersection& dereference() const
   {
-    if (this->_index == this->_glue->NULL_INTERSECTION.index())
+    if (this->index_ == this->glue_->NULL_INTERSECTION.index())
       DUNE_THROW(Dune::GridError, "dereferencing end iterator");
-    return this->_intersection;
+    return this->intersection_;
   }
 
 
   void increment()
   {
-    if (++this->_current < this->_parts.size())
+    if (++this->current_ < this->parts_.size())
     {
-      const RemoteIntersectionImpl& next = this->_glue->_intersections[this->_parts[this->_current]];
-      this->_index = next.index();
-      this->_intersection = next;
+      const RemoteIntersectionImpl& next = this->glue_->intersections_[this->parts_[this->current_]];
+      this->index_ = next.index();
+      this->intersection_ = next;
     }
     else
-      this->_index = this->_glue->NULL_INTERSECTION.index();
+      this->index_ = this->glue_->NULL_INTERSECTION.index();
   }
 
 
   bool equals(const TargetIntersectionIteratorImpl& iter) const
   {
-    return iter._index == this->_index;
+    return iter.index_ == this->index_;
   }
 
 };

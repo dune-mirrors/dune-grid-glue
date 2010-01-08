@@ -94,30 +94,30 @@ private:
   /*   M E M B E R   V A R  I A B L E S   */
 
   /// @brief the grid glue entity this is built on
-  const Parent*       _glue;
+  const Parent*       glue_;
 
   /// @brief index of this intersection after GridGlue interface
-  IndexType _mergeindex;
+  IndexType mergeindex_;
 
-  IndexType _index;
-  IndexType _domainindex;
-  IndexType _targetindex;
+  IndexType index_;
+  IndexType domainindex_;
+  IndexType targetindex_;
 
-  DomainLocalGeometry _domlgeom;
+  DomainLocalGeometry domlgeom_;
 
-  DomainGeometry _domggeom;
+  DomainGeometry domggeom_;
 
-  TargetLocalGeometry _tarlgeom;
+  TargetLocalGeometry tarlgeom_;
 
-  TargetGeometry _targgeom;
+  TargetGeometry targgeom_;
 
 public:
 
   /*   F U N C T I O N A L I T Y   */
 
   RemoteIntersectionImpl(const Parent* glue)
-    : _glue(glue), _mergeindex((IndexType)-1), _index((IndexType)-1),
-      _domainindex((IndexType)-1), _targetindex((IndexType)-1)
+    : glue_(glue), mergeindex_((IndexType)-1), index_((IndexType)-1),
+      domainindex_((IndexType)-1), targetindex_((IndexType)-1)
   {}
 
   RemoteIntersectionImpl(const Parent* glue, unsigned int mergeindex);
@@ -131,29 +131,29 @@ public:
   /** \brief Assignment operator */
   RemoteIntersectionImpl& operator=(const RemoteIntersectionImpl& impl)
   {
-    this->_glue = impl._glue;
-    this->_mergeindex = impl._mergeindex;
-    this->_index = impl._index;
-    this->_domainindex = impl._domainindex;
-    this->_targetindex = impl._targetindex;
-    this->_domlgeom = impl._domlgeom;
-    this->_domggeom = impl._domggeom;
-    this->_tarlgeom = impl._tarlgeom;
-    this->_targgeom = impl._targgeom;
+    this->glue_ = impl.glue_;
+    this->mergeindex_ = impl.mergeindex_;
+    this->index_ = impl.index_;
+    this->domainindex_ = impl.domainindex_;
+    this->targetindex_ = impl.targetindex_;
+    this->domlgeom_ = impl.domlgeom_;
+    this->domggeom_ = impl.domggeom_;
+    this->tarlgeom_ = impl.tarlgeom_;
+    this->targgeom_ = impl.targgeom_;
     return *this;
   }
 
   // return EntityPointer to the Entity on the inside of this intersection. That is the Entity where we started this .
   DomainEntityPointer entityDomain() const
   {
-    return this->_glue->_domext.element(this->_glue->_merg->domainParent(this->_mergeindex));
+    return this->glue_->domext_.element(this->glue_->merg_->domainParent(this->mergeindex_));
   }
 
 
   // return EntityPointer to the Entity on the outside of this intersection. That is the neighboring Entity.
   TargetEntityPointer entityTarget() const
   {
-    return this->_glue->_tarext.element(this->_glue->_merg->targetParent(this->_mergeindex));
+    return this->glue_->tarext_.element(this->glue_->merg_->targetParent(this->mergeindex_));
   }
 
 
@@ -164,41 +164,41 @@ public:
   // geometrical information about this intersection in local coordinates of the inside() entity.
   const DomainLocalGeometry& geometryInDomainEntity() const
   {
-    return this->_domlgeom;
+    return this->domlgeom_;
   }
 
 
   // geometrical information about this intersection in local coordinates of the outside() entity.
   const TargetLocalGeometry& geometryInTargetEntity() const
   {
-    return this->_tarlgeom;
+    return this->tarlgeom_;
   }
 
 
   // geometrical information about this intersection in global coordinates in the domain grid.
   const DomainGeometry& geometryDomain() const
   {
-    return this->_domggeom;
+    return this->domggeom_;
   }
 
 
   // geometrical information about this intersection in global coordinates in the target grid.
   const TargetGeometry& geometryTarget() const
   {
-    return this->_targgeom;
+    return this->targgeom_;
   }
 
 
   bool hasTarget() const
   {
     unsigned int localindex;
-    return this->_glue->_tarext.contains(this->_glue->_merg->targetParent(this->_mergeindex), localindex);
+    return this->glue_->tarext_.contains(this->glue_->merg_->targetParent(this->mergeindex_), localindex);
   }
 
   bool hasDomain() const
   {
     unsigned int localindex;
-    return this->_glue->_domext.contains(this->_glue->_merg->domainParent(this->_mergeindex), localindex);
+    return this->glue_->domext_.contains(this->glue_->merg_->domainParent(this->mergeindex_), localindex);
   }
 
   // obtain the type of reference element for this intersection
@@ -211,65 +211,65 @@ public:
   // Local number of codim 1 entity in the inside() Entity where intersection is contained in.
   int numberInDomainEntity() const
   {
-    return this->_glue->_domext.indexInInside(this->_glue->_merg->domainParent(this->_mergeindex));
+    return this->glue_->domext_.indexInInside(this->glue_->merg_->domainParent(this->mergeindex_));
   }
 
 
   // Local number of codim 1 entity in outside() Entity where intersection is contained in.
   int numberInTargetEntity() const
   {
-    return this->_glue->_tarext.indexInInside(this->_glue->_merg->targetParent(this->_mergeindex));
+    return this->glue_->tarext_.indexInInside(this->glue_->merg_->targetParent(this->mergeindex_));
   }
 
 
   // Return an outer normal (length not necessarily 1).
   Coords outerNormalDomain(const Dune::FieldVector<ctype, mydim> &local) const
   {
-    return this->_domggeom.outerNormal(local);
+    return this->domggeom_.outerNormal(local);
   }
 
   // Return an outer normal (length not necessarily 1).
   Coords outerNormalTarget(const Dune::FieldVector<ctype, mydim> &local) const
   {
-    return this->_targgeom.outerNormal(local);
+    return this->targgeom_.outerNormal(local);
   }
 
 #ifdef QUICKHACK_INDEX
   IndexType & index()
   {
-    return this->_index;
+    return this->index_;
   }
 
   IndexType & domainIndex()
   {
-    return this->_domainindex;
+    return this->domainindex_;
   }
 
   IndexType & targetIndex()
   {
-    return this->_targetindex;
+    return this->targetindex_;
   }
 
   IndexType index() const
   {
-    return this->_index;
+    return this->index_;
   }
 
   IndexType globalIndex() const
   {
-    return this->_mergeindex;
+    return this->mergeindex_;
   }
 
   IndexType domainIndex() const
   {
-    assert(this->_domainindex != (IndexType)-1);
-    return this->_domainindex;
+    assert(this->domainindex_ != (IndexType)-1);
+    return this->domainindex_;
   }
 
   IndexType targetIndex() const
   {
-    assert(this->_targetindex != (IndexType)-1);
-    return this->_targetindex;
+    assert(this->targetindex_ != (IndexType)-1);
+    return this->targetindex_;
   }
 
 #endif
@@ -282,23 +282,23 @@ bool GridGlue<GET1, GET2>::RemoteIntersectionImpl::conforming() const
   std::vector<unsigned int> results;
   // first check the domain side
   bool is_conforming =
-    this->_glue->_merg->domainSimplexRefined(this->_glue->_merg->domainParent(this->_mergeindex), results) && results.size() == 1;
+    this->glue_->merg_->domainSimplexRefined(this->glue_->merg_->domainParent(this->mergeindex_), results) && results.size() == 1;
   results.resize(0);
   // now check the target side
   if (is_conforming)
-    return this->_glue->_merg->targetSimplexRefined(this->_glue->_merg->targetParent(this->_mergeindex), results) && results.size() == 1;
+    return this->glue_->merg_->targetSimplexRefined(this->glue_->merg_->targetParent(this->mergeindex_), results) && results.size() == 1;
   return false;
 }
 
 
 template<typename GET1, typename GET2>
 GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Parent* glue, unsigned int mergeindex)
-  : _glue(glue), _mergeindex(mergeindex), _index((IndexType)-1),
-    _domainindex((IndexType)-1), _targetindex((IndexType)-1)
+  : glue_(glue), mergeindex_(mergeindex), index_((IndexType)-1),
+    domainindex_((IndexType)-1), targetindex_((IndexType)-1)
 {
   // if an invalid index is given do not proceed!
   // (happens when the parent GridGlue initializes the "end"-Intersection)
-  assert (0 <= mergeindex || mergeindex < glue->_index_sz);
+  assert (0 <= mergeindex || mergeindex < glue->index__sz);
 
   // initialize the local and the global geometry of the domain
   {
@@ -311,7 +311,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
 
     for (int i = 0; i < nSimplexCorners; ++i)
-      corners_subEntity_local[i] = glue->_merg->domainParentLocal(mergeindex, i);
+      corners_subEntity_local[i] = glue->merg_->domainParentLocal(mergeindex, i);
 
     // Coordinates of the remote intersection corners wrt the element coordinate system
     Dune::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
@@ -319,12 +319,12 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     // world coordinates of the remote intersection corners
     Dune::array<Dune::FieldVector<ctype, DomainGridType::dimensionworld>, nSimplexCorners> corners_global;
 
-    unsigned int domainIndex = glue->_merg->domainParent(mergeindex);
+    unsigned int domainIndex = glue->merg_->domainParent(mergeindex);
     unsigned int unused;
-    if (glue->_domext.contains(domainIndex, unused))
+    if (glue->domext_.contains(domainIndex, unused))
     {
-      typename DomainExtractor::Geometry domainWorldGeometry = glue->_domext.geometry(domainIndex);
-      typename DomainExtractor::LocalGeometry domainLocalGeometry = glue->_domext.geometryLocal(domainIndex);
+      typename DomainExtractor::Geometry domainWorldGeometry = glue->domext_.geometry(domainIndex);
+      typename DomainExtractor::LocalGeometry domainLocalGeometry = glue->domext_.geometryLocal(domainIndex);
 
       for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
         corners_element_local[i] = domainLocalGeometry.global(corners_subEntity_local[i]);
@@ -333,8 +333,8 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
       }
 
       // set the corners of the geometries
-      this->_domlgeom.setup(type(), corners_element_local);
-      this->_domggeom.setup(type(), corners_global);
+      this->domlgeom_.setup(type(), corners_element_local);
+      this->domggeom_.setup(type(), corners_global);
     }
   }
 
@@ -349,7 +349,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
 
     for (int i = 0; i < nSimplexCorners; ++i)
-      corners_subEntity_local[i] = glue->_merg->targetParentLocal(mergeindex, i);
+      corners_subEntity_local[i] = glue->merg_->targetParentLocal(mergeindex, i);
 
     // Coordinates of the remote intersection corners wrt the element coordinate system
     Dune::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
@@ -357,12 +357,12 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     // world coordinates of the remote intersection corners
     Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, nSimplexCorners> corners_global;
 
-    unsigned int targetIndex = glue->_merg->targetParent(mergeindex);
+    unsigned int targetIndex = glue->merg_->targetParent(mergeindex);
     unsigned int unused;
-    if (glue->_tarext.contains(targetIndex, unused))
+    if (glue->tarext_.contains(targetIndex, unused))
     {
-      typename TargetExtractor::Geometry targetWorldGeometry = glue->_tarext.geometry(targetIndex);
-      typename TargetExtractor::LocalGeometry targetLocalGeometry = glue->_tarext.geometryLocal(targetIndex);
+      typename TargetExtractor::Geometry targetWorldGeometry = glue->tarext_.geometry(targetIndex);
+      typename TargetExtractor::LocalGeometry targetLocalGeometry = glue->tarext_.geometryLocal(targetIndex);
 
       for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
         corners_element_local[i] = targetLocalGeometry.global(corners_subEntity_local[i]);
@@ -370,8 +370,8 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
       }
 
       // set the corners of the geometries
-      this->_tarlgeom.setup(type(), corners_element_local);
-      this->_targgeom.setup(type(), corners_global);
+      this->tarlgeom_.setup(type(), corners_element_local);
+      this->targgeom_.setup(type(), corners_global);
     }
   }
 }

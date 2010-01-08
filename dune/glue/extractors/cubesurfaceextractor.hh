@@ -148,8 +148,8 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
   std::deque<SubEntityInfo> temp_faces;
 
   // iterate over all codim 0 elemets on the grid
-  for (ElementIter elit = this->_gv.template begin<0, PType>();
-       elit != this->_gv.template end<0, PType>(); ++elit)
+  for (ElementIter elit = this->gv_.template begin<0, PType>();
+       elit != this->gv_.template end<0, PType>(); ++elit)
   {
     // count number of selected faces for this element
     size_t simplex_count = 0;
@@ -166,7 +166,7 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
     // iterate over all intersections of codim 1 and test if the
     // boundary intersections are to be added to the surface
-    for (IsIter is = this->_gv.ibegin(*elit); is != this->_gv.iend(*elit); ++is)
+    for (IsIter is = this->gv_.ibegin(*elit); is != this->gv_.iend(*elit); ++is)
     {
       unsigned int face_index = is->indexInInside();
 
@@ -196,11 +196,11 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
           // if the vertex is not yet inserted in the vertex info map
           // it is a new one -> it will be inserted now!
-          typename VertexInfoMap::iterator vimit = this->_vtxInfo.find(vindex);
-          if (vimit == this->_vtxInfo.end())
+          typename VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
+          if (vimit == this->vtxInfo_.end())
           {
             // insert into the map
-            this->_vtxInfo[vindex] = new VertexInfo(vertex_index, vptr);
+            this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
             // remember this vertex' index
             vertex_indices[i] = vertex_index;
             // increase the current index
@@ -279,23 +279,23 @@ void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
 
     // add element entry with the offset of the first simplex and the number of simplices
     if (simplex_count != 0)
-      this->_elmtInfo[eindex] = new ElementInfo(simplex_index, elit, simplex_count);
+      this->elmtInfo_[eindex] = new ElementInfo(simplex_index, elit, simplex_count);
     simplex_index += simplex_count;
 
   }       // end loop over elements
 
   // allocate the array for the face specific information...
-  this->_subEntities.resize(simplex_index);
+  this->subEntities_.resize(simplex_index);
   // ...and fill in the data from the temporary containers
-  copy(temp_faces.begin(), temp_faces.end(), this->_subEntities.begin());
+  copy(temp_faces.begin(), temp_faces.end(), this->subEntities_.begin());
 
   // now first write the array with the coordinates...
-  this->_coords.resize(this->_vtxInfo.size());
-  typename VertexInfoMap::const_iterator it1 = this->_vtxInfo.begin();
-  for (; it1 != this->_vtxInfo.end(); ++it1)
+  this->coords_.resize(this->vtxInfo_.size());
+  typename VertexInfoMap::const_iterator it1 = this->vtxInfo_.begin();
+  for (; it1 != this->vtxInfo_.end(); ++it1)
   {
     // get a pointer to the associated info object
-    CoordinateInfo* current = &this->_coords[it1->second->idx];
+    CoordinateInfo* current = &this->coords_[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping
