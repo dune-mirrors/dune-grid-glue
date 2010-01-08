@@ -20,12 +20,29 @@
 #define DUNE_CODIM_0_EXTRACTOR_HH
 
 #include <deque>
+
+#include <dune/grid/common/mcmgmapper.hh>
+
 #include "extractor.hh"
 #include "surfacedescriptor.hh"
 
 template<typename GV>
 class Codim0Extractor : public Extractor<GV,0>
 {
+
+protected:
+
+  /** \brief Layout class needed to create a consecutive index for all element types together */
+  template <int dim>
+  struct P0Layout
+  {
+    /// Return true if gt has the same dimension as the grid
+    bool contains (Dune::GeometryType gt) const
+    {
+      return (gt.dim()==dim);
+    }
+  };
+
 public:
 
   /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
@@ -83,11 +100,14 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
   // information can be stored at first
   std::deque<SubEntityInfo> temp_faces;
 
+  // Make a set of consecutive indices for the elements, irrespective of the element types
+  Dune::MultipleCodimMultipleGeomTypeMapper<GV, P0Layout > elementMapper(this->_gv);
+
   // iterate over all codim 0 elements on the grid
   for (ElementIter elit = this->_gv.template begin<0>(); elit != this->_gv.template end<0>(); ++elit)
   {
 
-    IndexType eindex = this->indexSet().template index<0>(*elit);
+    IndexType eindex = elementMapper.map(*elit);
 
     // only do sth. if this element is "interesting"
     // implicit cast is done automatically
