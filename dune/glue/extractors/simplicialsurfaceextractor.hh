@@ -76,7 +76,7 @@ public:
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dimworld>                           Coords;
+  typedef Dune::FieldVector<ctype, dimworld>                       Coords;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
@@ -240,9 +240,9 @@ void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     }             // end loop over elements
 
     // allocate the array for the face specific information...
-    this->subEntities_.resize(simplex_index);
+    this->_subEntities.resize(simplex_index);
     // ...and fill in the data from the temporary containers
-    copy(temp_faces.begin(), temp_faces.end(), this->subEntities_.begin());
+    copy(temp_faces.begin(), temp_faces.end(), this->_subEntities.begin());
   }
 
 

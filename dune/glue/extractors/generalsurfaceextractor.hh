@@ -359,9 +359,9 @@ void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
     std::cout << "added " << simplex_index << " subfaces\n";
 
     // allocate the array for the face specific information...
-    this->subEntities_.resize(simplex_index);
+    this->_subEntities.resize(simplex_index);
     // ...and fill in the data from the temporary containers
-    copy(temp_faces.begin(), temp_faces.end(), this->subEntities_.begin());
+    copy(temp_faces.begin(), temp_faces.end(), this->_subEntities.begin());
   }
 
 
