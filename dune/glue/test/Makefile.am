@@ -1,9 +1,13 @@
 # -*- tab-width: 4; indent-tabs-mode: nil -*-
 
-TESTPROGS = nonoverlappingcouplingtest overlappingcouplingtest orientedsubfacetest mixeddimcouplingtest mixeddimcouplingtest_failing
+TESTPROGS = nonoverlappingcouplingtest overlappingcouplingtest mixeddimcouplingtest mixeddimcouplingtest_failing
 
 if MPI
 TESTPROGS += nonoverlappingcouplingtest_mpi
+endif
+
+if UG
+TESTPROGS += orientedsubfacetest
 endif
 
 # programs just to build when "make check" is used
