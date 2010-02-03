@@ -102,7 +102,7 @@ private:
     {
       for (unsigned int i = 0; i < tempcoords.size(); ++i)
       {
-        assert(Parent::dimworld == Extractor::dimworld);
+        assert(int(Parent::dimworld) == int(Extractor::dimworld));
         coords.push_back(Dune::FieldVector<typename Parent::ctype, Parent::dimworld>());
         for (size_t j = 0; j < Parent::dimworld; ++j)
           coords.back()[j] = tempcoords[i][j];
