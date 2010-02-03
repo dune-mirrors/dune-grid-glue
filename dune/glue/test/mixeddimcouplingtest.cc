@@ -336,8 +336,6 @@ void test2d1dCoupling(double slice=0.0)
 
 int main(int argc, char *argv[]) try
 {
-  // #define ONLY_TEST_WORKING_VERSION
-
   // /////////////////////////////////////////////////////////////
   //   First set of tests: the grid have different dimensions,
   //   but the world dimension is the same for both of them.
@@ -357,12 +355,10 @@ int main(int argc, char *argv[]) try
   test2d1dCouplingMatchingDimworld<2,MeshClassification::simplex>();
   std::cout << "============================================================\n";
 
-#ifndef ONLY_TEST_WORKING_VERSION
   // Test a unit cube versus a grid one dimension lower
   std::cout << "==== 3d 2d simplex == matching =============================\n";
   test2d1dCouplingMatchingDimworld<3,MeshClassification::cube>();
   std::cout << "============================================================\n";
-#endif
 
   // /////////////////////////////////////////////////////////////
   //   Second set of tests: the grid have different dimensions,
@@ -388,13 +384,11 @@ int main(int argc, char *argv[]) try
   test2d1dCoupling<2,MeshClassification::simplex, true>();
   std::cout << "============================================================\n";
 
-#ifndef ONLY_TEST_WORKING_VERSION
   // Test a unit cube versus a grid one dimension lower
   std::cout << "==== 3d 2d cube ===== nonmatching ==========================\n";
   test2d1dCoupling<3,MeshClassification::cube>();
   test2d1dCoupling<3,MeshClassification::cube, true>();
   std::cout << "============================================================\n";
-#endif
 
   // /////////////////////////////////////////////////////////////
   //   Third set of tests: the grid have different dimensions,
@@ -421,13 +415,11 @@ int main(int argc, char *argv[]) try
   test2d1dCoupling<2,MeshClassification::simplex, true>(1.0);
   std::cout << "============================================================\n";
 
-#ifndef ONLY_TEST_WORKING_VERSION
   // Test a unit cube versus a grid one dimension lower
   std::cout << "==== 3d 2d cube ===== nonmatching top ======================\n";
   test2d1dCoupling<3,MeshClassification::cube>(1.0);
   test2d1dCoupling<3,MeshClassification::cube, true>(1.0);
   std::cout << "============================================================\n";
-#endif
 
 }
 catch (Exception e) {

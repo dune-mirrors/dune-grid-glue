@@ -47,7 +47,9 @@ public:
 
   /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
   using Extractor<GV,0>::codim;
+  typedef typename Extractor<GV,0>::ctype ctype;
   using Extractor<GV,0>::dim;
+  using Extractor<GV,0>::dimworld;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
@@ -58,11 +60,11 @@ public:
   typedef typename GV::IndexSet::IndexType IndexType;
 
   // import typedefs from base class
-  typedef typename Codim0Extractor<GV>::SubEntityInfo SubEntityInfo;
-  typedef typename Codim0Extractor<GV>::ElementInfo ElementInfo;
-  typedef typename Codim0Extractor<GV>::VertexInfo VertexInfo;
-  typedef typename Codim0Extractor<GV>::CoordinateInfo CoordinateInfo;
-  typedef typename Codim0Extractor<GV>::VertexInfoMap VertexInfoMap;
+  typedef typename Extractor<GV,0>::SubEntityInfo SubEntityInfo;
+  typedef typename Extractor<GV,0>::ElementInfo ElementInfo;
+  typedef typename Extractor<GV,0>::VertexInfo VertexInfo;
+  typedef typename Extractor<GV,0>::CoordinateInfo CoordinateInfo;
+  typedef typename Extractor<GV,0>::VertexInfoMap VertexInfoMap;
 
   /**
    * @brief Constructor
@@ -154,42 +156,57 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
       }
 
       // flip cell if necessary
-      if (positiveNormalDirection_)
       {
-        // choose element type
-        if (dim > elit->type().isCube())
+        switch (int(dim))
         {
-          for (int i = 0; i < (1<<dim); i+=2)
+        case 0 :
+          break;
+        case 1 :
+        {
+          bool elementNormalDirection =
+            (elit->geometry().corner(1).two_norm2() < elit->geometry().corner(0).two_norm2());
+          if ( positiveNormalDirection_ != elementNormalDirection )
           {
-            // swap i and i+1
-            int x = vertex_indices[i];
-            vertex_indices[i] = vertex_indices[i+1];
-            vertex_indices[i+1] = x;
-
-            x = vertex_numbers[i];
-            vertex_numbers[i] = vertex_numbers[i+1];
-            vertex_numbers[i+1] = x;
+            std::swap(vertex_indices[0], vertex_indices[1]);
+            std::swap(vertex_numbers[0], vertex_numbers[1]);
           }
+          break;
         }
-        if (elit->type().isSimplex())
+        case 2 :
         {
-          switch ((int)dim) {
-          case 1 :
-          case 2 :
+          Dune::FieldVector<ctype, dimworld>
+          v0 = elit->geometry().corner(1),
+            v1 = elit->geometry().corner(2);
+          v0 -= elit->geometry().corner(0);
+          v1 -= elit->geometry().corner(0);
+          ctype normal_sign = v0[0]*v1[1] - v0[1]*v1[0];
+          bool elementNormalDirection = (normal_sign < 0);
+          if ( positiveNormalDirection_ != elementNormalDirection )
           {
-            int x = vertex_indices[0];
-            vertex_indices[0] = vertex_indices[1];
-            vertex_indices[1] = x;
-
-            x = vertex_numbers[0];
-            vertex_numbers[0] = vertex_numbers[1];
-            vertex_numbers[1] = x;
-
+            std::cout << "swap\n";
+            switch (elit->type().basicType())
+            {
+            case Dune::GeometryType::cube :
+              for (int i = 0; i < (1<<dim); i+=2)
+              {
+                // swap i and i+1
+                std::swap(vertex_indices[i], vertex_indices[i+1]);
+                std::swap(vertex_numbers[i], vertex_numbers[i+1]);
+              }
+              break;
+            case Dune::GeometryType::simplex :
+              std::swap(vertex_indices[0], vertex_indices[1]);
+              std::swap(vertex_numbers[0], vertex_numbers[1]);
+              break;
+            default :
+              DUNE_THROW(Dune::Exception, "Unexpected Geometrytype");
+            }
+          }
+          else
             break;
-          }
-          default :
-            assert(false);
-          }
+        }
+        default :
+          DUNE_THROW(Dune::NotImplemented,"");
         }
       }
 
