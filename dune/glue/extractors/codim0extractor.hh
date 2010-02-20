@@ -163,8 +163,12 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
           break;
         case 1 :
         {
+          // The following test only works if the zero-th coordinate is the
+          // one that defines the orientation.  A sufficient condition for
+          // this is dimworld == 1
+          assert(dimworld==1);
           bool elementNormalDirection =
-            (elit->geometry().corner(1).two_norm2() < elit->geometry().corner(0).two_norm2());
+            (elit->geometry().corner(1)[0] < elit->geometry().corner(0)[0]);
           if ( positiveNormalDirection_ != elementNormalDirection )
           {
             std::swap(vertex_indices[0], vertex_indices[1]);
