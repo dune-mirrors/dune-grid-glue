@@ -284,7 +284,7 @@ protected:
 
     }
 
-    std::cout << "GridGlue::updateIntersections : The number of overlaps is " << merg_->nSimplices()
+    std::cout << "GridGlue::updateIntersections : The number of remote intersections is " << merg_->nSimplices()
               << " with " << _dindex_sz << " domain entities"
               << " and " << _tindex_sz << " target entities" << std::endl;
 
