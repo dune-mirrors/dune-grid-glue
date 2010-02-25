@@ -34,7 +34,7 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
-#include <dune/glue/merging/merger.hh>
+#include <dune/glue/merging/standardmerge.hh>
 
 
 /** \brief Implementation of the Merger concept for conforming interfaces
@@ -45,7 +45,7 @@
  */
 template<int dim, int dimworld, typename T = double>
 class ConformingMerge
-  : public Merger<T,dim,dim,dimworld>
+  : public StandardMerge<T,dim,dim,dimworld>
 {
 
 public:
@@ -63,39 +63,23 @@ public:
 
 private:
 
-  struct ConformingRemoteIntersection
-  {
-    // Local coordinates in the domain entity
-    Dune::array<Dune::FieldVector<T,dim>, dim+1> domainLocal_;
-
-    // Local coordinates in the domain entity
-    Dune::array<Dune::FieldVector<T,dim>, dim+1> targetLocal_;
-
-    //
-    int domainEntity_;
-
-    int targetEntity_;
-
-  };
-
-
-private:
-
   /*   M E M B E R   V A R I A B L E S   */
 
   /// @brief maximum distance between two matched points in the mapping
   T tolerance_;
 
-  /* topologic information for domain and target */
+  typedef typename StandardMerge<T,dim,dim,dim>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
-  /// @ brief domain indices (internal copy)
-  std::vector<Dune::array<int,dim+1> >         domi_;
+  /** \brief Compute the intersection between two overlapping elements
 
-  /// @brief target indices (internal copy)
-  std::vector<Dune::array<int,dim+1> >         tari_;
-
-  /** \brief The computed intersections */
-  std::vector<ConformingRemoteIntersection> intersections_;
+     The result is a set of simplices.
+   */
+  virtual void computeIntersection(const Dune::GeometryType& domainElementType,
+                                   const std::vector<Dune::FieldVector<T,dimworld> >& domainElementCorners,
+                                   unsigned int domainIndex,
+                                   const Dune::GeometryType& targetElementType,
+                                   const std::vector<Dune::FieldVector<T,dimworld> >& targetElementCorners,
+                                   unsigned int targetIndex);
 
 public:
 
@@ -105,33 +89,6 @@ public:
 
 
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
-
-  /**
-   * @brief builds the merged grid
-   *
-   * Note that the indices are used consequently throughout the whole class interface just like they are
-   * introduced here.
-   *
-   * @param domain_coords the domain vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param domain_simplices array with all domain simplices represented as corner indices into @c domain_coords;
-   * the simplices are just written to this array one after another
-   * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param target_simplices just like with the domain_simplices and domain_coords
-   */
-  void build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
-             const std::vector<unsigned int>& domain_elements,
-             const std::vector<Dune::GeometryType>& domain_element_types,
-             const std::vector<Dune::FieldVector<T,dimworld> >& target_coords,
-             const std::vector<unsigned int>& target_elements,
-             const std::vector<Dune::GeometryType>& target_element_types
-             );
-
-
-  /*   Q U E S T I O N I N G   T H E   M E R G E D   G R I D   */
-
-  /// @brief get the number of simplices in the merged grid
-  /// The indices are then in 0..nSimplices()-1
-  unsigned int nSimplices() const;
 
   /**
    * @brief check if given domain simplex could be matched in the merged grid
@@ -214,147 +171,103 @@ public:
 };
 
 
-/* IMPLEMENTATION OF CLASS   C O N T A C T  M A P P I N G  S U R F A C E  M E R G E */
-
-
 template<int dim, int dimworld, typename T>
-void ConformingMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<T,dimworld> >& domainCoords,
-                                              const std::vector<unsigned int>& domain_elements,
-                                              const std::vector<Dune::GeometryType>& domain_element_types,
-                                              const std::vector<Dune::FieldVector<T,dimworld> >& targetCoords,
-                                              const std::vector<unsigned int>& target_elements,
-                                              const std::vector<Dune::GeometryType>& target_element_types
-                                              )
+void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::GeometryType& domainElementType,
+                                                            const std::vector<Dune::FieldVector<T,dimworld> >& domainElementCorners,
+                                                            unsigned int domainIndex,
+                                                            const Dune::GeometryType& targetElementType,
+                                                            const std::vector<Dune::FieldVector<T,dimworld> >& targetElementCorners,
+                                                            unsigned int targetIndex)
 {
-  for (size_t i=0; i<domain_element_types.size(); i++)
-    if (!domain_element_types[i].isSimplex())
-      DUNE_THROW(Dune::GridError, "ConformingMerge is only implemented for simplicial elements!");
+  // A few consistency checks
+  assert((Dune::GenericReferenceElements<T,dim>::general(domainElementType).size(dim) == domainElementCorners.size()));
+  assert((Dune::GenericReferenceElements<T,dim>::general(targetElementType).size(dim) == targetElementCorners.size()));
 
-  for (size_t i=0; i<target_element_types.size(); i++)
-    if (!target_element_types[i].isSimplex())
-      DUNE_THROW(Dune::GridError, "ConformingMerge is only implemented for simplicial elements!");
+  // the intersection is either conforming or empty, hence the GeometryTypes have to match
+  if (domainElementType != targetElementType)
+    return;
 
-  // copy domain and target elements to internal arrays
-  // (cannot keep refs since outside modification would destroy information)
-  this->domi_.resize(domain_elements.size()/(dim+1));
-  this->tari_.resize(target_elements.size()/(dim+1));
+  // ////////////////////////////////////////////////////////////
+  //   Find correspondences between the different corners
+  // ////////////////////////////////////////////////////////////
+  std::vector<int> other(domainElementCorners.size(), -1);
 
-  for (unsigned int i = 0; i < domain_elements.size()/(dim+1); ++i)
-    for (int j=0; j<dim+1; j++)
-      domi_[i][j] = domain_elements[i*(dim+1)+j];
+  for (int i=0; i<domainElementCorners.size(); i++) {
 
-  // dim==dimworld-1: just copy the two arrays
-  for (unsigned int i = 0; i < target_elements.size()/(dim+1); ++i)
-    for (int j=0; j<dim+1; j++)
-      tari_[i][j] = target_elements[i*(dim+1)+j];
+    for (int j=0; j<targetElementCorners.size(); j++) {
 
-  std::cout << "ConformingMerge building merged grid..." << std::endl;
+      if ( (domainElementCorners[i]-targetElementCorners[j]).two_norm() < tolerance_ ) {
 
-  // /////////////////////////////////////////////////////////////////////
-  //   Compute correspondences between vertices
-  //   \todo This is only the naive quadratic algorithm
-  // /////////////////////////////////////////////////////////////////////
-
-  std::vector<int> pairs(domainCoords.size(), -1);
-
-  // Loop over first boundary
-  for (int i=0; i<domainCoords.size(); i++) {
-
-    // Loop over second boundary
-    for (int j=0; j<targetCoords.size(); j++) {
-
-      if ((domainCoords[i]-targetCoords[j]).two_norm() < tolerance_) {
-
-        pairs[i] = j;
+        other[i] = j;
         break;
 
       }
 
     }
 
-  }
-
-  std::cout << "ConformingMerge: " << pairs.size() - std::count(pairs.begin(), pairs.end(), -1) << " node pairs found" << std::endl;
-
-  // //////////////////////////////////////////////////////////////////////
-  //   Make the actual intersections
-  // //////////////////////////////////////////////////////////////////////
-
-  intersections_.resize(0);
-
-  for (size_t i=0; i<domi_.size(); i++) {
-
-    // --------------------------------------------
-    //  Find the corresponding target simplex
-    // --------------------------------------------
-
-    // Assemble a set of the vertices that the target simplex has to consist of
-    std::set<unsigned int> domainSimplexSorted;
-    for (int j=0; j<domi_[i].size(); j++)
-      if (pairs[domi_[i][j]] != -1)
-        domainSimplexSorted.insert(pairs[domi_[i][j]]);
-
-    // Do nothing if not all of the vertices of this simplex could be matched on the other side
-    if (domainSimplexSorted.size() != domi_[i].size())
-      continue;
-
-    // Find the index of this target simplex
-    int targetSimplexIdx = -1;
-    for (size_t j=0; j<tari_.size(); j++) {
-
-      std::set<unsigned int> targetSimplexSorted(tari_[j].begin(), tari_[j].end());
-
-      if (domainSimplexSorted == targetSimplexSorted) {
-        targetSimplexIdx = j;
-        break;
-      }
-
-    }
-
-    // We have found a conforming intersection.  Let's store it!
-    if (targetSimplexIdx != -1) {
-
-      intersections_.push_back(ConformingRemoteIntersection());
-      intersections_.back().domainEntity_ = i;
-      intersections_.back().targetEntity_ = targetSimplexIdx;
-
-      const Dune::GenericReferenceElement<T,dim>& refElement
-        = Dune::GenericReferenceElements<T,dim>::general(Dune::GeometryType(Dune::GeometryType::simplex,dim));
-
-      // Loop over the vertices of the intersection
-      for (int j=0; j<refElement.size(dim); j++) {
-
-        // local coordinates in the domain
-        // \todo This is so trivial we may not even want to save it...
-        intersections_.back().domainLocal_[j] = refElement.position(j,dim);
-
-        // global vertex number on the target side
-        int globalDomainNumber = domi_[i][j];
-        int globalTargetNumber = pairs[globalDomainNumber];
-
-        // local number in the target simplex
-        assert(std::find(tari_[targetSimplexIdx].begin(),
-                         tari_[targetSimplexIdx].end(), globalTargetNumber) != tari_[targetSimplexIdx].end());
-        int localTargetNumber = std::find(tari_[targetSimplexIdx].begin(),
-                                          tari_[targetSimplexIdx].end(), globalTargetNumber)
-                                - tari_[targetSimplexIdx].begin();
-
-        intersections_.back().targetLocal_[localTargetNumber] = refElement.position(j,dim);
-
-      }
-
-    }
+    // No corresponding target vertex found for this domain vertex
+    if (other[i] == -1)
+      return;
 
   }
 
+  // ////////////////////////////////////////////////////////////
+  //   Set up the new remote intersection
+  // ////////////////////////////////////////////////////////////
+
+  /** \todo Currently the RemoteIntersections have to be simplices */
+  if (domainElementType.isSimplex()) {
+
+    this->intersections_.push_back(RemoteSimplicialIntersection());
+
+    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(domainElementType);
+
+    for (int i=0; i<refElement.size(dim); i++) {
+      this->intersections_.back().domainLocal_[i] = refElement.position(i,dim);
+      this->intersections_.back().targetLocal_[i] = refElement.position(other[i],dim);
+    }
+
+    this->intersections_.back().domainEntity_ = domainIndex;
+    this->intersections_.back().targetEntity_ = targetIndex;
+
+  } else if (domainElementType.isQuadrilateral()) {
+
+    // split the quadrilateral into two triangles
+    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(domainElementType);
+
+    // triangle 1
+    RemoteSimplicialIntersection newSimplicialIntersection1;
+
+    for (int i=0; i<3; i++) {
+      newSimplicialIntersection1.domainLocal_[i] = refElement.position(i,dim);
+      newSimplicialIntersection1.targetLocal_[i] = refElement.position(other[i],dim);
+    }
+
+    newSimplicialIntersection1.domainEntity_ = domainIndex;
+    newSimplicialIntersection1.targetEntity_ = targetIndex;
+
+    this->intersections_.push_back(newSimplicialIntersection1);
+
+    // triangle 2
+    RemoteSimplicialIntersection newSimplicialIntersection2;
+
+    newSimplicialIntersection2.domainLocal_[2] = refElement.position(2,dim);
+    newSimplicialIntersection2.targetLocal_[2] = refElement.position(other[2],dim);
+    newSimplicialIntersection2.domainLocal_[1] = refElement.position(1,dim);
+    newSimplicialIntersection2.targetLocal_[1] = refElement.position(other[1],dim);
+    newSimplicialIntersection2.domainLocal_[3] = refElement.position(3,dim);
+    newSimplicialIntersection2.targetLocal_[3] = refElement.position(other[3],dim);
+
+    newSimplicialIntersection2.domainEntity_ = domainIndex;
+    newSimplicialIntersection2.targetEntity_ = targetIndex;
+
+    this->intersections_.push_back(newSimplicialIntersection2);
+
+  } else
+    DUNE_THROW(Dune::GridError, "Unsupported element type");
+
 }
 
-
-template<int dim, int dimworld, typename T>
-inline unsigned int ConformingMerge<dim, dimworld, T>::nSimplices() const
-{
-  return intersections_.size();
-}
 
 
 template<int dim, int dimworld, typename T>
@@ -376,7 +289,7 @@ inline bool ConformingMerge<dim, dimworld, T>::targetSimplexMatched(unsigned int
 template<int dim, int dimworld, typename T>
 inline unsigned int ConformingMerge<dim, dimworld, T>::domainParent(unsigned int idx) const
 {
-  return intersections_[idx].domainEntity_;
+  return this->intersections_[idx].domainEntity_;
 }
 
 
@@ -384,7 +297,7 @@ template<int dim, int dimworld, typename T>
 inline unsigned int ConformingMerge<dim, dimworld, T>::targetParent(unsigned int idx) const
 {
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
-  return intersections_[idx].targetEntity_;
+  return this->intersections_[idx].targetEntity_;
 }
 
 
@@ -403,7 +316,7 @@ template<int dim, int dimworld, typename T>
 bool ConformingMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
   indices.resize(1);
-  indices[0] = intersections_[idx].targetEntity_;
+  indices[0] = this->intersections_[idx].targetEntity_;
 
   // ...return success
   return true;
@@ -413,14 +326,14 @@ bool ConformingMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, s
 template<int dim, int dimworld, typename T>
 typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
-  return intersections_[idx].domainLocal_[corner];
+  return this->intersections_[idx].domainLocal_[corner];
 }
 
 
 template<int dim, int dimworld, typename T>
 typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
-  return intersections_[idx].targetLocal_[corner];
+  return this->intersections_[idx].targetLocal_[corner];
 }
 
 #endif // CONFORMING_MERGE_HH
