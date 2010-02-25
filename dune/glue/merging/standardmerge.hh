@@ -34,7 +34,7 @@
    computeIntersections() to compute the intersection between two elements.  Actual merger implementations
    can derive from this class and only implement computeIntersections().
 
-   \tparam ctype The type used for coordinates (assumed to be the same for both grids)
+   \tparam T The type used for coordinates (assumed to be the same for both grids)
    \tparam domainDim Dimension of the domain grid
    \tparam targetDim Dimension of the target grid
    \tparam dimworld Dimension of the world space where the coupling takes place
