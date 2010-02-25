@@ -39,7 +39,7 @@ public:
 
 
 template <int dim>
-void testCubeGrids(Merger<double,dim,dim,dim>& merger)
+void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
 {
 
   // /////////////////////////////////////////////////////////////////
@@ -54,8 +54,8 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger)
 
   GridType grid0(elements, lower, upper);
 
-  lower += 0.05;
-  upper += 0.05;
+  lower += gridOffset;
+  upper += gridOffset;
 
   GridType grid1(elements, lower, upper);
 
@@ -95,7 +95,7 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger)
 
 
 template <int dim>
-void testSimplexGrids(Merger<double,dim,dim,dim>& merger)
+void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
 {
 
   // /////////////////////////////////////////////////////////////////
@@ -110,8 +110,8 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger)
 
   GridType grid0(elements, lower, upper);
 
-  lower += 0.05;
-  upper += 0.05;
+  lower += gridOffset;
+  upper += gridOffset;
 
   GridType grid1(elements, lower, upper);
 
@@ -149,7 +149,7 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger)
 
 
 #if HAVE_UG
-void testTriangleGridsUG(Merger<double,2,2,2>& merger)
+void testTriangleGridsUG(Merger<double,2,2,2>& merger, const FieldVector<double,2>& gridOffset)
 {
   const int dim = 2;
 
@@ -171,7 +171,7 @@ void testTriangleGridsUG(Merger<double,2,2,2>& merger)
 
       factory0.insertVertex(pos);
 
-      pos += 0.05;
+      pos += gridOffset;
 
       factory1.insertVertex(pos);
 
@@ -238,7 +238,7 @@ void testTriangleGridsUG(Merger<double,2,2,2>& merger)
 
 
 template <int dim>
-void testHybridGridsUG(Merger<double,dim,dim,dim>& merger)
+void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
 {
   // /////////////////////////////////////////////////////////////////////////
   //   Create the hybrid test grid from dune-grid twice and shift it once
@@ -293,13 +293,13 @@ int main()
   PSurfaceMerge<1,1,double> psurfaceMerge1d;
   PSurfaceMerge<2,2,double> psurfaceMerge2d;
 
-  testCubeGrids<1>(psurfaceMerge1d);
-  testCubeGrids<2>(psurfaceMerge2d);
+  testCubeGrids<1>(psurfaceMerge1d, FieldVector<double,1>(0.05));
+  testCubeGrids<2>(psurfaceMerge2d, FieldVector<double,2>(0.05));
 
-  testSimplexGrids<1>(psurfaceMerge1d);
+  testSimplexGrids<1>(psurfaceMerge1d, FieldVector<double,1>(0.05));
 #if HAVE_UG
-  testTriangleGridsUG(psurfaceMerge2d);
-  testHybridGridsUG<2>(psurfaceMerge2d);
+  testTriangleGridsUG(psurfaceMerge2d, FieldVector<double,2>(0.05));
+  testHybridGridsUG<2>(psurfaceMerge2d, FieldVector<double,2>(0.05));
 #endif
 #endif
 
@@ -311,14 +311,14 @@ int main()
   CGALMerge<1,double> cgalMerge1d;
   CGALMerge<2,double> cgalMerge2d;
 
-  testCubeGrids<1>(cgalMerge1d);
-  testCubeGrids<2>(cgalMerge2d);
+  testCubeGrids<1>(cgalMerge1d, FieldVector<double,1>(0.05));
+  testCubeGrids<2>(cgalMerge2d, FieldVector<double,2>(0.05));
 
-  testSimplexGrids<1>(cgalMerge1d);
+  testSimplexGrids<1>(cgalMerge1d, FieldVector<double,1>(0.05));
 #if HAVE_UG
-  testTriangleGridsUG(cgalMerge2d);
+  testTriangleGridsUG(cgalMerge2d, FieldVector<double,2>(0.05));
 
-  testHybridGridsUG<2>(cgalMerge2d);
+  testHybridGridsUG<2>(cgalMerge2d, FieldVector<double,2>(0.05));
 #endif
 #endif
 
@@ -331,13 +331,13 @@ int main()
   ConformingMerge<2,2,double> conformingMerge2d;
   ConformingMerge<3,3,double> conformingMerge3d;
 
-  testCubeGrids<1>(conformingMerge1d);
-  testCubeGrids<2>(conformingMerge2d);
+  testCubeGrids<1>(conformingMerge1d, FieldVector<double,1>(0));
+  testCubeGrids<2>(conformingMerge2d, FieldVector<double,2>(0));
 
-  testSimplexGrids<1>(conformingMerge1d);
+  testSimplexGrids<1>(conformingMerge1d, FieldVector<double,1>(0));
 #if HAVE_UG
-  testTriangleGridsUG(conformingMerge2d);
+  testTriangleGridsUG(conformingMerge2d, FieldVector<double,2>(0));
 
-  testHybridGridsUG<2>(conformingMerge2d);
+  testHybridGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
 }
