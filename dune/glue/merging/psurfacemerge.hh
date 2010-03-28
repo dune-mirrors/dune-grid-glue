@@ -23,6 +23,7 @@
 #ifndef PSURFACEMERGE_HH
 #define PSURFACEMERGE_HH
 
+#if HAVE_PSURFACE
 
 #include <iostream>
 #include <fstream>
@@ -961,5 +962,6 @@ unsigned int PSurfaceMerge<dim, dimworld, T>::OverlapManager::firstTargetParent(
   return p;
 }
 
+#endif
 
 #endif // PSURFACEMERGE_HH_
