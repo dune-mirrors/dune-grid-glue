@@ -113,7 +113,7 @@ private:
     faces.clear();
 
     for (unsigned int i = 0; i < tempfaces.size(); ++i) {
-      for (int j = 0; j < tempfaces[i].size(); ++j)
+      for (unsigned int j = 0; j < tempfaces[i].size(); ++j)
         faces.push_back(tempfaces[i][j]);
     }
 

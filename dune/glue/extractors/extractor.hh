@@ -400,7 +400,7 @@ template<typename GV, int cd>
 typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int index) const
 {
   std::vector<Coords> corners(subEntities_[index].nCorners());
-  for (int i = 0; i < subEntities_[index].nCorners(); ++i)
+  for (unsigned int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = this->coords_[this->subEntities_[index].corners[i].idx].coord;
 
   return Geometry(subEntities_[index].geometryType_, corners);
@@ -422,7 +422,7 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   const Dune::GenericReferenceElement<ctype, dim> & re =
     Dune::GenericReferenceElements<ctype, dim>::general(celltype);
 
-  for (int i = 0; i < subEntities_[index].nCorners(); ++i)
+  for (unsigned int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = re.position(face.corners[i].num,dim);
 
   return LocalGeometry(facetype, corners);

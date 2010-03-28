@@ -142,7 +142,7 @@ public:
   struct GlobalFaceInfo
   {
     // GlobalEntityTopology v;
-    GlobalId v[(1<<dim-codim)];
+    GlobalId v[(1<<(dim-codim))];
     char corners;
     GlobalFaceId i;
     bool valid;
@@ -280,7 +280,7 @@ public:
       std::vector<Coords> coords;
       lx_.getCoords(coords);
       localCoordInfos.resize(coords.size());
-      for (unsigned int i=0; i<coords.size(); i++)
+      for (size_t i=0; i<coords.size(); i++)
       {
         localCoordInfos[i].c = coords[i];
         localCoordInfos[i].i = gv_.grid().globalIdSet().id(* lx_.vertex(i));
@@ -294,12 +294,12 @@ public:
       lx_.getFaces(faces);
       localFaceInfos.resize(faces.size());
       size_t Xsub = 0;
-      for (unsigned int i=0; i<faces.size(); i++)
+      for (size_t i=0; i<faces.size(); i++)
       {
         size_t corners = faces[i].size();
         // localFaceInfos[i].v.resize(corners);
         localFaceInfos[i].corners = corners;
-        for (int v=0; v<corners; v++)
+        for (size_t v=0; v<corners; v++)
         {
           localFaceInfos[i].v[v] = localCoordInfos[faces[i][v]].i;
         }
@@ -402,7 +402,7 @@ public:
       }
       // "copy" map to _local2global
       local2global_.resize(localFaceInfos.size());
-      for (unsigned int i = 0; i<localFaceInfos.size(); i++)
+      for (size_t i = 0; i<localFaceInfos.size(); i++)
       {
         local2global_[i] = globalIndex[localFaceInfos[i].i];
       }
@@ -417,7 +417,7 @@ public:
       // "copy" map to _global2local
       // not all entries are contained in the map, if not the entry is "-1"
       global2local_.resize(globalFaceInfos.size());
-      for (unsigned int i = 0; i<globalFaceInfos.size(); i++)
+      for (size_t i = 0; i<globalFaceInfos.size(); i++)
       {
         typename std::map<GlobalFaceId, unsigned int>::iterator where =
           localIndex.find(globalFaceInfos[i].i);
@@ -472,7 +472,7 @@ public:
   void getFaces(std::vector<VertexVector>& faces) const
   {
     faces.resize(this->faces_.size());
-    for (unsigned int i = 0; i < this->faces_.size(); ++i)
+    for (size_t i = 0; i < this->faces_.size(); ++i)
       faces[i] = this->faces_[i];
   }
 
