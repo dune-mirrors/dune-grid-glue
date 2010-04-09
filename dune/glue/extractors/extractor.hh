@@ -121,7 +121,7 @@ protected:
    */
   struct ElementInfo
   {
-    ElementInfo(unsigned int idx_, ElementPtr& p_, unsigned int f_) : idx(idx_), faces(f_), p(p_)
+    ElementInfo(unsigned int idx_, const ElementPtr& p_, unsigned int f_) : idx(idx_), faces(f_), p(p_)
     {}
 
     /// @brief the index of this element's first face in the internal list of extracted faces
