@@ -20,19 +20,14 @@
 #ifndef CONFORMING_MERGE_HH
 #define CONFORMING_MERGE_HH
 
-
-#include <iostream>
-#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <algorithm>
-#include <set>
 
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
 
 #include <dune/grid/common/genericreferenceelements.hh>
-#include <dune/grid/common/grid.hh>
 
 #include <dune/glue/merging/standardmerge.hh>
 
