@@ -68,7 +68,7 @@ private:
   /// @brief maximum distance between two matched points in the mapping
   T tolerance_;
 
-  typedef typename StandardMerge<T,dim,dim,dim>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
+  typedef typename StandardMerge<T,dim,dim,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
   /** \brief Compute the intersection between two overlapping elements
 
