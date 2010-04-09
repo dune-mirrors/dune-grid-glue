@@ -246,12 +246,12 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
     // triangle 2
     RemoteSimplicialIntersection newSimplicialIntersection2;
 
-    newSimplicialIntersection2.domainLocal_[2] = refElement.position(2,dim);
-    newSimplicialIntersection2.targetLocal_[2] = refElement.position(other[2],dim);
+    newSimplicialIntersection2.domainLocal_[0] = refElement.position(2,dim);
+    newSimplicialIntersection2.targetLocal_[0] = refElement.position(other[2],dim);
     newSimplicialIntersection2.domainLocal_[1] = refElement.position(1,dim);
     newSimplicialIntersection2.targetLocal_[1] = refElement.position(other[1],dim);
-    newSimplicialIntersection2.domainLocal_[3] = refElement.position(3,dim);
-    newSimplicialIntersection2.targetLocal_[3] = refElement.position(other[3],dim);
+    newSimplicialIntersection2.domainLocal_[2] = refElement.position(3,dim);
+    newSimplicialIntersection2.targetLocal_[2] = refElement.position(other[3],dim);
 
     newSimplicialIntersection2.domainEntity_ = domainIndex;
     newSimplicialIntersection2.targetEntity_ = targetIndex;
