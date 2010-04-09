@@ -12,9 +12,12 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <stack>
+#include <set>
 #include <algorithm>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/bitsetvector.hh>
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
@@ -88,11 +91,27 @@ protected:
                                    const std::vector<Dune::FieldVector<T,dimworld> >& targetElementCorners,
                                    unsigned int targetIndex) = 0;
 
+  /** \brief Test whether the two given elements intersect
+      \note If they do intersect their intersection is automatically added to the list!
+   */
+  bool testIntersection(unsigned int candidate0, unsigned int candidate1,
+                        const std::vector<Dune::FieldVector<T,dimworld> >& domainCoords,
+                        const std::vector<Dune::GeometryType>& domain_element_types,
+                        const std::vector<Dune::FieldVector<T,dimworld> >& targetCoords,
+                        const std::vector<Dune::GeometryType>& target_element_types);
+
 
   /*   M E M B E R   V A R I A B L E S   */
 
   /** \brief The computed intersections */
   std::vector<RemoteSimplicialIntersection> intersections_;
+
+  /** \brief Temporary internal data */
+  std::vector<std::vector<unsigned int> > domainElementCorners_;
+  std::vector<std::vector<unsigned int> > targetElementCorners_;
+  std::vector<std::vector<int> > elementsPerVertex0_;
+  std::vector<std::vector<int> > elementsPerVertex1_;
+
 
 public:
 
@@ -210,6 +229,45 @@ public:
 /* IMPLEMENTATION */
 
 template<typename T, int domainDim, int targetDim, int dimworld>
+bool StandardMerge<T,domainDim,targetDim,dimworld>::testIntersection(unsigned int candidate0, unsigned int candidate1,
+                                                                     const std::vector<Dune::FieldVector<T,dimworld> >& domainCoords,
+                                                                     const std::vector<Dune::GeometryType>& domain_element_types,
+                                                                     const std::vector<Dune::FieldVector<T,dimworld> >& targetCoords,
+                                                                     const std::vector<Dune::GeometryType>& target_element_types)
+{
+  unsigned int oldNumberOfIntersections = intersections_.size();
+
+  // Select vertices of the domain element
+  int domainNumVertices = domainElementCorners_[candidate0].size();
+  std::vector<Dune::FieldVector<T,dimworld> > domainElementCorners(domainNumVertices);
+  for (int i=0; i<domainNumVertices; i++)
+    domainElementCorners[i] = domainCoords[domainElementCorners_[candidate0][i]];
+
+  // Select vertices of the target element
+  int targetNumVertices = targetElementCorners_[candidate1].size();
+  std::vector<Dune::FieldVector<T,dimworld> > targetElementCorners(targetNumVertices);
+  for (int i=0; i<targetNumVertices; i++)
+    targetElementCorners[i] = targetCoords[targetElementCorners_[candidate1][i]];
+
+  // ///////////////////////////////////////////////////////
+  //   Compute the intersection between the two elements
+  // ///////////////////////////////////////////////////////
+
+  computeIntersection(domain_element_types[candidate0], domainElementCorners, candidate0,
+                      target_element_types[candidate1], targetElementCorners, candidate1);
+
+  // Have we found an intersection?
+  return (intersections_.size() > oldNumberOfIntersections);
+
+}
+
+
+// /////////////////////////////////////////////////////////////////////
+//   Compute the intersection of all pairs of elements
+//   Linear algorithm by Gander and Japhet, Proc. of DD18
+// /////////////////////////////////////////////////////////////////////
+
+template<typename T, int domainDim, int targetDim, int dimworld>
 void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune::FieldVector<T,dimworld> >& domainCoords,
                                                           const std::vector<unsigned int>& domain_elements,
                                                           const std::vector<Dune::GeometryType>& domain_element_types,
@@ -222,41 +280,205 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
   std::cout << "StandardMerge building merged grid..." << std::endl;
 
   // /////////////////////////////////////////////////////////////////////
-  //   Compute the intersection of all pairs of elements
-  //   \todo This is only the naive quadratic algorithm
+  //   Copy element corners into a data structure with block-structure.
+  //   This is not as efficient but a lot easier to use.
+  //   We may think about efficiency later.
   // /////////////////////////////////////////////////////////////////////
+
+  // first the domain side
+  domainElementCorners_.resize(domain_element_types.size());
 
   unsigned int domainCornerCounter = 0;
 
   for (std::size_t i=0; i<domain_element_types.size(); i++) {
 
     // Select vertices of the domain element
-    int domainNumVertices = Dune::GenericReferenceElements<T,domainDim>::general(domain_element_types[i]).size(domainDim);
-    std::vector<Dune::FieldVector<T,dimworld> > domainElementCorners(domainNumVertices);
-    for (int j=0; j<domainNumVertices; j++)
-      domainElementCorners[j] = domainCoords[domain_elements[domainCornerCounter++]];
+    int numVertices = Dune::GenericReferenceElements<T,domainDim>::general(domain_element_types[i]).size(domainDim);
+    domainElementCorners_[i].resize(numVertices);
+    for (int j=0; j<numVertices; j++)
+      domainElementCorners_[i][j] = domain_elements[domainCornerCounter++];
 
-    unsigned int targetCornerCounter = 0;
+  }
+
+  // then the target side
+  targetElementCorners_.resize(target_element_types.size());
+
+  unsigned int targetCornerCounter = 0;
+
+  for (std::size_t i=0; i<target_element_types.size(); i++) {
+
+    // Select vertices of the target element
+    int numVertices = Dune::GenericReferenceElements<T,targetDim>::general(target_element_types[i]).size(targetDim);
+    targetElementCorners_[i].resize(numVertices);
+    for (int j=0; j<numVertices; j++)
+      targetElementCorners_[i][j] = target_elements[targetCornerCounter++];
+
+  }
+
+  // /////////////////////////////////////////////////////////////////////
+  //   Set of lists of elements per vertex.  This is needed to find
+  //   neighboring elements later.
+  // /////////////////////////////////////////////////////////////////////
+
+  // first the domain side
+  elementsPerVertex0_.resize(domainCoords.size());
+
+  for (std::size_t i=0; i<domainElementCorners_.size(); i++)
+    for (int j=0; j<domainElementCorners_[i].size(); j++)
+      elementsPerVertex0_[domainElementCorners_[i][j]].push_back(i);
+
+  // then the target side
+  elementsPerVertex1_.resize(targetCoords.size());
+
+  for (std::size_t i=0; i<target_element_types.size(); i++)
+    for (int j=0; j<targetElementCorners_[i].size(); j++)
+      elementsPerVertex1_[targetElementCorners_[i][j]].push_back(i);
+
+  std::stack<unsigned int> candidates0;
+  std::stack<std::pair<unsigned int,unsigned int> > candidates1;
+
+  // /////////////////////////////////////////////////////////////////////
+  //   Do a brute-force search to find one pair of intersecting elements
+  //   to start the advancing-front type algorithm with.
+  // /////////////////////////////////////////////////////////////////////
+
+  for (std::size_t i=0; i<domain_element_types.size(); i++) {
 
     for (std::size_t j=0; j<target_element_types.size(); j++) {
 
-      // Select vertices of the domain element
-      int targetNumVertices = Dune::GenericReferenceElements<T,targetDim>::general(target_element_types[j]).size(targetDim);
-      std::vector<Dune::FieldVector<T,dimworld> > targetElementCorners(targetNumVertices);
-      for (int k=0; k<targetNumVertices; k++)
-        targetElementCorners[k] = targetCoords[target_elements[targetCornerCounter++]];
-
-      // ///////////////////////////////////////////////////////
-      //   Compute the intersection between the two elements
-      // ///////////////////////////////////////////////////////
-
-      computeIntersection(domain_element_types[i], domainElementCorners, i,
-                          target_element_types[j], targetElementCorners, j);
-
+      if (testIntersection(i,j,domainCoords,domain_element_types,targetCoords,target_element_types)) {
+        candidates1.push(std::make_pair(j,i));          // the candidate and a seed for the candidate
+        break;
+      }
 
     }
 
+    // Have we found an intersection?
+    if (intersections_.size() > 0)
+      break;
+
   }
+
+  // clear global intersection list again:  the main algorithm wants to start with
+  // an empty list.
+  intersections_.resize(0);
+
+  // /////////////////////////////////////////////////////////////////////
+  //   Main loop
+  // /////////////////////////////////////////////////////////////////////
+
+  Dune::BitSetVector<1> isHandled0(domain_element_types.size());
+  Dune::BitSetVector<1> isHandled1(target_element_types.size());
+
+  Dune::BitSetVector<1> isCandidate0(domain_element_types.size());
+  Dune::BitSetVector<1> isCandidate1(target_element_types.size());
+
+  while (!candidates1.empty()) {
+
+    // Get the next element on the target side
+    unsigned int currentCandidate1 = candidates1.top().first;
+    unsigned int seed = candidates1.top().second;
+    candidates1.pop();
+    isHandled1[currentCandidate1] = true;
+
+    // Start advancing front algorithm on the domain side from the 'seed' element that
+    // we stored along with the current target element
+    candidates0.push(seed);
+
+    isHandled0.unsetAll();
+    isCandidate0.unsetAll();
+
+
+    while (!candidates0.empty()) {
+
+      unsigned int currentCandidate0 = candidates0.top();
+      candidates0.pop();
+      isHandled0[currentCandidate0] = true;
+
+      // Test whether there is an intersection between currentCandidate0 and currentCandidate1
+      bool intersectionFound = testIntersection(currentCandidate0, currentCandidate1,
+                                                domainCoords,domain_element_types,targetCoords,target_element_types);
+
+      if (intersectionFound) {
+
+        std::set<unsigned int> neighbors0;
+        // get all neighbors of currentCandidate0, but not currentCandidate0 itself
+        for (int i=0; i<domainElementCorners_[currentCandidate0].size(); i++) {
+          unsigned int v = domainElementCorners_[currentCandidate0][i];
+          neighbors0.insert(elementsPerVertex0_[v].begin(), elementsPerVertex0_[v].end());
+        }
+
+        // The neighbors of currentCandidate0 are all possible candidates
+        for (typename std::set<unsigned int>::iterator it = neighbors0.begin();
+             it != neighbors0.end(); ++it) {
+
+          if (!isHandled0[*it][0] && !isCandidate0[*it][0]) {
+            candidates0.push(*it);
+            isCandidate0[*it] = true;
+          }
+
+        }
+
+      }
+
+    }
+
+    // We have now found all intersections of elements in the domain side with currentCandidate1
+    // Now we add all neighbors of currentCandidate1 that have not been treated yet as new
+    // candidates.
+    std::set<unsigned int> neighbors1;
+
+    // get all neighbors of currentCandidate1, but not currentCandidate1 itself
+    for (int i=0; i<targetElementCorners_[currentCandidate1].size(); i++) {
+      unsigned int v = domainElementCorners_[currentCandidate1][i];
+      neighbors1.insert(elementsPerVertex1_[v].begin(), elementsPerVertex1_[v].end());
+    }
+
+    // The unhandled neighbors of currentCandidate1 are all possible candidates
+    for (typename std::set<unsigned int>::iterator it = neighbors1.begin();
+         it != neighbors1.end(); ++it) {
+
+      if (!isHandled1[*it][0] && !isCandidate1[*it][0]) {
+
+        // Get a seed element for the new target element
+        // Look for an element on the domain side that intersects the new target element.
+        // Look only among the ones that have been tested during the last iteration.
+        // Since currentCandidate1 is a neighbor of the previous element, there has to be one.
+        int seed = -1;
+        for (int i=0; i<isHandled0.size(); i++) {
+
+          if (!isHandled0[i][0])
+            continue;
+
+          int oldSize = intersections_.size();
+          bool intersectionFound = testIntersection(i, *it,
+                                                    domainCoords,domain_element_types,
+                                                    targetCoords,target_element_types);
+
+          if (intersectionFound) {
+
+            // i is our new seed candidate on the domain side
+            seed = i;
+
+            while (intersections_.size()> oldSize)
+              intersections_.pop_back();
+
+            break;
+
+          }
+
+        }
+
+        assert(seed >= 0);
+        candidates1.push(std::make_pair(*it,seed));
+        isCandidate1[*it] = true;
+      }
+
+    }
+
+
+  }
+
 }
 
 
