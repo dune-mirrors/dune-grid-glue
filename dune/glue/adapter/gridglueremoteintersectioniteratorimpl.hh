@@ -119,7 +119,7 @@ public:
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_domain_parent = this->glue_->merg_->domainParent(this->index_);
+    this->_domain_parent = this->glue_->merger_->domainParent(this->index_);
     this->parts_.resize(parts_.size());
     copy(parts_.begin(), parts_.end(), this->parts_.begin());
   }
@@ -135,7 +135,7 @@ public:
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_domain_parent = this->glue_->merg_->domainParent(this->index_);
+    this->_domain_parent = this->glue_->merger_->domainParent(this->index_);
   }
 
 
@@ -213,7 +213,7 @@ public:
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_target_parent = this->glue_->merg_->targetParent(this->index_);
+    this->_target_parent = this->glue_->merger_->targetParent(this->index_);
     this->parts_.resize(parts_.size());
     copy(parts_.begin(), parts_.end(), this->parts_.begin());
   }
@@ -229,7 +229,7 @@ public:
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_target_parent = this->glue_->merg_->targetParent(this->index_);
+    this->_target_parent = this->glue_->merger_->targetParent(this->index_);
   }
 
 public:

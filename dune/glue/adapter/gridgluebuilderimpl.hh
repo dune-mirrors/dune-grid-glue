@@ -213,8 +213,8 @@ public:
 
 
     // start the actual build process
-    this->glue_.merg_->build(domcoords, domfaces, domainElementTypes,
-                             tarcoords, tarfaces, targetElementTypes);
+    this->glue_.merger_->build(domcoords, domfaces, domainElementTypes,
+                               tarcoords, tarfaces, targetElementTypes);
 
     // the intersections need to be recomputed
     this->glue_.updateIntersections();
