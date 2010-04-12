@@ -468,9 +468,42 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
 
         }
 
-        assert(seed >= 0);
-        candidates1.push(std::make_pair(*it,seed));
+        if (seed < 0) {
+          // The fast method didn't find a domain element that intersections with
+          // the new target candidate.  We have to do a brute-force search.
+          for (std::size_t i=0; i<domain_element_types.size(); i++) {
+
+            int oldSize = intersections_.size();
+            bool intersectionFound = testIntersection(i, *it,
+                                                      domainCoords,domain_element_types,
+                                                      targetCoords,target_element_types);
+
+            if (intersectionFound) {
+
+              // i is our new seed candidate on the domain side
+              seed = i;
+
+              while (intersections_.size()> oldSize)
+                intersections_.pop_back();
+
+              break;
+
+            }
+
+          }
+
+        }
+
+        // We have tried all we could: the candidate is 'handled' now
         isCandidate1[*it] = true;
+
+        if (seed < 0)
+          // still no seed?  Then the new target candidate isn't overlapped by anything
+          continue;
+
+        // we have a seed now
+        candidates1.push(std::make_pair(*it,seed));
+
       }
 
     }
