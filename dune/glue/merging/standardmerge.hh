@@ -401,20 +401,19 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
 
       if (intersectionFound) {
 
-        std::set<unsigned int> neighbors0;
         // get all neighbors of currentCandidate0, but not currentCandidate0 itself
         for (int i=0; i<domainElementCorners_[currentCandidate0].size(); i++) {
           unsigned int v = domainElementCorners_[currentCandidate0][i];
-          neighbors0.insert(elementsPerVertex0_[v].begin(), elementsPerVertex0_[v].end());
-        }
 
-        // The neighbors of currentCandidate0 are all possible candidates
-        for (typename std::set<unsigned int>::iterator it = neighbors0.begin();
-             it != neighbors0.end(); ++it) {
+          // The neighbors of currentCandidate0 are all possible candidates
+          for (typename std::vector<int>::iterator it = elementsPerVertex0_[v].begin();
+               it != elementsPerVertex0_[v].end(); ++it) {
 
-          if (!isHandled0[*it][0] && !isCandidate0[*it][0]) {
-            candidates0.push(*it);
-            isCandidate0[*it] = true;
+            if (!isHandled0[*it][0] && !isCandidate0[*it][0]) {
+              candidates0.push(*it);
+              isCandidate0[*it] = true;
+            }
+
           }
 
         }
