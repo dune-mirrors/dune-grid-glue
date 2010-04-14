@@ -3,7 +3,7 @@
 AC_PREREQ(2.50)
 DUNE_AC_INIT # gets module version from dune.module file
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([dune/glue/adapter/gridglue.hh])
+AC_CONFIG_SRCDIR([dune/grid-glue/adapter/gridglue.hh])
 AM_CONFIG_HEADER([config.h])
 
 # we need no more than the standard DE-stuff
@@ -18,12 +18,12 @@ LIBS="$DUNE_LIBS"
 
 AC_CONFIG_FILES([Makefile
   dune/Makefile
-  dune/glue/Makefile
-  dune/glue/adapter/Makefile
-  dune/glue/merging/Makefile
-  dune/glue/common/Makefile
-  dune/glue/extractors/Makefile
-  dune/glue/test/Makefile
+  dune/grid-glue/Makefile
+  dune/grid-glue/adapter/Makefile
+  dune/grid-glue/merging/Makefile
+  dune/grid-glue/common/Makefile
+  dune/grid-glue/extractors/Makefile
+  dune/grid-glue/test/Makefile
   doc/Makefile
   doc/doxygen/Makefile
   doc/doxygen/Doxyfile
