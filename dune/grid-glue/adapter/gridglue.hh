@@ -26,7 +26,7 @@
 #define QUICKHACK_INDEX 1
 
 #ifdef GRID_GLUE_USE_CONCEPTS
-#include <dune/glue/common/conceptchecking.hh>
+#include <dune/grid-glue/common/conceptchecking.hh>
 #endif
 #include "../extractors/gridextractiontraits.hh"
 #include "../extractors/extractorselector.hh"
@@ -35,7 +35,7 @@
 #include "remoteintersectioniterators.hh"
 #include "coordinatetransformation.hh"
 #include "gridgluecommunicate.hh"
-#include <dune/glue/merging/merger.hh>
+#include <dune/grid-glue/merging/merger.hh>
 
 #include <dune/istl/indexset.hh>
 #include <dune/istl/plocalindex.hh>

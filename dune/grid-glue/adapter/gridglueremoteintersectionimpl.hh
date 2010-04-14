@@ -19,8 +19,8 @@
 #ifndef GRIDGLUEREMOTEINTERSECTIONIMPL_HH_
 #define GRIDGLUEREMOTEINTERSECTIONIMPL_HH_
 
-#include <dune/glue/adapter/simplexgeometry.hh>
-#include <dune/glue/adapter/gridglue.hh>
+#include <dune/grid-glue/adapter/simplexgeometry.hh>
+#include <dune/grid-glue/adapter/gridglue.hh>
 
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   REMOTE INTERSECTION IMPL   */
 

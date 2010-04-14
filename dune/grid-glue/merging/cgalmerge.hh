@@ -22,7 +22,7 @@
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
-#include <dune/glue/merging/standardmerge.hh>
+#include <dune/grid-glue/merging/standardmerge.hh>
 
 #ifdef HAVE_CGAL  // without CGAL we can still handle 1d problems
 // 2d

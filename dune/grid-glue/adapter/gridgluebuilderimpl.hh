@@ -19,9 +19,9 @@
 #ifndef GRIDGLUEBUILDERIMPL_HH_
 #define GRIDGLUEBUILDERIMPL_HH_
 
-#include <dune/glue/extractors/surfacedescriptor.hh>
-#include <dune/glue/adapter/gridglue.hh>
-#include <dune/glue/extractors/vtksurfacewriter.hh>
+#include <dune/grid-glue/extractors/surfacedescriptor.hh>
+#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/extractors/vtksurfacewriter.hh>
 
 template <typename GV, int codim>
 struct ExtractorTypeTraits {};

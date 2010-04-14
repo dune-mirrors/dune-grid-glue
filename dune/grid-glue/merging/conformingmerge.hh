@@ -29,7 +29,7 @@
 
 #include <dune/grid/common/genericreferenceelements.hh>
 
-#include <dune/glue/merging/standardmerge.hh>
+#include <dune/grid-glue/merging/standardmerge.hh>
 
 
 /** \brief Implementation of the Merger concept for conforming interfaces
