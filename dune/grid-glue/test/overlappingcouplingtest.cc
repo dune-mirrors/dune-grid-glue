@@ -9,19 +9,19 @@
 #include <dune/grid/common/quadraturerules.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
-#include <dune/glue/extractors/surfacedescriptor.hh>
-#include <dune/glue/extractors/gridextractiontraits.hh>
-#include <dune/glue/adapter/gridglue.hh>
+#include <dune/grid-glue/extractors/surfacedescriptor.hh>
+#include <dune/grid-glue/extractors/gridextractiontraits.hh>
+#include <dune/grid-glue/adapter/gridglue.hh>
 
 #if HAVE_PSURFACE
-#include <dune/glue/merging/psurfacemerge.hh>
+#include <dune/grid-glue/merging/psurfacemerge.hh>
 #endif
 #if HAVE_CGAL
-#include <dune/glue/merging/cgalmerge.hh>
+#include <dune/grid-glue/merging/cgalmerge.hh>
 #endif
-#include <dune/glue/merging/conformingmerge.hh>
+#include <dune/grid-glue/merging/conformingmerge.hh>
 
-#include <dune/glue/test/couplingtest.hh>
+#include <dune/grid-glue/test/couplingtest.hh>
 
 using namespace Dune;
 
