@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file GridGlue.hh
+ * @file
  * @brief Central component of the module implementing the coupling of two grids.
  */
 
