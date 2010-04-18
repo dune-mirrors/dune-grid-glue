@@ -395,12 +395,14 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
     isHandled0.unsetAll();
     isCandidate0.unsetAll();
 
+    std::set<unsigned int> potentialSeeds;
 
     while (!candidates0.empty()) {
 
       unsigned int currentCandidate0 = candidates0.top();
       candidates0.pop();
       isHandled0[currentCandidate0] = true;
+      potentialSeeds.insert(currentCandidate0);
 
       // Test whether there is an intersection between currentCandidate0 and currentCandidate1
       bool intersectionFound = testIntersection(currentCandidate0, currentCandidate1,
@@ -446,24 +448,22 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
           // Get a seed element for the new target element
           // Look for an element on the domain side that intersects the new target element.
           // Look only among the ones that have been tested during the last iteration.
-          // Since currentCandidate1 is a neighbor of the previous element, there has to be one.
           int seed = -1;
-          for (int i=0; i<isHandled0.size(); i++) {
 
-            if (!isHandled0[i][0])
-              continue;
+          for (typename std::set<unsigned int>::iterator seedIt = potentialSeeds.begin();
+               seedIt != potentialSeeds.end(); ++seedIt) {
 
             int oldSize = intersections_.size();
-            bool intersectionFound = testIntersection(i, *it,
+            bool intersectionFound = testIntersection(*seedIt, *it,
                                                       domainCoords,domain_element_types,
                                                       targetCoords,target_element_types);
 
             if (intersectionFound) {
 
               // i is our new seed candidate on the domain side
-              seed = i;
+              seed = *seedIt;
 
-              while (intersections_.size()> oldSize)
+              while (intersections_.size() > oldSize)
                 intersections_.pop_back();
 
               break;
