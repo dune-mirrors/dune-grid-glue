@@ -279,6 +279,9 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
 
   std::cout << "StandardMerge building merged grid..." << std::endl;
 
+  // Delete old list of intersections, from a possible previous run
+  intersections_.clear();
+
   // /////////////////////////////////////////////////////////////////////
   //   Copy element corners into a data structure with block-structure.
   //   This is not as efficient but a lot easier to use.
@@ -361,7 +364,7 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
 
   // clear global intersection list again:  the main algorithm wants to start with
   // an empty list.
-  intersections_.resize(0);
+  intersections_.clear();
 
   // /////////////////////////////////////////////////////////////////////
   //   Main loop
