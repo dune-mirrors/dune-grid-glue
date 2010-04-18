@@ -279,8 +279,12 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
 
   std::cout << "StandardMerge building merged grid..." << std::endl;
 
-  // Delete old list of intersections, from a possible previous run
+  // Delete old internal data, from a possible previous run
   intersections_.clear();
+  domainElementCorners_.clear();
+  targetElementCorners_.clear();
+  elementsPerVertex0_.clear();
+  elementsPerVertex1_.clear();
 
   // /////////////////////////////////////////////////////////////////////
   //   Copy element corners into a data structure with block-structure.
