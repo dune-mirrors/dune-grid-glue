@@ -208,13 +208,13 @@ private:
   template <typename GV>
   struct ExtractorTypeTraits<GV, 0>
   {
-    typedef ElementDescriptor<GV> Type;
+    typedef ExtractorPredicate<GV,0> Type;
   };
 
   template <typename GV>
   struct ExtractorTypeTraits<GV, 1>
   {
-    typedef FaceDescriptor<GV> Type;
+    typedef ExtractorPredicate<GV,1> Type;
   };
 
 

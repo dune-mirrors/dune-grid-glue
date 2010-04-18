@@ -129,14 +129,14 @@ public:
    * segments have are cubes.
    * @param descr a descriptor that "selects" the faces to add to the surface
    */
-  void update(const FaceDescriptor<GV>& descr);
+  void update(const ExtractorPredicate<GV,1>& descr);
 
 }; // end of class GeneralSurfaceExtractor
 
 
 
 template<typename GV>
-void GeneralSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
+void GeneralSurfaceExtractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 {
   // free everything there is in this object
   this->clear();

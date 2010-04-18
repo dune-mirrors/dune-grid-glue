@@ -79,7 +79,7 @@ public:
 
   /**
    */
-  void update(const ElementDescriptor<GV>& descr);
+  void update(const ExtractorPredicate<GV,0>& descr);
 
   bool & positiveNormalDirection() { return positiveNormalDirection_; }
   const bool & positiveNormalDirection() const { return positiveNormalDirection_; }
@@ -90,7 +90,7 @@ protected:
 
 
 template<typename GV>
-void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
+void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
 {
   // In this first pass iterate over all entities of codim 0.
   // Get its corner vertices, find resp. store them together with their associated index,

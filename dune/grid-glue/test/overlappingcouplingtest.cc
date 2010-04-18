@@ -28,7 +28,7 @@ using namespace Dune;
 /** \brief Returns always true */
 template <class GridView>
 class AllElementsDescriptor
-  : public ElementDescriptor<GridView>
+  : public ExtractorPredicate<GridView,0>
 {
 public:
   virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr) const

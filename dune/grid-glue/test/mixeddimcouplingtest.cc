@@ -20,7 +20,7 @@ using namespace Dune;
 
 template <class GridView>
 class HorizontalFaceDescriptor
-  : public FaceDescriptor<GridView>
+  : public ExtractorPredicate<GridView,1>
 {
 public:
   HorizontalFaceDescriptor(double sliceCoord)
@@ -49,7 +49,7 @@ private:
 /** \brief Returns always true */
 template <class GridView>
 class AllElementsDescriptor
-  : public ElementDescriptor<GridView>
+  : public ExtractorPredicate<GridView,0>
 {
 public:
   virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr) const

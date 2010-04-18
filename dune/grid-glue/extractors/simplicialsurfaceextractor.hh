@@ -131,13 +131,13 @@ public:
    * segments have are simplices.
    * @param descr a descriptor that "selects" the faces to add to the surface
    */
-  void update(const FaceDescriptor<GV>& descr);
+  void update(const ExtractorPredicate<GV,1>& descr);
 
 }; // end of class SimplicialSurfaceExtractor
 
 
 template<typename GV>
-void SimplicialSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
+void SimplicialSurfaceExtractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 {
   // free everything there is in this object
   this->clear();

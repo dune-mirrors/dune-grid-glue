@@ -118,14 +118,14 @@ public:
    * segments have are cubes.
    * @param descr a descriptor that "selects" the faces to add to the surface
    */
-  void update(const FaceDescriptor<GV>& descr);
+  void update(const ExtractorPredicate<GV,1>& descr);
 
 }; // end of class CubeSurfaceExtractor
 
 
 
 template<typename GV>
-void CubeSurfaceExtractor<GV>::update(const FaceDescriptor<GV>& descr)
+void CubeSurfaceExtractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 {
   // Currently the extractor splits (if necessary) quadrilaterals into triangles (because psurface)
   // can only handle triangles). Since this is done manually we cannot handle grids
