@@ -123,10 +123,10 @@ void testMatchingCubeGrids()
 
   merger.setMaxDistance(0.01);
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -185,10 +185,10 @@ void testNonMatchingCubeGrids()
 
   merger.setMaxDistance(0.01);
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -325,12 +325,12 @@ void testParallelCubeGrids()
 
   merger.setMaxDistance(0.01);
 
-  glue.builder().setDomainTransformation(domGen.trafo());
-  glue.builder().setTargetTransformation(tarGen.trafo());
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainTransformation(domGen.trafo());
+  glue.setTargetTransformation(tarGen.trafo());
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
