@@ -124,11 +124,11 @@ void test1d2dCouplingMatchingDimworld()
   HorizontalFaceDescriptor<DomGridView> domdesc(0);
   AllElementsDescriptor<TarGridView>  tardesc;
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
   glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -187,11 +187,11 @@ void test2d1dCouplingMatchingDimworld()
   AllElementsDescriptor<DomGridView>  domdesc;
   HorizontalFaceDescriptor<TarGridView> tardesc(0);
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
   glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -249,14 +249,14 @@ void test1d2dCoupling(double slice=0.0)
   HorizontalFaceDescriptor<DomGridView> domdesc(slice);
   AllElementsDescriptor<TarGridView>  tardesc;
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
-  glue.builder().setTargetTransformation(&trafo);
+  glue.setTargetTransformation(&trafo);
   glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -314,14 +314,14 @@ void test2d1dCoupling(double slice=0.0)
   AllElementsDescriptor<DomGridView>  domdesc;
   HorizontalFaceDescriptor<TarGridView> tardesc(slice);
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
-  glue.builder().setDomainTransformation(&trafo);
+  glue.setDomainTransformation(&trafo);
   glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
