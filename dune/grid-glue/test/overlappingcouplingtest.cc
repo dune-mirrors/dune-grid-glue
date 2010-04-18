@@ -77,10 +77,10 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -131,10 +131,10 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -220,10 +220,10 @@ void testTriangleGridsUG(Merger<double,2,2,2>& merger, const FieldVector<double,
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
@@ -266,10 +266,10 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
 
-  glue.builder().setDomainDescriptor(domdesc);
-  glue.builder().setTargetDescriptor(tardesc);
+  glue.setDomainDescriptor(domdesc);
+  glue.setTargetDescriptor(tardesc);
 
-  glue.builder().build();
+  glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
   assert(merger.nSimplices() > 0);
