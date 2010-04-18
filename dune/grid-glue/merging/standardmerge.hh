@@ -432,53 +432,26 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
     // We have now found all intersections of elements in the domain side with currentCandidate1
     // Now we add all neighbors of currentCandidate1 that have not been treated yet as new
     // candidates.
-    std::set<unsigned int> neighbors1;
 
     // get all neighbors of currentCandidate1, but not currentCandidate1 itself
     for (int i=0; i<targetElementCorners_[currentCandidate1].size(); i++) {
       unsigned int v = domainElementCorners_[currentCandidate1][i];
-      neighbors1.insert(elementsPerVertex1_[v].begin(), elementsPerVertex1_[v].end());
-    }
 
-    // The unhandled neighbors of currentCandidate1 are all possible candidates
-    for (typename std::set<unsigned int>::iterator it = neighbors1.begin();
-         it != neighbors1.end(); ++it) {
+      // The unhandled neighbors of currentCandidate1 are all possible candidates
+      for (typename std::vector<int>::iterator it = elementsPerVertex1_[v].begin();
+           it != elementsPerVertex1_[v].end(); ++it) {
 
-      if (!isHandled1[*it][0] && !isCandidate1[*it][0]) {
+        if (!isHandled1[*it][0] && !isCandidate1[*it][0]) {
 
-        // Get a seed element for the new target element
-        // Look for an element on the domain side that intersects the new target element.
-        // Look only among the ones that have been tested during the last iteration.
-        // Since currentCandidate1 is a neighbor of the previous element, there has to be one.
-        int seed = -1;
-        for (int i=0; i<isHandled0.size(); i++) {
+          // Get a seed element for the new target element
+          // Look for an element on the domain side that intersects the new target element.
+          // Look only among the ones that have been tested during the last iteration.
+          // Since currentCandidate1 is a neighbor of the previous element, there has to be one.
+          int seed = -1;
+          for (int i=0; i<isHandled0.size(); i++) {
 
-          if (!isHandled0[i][0])
-            continue;
-
-          int oldSize = intersections_.size();
-          bool intersectionFound = testIntersection(i, *it,
-                                                    domainCoords,domain_element_types,
-                                                    targetCoords,target_element_types);
-
-          if (intersectionFound) {
-
-            // i is our new seed candidate on the domain side
-            seed = i;
-
-            while (intersections_.size()> oldSize)
-              intersections_.pop_back();
-
-            break;
-
-          }
-
-        }
-
-        if (seed < 0) {
-          // The fast method didn't find a domain element that intersections with
-          // the new target candidate.  We have to do a brute-force search.
-          for (std::size_t i=0; i<domain_element_types.size(); i++) {
+            if (!isHandled0[i][0])
+              continue;
 
             int oldSize = intersections_.size();
             bool intersectionFound = testIntersection(i, *it,
@@ -499,17 +472,43 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
 
           }
 
+          if (seed < 0) {
+            // The fast method didn't find a domain element that intersections with
+            // the new target candidate.  We have to do a brute-force search.
+            for (std::size_t i=0; i<domain_element_types.size(); i++) {
+
+              int oldSize = intersections_.size();
+              bool intersectionFound = testIntersection(i, *it,
+                                                        domainCoords,domain_element_types,
+                                                        targetCoords,target_element_types);
+
+              if (intersectionFound) {
+
+                // i is our new seed candidate on the domain side
+                seed = i;
+
+                while (intersections_.size()> oldSize)
+                  intersections_.pop_back();
+
+                break;
+
+              }
+
+            }
+
+          }
+
+          // We have tried all we could: the candidate is 'handled' now
+          isCandidate1[*it] = true;
+
+          if (seed < 0)
+            // still no seed?  Then the new target candidate isn't overlapped by anything
+            continue;
+
+          // we have a seed now
+          candidates1.push(std::make_pair(*it,seed));
+
         }
-
-        // We have tried all we could: the candidate is 'handled' now
-        isCandidate1[*it] = true;
-
-        if (seed < 0)
-          // still no seed?  Then the new target candidate isn't overlapped by anything
-          continue;
-
-        // we have a seed now
-        candidates1.push(std::make_pair(*it,seed));
 
       }
 
