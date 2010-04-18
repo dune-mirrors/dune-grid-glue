@@ -3,7 +3,6 @@
 # These libraries do not need other libraries besides lcommon and lgrid
 adapterdir = $(includedir)/dune/glue/adapter
 adapter_HEADERS = coordinatetransformation.hh\
-	gridgluebuilderimpl.hh\
 	gridglue.hh\
 	gridglueremoteintersectionimpl.hh\
 	gridglueremoteintersectioniteratorimpl.hh\

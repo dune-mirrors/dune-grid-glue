@@ -86,10 +86,6 @@ private:
   typedef Dune::ParallelIndexSet <GlobalId, LocalIndex > PIndexSet;
 
 public:
-  /** \todo Please doc me! */
-  template<typename BSET1, typename BSET2, int codim1, int codim2>
-  class BuilderImpl;
-
   class RemoteIntersectionImpl;
 
   class RemoteIntersectionIteratorImpl;
@@ -189,9 +185,6 @@ public:
       TargetGridType::dimension - TargetExtractor::codim,
       dimworld>                         Merger;
 
-  /** \todo Please doc me! */
-  typedef BuilderImpl<GET1, GET2, DomainExtractor::codim, TargetExtractor::codim>                    Builder;
-
   /** \brief Type of remote intersection objects */
   typedef RemoteIntersectionInterface::RemoteIntersection<RemoteIntersectionImpl>    RemoteIntersection;
 
@@ -209,7 +202,36 @@ public:
 
 private:
 
+  template <typename GV, int codim>
+  struct ExtractorTypeTraits {};
+
+  template <typename GV>
+  struct ExtractorTypeTraits<GV, 0>
+  {
+    typedef ElementDescriptor<GV> Type;
+  };
+
+  template <typename GV>
+  struct ExtractorTypeTraits<GV, 1>
+  {
+    typedef FaceDescriptor<GV> Type;
+  };
+
+
+  typedef typename ExtractorTypeTraits<DomainGridView, DomainExtractor::codim>::Type DomainDescriptor;
+
+  typedef typename ExtractorTypeTraits<TargetGridView, TargetExtractor::codim>::Type TargetDescriptor;
+
   /*   M E M B E R   V A R I A B L E S   */
+
+  const DomainDescriptor*                   domelmntdescr_;
+
+  const TargetDescriptor*                   tarelmntdescr_;
+
+  const DomainTransformation*    domtrafo_;
+
+  const TargetTransformation*    tartrafo_;
+
 
   /// @brief the "domain" grid view
   const DomainGridView&        domgv_;
@@ -225,9 +247,6 @@ private:
 
   /// @brief the surface merging utility
   Merger* merger_;
-
-  /// @brief the builder utility
-  Builder builder_;
 
   /// @brief number of intersections
   unsigned int index__sz;
@@ -320,6 +339,12 @@ protected:
 #endif
   }
 
+  template<typename Extractor>
+  void extractGrid (const Extractor & extractor,
+                    std::vector<Dune::FieldVector<ctype, dimworld> > & coords,
+                    std::vector<unsigned int> & faces,
+                    std::vector<Dune::GeometryType>& geometryTypes,
+                    const CoordinateTransformation<Extractor::dimworld, dimworld, ctype>* trafo) const;
 
 public:
 
@@ -369,16 +394,6 @@ public:
 
 
   /**
-   * @brief getter for the builder
-   * @return the object
-   */
-  Builder& builder()
-  {
-    return this->builder_;
-  }
-
-
-  /**
    * @brief getter for the surface matcher utility
    *
    * This grants access to the surface merger. This Merger class has to be a model
@@ -393,7 +408,31 @@ public:
     return this->merger_;
   }
 
+  void setDomainDescriptor(const DomainDescriptor& descr)
+  {
+    domelmntdescr_ = &descr;
+  }
+
+
+  void setTargetDescriptor(const TargetDescriptor& descr)
+  {
+    tarelmntdescr_ = &descr;
+  }
+
+  void setDomainTransformation(const DomainTransformation* trafo)
+  {
+    domtrafo_ = trafo;
+  }
+
+
+  void setTargetTransformation(const TargetTransformation* trafo)
+  {
+    tartrafo_ = trafo;
+  }
+
   /*   F U N C T I O N A L I T Y   */
+
+  void build();
 
   /**
    * @brief tells whether a codim 0 entity's face(s) (or at least a part)
@@ -697,7 +736,8 @@ GridGlue<GET1, GET2>::GridGlue(const DomainGridView & gv1, const TargetGridView 
 #endif
   : domgv_(gv1), targv_(gv2),
     domext_(gv1), tarext_(gv2), merger_(merger),
-    builder_(*const_cast<GridGlue<GET1, GET2>*>(this)),
+    domelmntdescr_(NULL), tarelmntdescr_(NULL),
+    domtrafo_(NULL), tartrafo_(NULL),
     NULL_INTERSECTION(this),
 #if HAVE_MPI
     mpicomm(m),
@@ -705,6 +745,123 @@ GridGlue<GET1, GET2>::GridGlue(const DomainGridView & gv1, const TargetGridView 
     intersections_(0, NULL_INTERSECTION)
 {
   std::cout << "GridGlue: Constructor succeeded!" << std::endl;
+}
+
+template<typename GET1, typename GET2>
+void GridGlue<GET1, GET2>::build()
+{
+  // setup the domain surface extractor
+  if (domelmntdescr_ != NULL)
+    domext_.update(*domelmntdescr_);
+  else
+    DUNE_THROW(Dune::Exception, "GridGlue::Builder : no domain surface descriptor set");
+
+  // setup the target surface extractor
+  if (tarelmntdescr_ != NULL)
+    tarext_.update(*tarelmntdescr_);
+  else
+    DUNE_THROW(Dune::Exception, "GridGlue::Builder : no target surface descriptor set");
+
+  // clear the contents from the current intersections array
+  {
+    std::vector<RemoteIntersectionImpl> dummy(0, NULL_INTERSECTION);
+    intersections_.swap(dummy);
+  }
+
+  std::vector<Dune::FieldVector<ctype, dimworld> > domcoords;
+  std::vector<unsigned int> domfaces;
+  std::vector<Dune::GeometryType> domainElementTypes;
+  std::vector<Dune::FieldVector<ctype,dimworld> > tarcoords;
+  std::vector<unsigned int> tarfaces;
+  std::vector<Dune::GeometryType> targetElementTypes;
+
+  /*
+   * extract global surface grids
+   */
+
+  // retrieve the coordinate and topology information from the extractors
+  // and apply transformations if necessary
+  extractGrid(domext_, domcoords, domfaces, domainElementTypes, domtrafo_);
+  extractGrid(tarext_, tarcoords, tarfaces, targetElementTypes, tartrafo_);
+
+#ifdef WRITE_TO_VTK
+  const int dimw = Parent::dimworld;
+  const char prefix[] = "GridGlue::Builder::build() : ";
+  char domainsurf[256];
+  sprintf(domainsurf, "/tmp/vtk-domain-test-%i", mpi_rank);
+  char targetsurf[256];
+  sprintf(targetsurf, "/tmp/vtk-target-test-%i", mpi_rank);
+
+  std::cout << prefix << "Writing domain surface to '" << domainsurf << ".vtk'...\n";
+  VtkSurfaceWriter vtksw(domainsurf);
+  vtksw.writeSurface(domcoords, domfaces, dimw, dimw);
+  std::cout << prefix << "Done writing domain surface!\n";
+
+  std::cout << prefix << "Writing target surface to '" << targetsurf << ".vtk'...\n";
+  vtksw.setFilename(targetsurf);
+  vtksw.writeSurface(tarcoords, tarfaces, dimw, dimw);
+  std::cout << prefix << "Done writing target surface!\n";
+#endif // WRITE_TO_VTK
+
+
+  // start the actual build process
+  merger_->build(domcoords, domfaces, domainElementTypes,
+                 tarcoords, tarfaces, targetElementTypes);
+
+  // the intersections need to be recomputed
+  updateIntersections();
+}
+
+
+template<typename GET1, typename GET2>
+template<typename Extractor>
+void GridGlue<GET1, GET2>::extractGrid (const Extractor & extractor,
+                                        std::vector<Dune::FieldVector<ctype, dimworld> > & coords,
+                                        std::vector<unsigned int> & faces,
+                                        std::vector<Dune::GeometryType>& geometryTypes,
+                                        const CoordinateTransformation<Extractor::dimworld, dimworld, ctype>* trafo) const
+{
+  std::vector<typename Extractor::Coords> tempcoords;
+  std::vector<typename Extractor::VertexVector> tempfaces;
+
+  extractor.getCoords(tempcoords);
+  coords.clear();
+  coords.reserve(tempcoords.size());
+
+  if (trafo != NULL)
+  {
+    std::cout << "GridGlue::Builder : apply trafo\n";
+    for (size_t i = 0; i < tempcoords.size(); ++i)
+    {
+      Coords temp = (*trafo)(tempcoords[i]);
+      coords.push_back(temp);
+      // coords.push_back(Dune::FieldVector<typename Parent::ctype, Parent::dimworld>());
+      // for (size_t j = 0; j < Parent::dimworld; ++j)
+      //     coords.back()[j] = temp[j];
+    }
+  }
+  else
+  {
+    for (unsigned int i = 0; i < tempcoords.size(); ++i)
+    {
+      assert(int(dimworld) == int(Extractor::dimworld));
+      coords.push_back(Dune::FieldVector<ctype, dimworld>());
+      for (size_t j = 0; j <dimworld; ++j)
+        coords.back()[j] = tempcoords[i][j];
+    }
+  }
+
+  extractor.getFaces(tempfaces);
+  faces.clear();
+
+  for (unsigned int i = 0; i < tempfaces.size(); ++i) {
+    for (unsigned int j = 0; j < tempfaces[i].size(); ++j)
+      faces.push_back(tempfaces[i][j]);
+  }
+
+  // get the list of geometry types from the extractor
+  extractor.getGeometryTypes(geometryTypes);
+
 }
 
 
@@ -905,9 +1062,6 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   else
     return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
 }
-
-// include implementation of subclass BuilderImpl
-#include "gridgluebuilderimpl.hh"
 
 // include implementation of subclass RemoteIntersectionImpl
 #include "gridglueremoteintersectionimpl.hh"
