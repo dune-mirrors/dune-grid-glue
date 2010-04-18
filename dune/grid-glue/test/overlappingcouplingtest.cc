@@ -9,7 +9,7 @@
 #include <dune/grid/common/quadraturerules.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
-#include <dune/grid-glue/extractors/surfacedescriptor.hh>
+#include <dune/grid-glue/extractors/extractorpredicates.hh>
 #include <dune/grid-glue/extractors/gridextractiontraits.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
