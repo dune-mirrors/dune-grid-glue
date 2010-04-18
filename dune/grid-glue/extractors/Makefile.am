@@ -7,7 +7,7 @@ surfaces_HEADERS = codim0extractor.hh codim1extractor.hh extractor.hh \
 	generalsurfaceextractor.hh\
 	simplicialsurfaceextractor.hh\
 	cubesurfaceextractor.hh\
-	surfacedescriptor.hh\
+	extractorpredicates.hh\
 	gridextractiontraits.hh\
         parallelextractor.hh \
 	vtksurfacewriter.hh

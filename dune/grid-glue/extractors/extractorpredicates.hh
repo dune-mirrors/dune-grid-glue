@@ -44,8 +44,8 @@ class FaceDescriptor
 public:
 
   /** \brief Return true if a face should be extracted.  Faces are specified through an element and a face number
-     \param eptr An element
-     \param face Face number
+      \param eptr An element
+      \param face Face number
    */
   virtual bool contains(const typename GV::Traits::template Codim<0>::EntityPointer& eptr, unsigned int face) const = 0;
 

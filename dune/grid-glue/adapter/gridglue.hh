@@ -30,7 +30,7 @@
 #endif
 #include "../extractors/gridextractiontraits.hh"
 #include "../extractors/extractorselector.hh"
-#include "../extractors/surfacedescriptor.hh"
+#include "../extractors/extractorpredicates.hh"
 #include "remoteintersection.hh"
 #include "remoteintersectioniterators.hh"
 #include "coordinatetransformation.hh"
