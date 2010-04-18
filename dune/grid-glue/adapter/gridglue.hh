@@ -202,25 +202,9 @@ public:
 
 private:
 
-  template <typename GV, int codim>
-  struct ExtractorTypeTraits {};
+  typedef ExtractorPredicate<DomainGridView, DomainExtractor::codim> DomainDescriptor;
 
-  template <typename GV>
-  struct ExtractorTypeTraits<GV, 0>
-  {
-    typedef ExtractorPredicate<GV,0> Type;
-  };
-
-  template <typename GV>
-  struct ExtractorTypeTraits<GV, 1>
-  {
-    typedef ExtractorPredicate<GV,1> Type;
-  };
-
-
-  typedef typename ExtractorTypeTraits<DomainGridView, DomainExtractor::codim>::Type DomainDescriptor;
-
-  typedef typename ExtractorTypeTraits<TargetGridView, TargetExtractor::codim>::Type TargetDescriptor;
+  typedef ExtractorPredicate<TargetGridView, TargetExtractor::codim> TargetDescriptor;
 
   /*   M E M B E R   V A R I A B L E S   */
 
