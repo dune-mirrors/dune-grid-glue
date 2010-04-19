@@ -19,8 +19,8 @@
 #ifndef EXTRACTOR_PREDICATES_HH
 #define EXTRACTOR_PREDICATES_HH
 
-/** \brief Base class for face-selecting predicates
-    \tparam GV GridView that the faces are selected from
+/** \brief Base class for subentity-selecting predicates
+    \tparam GV GridView that the subentities are extracted from
  */
 template<typename GV, int codim>
 class ExtractorPredicate
@@ -28,28 +28,10 @@ class ExtractorPredicate
 public:
 
   /** \brief Return true if a subentity should be extracted.
-      \param eptr An element
+      \param element An element
       \param subentity Subentity number
    */
-  virtual bool contains(const typename GV::Traits::template Codim<0>::EntityPointer& eptr, unsigned int subentity) const = 0;
-
-  /** \brief Dummy virtual destructor */
-  virtual ~ExtractorPredicate() {}
-};
-
-/** \brief Base class for element-selecting predicates
-    \tparam GV GridView that the elements are selected from
- */
-template<typename GV>
-class ExtractorPredicate<GV,0>
-{
-public:
-
-  /** \brief Return true if a subentity should be extracted.
-      \param eptr An element
-      \param subentity Subentity number
-   */
-  virtual bool contains(const typename GV::Traits::template Codim<0>::EntityPointer& eptr) const = 0;
+  virtual bool contains(const typename GV::Traits::template Codim<0>::EntityPointer& element, unsigned int subentity) const = 0;
 
   /** \brief Dummy virtual destructor */
   virtual ~ExtractorPredicate() {}

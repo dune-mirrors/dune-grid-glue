@@ -118,7 +118,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
 
     // only do sth. if this element is "interesting"
     // implicit cast is done automatically
-    if (descr.contains(elit))
+    if (descr.contains(elit,0))
     {
       // add an entry to the element info map, the index will be set properly later
       this->elmtInfo_[eindex] = new ElementInfo(element_index, elit, 1);

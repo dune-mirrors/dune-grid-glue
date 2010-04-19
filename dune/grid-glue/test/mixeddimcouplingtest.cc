@@ -52,7 +52,7 @@ class AllElementsDescriptor
   : public ExtractorPredicate<GridView,0>
 {
 public:
-  virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr) const
+  virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& element, unsigned int subentity) const
   {
     return true;
   }
