@@ -24,7 +24,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 
 #include "extractor.hh"
-#include "extractorpredicates.hh"
+#include "extractorpredicate.hh"
 
 template<typename GV>
 class Codim0Extractor : public Extractor<GV,0>

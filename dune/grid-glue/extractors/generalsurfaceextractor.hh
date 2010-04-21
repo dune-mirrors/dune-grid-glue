@@ -31,7 +31,7 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/geometry.hh>
 
-#include "extractorpredicates.hh"
+#include "extractorpredicate.hh"
 #include "codim1extractor.hh"
 #include "../common/orientedsubface.hh"
 

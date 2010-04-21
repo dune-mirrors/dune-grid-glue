@@ -32,7 +32,7 @@
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
 
-#include "extractorpredicates.hh"
+#include "extractorpredicate.hh"
 #include "codim1extractor.hh"
 #include "../common/orientedsubface.hh"
 
