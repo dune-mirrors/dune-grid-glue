@@ -2,7 +2,6 @@
 - MeshClassification sollte automatisch gehen.
 - Die IteratorFacades verwenden
 - Kann man mit weniger Präprozessorschaltern auskommen?
-- rename surfacedescriptor.hh to something more fitting
 - Does class Merger need the dimworld template parameter?
 - Test: Gibt numberInDomainEntity() bei Codim0-Kopplungen immer Null zurück?
 - orientedSubface für Subentities beliebiger Kodimension verallgemeinern
