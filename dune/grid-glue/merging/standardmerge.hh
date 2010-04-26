@@ -437,7 +437,7 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
 
     // get all neighbors of currentCandidate1, but not currentCandidate1 itself
     for (int i=0; i<targetElementCorners_[currentCandidate1].size(); i++) {
-      unsigned int v = domainElementCorners_[currentCandidate1][i];
+      unsigned int v = targetElementCorners_[currentCandidate1][i];
 
       // The unhandled neighbors of currentCandidate1 are all possible candidates
       for (typename std::vector<int>::iterator it = elementsPerVertex1_[v].begin();
