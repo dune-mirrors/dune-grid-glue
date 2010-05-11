@@ -206,11 +206,10 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
               DUNE_THROW(Dune::Exception, "Unexpected Geometrytype");
             }
           }
-          else
-            break;
+          break;
         }
         default :
-          DUNE_THROW(Dune::NotImplemented,"");
+          DUNE_THROW(Dune::NotImplemented,"flipping for dim>2");
         }
       }
 
