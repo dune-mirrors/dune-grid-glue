@@ -346,6 +346,7 @@ public:
       ++where;
       globalCoordInfos.erase(where, globalCoordInfos.end());
     }
+    assert(globalCoordInfos.size() > 0);
     assert(globalCoordInfos.front().valid == true);
     globalCoordSize = globalCoordInfos.size();
 
