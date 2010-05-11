@@ -187,7 +187,6 @@ void Codim0Extractor<GV>::update(const ElementDescriptor<GV>& descr)
           bool elementNormalDirection = (normal_sign < 0);
           if ( positiveNormalDirection_ != elementNormalDirection )
           {
-            std::cout << "swap\n";
             switch (elit->type().basicType())
             {
             case Dune::GeometryType::cube :
