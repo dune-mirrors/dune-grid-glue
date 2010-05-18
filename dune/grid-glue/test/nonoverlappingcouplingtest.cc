@@ -10,7 +10,7 @@
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/common/quadraturerules.hh>
 
-#include <dune/grid-glue/extractors/extractorpredicates.hh>
+#include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/gridextractiontraits.hh>
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
