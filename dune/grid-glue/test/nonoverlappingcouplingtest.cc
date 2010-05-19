@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) try
   typedef MeshGenerator<2,false>  Seq;
   typedef MeshGenerator<2,true>   Par;
 
-  // Test two unit squares, extract boundaries using the CubeSurrfaceExtractor
+  // Test two unit squares, extract boundaries using the CubeSurfaceExtractor
   std::cout << "==== 2D cube ===============================================\n";
   testMatchingCubeGrids<2,MeshClassification::cube>();
   testNonMatchingCubeGrids<2,MeshClassification::cube>();
