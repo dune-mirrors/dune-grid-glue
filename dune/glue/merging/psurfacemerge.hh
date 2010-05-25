@@ -45,6 +45,8 @@
 
 /** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
 
+   This version of PSurfaceMerge needs libpsurface-1.1.x to work properly.
+
    \tparam dim Grid dimension of the coupling grids.  Must be the same for both sides
    \tparam dimworld  Dimension of the world coordinates.  Must be equal to dim or to dim+1
    \tparam T Type used for coordinates
