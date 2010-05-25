@@ -48,19 +48,6 @@ private:
   double sliceCoord_;
 };
 
-/** \brief Returns always true */
-template <class GridView>
-class AllElementsDescriptor
-  : public ExtractorPredicate<GridView,0>
-{
-public:
-  virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr) const
-  {
-    return true;
-  }
-};
-
-
 /** \brief trafo used for yaspgrids */
 template<int dim>
 class ShiftTrafo : public CoordinateTransformation<dim,dim,double>
