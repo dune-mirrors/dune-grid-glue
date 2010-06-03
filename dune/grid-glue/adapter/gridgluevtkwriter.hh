@@ -205,7 +205,7 @@ public:
     }
     fgrid << std::endl;
 
-    int domainSimplexCorners = dimw-Glue::DomainExtractor::codim+1;
+    int domainSimplexCorners = domainDim-Glue::DomainExtractor::codim+1;
     fmerged << "POLYGONS " << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {
@@ -379,7 +379,7 @@ public:
     }
     fgrid << std::endl;
 
-    int targetSimplexCorners = dimw-Glue::TargetExtractor::codim+1;
+    int targetSimplexCorners = targetDim-Glue::TargetExtractor::codim+1;
     fmerged << "POLYGONS " << overlaps << " " << (targetSimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {
