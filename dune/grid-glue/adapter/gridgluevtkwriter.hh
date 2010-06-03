@@ -89,6 +89,7 @@ public:
     typedef typename Glue::DomainGridType DomainGridType;
     typedef typename DomainGridView::Traits::template Codim<0>::Iterator DomainIter;
     typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainEPtr;
+    const int domainDim = DomainGridView::dimension;
     const int domdimw = DomainGridType::dimensionworld;
 
     std::string coordinatePadding;
@@ -115,9 +116,9 @@ public:
         domeptrs.push_back(pit);
 
         // count and remember the corners of this subEntity
-        const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-          Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
-        int size = refElement.size(face, Glue::DomainExtractor::codim, dimw);
+        const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
+          Dune::GenericReferenceElements<ctype, domainDim>::general(pit->type());
+        int size = refElement.size(face, Glue::DomainExtractor::codim, domainDim);
         face_corners.push_back(size);
         face_corner_count += size;
 
@@ -147,12 +148,12 @@ public:
     for (typename std::list<DomainEPtr>::const_iterator pit = domeptrs.begin(); pit != domeptrs.end(); ++pit, ++faceit)
     {
 
-      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+      const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
+        Dune::GenericReferenceElements<ctype, domainDim>::general((*pit)->type());
 
       // Write the current subentity into the fgrid file
-      for (int i=0; i<refElement.size(*faceit, Glue::DomainExtractor::codim, dimw); i++)
-        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::DomainExtractor::codim, i, dimw))
+      for (int i=0; i<refElement.size(*faceit, Glue::DomainExtractor::codim, domainDim); i++)
+        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::DomainExtractor::codim, i, domainDim))
               << coordinatePadding
               << std::endl;
 
@@ -181,10 +182,10 @@ public:
          pit != domeptrs.end();
          ++pit, ++faceit) {
 
-      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+      const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
+        Dune::GenericReferenceElements<ctype, domainDim>::general((*pit)->type());
 
-      int size = refElement.size(*faceit, Glue::DomainExtractor::codim, dimw);
+      int size = refElement.size(*faceit, Glue::DomainExtractor::codim, domainDim);
 
       fgrid << size;
 
@@ -256,6 +257,7 @@ public:
     typedef typename Glue::TargetGridType TargetGridType;
     typedef typename TargetGridView::Traits::template Codim<0>::Iterator TargetIter;
     typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEPtr;
+    const int targetDim = TargetGridView::dimension;
     const int tardimw = TargetGridType::dimensionworld;
 
     const TargetGridView& targv = glue.targetGridView();
@@ -284,9 +286,9 @@ public:
         tareptrs.push_back(pit);
 
         // count and remember the corners of this face
-        const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-          Dune::GenericReferenceElements<ctype, dimw>::general(pit->type());
-        int size = refElement.size(face, Glue::TargetExtractor::codim, dimw);
+        const Dune::GenericReferenceElement<ctype, targetDim>& refElement =
+          Dune::GenericReferenceElements<ctype, targetDim>::general(pit->type());
+        int size = refElement.size(face, Glue::TargetExtractor::codim, targetDim);
         face_corners.push_back(size);
         face_corner_count += size;
 
@@ -316,12 +318,12 @@ public:
     for (typename std::list<TargetEPtr>::const_iterator pit = tareptrs.begin(); pit != tareptrs.end(); ++pit, ++faceit)
     {
 
-      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+      const Dune::GenericReferenceElement<ctype, targetDim>& refElement =
+        Dune::GenericReferenceElements<ctype, targetDim>::general((*pit)->type());
 
       // Write the current subentity into the fgrid file
-      for (int i=0; i<refElement.size(*faceit, Glue::TargetExtractor::codim, dimw); i++)
-        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::TargetExtractor::codim, i, dimw))
+      for (int i=0; i<refElement.size(*faceit, Glue::TargetExtractor::codim, targetDim); i++)
+        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::TargetExtractor::codim, i, targetDim))
               << coordinatePadding
               << std::endl;
 
@@ -350,10 +352,10 @@ public:
          pit != tareptrs.end();
          ++pit, ++faceit) {
 
-      const Dune::GenericReferenceElement<ctype, dimw>& refElement =
-        Dune::GenericReferenceElements<ctype, dimw>::general((*pit)->type());
+      const Dune::GenericReferenceElement<ctype, targetDim>& refElement =
+        Dune::GenericReferenceElements<ctype, targetDim>::general((*pit)->type());
 
-      int size = refElement.size(*faceit, Glue::TargetExtractor::codim, dimw);
+      int size = refElement.size(*faceit, Glue::TargetExtractor::codim, targetDim);
 
       fgrid << size;
 
