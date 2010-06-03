@@ -92,9 +92,9 @@ public:
     const int domainDim = DomainGridView::dimension;
     const int domdimw = DomainGridType::dimensionworld;
 
-    std::string coordinatePadding;
-    for (int i=1; i<dimw; i++)
-      coordinatePadding += " 0";
+    std::string domainCoordinatePadding;
+    for (int i=domdimw; i<dimw; i++)
+      domainCoordinatePadding += " 0";
 
     const DomainGridView& domgv = glue.domainGridView();
 
@@ -154,7 +154,7 @@ public:
       // Write the current subentity into the fgrid file
       for (int i=0; i<refElement.size(*faceit, Glue::DomainExtractor::codim, domainDim); i++)
         fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::DomainExtractor::codim, i, domainDim))
-              << coordinatePadding
+              << domainCoordinatePadding
               << std::endl;
 
       // write the remote intersections of the current subentity into the fmerged file
@@ -164,7 +164,7 @@ public:
         assert(domisit->intersectionDomainGlobal().type().isSimplex());
 
         for (int i = 0; i < domisit->intersectionDomainGlobal().corners(); ++i)
-          fmerged << domisit->intersectionDomainGlobal().corner(i) << coordinatePadding << std::endl;
+          fmerged << domisit->intersectionDomainGlobal().corner(i) << domainCoordinatePadding << std::endl;
       }
     }
 
@@ -260,6 +260,10 @@ public:
     const int targetDim = TargetGridView::dimension;
     const int tardimw = TargetGridType::dimensionworld;
 
+    std::string targetCoordinatePadding;
+    for (int i=tardimw; i<dimw; i++)
+      targetCoordinatePadding += " 0";
+
     const TargetGridView& targv = glue.targetGridView();
 
     // remember the entities that have been mapped
@@ -324,7 +328,7 @@ public:
       // Write the current subentity into the fgrid file
       for (int i=0; i<refElement.size(*faceit, Glue::TargetExtractor::codim, targetDim); i++)
         fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::TargetExtractor::codim, i, targetDim))
-              << coordinatePadding
+              << targetCoordinatePadding
               << std::endl;
 
       // write the merged grid refinement of this surface part
@@ -334,7 +338,7 @@ public:
         assert(tarisit->intersectionTargetGlobal().type().isSimplex());
 
         for (int i = 0; i < tarisit->intersectionTargetGlobal().corners(); ++i)
-          fmerged << tarisit->intersectionTargetGlobal().corner(i) << coordinatePadding << std::endl;
+          fmerged << tarisit->intersectionTargetGlobal().corner(i) << targetCoordinatePadding << std::endl;
       }
     }
 
