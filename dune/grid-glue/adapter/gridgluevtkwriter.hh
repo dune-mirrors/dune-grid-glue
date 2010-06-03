@@ -91,7 +91,6 @@ public:
     typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainEPtr;
     const int domdimw = DomainGridType::dimensionworld;
 
-    bool pad = dimw > domdimw;
     std::string coordinatePadding;
     for (int i=1; i<dimw; i++)
       coordinatePadding += " 0";
