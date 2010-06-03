@@ -64,6 +64,7 @@ public:
 template<int dim, int dimw, class ctype>
 class MixedDimTrafo : public CoordinateTransformation<dim,dimw,ctype>
 {
+  dune_static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
   double yOffset_;
 public:
   MixedDimTrafo(double yOffset) : yOffset_(yOffset) {}
@@ -71,7 +72,7 @@ public:
   {
     Dune::FieldVector<ctype, dimw> x(yOffset_);
     x[0] = c[0];
-    for (int i=2; i<dim ; i++)
+    for (int i=2; i<dimw ; i++)
       x[i] = c[i-1];
     return x;
   }
