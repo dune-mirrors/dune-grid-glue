@@ -229,9 +229,6 @@ private:
 
   /*   M E M B E R   V A R I A B L E S   */
 
-  /// @brief maximum distance between two matched points in the mapping
-  T maxdist_;
-
   /* geometric data for both domain and target */
 
   /// @brief domain coordinates
@@ -267,27 +264,12 @@ private:
 
 public:
 
-  PSurfaceMerge(T max_distance = 1E-4, const SurfaceNormal domain_normals = NULL) :
-    maxdist_(max_distance), domnormals_(domain_normals)
+  PSurfaceMerge(const SurfaceNormal domain_normals = NULL) :
+    domnormals_(domain_normals)
   {}
 
 
   /*   M O D E L   S P E C I F I C   E X T E N D I N G   F U N C T I O N A L I T Y   */
-
-  /**
-   * @brief setter for the maximum distance between domain and target surface
-   *
-   * If the distance between a point on the target surface and a point on the domain
-   * surface exceeds this value (measured along the search direction which is
-   * usually the normal) the points will not be matched.
-   * @param value the new value ( value > 0.0 )
-   */
-  void setMaxDistance(ctype value)
-  {
-    if (value > 0.0)
-      this->maxdist_ = value;
-  }
-
 
   /**
    * @brief setter for the domain surface normal function
@@ -610,9 +592,6 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
     for (unsigned int i = 0; i < this->domc_.size(); ++i)
       tarc_[i][dim] = 1;
-
-    // Needs to be more than 1
-    maxdist_ = 2;
   }
 
   std::cout << "PSurfaceMerge building merged grid..." << std::endl;
@@ -620,7 +599,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   // compute the merged grid using the psurface library
   this->cm_.build(domc_, domi_,
                   tarc_, tari_,
-                  this->maxdist_, this->domnormals_);
+                  this->domnormals_);
 
   std::cout << "Finished building merged grid!" << std::endl;
 
