@@ -131,23 +131,6 @@ public:
    */
   unsigned int targetParent(unsigned int idx) const;
 
-  /**
-   * @brief get the merged grid simplices refining a given domain simplex
-   * @param idx index of domain simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  bool domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
-
-  /**
-   * @brief get the merged grid simplices refining a given target simplex
-   * @param idx index of target simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  bool targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
-
-
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
 
   /**
@@ -298,28 +281,6 @@ inline unsigned int ConformingMerge<dim, dimworld, T>::targetParent(unsigned int
 {
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
   return this->intersections_[idx].targetEntity_;
-}
-
-
-template<int dim, int dimworld, typename T>
-bool ConformingMerge<dim, dimworld, T>::domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
-{
-  indices.resize(1);
-  indices[0] = idx;
-
-  // ...return success
-  return true;
-}
-
-
-template<int dim, int dimworld, typename T>
-bool ConformingMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
-{
-  indices.resize(1);
-  indices[0] = this->intersections_[idx].targetEntity_;
-
-  // ...return success
-  return true;
 }
 
 
