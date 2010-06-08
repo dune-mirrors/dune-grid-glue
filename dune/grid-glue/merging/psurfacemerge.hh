@@ -76,9 +76,6 @@ public:
   /// @brief the coordinate type used in this interface
   typedef Dune::FieldVector<T, dim>  LocalCoords;
 
-  /// @brief a function (or functor) describing the domain normals
-  typedef void (*SurfaceNormal)(const ctype* pos, ctype* dir);
-
 
 private:
 
@@ -259,29 +256,43 @@ private:
   /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
    */
-  SurfaceNormal domnormals_;
+  const DirectionFunction<dimworld,ctype>* domainDirections_;
+
+  /** \brief Vector field on the target surface which prescribes a 'forward'
+      direction.
+
+      PSurface uses the normals of the target side to increase projection
+      robustness.  If these cannot be computed from the surface directly
+      (e.g. because it is not properly oriented), they can be given
+      explicitly through the targetDirections field.
+   */
+  const DirectionFunction<dimworld,ctype>* targetDirections_;
 
 
 public:
 
-  PSurfaceMerge(const SurfaceNormal domain_normals = NULL) :
-    domnormals_(domain_normals)
+  PSurfaceMerge(const DirectionFunction<dimworld,ctype>* domainDirections = NULL,
+                const DirectionFunction<dimworld,ctype>* targetDirections = NULL
+                )
+    : domainDirections_(domainDirections), targetDirections_(targetDirections)
   {}
 
 
   /*   M O D E L   S P E C I F I C   E X T E N D I N G   F U N C T I O N A L I T Y   */
 
   /**
-   * @brief setter for the domain surface normal function
+   * @brief Set surface direction functions
    *
    * The matching of the geometries offers the possibility to specify a function for
    * the exact evaluation of domain surface normals. If no such function is specified
    * (default) normals are interpolated.
    * @param value the new function (or NULL to unset the function)
    */
-  void setDomainNormals(const SurfaceNormal value)
+  void setSurfaceDirections(const DirectionFunction<dimworld,ctype>* domainDirections,
+                            const DirectionFunction<dimworld,ctype>* targetDirections)
   {
-    this->domnormals_ = value;
+    domainDirections_ = domainDirections;
+    targetDirections_ = targetDirections;
   }
 
 
@@ -597,9 +608,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   std::cout << "PSurfaceMerge building merged grid..." << std::endl;
 
   // compute the merged grid using the psurface library
-  this->cm_.build(domc_, domi_,
-                  tarc_, tari_,
-                  this->domnormals_);
+  this->cm_.build(domc_, domi_,tarc_, tari_,
+                  domainDirections_, targetDirections_);
 
   std::cout << "Finished building merged grid!" << std::endl;
 
