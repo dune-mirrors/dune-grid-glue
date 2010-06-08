@@ -119,7 +119,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent domain simplex' index of @c a smaller
    */
-  static bool domainParentSmaller(const IntersectionPrimitive<dim,float>& a, const IntersectionPrimitive<dim,float>& b)
+  static bool domainParentSmaller(const IntersectionPrimitive<dim,ctype>& a, const IntersectionPrimitive<dim,ctype>& b)
   {
     return a.tris[0] < b.tris[0];
   }
@@ -130,7 +130,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent target simplex' index of @c a smaller
    */
-  static bool targetParentSmaller(const IntersectionPrimitive<dim,float>* a, const IntersectionPrimitive<dim,float>* b)
+  static bool targetParentSmaller(const IntersectionPrimitive<dim,ctype>* a, const IntersectionPrimitive<dim,ctype>* b)
   {
     return a->tris[1] < b->tris[1];
   }
@@ -154,7 +154,7 @@ private:
      * from the given array
      * @param unordered array containing all overlap simplices
      */
-    void setOverlaps(const std::vector<IntersectionPrimitive<dim,float> >& unordered);
+    void setOverlaps(const std::vector<IntersectionPrimitive<dim,ctype> >& unordered);
 
     /**
      * @brief getter for the number of simplex overlaps in the merged grid
@@ -185,7 +185,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntersectionPrimitive<dim,float>& domain(unsigned int idx) const
+    const IntersectionPrimitive<dim,ctype>& domain(unsigned int idx) const
     {
       return this->domOrder[idx];
     }
@@ -195,7 +195,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntersectionPrimitive<dim,float>& target(unsigned int idx) const
+    const IntersectionPrimitive<dim,ctype>& target(unsigned int idx) const
     {
       return *this->tarOrder[idx];
     }
@@ -214,14 +214,14 @@ private:
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending domain parent simplex indices (see domi_)
-    std::vector<IntersectionPrimitive<dim,float> > domOrder;
+    std::vector<IntersectionPrimitive<dim,ctype> > domOrder;
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending target parent simplex indices (see tari_)
-    std::vector<IntersectionPrimitive<dim,float>*> tarOrder;
+    std::vector<IntersectionPrimitive<dim,ctype>*> tarOrder;
 
     /// @brief used to recompute original index of an overlap in "tarOrder"
-    IntersectionPrimitive<dim,float>*         baseptr;
+    IntersectionPrimitive<dim,ctype>*         baseptr;
   };
 
 
@@ -625,7 +625,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   std::cout << "Finished building merged grid!" << std::endl;
 
   // get the representation from the contact mapping object
-  std::vector<IntersectionPrimitive<dim,float> > overlaps;
+  std::vector<IntersectionPrimitive<dim,ctype> > overlaps;
   this->cm_.getOverlaps(overlaps);
 
   // ////////////////////////////////////////////////////////////////////////
@@ -826,7 +826,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<dim,float>& ip = this->olm_.domain(idx);
+  const IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
@@ -855,7 +855,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<dim,float>& ip = this->olm_.domain(idx);
+  const IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
@@ -881,7 +881,7 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 /* IMPLEMENTATION OF   O V E R L A P  M A N A G E R  SUBCLASS */
 
 template<int dim, int dimworld, typename T>
-void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<dim,float> >& unordered)
+void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<dim,ctype> >& unordered)
 {
   this->domOrder.resize(unordered.size());
   this->tarOrder.resize(unordered.size(), NULL);
