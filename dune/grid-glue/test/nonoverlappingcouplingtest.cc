@@ -108,8 +108,6 @@ void testMatchingCubeGrids()
   VerticalFaceDescriptor<DomGridView> domdesc(1);
   VerticalFaceDescriptor<TarGridView> tardesc(1);
 
-  merger.setMaxDistance(0.01);
-
   glue.setDomainDescriptor(domdesc);
   glue.setTargetDescriptor(tardesc);
 
@@ -169,8 +167,6 @@ void testNonMatchingCubeGrids()
 
   VerticalFaceDescriptor<DomGridView> domdesc(1);
   VerticalFaceDescriptor<TarGridView> tardesc(1);
-
-  merger.setMaxDistance(0.01);
 
   glue.setDomainDescriptor(domdesc);
   glue.setTargetDescriptor(tardesc);
@@ -309,8 +305,6 @@ void testParallelCubeGrids()
 
   VerticalFaceDescriptor<DomGridView> domdesc(domGen.slice());
   VerticalFaceDescriptor<TarGridView> tardesc(tarGen.slice());
-
-  merger.setMaxDistance(0.01);
 
   glue.setDomainTransformation(domGen.trafo());
   glue.setTargetTransformation(tarGen.trafo());
