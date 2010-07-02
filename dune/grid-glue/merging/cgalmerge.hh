@@ -187,8 +187,14 @@ computeIntersection(const Dune::GeometryType& domainElementType,
   //     for (int i = 0; i < subEntities_[index].nCorners(); ++i)
   //         corners[i] = this->coords_[this->subEntities_[index].corners[i].idx].coord;
 
+#define DUNE_GRID_VERSION_NUMBER (DUNE_GRID_VERSION_MAJOR * 10 + DUNE_GRID_VERSION_MINOR)
+#if DUNE_GRID_VERSION_NUMBER > 20
   Geometry domainGeometry(Dune::GenericGeometry::topologyId(domainElementType), domainElementCorners);
   Geometry targetGeometry(Dune::GenericGeometry::topologyId(targetElementType), targetElementCorners);
+#else
+  Geometry domainGeometry(domainElementType, domainElementCorners);
+  Geometry targetGeometry(targetElementType, targetElementCorners);
+#endif
 
   // /////////////////////////////////////////////////////////////////////////////////////
   //   Compute the intersection between the two elements.  The 1d case is implemented

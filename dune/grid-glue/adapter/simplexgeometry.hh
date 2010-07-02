@@ -220,7 +220,12 @@ public:
   void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
   {
     // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
+#define DUNE_GRID_VERSION_NUMBER (DUNE_GRID_VERSION_MAJOR * 10 + DUNE_GRID_VERSION_MINOR)
+#if DUNE_GRID_VERSION_NUMBER > 20
     Base::operator=(Base(Dune::GenericGeometry::topologyId(type), coordinates));
+#else
+    Base::operator=(Base(type, coordinates));
+#endif
   }
 
   const Dune::FieldVector<typename G::ctype, coorddim + static_cast<int>(coorddim==mydim)> outerNormal(const Dune::FieldVector<typename G::ctype, mydim>& local) const
@@ -281,7 +286,12 @@ public:
     //		STDOUTLN("LocalSimplexGeometry: trying to set up");
     // set up base class
     // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
+#define DUNE_GRID_VERSION_NUMBER (DUNE_GRID_VERSION_MAJOR * 10 + DUNE_GRID_VERSION_MINOR)
+#if DUNE_GRID_VERSION_NUMBER > 20
     Base::operator=(Base(Dune::GenericGeometry::topologyId(type), coordinates));
+#else
+    Base::operator=(Base(type, coordinates));
+#endif
     //		for (int i = 0; i < this->corners(); ++i)
     //			STDOUT(" (" << this->operator[](i) << ")");
     //		STDOUTLN("");
