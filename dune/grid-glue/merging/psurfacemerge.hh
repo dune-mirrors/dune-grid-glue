@@ -256,7 +256,7 @@ private:
   /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
    */
-  const DirectionFunction<dimworld,ctype>* domainDirections_;
+  const DirectionFunction<psurfaceDimworld,ctype>* domainDirections_;
 
   /** \brief Vector field on the target surface which prescribes a 'forward'
       direction.
@@ -266,13 +266,13 @@ private:
       (e.g. because it is not properly oriented), they can be given
       explicitly through the targetDirections field.
    */
-  const DirectionFunction<dimworld,ctype>* targetDirections_;
+  const DirectionFunction<psurfaceDimworld,ctype>* targetDirections_;
 
 
 public:
 
-  PSurfaceMerge(const DirectionFunction<dimworld,ctype>* domainDirections = NULL,
-                const DirectionFunction<dimworld,ctype>* targetDirections = NULL
+  PSurfaceMerge(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections = NULL,
+                const DirectionFunction<psurfaceDimworld,ctype>* targetDirections = NULL
                 )
     : domainDirections_(domainDirections), targetDirections_(targetDirections)
   {}
@@ -288,8 +288,8 @@ public:
    * (default) normals are interpolated.
    * @param value the new function (or NULL to unset the function)
    */
-  void setSurfaceDirections(const DirectionFunction<dimworld,ctype>* domainDirections,
-                            const DirectionFunction<dimworld,ctype>* targetDirections)
+  void setSurfaceDirections(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
+                            const DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
   {
     domainDirections_ = domainDirections;
     targetDirections_ = targetDirections;
