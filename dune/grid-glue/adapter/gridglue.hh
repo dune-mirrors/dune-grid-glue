@@ -206,7 +206,6 @@ private:
 
   const TargetTransformation*    tartrafo_;
 
-
   /// @brief the "domain" grid view
   const DomainGridView&        domgv_;
 
@@ -708,10 +707,10 @@ GridGlue<GET1, GET2>::GridGlue(const DomainGridView& gv1, const TargetGridView& 
 #else
 GridGlue<GET1, GET2>::GridGlue(const DomainGridView & gv1, const TargetGridView & gv2, Merger* merger)
 #endif
-  : domgv_(gv1), targv_(gv2),
-    domext_(gv1), tarext_(gv2), merger_(merger),
-    domelmntdescr_(NULL), tarelmntdescr_(NULL),
+  : domelmntdescr_(NULL), tarelmntdescr_(NULL),
     domtrafo_(NULL), tartrafo_(NULL),
+    domgv_(gv1), targv_(gv2),
+    domext_(gv1), tarext_(gv2), merger_(merger),
     NULL_INTERSECTION(this),
 #if HAVE_MPI
     mpicomm(m),
