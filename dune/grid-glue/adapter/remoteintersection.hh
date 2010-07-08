@@ -23,11 +23,6 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
 
-#ifdef GRID_GLUE_USE_CONCEPTS
-#include <dune/common/conceptchecking.hh>
-#include "remoteIntersectionconcepts.hh"
-#endif
-
 namespace RemoteIntersectionInterface
 {
 

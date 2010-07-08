@@ -25,9 +25,6 @@
 
 #define QUICKHACK_INDEX 1
 
-#ifdef GRID_GLUE_USE_CONCEPTS
-#include <dune/grid-glue/common/conceptchecking.hh>
-#endif
 #include "../extractors/gridextractiontraits.hh"
 #include "../extractors/extractorselector.hh"
 #include "../extractors/extractorpredicate.hh"
@@ -59,17 +56,10 @@ class GridGlue
 {
 private:
 
-  /*   C H E C K   C O N C E P T S   */
 
   typedef GET1 DomGridExtractionTraits;
-#ifdef GRID_GLUE_USE_CONCEPTS
-  CLASS_REQUIRE(DomGridExtractionTraits, GridExtractionTraitsConcept);
-#endif
 
   typedef GET2 TarGridExtractionTraits;
-#ifdef GRID_GLUE_USE_CONCEPTS
-  CLASS_REQUIRE(TarGridExtractionTraits, GridExtractionTraitsConcept);
-#endif
 
 
   /*   P R I V A T E   T Y P E S   */
@@ -819,9 +809,6 @@ void GridGlue<GET1, GET2>::extractGrid (const Extractor & extractor,
     {
       Coords temp = (*trafo)(tempcoords[i]);
       coords.push_back(temp);
-      // coords.push_back(Dune::FieldVector<typename Parent::ctype, Parent::dimworld>());
-      // for (size_t j = 0; j < Parent::dimworld; ++j)
-      //     coords.back()[j] = temp[j];
     }
   }
   else

@@ -34,19 +34,9 @@ namespace RemoteIntersectionInterface
   class RemoteIntersectionIterator
   {
   private:
-    /*   C H E C K   C O N C E P T S   */
 
-#ifdef GRID_GLUE_USE_CONCEPTS
     typedef RemoteIntersectionImpl RemoteIntersectionImplType;
-    CLASS_REQUIRE(RemoteIntersectionImplType, RemoteIntersectionConcept);
-
     typedef RemoteIntersectionIteratorImpl RemoteIntersectionIteratorImplType;
-    CLASS_REQUIRE(RemoteIntersectionIteratorImplType, RemoteIntersectionIteratorConcept);
-#else
-    typedef RemoteIntersectionImpl RemoteIntersectionImplType;
-
-    typedef RemoteIntersectionIteratorImpl RemoteIntersectionIteratorImplType;
-#endif
 
   public:
 
