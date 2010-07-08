@@ -12,7 +12,9 @@
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/gridextractiontraits.hh>
+#if HAVE_PSURFACE
 #include <dune/grid-glue/merging/psurfacemerge.hh>
+#endif
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
@@ -97,7 +99,7 @@ void testMatchingCubeGrids()
 
   typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
-
+#if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
@@ -121,7 +123,9 @@ void testMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-
+#else
+    #warning Not testing, because psurface backend is not available.
+#endif
 }
 
 
@@ -157,7 +161,7 @@ void testNonMatchingCubeGrids()
 
   typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
-
+#if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
@@ -181,7 +185,9 @@ void testNonMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-
+#else
+    #warning Not testing, because psurface backend is not available.
+#endif
 }
 
 
@@ -295,7 +301,7 @@ void testParallelCubeGrids()
   // ////////////////////////////////////////
   //   Set up coupling at their interface
   // ////////////////////////////////////////
-
+#if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
@@ -321,7 +327,9 @@ void testParallelCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue, domGen.trafo(), tarGen.trafo());
-
+#else
+    #warning Not testing, because psurface backend is not available.
+#endif
 }
 
 
