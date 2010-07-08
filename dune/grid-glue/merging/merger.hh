@@ -8,6 +8,81 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
 
+// forward declaration
+template <class ctype, int domainDim, int targetDim, int dimworld>
+class Merger;
+
+template <class ctype, int domainDim, int targetDim, int dimworld, int n>
+struct MergerGridPolicy;
+
+template <class ctype, int domainDim, int targetDim, int dimworld>
+struct MergerGridPolicy<ctype, domainDim, targetDim, dimworld, 0>
+{
+  typedef Merger<ctype, domainDim, targetDim, dimworld> Parent;
+
+  /// @brief the local coordinate type for the domain coordinates
+  typedef Dune::FieldVector<ctype, domainDim>  GridCoords;
+
+  static
+  bool simplexMatched(const Parent & m, unsigned int idx)
+  {
+    return m.domainSimplexMatched(idx);
+  }
+
+  static
+  unsigned int parent(const Parent & m, unsigned int idx)
+  {
+    return m.domainParent(idx);
+  }
+
+  static
+  GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner)
+  {
+    return m.domainParentLocal(idx, corner);
+  }
+
+  static
+  bool simplexRefined(const Parent & m, unsigned int idx, std::vector<unsigned int>& indices)
+  {
+    return m.domainSimplexRefined(idx, indices);
+  }
+
+};
+
+template <class ctype, int domainDim, int targetDim, int dimworld>
+struct MergerGridPolicy<ctype, domainDim, targetDim, dimworld, 1>
+{
+  typedef Merger<ctype, domainDim, targetDim, dimworld> Parent;
+
+  /// @brief the local coordinate type for the target coordinates
+  typedef Dune::FieldVector<ctype, targetDim>  GridCoords;
+
+  static
+  bool simplexMatched(const Parent & m, unsigned int idx)
+  {
+    return m.targetSimplexMatched(idx);
+  }
+
+  static
+  unsigned int parent(const Parent & m, unsigned int idx)
+  {
+    return m.targetParent(idx);
+  }
+
+  static
+  GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner)
+  {
+    return m.targetParentLocal(idx, corner);
+  }
+
+  static
+  bool simplexRefined(const Parent & m, unsigned int idx, std::vector<unsigned int>& indices)
+  {
+    return m.targetSimplexRefined(idx, indices);
+  }
+
+};
+
 /** \brief Abstract base for all classes that take extracted grids and build sets of intersections
 
    \tparam ctype The type used for coordinates (assumed to be the same for both grids)
@@ -18,6 +93,11 @@
 template <class ctype, int domainDim, int targetDim, int dimworld>
 class Merger
 {
+
+  // the policy class get's access to the Merger
+  friend class MergerGridPolicy<ctype, domainDim, targetDim, dimworld, 0>;
+  friend class MergerGridPolicy<ctype, domainDim, targetDim, dimworld, 1>;
+
 public:
 
   /// @brief the local coordinate type for the domain coordinates
@@ -29,6 +109,12 @@ public:
   /// @brief the coordinate type used in this interface
   typedef Dune::FieldVector<ctype, dimworld>  WorldCoords;
 
+  template<int n>
+  struct GridTraits
+  {
+    /// @brief the local coordinate type for the grid-n coordinates
+    typedef typename MergerGridPolicy<ctype, domainDim, targetDim, dimworld, n>::GridCoords Coords;
+  };
 
   /**
    * @brief builds the merged grid
@@ -54,6 +140,64 @@ public:
    */
   virtual unsigned int nSimplices() const = 0;
 
+  /**
+   * @brief check if given grid-n simplex could be matched in the merged grid
+   *
+   * @tparam n specify which grid (domain/target: 0/1)
+   *
+   * The result of this member even is positive if a grid-n simplex only is
+   * partially refined! That means the simplex is not necessarily completely
+   * covered in the merged grid. Whether or not a particular point in the simplex
+   * was mapped can be asked via "domainLocalToMerged" or "domainGlobalToMerged".
+   * @param idx the index of the domain simplex
+   * @return TRUE <=> refined in merged grid
+   */
+  template<int n>
+  bool simplexMatched(unsigned int idx) const
+  {
+    return MergerGridPolicy<ctype, domainDim, targetDim, dimworld, n>::simplexMatched(*this, idx);
+  }
+
+  /**
+   * @brief get index of grid-n's parent simplex for given merged grid simplex
+   * @tparam n specify which grid (domain/target: 0/1)
+   * @param idx index of the merged grid simplex
+   * @return index of the parent simplex
+   */
+  template<int n>
+  unsigned int parent(unsigned int idx) const
+  {
+    return MergerGridPolicy<ctype, domainDim, targetDim, dimworld, n>::parent(*this, idx);
+  }
+
+  /**
+   * @brief get the merged grid simplices refining a given grid-n simplex
+   * @tparam n specify which grid (domain/target: 0/1)
+   * @param idx index of grid-n simplex
+   * @param indices will be resized first and then filled with the refining simplices
+   * @return TRUE <=> given simplex could be matched and is part of the merged grid
+   */
+  template<int n>
+  bool simplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
+  {
+    return MergerGridPolicy<ctype, domainDim, targetDim, dimworld, n>::simplexRefined(*this, idx, indices);
+  }
+
+  /**
+   * @brief get the grid-n parent's simplex local coordinates for a particular merged grid simplex corner
+   * (parent's index can be obtained via "domainParent")
+   * @tparam n specify which grid (domain/target: 0/1)
+   * @param idx the index of the merged grid simplex
+   * @param corner the index of the simplex' corner
+   * @return local coordinates in grid-n domain
+   */
+  template<int n>
+  typename GridTraits<n>::Coords parentLocal(unsigned int idx, unsigned int corner) const
+  {
+    return MergerGridPolicy<ctype, domainDim, targetDim, dimworld, n>::parentLocal(*this, idx, corner);
+  }
+
+private:
   /**
    * @brief check if given domain simplex could be matched in the merged grid
    *

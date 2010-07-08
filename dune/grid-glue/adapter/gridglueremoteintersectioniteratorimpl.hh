@@ -84,28 +84,18 @@ template<typename GET1, typename GET2>
 class GridGlue<GET1, GET2>::DomainIntersectionIteratorImpl
 {
 private:
-
   typedef GridGlue<GET1, GET2> Parent;
 
 public:
-
   typedef typename Parent::RemoteIntersection RemoteIntersection;
 
-
 private:
-
   const Parent*              glue_;
-
   RemoteIntersection intersection_;
-
   unsigned int index_;
-
-  unsigned int _domain_parent;
-
+  unsigned int parent_id_;
   unsigned int current_;
-
   std::vector<unsigned int>  parts_;
-
 
 public:
 
@@ -113,13 +103,13 @@ public:
     : glue_(intersectionImpl_.glue_),
       intersection_(intersectionImpl_),
       index_(intersectionImpl_.index()),
-      _domain_parent(0),
+      parent_id_(0),
       current_(0)
   {
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_domain_parent = this->glue_->merger_->domainParent(this->index_);
+    this->parent_id_ = this->glue_->merger_->template parent<0>(this->index_);
     this->parts_.resize(parts_.size());
     copy(parts_.begin(), parts_.end(), this->parts_.begin());
   }
@@ -129,13 +119,13 @@ public:
     : glue_(intersectionImpl_.glue_),
       intersection_(intersectionImpl_),
       index_(intersectionImpl_.index()),
-      _domain_parent(0),
+      parent_id_(0),
       current_(0)
   {
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_domain_parent = this->glue_->merger_->domainParent(this->index_);
+    this->parent_id_ = this->glue_->merger_->template parent<0>(this->index_);
   }
 
 
@@ -194,7 +184,7 @@ private:
 
   unsigned int index_;
 
-  unsigned int _target_parent;
+  unsigned int parent_id_;
 
   unsigned int current_;
 
@@ -207,13 +197,13 @@ public:
     : glue_(intersectionImpl_.glue_),
       intersection_(intersectionImpl_),
       index_(intersectionImpl_.index()),
-      _target_parent(0),
+      parent_id_(0),
       current_(0)
   {
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_target_parent = this->glue_->merger_->targetParent(this->index_);
+    this->parent_id_ = this->glue_->merger_->template parent<1>(this->index_);
     this->parts_.resize(parts_.size());
     copy(parts_.begin(), parts_.end(), this->parts_.begin());
   }
@@ -223,13 +213,13 @@ public:
     : glue_(intersectionImpl_.glue_),
       intersection_(intersectionImpl_),
       index_(intersectionImpl_.index()),
-      _target_parent(0),
+      parent_id_(0),
       current_(0)
   {
     if (this->index_ < 0 || this->glue_->index__sz <= this->index_)
       return;
 
-    this->_target_parent = this->glue_->merger_->targetParent(this->index_);
+    this->parent_id_ = this->glue_->merger_->template parent<1>(this->index_);
   }
 
 public:

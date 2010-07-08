@@ -40,6 +40,12 @@
 #include <dune/istl/communicator.hh>
 #include <dune/istl/interface.hh>
 
+/** Document the relation between the old grid names and the new numbering */
+enum GridOrdering {
+  Domain = 0,
+  Target = 1
+};
+
 /**
  * @class GridGlue
  * @brief sequential adapter to couple two grids at specified close together boundaries
@@ -56,11 +62,8 @@ class GridGlue
 {
 private:
 
-
   typedef GET1 DomGridExtractionTraits;
-
   typedef GET2 TarGridExtractionTraits;
-
 
   /*   P R I V A T E   T Y P E S   */
 
@@ -77,11 +80,8 @@ private:
 
 public:
   class RemoteIntersectionImpl;
-
   class RemoteIntersectionIteratorImpl;
-
   class DomainIntersectionIteratorImpl;
-
   class TargetIntersectionIteratorImpl;
 
 public:
@@ -846,7 +846,7 @@ int GridGlue<GET1, GET2>::domainEntityNextFace(const DomainElement& e, int index
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count &&    (this->domext_.indexInInside(first) < index || !this->merger_->domainSimplexMatched(first)))
+  while (first < count &&    (this->domext_.indexInInside(first) < index || !this->merger_->template simplexMatched<0>(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
@@ -865,7 +865,7 @@ int GridGlue<GET1, GET2>::targetEntityNextFace(const TargetElement& e, int index
 
   // check all mapped faces and accept the first one with number >=index
   count += first;
-  while (first < count && (this->tarext_.indexInInside(first) < index || !this->merger_->targetSimplexMatched(first)))
+  while (first < count && (this->tarext_.indexInInside(first) < index || !this->merger_->template simplexMatched<1>(first)))
     first++;
   if (first == count)
     return -1;             // no more faces
@@ -895,15 +895,15 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->domext_.indexInInside(first) == num && this->merger_->domainSimplexMatched(first))
+    if (this->domext_.indexInInside(first) == num && this->merger_->template simplexMatched<0>(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
       std::vector<unsigned int> local_results;
 
       // get the remote intersections
-      this->merger_->domainSimplexRefined(first, global_results);
-      while (++first < count && this->domext_.indexInInside(first) == num && this->merger_->domainSimplexRefined(first, local_results))
+      this->merger_->template simplexRefined<0>(first, global_results);
+      while (++first < count && this->domext_.indexInInside(first) == num && this->merger_->template simplexRefined<0>(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
@@ -943,7 +943,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->merger_->domainSimplexRefined(first, local_results))
+    if (this->merger_->template simplexRefined<0>(first, local_results))
     {
       if (local_results.size() > 0)
         found_sth = true;
@@ -971,15 +971,15 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->tarext_.indexInInside(first) == num && this->merger_->targetSimplexMatched(first))
+    if (this->tarext_.indexInInside(first) == num && this->merger_->template simplexMatched<1>(first))
     {
       // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
       std::vector<unsigned int> global_results;
       std::vector<unsigned int> local_results;
 
       // get the remote intersections
-      this->merger_->targetSimplexRefined(first, global_results);
-      while (++first < count && this->tarext_.indexInInside(first) == num && this->merger_->targetSimplexRefined(first, local_results))
+      this->merger_->template simplexRefined<1>(first, global_results);
+      while (++first < count && this->tarext_.indexInInside(first) == num && this->merger_->template simplexRefined<1>(first, local_results))
       {
         for (unsigned int i = 0; i < local_results.size(); ++i)
           global_results.push_back(local_results[i]);
@@ -1018,7 +1018,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   count += first;
   while (first < count)
   {
-    if (this->merger_->targetSimplexRefined(first, local_results))
+    if (this->merger_->template simplexRefined<1>(first, local_results))
     {
       if (local_results.size() > 0)
         found_sth = true;
