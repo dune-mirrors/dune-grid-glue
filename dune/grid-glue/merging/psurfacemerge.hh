@@ -423,7 +423,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   // //////////////////////////////////////////
 #ifndef NDEBUG
   // first the domain side
-  int expectedCorners = 0;
+  unsigned int expectedCorners = 0;
 
   for (size_t i=0; i<domain_element_types.size(); i++) {
 
@@ -465,8 +465,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   // //////////////////////////////////////////////////////////////////////////////////
 
   // First count the number of simplices we expect
-  int numDomainSimplices = 0;
-  int numTargetSimplices = 0;
+  size_t numDomainSimplices = 0;
+  size_t numTargetSimplices = 0;
 
   if (dim==1) {
     numDomainSimplices = domain_element_types.size();
@@ -498,10 +498,10 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   Dune::BitSetVector<1> domainIsSecondTriangle(numDomainSimplices, false);
   std::vector<int> unsplitDomainElementNumbers(numDomainSimplices);
 
-  int vertexCounter = 0;
-  int simplexCounter = 0;
+  size_t vertexCounter = 0;
+  size_t simplexCounter = 0;
 
-  for (unsigned int i = 0; i < domain_element_types.size(); ++i) {
+  for (size_t i = 0; i < domain_element_types.size(); ++i) {
 
     // dim is known at compile time, hence if dim==1 the following conditional is removed
     if (dim == 1 || domain_element_types[i].isSimplex()) {
@@ -541,11 +541,11 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   vertexCounter  = 0;
   simplexCounter = 0;
 
-  for (unsigned int i = 0; i < target_element_types.size(); ++i) {
+  for (size_t i = 0; i < target_element_types.size(); ++i) {
 
     // dim is known at compile time, hence if dim==1 the following conditional is removed
     if (dim==1 || target_element_types[i].isSimplex()) {
-      for (int j=0; j<dim+1; j++)
+      for (size_t j=0; j<dim+1; j++)
         tari_[simplexCounter][j] = target_elements[vertexCounter++];
 
       unsplitTargetElementNumbers[simplexCounter] = i;
@@ -577,7 +577,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
     // dim==dimworld: Then grids are artificially embedded in a dim+1 space,
     // the second grid needs to have its orientation reversed.
     // That way, the 'surface normals' of the two grids point towards each other.
-    for (unsigned int i = 0; i < numTargetSimplices; ++i)
+    for (size_t i = 0; i < numTargetSimplices; ++i)
       std::swap(tari_[i][0],tari_[i][1]);
 
   }
@@ -586,22 +586,22 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   //   copy the coordinates to internal arrays of coordinates
   // ////////////////////////////////////////////////////////////
   this->domc_.resize(domain_coords.size());
-  for (unsigned int i = 0; i < this->domc_.size(); ++i)
-    for (unsigned int j = 0; j < dimworld; ++j)
+  for (size_t i = 0; i < this->domc_.size(); ++i)
+    for (size_t j = 0; j < dimworld; ++j)
       this->domc_[i][j] = domain_coords[i][j];
 
   this->tarc_.resize(target_coords.size());
-  for (unsigned int i = 0; i < this->tarc_.size(); ++i)
-    for (unsigned int j = 0; j < dimworld; ++j)
+  for (size_t i = 0; i < this->tarc_.size(); ++i)
+    for (size_t j = 0; j < dimworld; ++j)
       this->tarc_[i][j] = target_coords[i][j];
 
   // psurface doesn't actually support the case dim==dimworld.  Therefore we
   // use a trick: we just embed everything in a space of dimension dimworld+1
   if (dim==dimworld) {
-    for (unsigned int i = 0; i < this->domc_.size(); ++i)
+    for (size_t i = 0; i < this->domc_.size(); ++i)
       domc_[i][dim] = 0;
 
-    for (unsigned int i = 0; i < this->domc_.size(); ++i)
+    for (size_t i = 0; i < this->domc_.size(); ++i)
       tarc_[i][dim] = 1;
   }
 
@@ -647,7 +647,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   //  and the local coordinates.
   // /////////////////////////////////////////////////////////////////////////////
 
-  for (int i=0; i<overlaps.size(); i++) {
+  for (size_t i=0; i<overlaps.size(); i++) {
 
     //
     if (domainIsSecondTriangle[overlaps[i].tris[0]][0]) {
@@ -684,7 +684,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
       assert(dim==2);
 
       // loop over the intersection corners
-      for (int j=0; j<dim+1; j++) {
+      for (size_t j=0; j<dim+1; j++) {
 
         // kinda umstaendlich: go from barycentric to reference coords, do the transformation
         // there, then go back to barycentric coordinates.  Streamlining this is left for later.
