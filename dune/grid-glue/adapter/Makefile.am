@@ -7,7 +7,6 @@ adapter_HEADERS = coordinatetransformation.hh\
 	gridglueremoteintersectionimpl.hh\
 	gridglueremoteintersectioniteratorimpl.hh\
 	gridgluevtkwriter.hh\
-	remoteintersectionconcepts.hh\
 	remoteintersection.hh\
 	remoteintersectioniterators.hh\
 	simplexgeometry.hh
