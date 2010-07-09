@@ -40,6 +40,7 @@
 #include <dune/grid-glue/merging/merger.hh>
 
 #include <psurface/ContactMapping.h>
+#include <psurface/DirectionFunction.h>
 
 
 /** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
@@ -219,6 +220,24 @@ private:
 
     /// @brief used to recompute original index of an overlap in "tarOrder"
     IntersectionPrimitive<dim,ctype>*         baseptr;
+  };
+
+  /** \brief Return a constant direction field for PSurface
+
+     This is used for overlapping couplings.  We need the direction fields (0,0,1) and (0,0,-1)
+     \tparam dir Value of the last component: either -1 or 1.
+   */
+  template <int dir>
+  struct ConstantDirection : public AnalyticDirectionFunction<psurfaceDimworld,ctype>
+  {
+    StaticVector<ctype,psurfaceDimworld> operator()(const StaticVector<ctype,psurfaceDimworld>& position) const
+    {
+      StaticVector<ctype,psurfaceDimworld> result;
+      for (size_t i=0; i<psurfaceDimworld-1; i++)
+        result[i] = 0;
+      result[psurfaceDimworld-1] = dir;
+      return result;
+    }
   };
 
 
@@ -572,16 +591,6 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
   }
 
-  if (dim==dimworld) {
-
-    // dim==dimworld: Then grids are artificially embedded in a dim+1 space,
-    // the second grid needs to have its orientation reversed.
-    // That way, the 'surface normals' of the two grids point towards each other.
-    for (size_t i = 0; i < numTargetSimplices; ++i)
-      std::swap(tari_[i][0],tari_[i][1]);
-
-  }
-
   // ////////////////////////////////////////////////////////////
   //   copy the coordinates to internal arrays of coordinates
   // ////////////////////////////////////////////////////////////
@@ -607,39 +616,27 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
   std::cout << "PSurfaceMerge building merged grid..." << std::endl;
 
-  // compute the merged grid using the psurface library
-  this->cm_.build(domc_, domi_,tarc_, tari_,
-                  domainDirections_, targetDirections_);
+  if (dim==dimworld) {
+
+    ConstantDirection<+1> positiveDirection;
+    ConstantDirection<-1> negativeDirection;
+
+    // compute the merged grid using the psurface library
+    this->cm_.build(domc_, domi_,tarc_, tari_,
+                    &positiveDirection, &negativeDirection);
+  } else {
+
+    // compute the merged grid using the psurface library
+    this->cm_.build(domc_, domi_,tarc_, tari_,
+                    domainDirections_, targetDirections_);
+
+  }
 
   std::cout << "Finished building merged grid!" << std::endl;
 
   // get the representation from the contact mapping object
   std::vector<IntersectionPrimitive<dim,ctype> > overlaps;
   this->cm_.getOverlaps(overlaps);
-
-  // ////////////////////////////////////////////////////////////////////////
-  //   If dim==dimworld we have inverted the target simplices above.
-  //   Hence we have to revert the local coordinates before returning them.
-  // ////////////////////////////////////////////////////////////////////////
-
-  if (dim==dimworld) {
-
-    for (size_t i=0; i<overlaps.size(); i++) {
-
-      if (dim==1) {
-        // Replacing 1-x is the proper coordinate inversion
-        for (int j=0; j<2; j++)
-          overlaps[i].localCoords[1][j][0] = 1 - overlaps[i].localCoords[1][j][0];
-      } else {
-        // The coordinates returned by psurface are the barycentric one.
-        // Hence it is sufficient to swap the first two coordinates.
-        for (int j=0; j<3; j++)
-          std::swap(overlaps[i].localCoords[1][j][0], overlaps[i].localCoords[1][j][1]);
-      }
-
-    }
-
-  }
 
   // /////////////////////////////////////////////////////////////////////////////
   //  If overlaps refer to triangular elements that have been created
