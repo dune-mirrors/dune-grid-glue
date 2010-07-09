@@ -136,7 +136,7 @@ class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, Globa
   enum { simplex_corners = coorddim + static_cast<int>(mydim == coorddim) };
 
 protected:
-
+#if 0
   /// @brief normal computation module specialized for the case of full-dimensional or
   /// manifold grids
   struct CommonNormalComputer
@@ -199,7 +199,7 @@ protected:
   };
 
   typedef typename Dune::SelectType<mydim == coorddim, LiftingNormalComputer, CommonNormalComputer>::Type NormalComputer;
-
+#endif
 public:
 
   typedef typename Base::Mapping Mapping;
@@ -227,11 +227,12 @@ public:
     Base::operator=(Base(type, coordinates));
 #endif
   }
-
+#if 0
   const Dune::FieldVector<typename G::ctype, coorddim + static_cast<int>(coorddim==mydim)> outerNormal(const Dune::FieldVector<typename G::ctype, mydim>& local) const
   {
     return This::NormalComputer::outerNormal(*this, local);
   }
+#endif
 };
 
 
