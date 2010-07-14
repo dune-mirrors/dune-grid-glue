@@ -1,6 +1,10 @@
 dnl This test searches for CGAL in the standard places.
 AC_DEFUN([ACX_CHECK_CGAL],
 [
+
+AC_ARG_WITH(cgal,
+    AC_HELP_STRING([--with-cgal=PATH],[directory where cgal is installed]))
+    
 acx_cgal_found=no
 
 AC_LANG_PUSH([C++])
