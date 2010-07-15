@@ -9,20 +9,19 @@ acx_cgal_found=no
 
 AC_LANG_PUSH([C++])
 
-CGAL_ROOT="./"
-
 if test "x$with_cgal" != x ; then
     if ! test -d $with_cgal; then
               AC_MSG_WARN([cgal directory $with_cgal does not exist!])
           else
               # expand tilde / other stuff
               CGAL_ROOT=`cd $with_cgal && pwd`
+              
+              # Point tests to local installation of CGAL, if requested
+              CPPFLAGS="$CPPFLAGS -I$CGAL_ROOT/include"
+              LDFLAGS="$LDFLAGS -L$CGAL_ROOT/lib"
+
     fi
 fi
-
-# Point tests to local installation of CGAL, if requested
-CPPFLAGS="$CPPFLAGS -I$CGAL_ROOT/include"
-LDFLAGS="$LDFLAGS -L$CGAL_ROOT/lib"
 
 dnl if test "$acx_cgal_found" == no; then
 	AC_CHECK_HEADER(CGAL/Exact_predicates_inexact_constructions_kernel.h, cgal_have_header=yes, cgal_have_header=no)
