@@ -354,7 +354,7 @@ GridGlue<GET1, GET2>::RemoteIntersectionImpl::RemoteIntersectionImpl(const Paren
     // world coordinates of the remote intersection corners
     Dune::array<Dune::FieldVector<ctype, TargetGridType::dimensionworld>, nSimplexCorners> corners_global;
 
-    unsigned int targetIndex = glue->merger_->template parent<0>(mergeindex);
+    unsigned int targetIndex = glue->merger_->template parent<1>(mergeindex);
     unsigned int unused;
     if (glue->tarext_.contains(targetIndex, unused))
     {
