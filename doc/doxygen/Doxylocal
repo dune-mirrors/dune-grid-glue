@@ -1,9 +1,9 @@
 INPUT                  += @srcdir@/mainpage \
                          @srcdir@/modules \
-                         @top_srcdir@/dune/glue/adapter \
-                         @top_srcdir@/dune/glue/merging \
-                         @top_srcdir@/dune/glue/misc \
-                         @top_srcdir@/dune/glue/surfaces
+                         @top_srcdir@/dune/grid-glue/adapter \
+                         @top_srcdir@/dune/grid-glue/common \
+                         @top_srcdir@/dune/grid-glue/extractors \
+                         @top_srcdir@/dune/grid-glue/merging
 EXCLUDE                +=
 EXAMPLE_PATH           +=
 EXAMPLE_PATTERNS       += *.dgf
