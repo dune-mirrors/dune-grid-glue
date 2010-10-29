@@ -21,8 +21,6 @@
 
 #include "gridextractiontraits.hh"
 #include "codim0extractor.hh"
-#include "simplicialsurfaceextractor.hh"
-#include "cubesurfaceextractor.hh"
 #include "generalsurfaceextractor.hh"
 #include "parallelextractor.hh"
 
@@ -31,7 +29,7 @@
  * @brief automatic deduction of a suitable extractor for the configuration
  * given in the extraction traits class
  *
- * The template parameter SET stands for a traits class which is a model of
+ * \tparam GSET Traits class which is a model of
  * SurfaceExtractionTraitsConcept. Given the configuration in this traits class
  * a suitable extractor is chosen and exported in the typedef ExtractorType.
  */
@@ -94,39 +92,21 @@ struct ExtractorSelector<GSET>::ParallelHelper<EXTR, true>
   typedef ParallelExtractor<EXTR> ExtractorType;
 };
 
-/*   S P E C I A L I Z A T I O N   F O R   S U R F A C E   E X T R A C T I O  N   */
+/*   S P E C I A L I Z A T I O N   F O R   C O D I M   1   E X T R A C T I O N   */
 /*   --------------------------------------------------------------------------   */
 
-/*   Surface in 3D is a 2D manifold   */
-
 template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::simplex>
-{
-  typedef SimplicialSurfaceExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::cube>
-{
-  typedef CubeSurfaceExtractor<typename LSET::GridView>  ExtractorType;
-};
-
-template<typename GSET>
-template<typename LSET>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, MeshClassification::hybrid>
+template<typename LSET,MeshClassification::MeshType mtype>
+struct ExtractorSelector<GSET>::Helper<LSET, 1, mtype>
 {
   typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
 };
 
 
 
-/*   S P E C I A L I Z A T I O N   F O R   M E S H   E X T R A C T I O  N   */
+/*   S P E C I A L I Z A T I O N   F O R   C O D I M   0   E X T R A C T I O  N   */
 /*   --------------------------------------------------------------------   */
 
-
-/*   2D mesh is extracted and interpreted as 2D manifold in 3D   */
 
 template<typename GSET>
 template<typename LSET,MeshClassification::MeshType mtype>
