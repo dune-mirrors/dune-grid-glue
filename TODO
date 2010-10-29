@@ -1,5 +1,4 @@
 - Von DefaultExtractionTraits bitte die Templateparameter dokumentieren!
-- MeshClassification sollte automatisch gehen.
 - Die IteratorFacades verwenden
 - Kann man mit weniger Präprozessorschaltern auskommen?
 - Does class Merger need the dimworld template parameter?

@@ -67,8 +67,8 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
   typedef typename GridType::LeafGridView DomGridView;
   typedef typename GridType::LeafGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::cube> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::cube> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
@@ -123,8 +123,8 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
   typedef typename GridType::LeafGridView DomGridView;
   typedef typename GridType::LeafGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::simplex> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::simplex> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
   GridGlue<DomTraits,TarTraits> glue(grid0.leafView(), grid1.leafView(), &merger);
 
@@ -212,8 +212,8 @@ void testTriangleGridsUG(Merger<double,2,2,2>& merger, const FieldVector<double,
   typedef GridType::LeafGridView DomGridView;
   typedef GridType::LeafGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::simplex> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::simplex> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
   GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
 
@@ -258,8 +258,8 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
   typedef typename GridType::LeafGridView DomGridView;
   typedef typename GridType::LeafGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::simplex> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0,MeshClassification::simplex> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
   GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
 

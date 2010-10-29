@@ -80,7 +80,7 @@ public:
 
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification>
+template <int dim>
 void test1d2dCouplingMatchingDimworld()
 {
   double slice = 0.0;
@@ -112,8 +112,8 @@ void test1d2dCouplingMatchingDimworld()
   typedef typename GridType2d::LevelGridView DomGridView;
   typedef typename GridType1d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,MeshClassification::cube> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
@@ -142,7 +142,7 @@ void test1d2dCouplingMatchingDimworld()
 }
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification>
+template <int dim>
 void test2d1dCouplingMatchingDimworld()
 {
   double slice = 0.0;
@@ -174,8 +174,8 @@ void test2d1dCouplingMatchingDimworld()
   typedef typename GridType1d::LevelGridView DomGridView;
   typedef typename GridType2d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::cube> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
@@ -204,7 +204,7 @@ void test2d1dCouplingMatchingDimworld()
 }
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification, bool par=false>
+template <int dim, bool par=false>
 void test1d2dCoupling(double slice=0.0)
 {
 
@@ -235,8 +235,8 @@ void test1d2dCoupling(double slice=0.0)
   typedef typename GridType2d::LevelGridView DomGridView;
   typedef typename GridType1d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,MeshClassification::cube, par> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0,ExtractorClassification, par> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1, par> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,0, par> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
@@ -268,7 +268,7 @@ void test1d2dCoupling(double slice=0.0)
 }
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification, bool par=false>
+template <int dim, bool par=false>
 void test2d1dCoupling(double slice=0.0)
 {
 
@@ -299,8 +299,8 @@ void test2d1dCoupling(double slice=0.0)
   typedef typename GridType1d::LevelGridView DomGridView;
   typedef typename GridType2d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0,MeshClassification::cube, par> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification, par> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,0, par> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1, par> TarTraits;
 
   typedef GridGlue<DomTraits,TarTraits> GlueType;
 
@@ -339,23 +339,19 @@ int main(int argc, char *argv[]) try
   // /////////////////////////////////////////////////////////////
 
   // Test a unit square versus a grid one dimension lower
-  std::cout << "==== 1d 2d cube ===== matching =============================\n";
-  test1d2dCouplingMatchingDimworld<2,MeshClassification::cube>();
-  std::cout << "==== 1d 2d simplex == matching =============================\n";
-  test1d2dCouplingMatchingDimworld<2,MeshClassification::simplex>();
-  std::cout << "============================================================\n";
+  std::cout << "==== 1d 2d == matching =============================\n";
+  test1d2dCouplingMatchingDimworld<2>();
+  std::cout << "====================================================\n";
 
   // Test a unit square versus a grid one dimension lower
-  std::cout << "==== 2d 1d cube ===== matching =============================\n";
-  test2d1dCouplingMatchingDimworld<2,MeshClassification::cube>();
-  std::cout << "==== 2d 1d simplex == matching =============================\n";
-  test2d1dCouplingMatchingDimworld<2,MeshClassification::simplex>();
-  std::cout << "============================================================\n";
+  std::cout << "==== 2d 1d == matching =============================\n";
+  test2d1dCouplingMatchingDimworld<2>();
+  std::cout << "====================================================\n";
 
   // Test a unit cube versus a grid one dimension lower
-  std::cout << "==== 3d 2d simplex == matching =============================\n";
-  test2d1dCouplingMatchingDimworld<3,MeshClassification::cube>();
-  std::cout << "============================================================\n";
+  std::cout << "==== 3d 2d == matching =============================\n";
+  test2d1dCouplingMatchingDimworld<3>();
+  std::cout << "====================================================\n";
 
   // /////////////////////////////////////////////////////////////
   //   Second set of tests: the grid have different dimensions,
@@ -364,28 +360,22 @@ int main(int argc, char *argv[]) try
   // /////////////////////////////////////////////////////////////
 
   // Test a unit square versus a grid one dimension lower
-  std::cout << "==== 1d 2d cube ===== nonmatching ==========================\n";
-  test1d2dCoupling<2,MeshClassification::cube>();
-  test1d2dCoupling<2,MeshClassification::cube, true>();
-  std::cout << "==== 1d 2d simplex=== nonmatching ==========================\n";
-  test1d2dCoupling<2,MeshClassification::simplex>();
-  test1d2dCoupling<2,MeshClassification::simplex, true>();
-  std::cout << "============================================================\n";
+  std::cout << "==== 1d 2d === nonmatching ==========================\n";
+  test1d2dCoupling<2>();
+  test1d2dCoupling<2, true>();
+  std::cout << "=====================================================\n";
 
   // Test a unit square versus a grid one dimension lower
-  std::cout << "==== 2d 1d cube ===== nonmatching ==========================\n";
-  test2d1dCoupling<2,MeshClassification::cube>();
-  test2d1dCoupling<2,MeshClassification::cube, true>();
-  std::cout << "==== 2d 1d simplex == nonmatching ==========================\n";
-  test2d1dCoupling<2,MeshClassification::simplex>();
-  test2d1dCoupling<2,MeshClassification::simplex, true>();
-  std::cout << "============================================================\n";
+  std::cout << "==== 2d 1d == nonmatching ==========================\n";
+  test2d1dCoupling<2>();
+  test2d1dCoupling<2, true>();
+  std::cout << "====================================================\n";
 
   // Test a unit cube versus a grid one dimension lower
-  std::cout << "==== 3d 2d cube ===== nonmatching ==========================\n";
-  test2d1dCoupling<3,MeshClassification::cube>();
-  test2d1dCoupling<3,MeshClassification::cube, true>();
-  std::cout << "============================================================\n";
+  std::cout << "==== 3d 2d == nonmatching ==========================\n";
+  test2d1dCoupling<3>();
+  test2d1dCoupling<3, true>();
+  std::cout << "====================================================\n";
 
   // /////////////////////////////////////////////////////////////
   //   Third set of tests: the grid have different dimensions,
@@ -394,29 +384,22 @@ int main(int argc, char *argv[]) try
   // /////////////////////////////////////////////////////////////
 
   // Test a unit square versus a grid one dimension lower
-  std::cout << "==== 1d 2d cube ===== nonmatching top ======================\n";
-  test1d2dCoupling<2,MeshClassification::cube>(1.0);
-  test1d2dCoupling<2,MeshClassification::cube, true>(1.0);
-  std::cout << "==== 1d 2d simplex == nonmatching top ======================\n";
-  test1d2dCoupling<2,MeshClassification::simplex>(1.0);
-  test1d2dCoupling<2,MeshClassification::simplex, true>(1.0);
-  std::cout << "============================================================\n";
+  std::cout << "==== 1d 2d == nonmatching top ======================\n";
+  test1d2dCoupling<2>(1.0);
+  test1d2dCoupling<2, true>(1.0);
+  std::cout << "====================================================\n";
 
   // Test a unit square versus a grid one dimension lower
-  std::cout << "==== 2d 1d cube ===== nonmatching top ======================\n";
-  test2d1dCoupling<2,MeshClassification::cube>(1.0);
-  test2d1dCoupling<2,MeshClassification::cube, true>(1.0);
-  std::cout << "============================================================\n";
-  std::cout << "==== 2d 1d simplex == nonmatching top ======================\n";
-  test2d1dCoupling<2,MeshClassification::simplex>(1.0);
-  test2d1dCoupling<2,MeshClassification::simplex, true>(1.0);
-  std::cout << "============================================================\n";
+  std::cout << "==== 2d 1d == nonmatching top ======================\n";
+  test2d1dCoupling<2>(1.0);
+  test2d1dCoupling<2, true>(1.0);
+  std::cout << "====================================================\n";
 
   // Test a unit cube versus a grid one dimension lower
-  std::cout << "==== 3d 2d cube ===== nonmatching top ======================\n";
-  test2d1dCoupling<3,MeshClassification::cube>(1.0);
-  test2d1dCoupling<3,MeshClassification::cube, true>(1.0);
-  std::cout << "============================================================\n";
+  std::cout << "==== 3d 2d == nonmatching top ======================\n";
+  test2d1dCoupling<3>(1.0);
+  test2d1dCoupling<3, true>(1.0);
+  std::cout << "====================================================\n";
 
 }
 catch (Exception e) {

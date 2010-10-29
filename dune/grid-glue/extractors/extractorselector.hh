@@ -21,7 +21,7 @@
 
 #include "gridextractiontraits.hh"
 #include "codim0extractor.hh"
-#include "generalsurfaceextractor.hh"
+#include "codim1extractor.hh"
 #include "parallelextractor.hh"
 
 
@@ -50,13 +50,8 @@ private:
    * world dimension (coordinate dimension), the grid's dimension and the dimension of
    * the extracted surface are treated. Only thing left is to implement classes that
    * can do the extraction for all of these combinations.
-   * Note:
-   * So far only the simplicial extractors for surfaces and meshes are fully implemented.
-   * For all other configurations the helper class simply does not export an extractor
-   * type, so the compiler will notice and fail.
-   * Also note that only using the specialized versions of this helper struct will lead to success.
    */
-  template<typename LSET, int codimension, MeshClassification::MeshType mtype>
+  template<typename LSET, int codimension>
   struct Helper
   {};
 
@@ -69,7 +64,7 @@ public:
   /// @brief export the type of the deduced extractor
   typedef
   typename ParallelHelper<
-      typename Helper<GSET, GSET::codimension, GSET::mesh>::ExtractorType,
+      typename Helper<GSET, GSET::codimension>::ExtractorType,
       GSET::parallel
       >::ExtractorType
   ExtractorType;
@@ -96,21 +91,21 @@ struct ExtractorSelector<GSET>::ParallelHelper<EXTR, true>
 /*   --------------------------------------------------------------------------   */
 
 template<typename GSET>
-template<typename LSET,MeshClassification::MeshType mtype>
-struct ExtractorSelector<GSET>::Helper<LSET, 1, mtype>
+template<typename LSET>
+struct ExtractorSelector<GSET>::Helper<LSET, 1>
 {
-  typedef GeneralSurfaceExtractor<typename LSET::GridView>  ExtractorType;
+  typedef Codim1Extractor<typename LSET::GridView>  ExtractorType;
 };
 
 
 
-/*   S P E C I A L I Z A T I O N   F O R   C O D I M   0   E X T R A C T I O  N   */
+/*   S P E C I A L I Z A T I O N   F O R   C O D I M   0   E X T R A C T I O N   */
 /*   --------------------------------------------------------------------   */
 
 
 template<typename GSET>
-template<typename LSET,MeshClassification::MeshType mtype>
-struct ExtractorSelector<GSET>::Helper<LSET, 0, mtype>
+template<typename LSET>
+struct ExtractorSelector<GSET>::Helper<LSET, 0>
 {
   typedef Codim0Extractor<typename LSET::GridView>  ExtractorType;
 };

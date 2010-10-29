@@ -20,18 +20,6 @@
 #ifndef GRIDEXTRACTIONTRAITS_HH_
 #define GRIDEXTRACTIONTRAITS_HH_
 
-/// @brief enum helper to identify a grid's mesh type
-
-namespace MeshClassification
-{
-  enum MeshType
-  {
-    hybrid  = 0,
-    simplex = 1,
-    cube    = 2
-  };
-}
-
 /**
  * @class GridExtractionTraitsConcept
  * @brief concept check class for extraction traits classes
@@ -44,31 +32,24 @@ public:
   {
     typedef typename T::GridView TempGridView;
     enum { codimension = T::codimension };
-    this->mesh = T::mesh;
     this->par  = T::parallel;
   }
 
 private:
 
-  MeshClassification::MeshType mesh;
   bool par;
 };
 
 
 /**
- * @brief default configuration of surface extraction traits,
- * deduced from type of grid and descriptor
+ * @brief default configuration of extraction traits,
+ * deduced from type of grid and extractor codimension.
  *
  * This can be overloaded in order to change single components.
  * But actually such a small class is rewritten pretty quickly...
  * (efficiency!)
- * !!IMPORTANT!!
- * Use the third parameter with care! E.g. specifying "simplex" for a given grid for which a simplicial
- * extractor would have been chosen anyway results in ambiguous template specializations and thus
- * deducing the "right" specialization of the GridMeshTraits struct is not possible for the compiler!
- * Remove the explicit MeshType argument in that case and you're fine.
  */
-template<typename GV, int extractorCodim, MeshClassification::MeshType mtype = MeshClassification::hybrid, bool par=false>
+template<typename GV, int extractorCodim, bool par=false>
 struct DefaultExtractionTraits
 {
   /// @brief the grid's type
@@ -76,9 +57,6 @@ struct DefaultExtractionTraits
 
   /// @brief Extractor codimension
   enum { codimension = extractorCodim };
-
-  /// @brief determines the type of the extractor used
-  static const MeshClassification::MeshType mesh = mtype;
 
   /// @brief is this a parallel mesh?
   static const bool parallel = par;

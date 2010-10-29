@@ -68,7 +68,7 @@ public:
 };
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification>
+template <int dim>
 void testMatchingCubeGrids()
 {
 
@@ -97,8 +97,8 @@ void testMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1> TarTraits;
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
@@ -129,7 +129,7 @@ void testMatchingCubeGrids()
 }
 
 
-template <int dim, MeshClassification::MeshType ExtractorClassification>
+template <int dim>
 void testNonMatchingCubeGrids()
 {
 
@@ -159,8 +159,8 @@ void testNonMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1> TarTraits;
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
@@ -271,7 +271,7 @@ public:
 };
 
 
-template <int dim, class DomGen, class TarGen, MeshClassification::MeshType ExtractorClassification>
+template <int dim, class DomGen, class TarGen>
 void testParallelCubeGrids()
 {
   // ///////////////////////////////////////
@@ -295,8 +295,8 @@ void testParallelCubeGrids()
   typedef typename GridType1::LevelGridView TarGridView;
 
   // always test the extractor via the parallel extractor classes, even if we use a seqqential grid.
-  typedef DefaultExtractionTraits<DomGridView,1,ExtractorClassification,true> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,ExtractorClassification,true> TarTraits;
+  typedef DefaultExtractionTraits<DomGridView,1,true> DomTraits;
+  typedef DefaultExtractionTraits<TarGridView,1,true> TarTraits;
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
@@ -343,12 +343,12 @@ int main(int argc, char *argv[]) try
 
   // Test two unit squares
   std::cout << "==== 2D hybrid =============================================\n";
-  testMatchingCubeGrids<2,MeshClassification::hybrid>();
-  testNonMatchingCubeGrids<2,MeshClassification::hybrid>();
-  testParallelCubeGrids<2,Seq,Seq,MeshClassification::hybrid>();
-  testParallelCubeGrids<2,Par,Seq,MeshClassification::hybrid>();
-  testParallelCubeGrids<2,Seq,Par,MeshClassification::hybrid>();
-  testParallelCubeGrids<2,Par,Par,MeshClassification::hybrid>();
+  testMatchingCubeGrids<2>();
+  testNonMatchingCubeGrids<2>();
+  testParallelCubeGrids<2,Seq,Seq>();
+  testParallelCubeGrids<2,Par,Seq>();
+  testParallelCubeGrids<2,Seq,Par>();
+  testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
   // 3d Tests
@@ -357,12 +357,12 @@ int main(int argc, char *argv[]) try
 
   // Test two unit cubes
   std::cout << "==== 3D hybrid =============================================\n";
-  testMatchingCubeGrids<3,MeshClassification::hybrid>();
-  testNonMatchingCubeGrids<3,MeshClassification::hybrid>();
-  testParallelCubeGrids<3,Seq3d,Seq3d,MeshClassification::hybrid>();
-  testParallelCubeGrids<3,Par3d,Seq3d,MeshClassification::hybrid>();
-  testParallelCubeGrids<3,Seq3d,Par3d,MeshClassification::hybrid>();
-  testParallelCubeGrids<3,Par3d,Par3d,MeshClassification::hybrid>();
+  testMatchingCubeGrids<3>();
+  testNonMatchingCubeGrids<3>();
+  testParallelCubeGrids<3,Seq3d,Seq3d>();
+  testParallelCubeGrids<3,Par3d,Seq3d>();
+  testParallelCubeGrids<3,Seq3d,Par3d>();
+  testParallelCubeGrids<3,Par3d,Par3d>();
   std::cout << "============================================================\n";
 
 }
