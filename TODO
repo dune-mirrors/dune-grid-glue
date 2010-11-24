@@ -1,6 +1,5 @@
 - Von DefaultExtractionTraits bitte die Templateparameter dokumentieren!
 - Die IteratorFacades verwenden
-- Does class Merger need the dimworld template parameter?
 - Test: Gibt numberInDomainEntity() bei Codim0-Kopplungen immer Null zurück?
 - orientedSubface für Subentities beliebiger Kodimension verallgemeinern
 - GridGlueVTKWriter doesn't seem to work
@@ -9,5 +8,17 @@
 For the upcoming paper:
 - remove target/domain naming
 - move parallel index sets from dune-istl to dune-common
+- make parallel merging as local as possible (only on matched bounding boxes)
 - implement 3d cgal backend
 - Put everything into the namespace Dune::GridGlue
+
+Interface changes:
+- Merger gets (CoordType, dimG1, dimG2, dimworld, mergedDim) template parameters
+- Merger::build(Range<CoordG1> verticesG1,
+                Range<ExtractedEntityG1> entitiesG1,
+                Range<CoordG2> verticesG2,
+                Range<ExtractedEntityG2> entitiesG2)
+- ExtractedEntity (name to be discussed) provides:
+  * list of vertexIds
+  * Dune::GeometryType
+- Range describes begin and end iterator
