@@ -13,9 +13,7 @@
 #include <dune/grid-glue/extractors/gridextractiontraits.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
-#if HAVE_PSURFACE
 #include <dune/grid-glue/merging/psurfacemerge.hh>
-#endif
 #if HAVE_CGAL
 #include <dune/grid-glue/merging/cgalmerge.hh>
 #endif

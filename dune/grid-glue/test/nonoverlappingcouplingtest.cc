@@ -12,9 +12,7 @@
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/gridextractiontraits.hh>
-#if HAVE_PSURFACE
 #include <dune/grid-glue/merging/psurfacemerge.hh>
-#endif
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>

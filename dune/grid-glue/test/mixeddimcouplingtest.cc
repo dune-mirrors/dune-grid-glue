@@ -117,6 +117,7 @@ void test1d2dCouplingMatchingDimworld()
 
   typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
+#if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -138,7 +139,9 @@ void test1d2dCouplingMatchingDimworld()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-
+#else
+    #warning Not testing, because psurface backend is not available.
+#endif
 }
 
 
@@ -179,6 +182,7 @@ void test2d1dCouplingMatchingDimworld()
 
   typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
+#if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -200,7 +204,9 @@ void test2d1dCouplingMatchingDimworld()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-
+#else
+    #warning Not testing, because psurface backend is not available.
+#endif
 }
 
 
@@ -240,6 +246,7 @@ void test1d2dCoupling(double slice=0.0)
 
   typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
+#if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -264,7 +271,9 @@ void test1d2dCoupling(double slice=0.0)
   // ///////////////////////////////////////////
 
   testCoupling(glue, (CoordinateTransformation<dim,dim,double>*)nullptr, &trafo);
-
+#else
+    #warning Not testing, because psurface backend is not available.
+#endif
 }
 
 
@@ -304,6 +313,7 @@ void test2d1dCoupling(double slice=0.0)
 
   typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
+#if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
 
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -328,7 +338,9 @@ void test2d1dCoupling(double slice=0.0)
   // ///////////////////////////////////////////
 
   testCoupling(glue, &trafo, (CoordinateTransformation<dim,dim,double>*)nullptr);
-
+#else
+    #warning Not testing, because psurface backend is not available.
+#endif
 }
 
 int main(int argc, char *argv[]) try
