@@ -30,8 +30,8 @@ LDADD       += $(UG_LIBS)
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
 if MPI
 nonoverlappingcouplingtest_mpi_SOURCES = nonoverlappingcouplingtest.cc
-nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(MPI_CPPFLAGS)
-nonoverlappingcouplingtest_mpi_LDFLAGS = $(AM_LDFLAGS) $(MPI_LDFLAGS)
+nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
+nonoverlappingcouplingtest_mpi_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
