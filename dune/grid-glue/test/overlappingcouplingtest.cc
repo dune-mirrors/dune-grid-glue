@@ -70,7 +70,7 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
   typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   GlueType glue(grid0.leafView(), grid1.leafView(), &merger);
 
@@ -126,7 +126,7 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
   typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
-  GridGlue<DomTraits,TarTraits> glue(grid0.leafView(), grid1.leafView(), &merger);
+  ::GridGlue<DomTraits,TarTraits> glue(grid0.leafView(), grid1.leafView(), &merger);
 
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
@@ -215,7 +215,7 @@ void testTriangleGridsUG(Merger<double,2,2,2>& merger, const FieldVector<double,
   typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
-  GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
+  ::GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
 
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
@@ -261,7 +261,7 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
   typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
-  GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
+  ::GridGlue<DomTraits,TarTraits> glue(grid0->leafView(), grid1->leafView(), &merger);
 
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;

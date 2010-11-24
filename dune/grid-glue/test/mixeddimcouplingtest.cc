@@ -115,7 +115,7 @@ void test1d2dCouplingMatchingDimworld()
   typedef DefaultExtractionTraits<DomGridView,1> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   PSurfaceMerge<dim-1,dim,double> merger;
 
@@ -177,7 +177,7 @@ void test2d1dCouplingMatchingDimworld()
   typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1> TarTraits;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   PSurfaceMerge<dim-1,dim,double> merger;
 
@@ -238,7 +238,7 @@ void test1d2dCoupling(double slice=0.0)
   typedef DefaultExtractionTraits<DomGridView,1, par> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,0, par> TarTraits;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   PSurfaceMerge<dim-1,dim,double> merger;
 
@@ -302,7 +302,7 @@ void test2d1dCoupling(double slice=0.0)
   typedef DefaultExtractionTraits<DomGridView,0, par> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1, par> TarTraits;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   PSurfaceMerge<dim-1,dim,double> merger;
 
