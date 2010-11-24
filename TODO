@@ -1,6 +1,5 @@
 - Von DefaultExtractionTraits bitte die Templateparameter dokumentieren!
 - Die IteratorFacades verwenden
-- Kann man mit weniger Präprozessorschaltern auskommen?
 - Does class Merger need the dimworld template parameter?
 - Test: Gibt numberInDomainEntity() bei Codim0-Kopplungen immer Null zurück?
 - orientedSubface für Subentities beliebiger Kodimension verallgemeinern
@@ -8,7 +7,7 @@
 - GridGlueVTKWriter crashes when started on an empty GridGlue
 
 For the upcoming paper:
+- remove target/domain naming
 - move parallel index sets from dune-istl to dune-common
 - implement 3d cgal backend
-- codim1-extractor should not triangulate the extracted faces
 - Put everything into the namespace Dune::GridGlue
