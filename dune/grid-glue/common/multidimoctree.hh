@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 
+#include <iostream>
 #include <vector>
 #include <deque>
 #include <map>
@@ -672,10 +673,13 @@ void MultiDimOctree<T, F, C, dim, uniform_access>::info()
     }
   }
 
-  printf("MultiDimOctree: %d nodes, %d leafs (%.2f MB)\n",
-         nNodes-nLeafs, nLeafs, (float) memSize()/(1024*1024));
-  printf("MultiDimOctree: %d elements, (%.2f per leaf, %d...%d)\n",
-         nElements, (float)nElements/nLeafs, minNumElements, maxNumElements);
+  std::cout << "MultiDimOctree: "
+            << nNodes-nLeafs << " nodes, "
+            << nLeafs << " leafs (" << (float) memSize()/(1024*1024) << " MB)"
+            << std::endl
+            << "                "
+            << nElements << " elements, (" << (float)nElements/nLeafs << " per leaf, "
+            << minNumElements << "..." << maxNumElements << ")" << std::endl;
 }
 
 
