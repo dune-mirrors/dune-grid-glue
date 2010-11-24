@@ -6,3 +6,8 @@
 - orientedSubface für Subentities beliebiger Kodimension verallgemeinern
 - GridGlueVTKWriter doesn't seem to work
 - GridGlueVTKWriter crashes when started on an empty GridGlue
+
+For the upcoming paper:
+- move parallel index sets from dune-istl to dune-common
+- implement 3d cgal backend
+- codim1-extractor should not triangulate the extracted faces
