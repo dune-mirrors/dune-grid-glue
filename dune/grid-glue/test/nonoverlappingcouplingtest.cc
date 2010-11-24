@@ -102,7 +102,7 @@ void testMatchingCubeGrids()
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -164,7 +164,7 @@ void testNonMatchingCubeGrids()
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
@@ -304,7 +304,7 @@ void testParallelCubeGrids()
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
