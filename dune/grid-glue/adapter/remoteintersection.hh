@@ -38,12 +38,8 @@ namespace RemoteIntersectionInterface
   class RemoteIntersection
   {
   private:
-    /*   C H E C K   C O N C E P T S   */
 
     typedef RemoteIntersectionImpl RemoteIntersectionImplType;
-#ifdef GRID_GLUE_USE_CONCEPTS
-    CLASS_REQUIRE(RemoteIntersectionImplType, RemoteIntersectionConcept);
-#endif
 
   private:
 
