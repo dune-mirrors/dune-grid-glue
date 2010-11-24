@@ -344,17 +344,19 @@ public:
   /// The indices are then in 0..nSimplices()-1
   unsigned int nSimplices() const;
 
+private:
+
   /**
-   * @brief check if given domain simplex could be matched in the merged grid
+   * @brief check if given grid1 simplex could be matched in the merged grid
    *
-   * The result of this member even is positive if a domain simplex only is
+   * The result of this member even is positive if a grid1 simplex only is
    * partially refined! That means the simplex is not necessarily completely
    * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "domainLocalToMerged" or "domainGlobalToMerged".
-   * @param idx the index of the domain simplex
+   * was mapped can be asked via "grid1LocalToMerged" or "grid1GlobalToMerged".
+   * @param idx the index of the grid1 simplex
    * @return TRUE <=> refined in merged grid
    */
-  bool domainSimplexMatched(unsigned int idx) const;
+  bool grid1SimplexMatched(unsigned int idx) const;
 
   /**
    * @brief check if given target simplex could be matched in the merged grid
@@ -366,32 +368,32 @@ public:
    * @param idx the index of the target simplex
    * @return TRUE <=> refined in merged grid
    */
-  bool targetSimplexMatched(unsigned int idx) const;
+  bool grid2SimplexMatched(unsigned int idx) const;
 
 
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
 
   /**
-   * @brief get index of domain parent simplex for given merged grid simplex
+   * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
-   * @return index of the domain parent simplex
+   * @return index of the grid1 parent simplex
    */
-  unsigned int domainParent(unsigned int idx) const;
+  unsigned int grid1Parent(unsigned int idx) const;
 
   /**
    * @brief get index of target parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the target parent simplex
    */
-  unsigned int targetParent(unsigned int idx) const;
+  unsigned int grid2Parent(unsigned int idx) const;
 
   /**
-   * @brief get the merged grid simplices refining a given domain simplex
-   * @param idx index of domain simplex
+   * @brief get the merged grid simplices refining a given grid1 simplex
+   * @param idx index of grid1 simplex
    * @param indices will be resized first and then filled with the refining simplices
    * @return TRUE <=> given simplex could be matched and is part of the merged grid
    */
-  bool domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
+  bool grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
 
   /**
    * @brief get the merged grid simplices refining a given target simplex
@@ -399,19 +401,19 @@ public:
    * @param indices will be resized first and then filled with the refining simplices
    * @return TRUE <=> given simplex could be matched and is part of the merged grid
    */
-  bool targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
+  bool grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
 
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
 
   /**
-   * @brief get the domain parent's simplex local coordinates for a particular merged grid simplex corner
-   * (parent's index can be obtained via "domainParent")
+   * @brief get the grid1 parent's simplex local coordinates for a particular merged grid simplex corner
+   * (parent's index can be obtained via "grid1Parent")
    * @param idx the index of the merged grid simplex
    * @param corner the index of the simplex' corner
-   * @return local coordinates in parent domain simplex
+   * @return local coordinates in parent grid1 simplex
    */
-  LocalCoords domainParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner) const;
 
   /**
    * @brief get the target parent's simplex local coordinates for a particular merged grid simplex corner
@@ -420,7 +422,7 @@ public:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent target simplex
    */
-  LocalCoords targetParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner) const;
 
 };
 
@@ -746,7 +748,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
 
 
 template<int dim, int dimworld, typename T>
-inline bool PSurfaceMerge<dim, dimworld, T>::domainSimplexMatched(unsigned int idx) const
+inline bool PSurfaceMerge<dim, dimworld, T>::grid1SimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstDomainParent" is in the valid range
   return (this->olm_.firstDomainParent(idx) < this->olm_.nOverlaps());
@@ -754,7 +756,7 @@ inline bool PSurfaceMerge<dim, dimworld, T>::domainSimplexMatched(unsigned int i
 
 
 template<int dim, int dimworld, typename T>
-inline bool PSurfaceMerge<dim, dimworld, T>::targetSimplexMatched(unsigned int idx) const
+inline bool PSurfaceMerge<dim, dimworld, T>::grid2SimplexMatched(unsigned int idx) const
 {
   // if the simplex was matched the result returned by "firstTargetParent" is in the valid range
   return (this->olm_.firstTargetParent(idx) < this->olm_.nOverlaps());
@@ -762,14 +764,14 @@ inline bool PSurfaceMerge<dim, dimworld, T>::targetSimplexMatched(unsigned int i
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int PSurfaceMerge<dim, dimworld, T>::domainParent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int idx) const
 {
   return this->olm_.domain(idx).tris[0];
 }
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int PSurfaceMerge<dim, dimworld, T>::targetParent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int idx) const
 {
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
   return this->olm_.domain(idx).tris[1];
@@ -777,7 +779,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::targetParent(unsigned int i
 
 
 template<int dim, int dimworld, typename T>
-bool PSurfaceMerge<dim, dimworld, T>::domainSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
+bool PSurfaceMerge<dim, dimworld, T>::grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
   unsigned int first = this->olm_.firstDomainParent(idx);
   unsigned int count = 0;
@@ -801,7 +803,7 @@ bool PSurfaceMerge<dim, dimworld, T>::domainSimplexRefined(unsigned int idx, std
 
 
 template<int dim, int dimworld, typename T>
-bool PSurfaceMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
+bool PSurfaceMerge<dim, dimworld, T>::grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
   unsigned int first = this->olm_.firstTargetParent(idx);
   unsigned int count = 0;
@@ -825,7 +827,7 @@ bool PSurfaceMerge<dim, dimworld, T>::targetSimplexRefined(unsigned int idx, std
 
 
 template<int dim, int dimworld, typename T>
-typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
@@ -854,7 +856,7 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 
 
 template<int dim, int dimworld, typename T>
-typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
   const IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);

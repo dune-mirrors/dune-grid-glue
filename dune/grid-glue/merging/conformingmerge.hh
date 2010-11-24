@@ -69,12 +69,12 @@ private:
 
      The result is a set of simplices.
    */
-  virtual void computeIntersection(const Dune::GeometryType& domainElementType,
-                                   const std::vector<Dune::FieldVector<T,dimworld> >& domainElementCorners,
-                                   unsigned int domainIndex,
-                                   const Dune::GeometryType& targetElementType,
-                                   const std::vector<Dune::FieldVector<T,dimworld> >& targetElementCorners,
-                                   unsigned int targetIndex);
+  virtual void computeIntersection(const Dune::GeometryType& grid1ElementType,
+                                   const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
+                                   unsigned int grid1Index,
+                                   const Dune::GeometryType& grid2ElementType,
+                                   const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                                   unsigned int grid2Index);
 
 public:
 
@@ -82,99 +82,100 @@ public:
     tolerance_(tolerance)
   {}
 
+private:
 
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
 
   /**
-   * @brief check if given domain simplex could be matched in the merged grid
+   * @brief check if given grid1 simplex could be matched in the merged grid
    *
-   * The result of this member even is positive if a domain simplex only is
+   * The result of this member even is positive if a grid1 simplex only is
    * partially refined! That means the simplex is not necessarily completely
    * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "domainLocalToMerged" or "domainGlobalToMerged".
-   * @param idx the index of the domain simplex
+   * was mapped can be asked via "grid1LocalToMerged" or "grid1GlobalToMerged".
+   * @param idx the index of the grid1 simplex
    * @return TRUE <=> refined in merged grid
    */
-  bool domainSimplexMatched(unsigned int idx) const;
+  bool grid1SimplexMatched(unsigned int idx) const;
 
   /**
-   * @brief check if given target simplex could be matched in the merged grid
+   * @brief check if given grid2 simplex could be matched in the merged grid
    *
-   * The result of this member even is positive if a target simplex only is
+   * The result of this member even is positive if a grid2 simplex only is
    * partially refined! That means the simplex is not necessarily completely
    * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "targetLocalToMerged" or "targetGlobalToMerged".
-   * @param idx the index of the target simplex
+   * was mapped can be asked via "grid2LocalToMerged" or "grid2GlobalToMerged".
+   * @param idx the index of the grid2 simplex
    * @return TRUE <=> refined in merged grid
    */
-  bool targetSimplexMatched(unsigned int idx) const;
+  bool grid2SimplexMatched(unsigned int idx) const;
 
 
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
 
   /**
-   * @brief get index of domain parent simplex for given merged grid simplex
+   * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
-   * @return index of the domain parent simplex
+   * @return index of the grid1 parent simplex
    */
-  unsigned int domainParent(unsigned int idx) const;
+  unsigned int grid1Parent(unsigned int idx) const;
 
   /**
-   * @brief get index of target parent simplex for given merged grid simplex
+   * @brief get index of grid2 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
-   * @return index of the target parent simplex
+   * @return index of the grid2 parent simplex
    */
-  unsigned int targetParent(unsigned int idx) const;
+  unsigned int grid2Parent(unsigned int idx) const;
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
 
   /**
-   * @brief get the domain parent's simplex local coordinates for a particular merged grid simplex corner
-   * (parent's index can be obtained via "domainParent")
+   * @brief get the grid1 parent's simplex local coordinates for a particular merged grid simplex corner
+   * (parent's index can be obtained via "grid1Parent")
    * @param idx the index of the merged grid simplex
    * @param corner the index of the simplex' corner
-   * @return local coordinates in parent domain simplex
+   * @return local coordinates in parent grid1 simplex
    */
-  LocalCoords domainParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner) const;
 
   /**
-   * @brief get the target parent's simplex local coordinates for a particular merged grid simplex corner
-   * (parent's index can be obtained via "targetParent")
+   * @brief get the grid2 parent's simplex local coordinates for a particular merged grid simplex corner
+   * (parent's index can be obtained via "grid2Parent")
    * @param idx the index of the merged grid simplex
    * @param corner the index of the simplex' corner
-   * @return local coordinates in parent target simplex
+   * @return local coordinates in parent grid2 simplex
    */
-  LocalCoords targetParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner) const;
 
 };
 
 
 template<int dim, int dimworld, typename T>
-void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::GeometryType& domainElementType,
-                                                            const std::vector<Dune::FieldVector<T,dimworld> >& domainElementCorners,
-                                                            unsigned int domainIndex,
-                                                            const Dune::GeometryType& targetElementType,
-                                                            const std::vector<Dune::FieldVector<T,dimworld> >& targetElementCorners,
-                                                            unsigned int targetIndex)
+void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
+                                                            const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
+                                                            unsigned int grid1Index,
+                                                            const Dune::GeometryType& grid2ElementType,
+                                                            const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                                                            unsigned int grid2Index)
 {
   // A few consistency checks
-  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(domainElementType).size(dim) == domainElementCorners.size()));
-  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(targetElementType).size(dim) == targetElementCorners.size()));
+  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
+  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
 
   // the intersection is either conforming or empty, hence the GeometryTypes have to match
-  if (domainElementType != targetElementType)
+  if (grid1ElementType != grid2ElementType)
     return;
 
   // ////////////////////////////////////////////////////////////
   //   Find correspondences between the different corners
   // ////////////////////////////////////////////////////////////
-  std::vector<int> other(domainElementCorners.size(), -1);
+  std::vector<int> other(grid1ElementCorners.size(), -1);
 
-  for (unsigned int i=0; i<domainElementCorners.size(); i++) {
+  for (unsigned int i=0; i<grid1ElementCorners.size(); i++) {
 
-    for (unsigned int j=0; j<targetElementCorners.size(); j++) {
+    for (unsigned int j=0; j<grid2ElementCorners.size(); j++) {
 
-      if ( (domainElementCorners[i]-targetElementCorners[j]).two_norm() < tolerance_ ) {
+      if ( (grid1ElementCorners[i]-grid2ElementCorners[j]).two_norm() < tolerance_ ) {
 
         other[i] = j;
         break;
@@ -183,7 +184,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
 
     }
 
-    // No corresponding target vertex found for this domain vertex
+    // No corresponding grid2 vertex found for this grid1 vertex
     if (other[i] == -1)
       return;
 
@@ -194,50 +195,50 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
   // ////////////////////////////////////////////////////////////
 
   /** \todo Currently the RemoteIntersections have to be simplices */
-  if (domainElementType.isSimplex()) {
+  if (grid1ElementType.isSimplex()) {
 
     this->intersections_.push_back(RemoteSimplicialIntersection());
 
-    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(domainElementType);
+    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
 
     for (int i=0; i<refElement.size(dim); i++) {
-      this->intersections_.back().domainLocal_[i] = refElement.position(i,dim);
-      this->intersections_.back().targetLocal_[i] = refElement.position(other[i],dim);
+      this->intersections_.back().grid1Local_[i] = refElement.position(i,dim);
+      this->intersections_.back().grid2Local_[i] = refElement.position(other[i],dim);
     }
 
-    this->intersections_.back().domainEntity_ = domainIndex;
-    this->intersections_.back().targetEntity_ = targetIndex;
+    this->intersections_.back().grid1Entity_ = grid1Index;
+    this->intersections_.back().grid2Entity_ = grid2Index;
 
-  } else if (domainElementType.isQuadrilateral()) {
+  } else if (grid1ElementType.isQuadrilateral()) {
 
     // split the quadrilateral into two triangles
-    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(domainElementType);
+    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
 
     // triangle 1
     RemoteSimplicialIntersection newSimplicialIntersection1;
 
     for (int i=0; i<3; i++) {
-      newSimplicialIntersection1.domainLocal_[i] = refElement.position(i,dim);
-      newSimplicialIntersection1.targetLocal_[i] = refElement.position(other[i],dim);
+      newSimplicialIntersection1.grid1Local_[i] = refElement.position(i,dim);
+      newSimplicialIntersection1.grid2Local_[i] = refElement.position(other[i],dim);
     }
 
-    newSimplicialIntersection1.domainEntity_ = domainIndex;
-    newSimplicialIntersection1.targetEntity_ = targetIndex;
+    newSimplicialIntersection1.grid1Entity_ = grid1Index;
+    newSimplicialIntersection1.grid2Entity_ = grid2Index;
 
     this->intersections_.push_back(newSimplicialIntersection1);
 
     // triangle 2
     RemoteSimplicialIntersection newSimplicialIntersection2;
 
-    newSimplicialIntersection2.domainLocal_[0] = refElement.position(2,dim);
-    newSimplicialIntersection2.targetLocal_[0] = refElement.position(other[2],dim);
-    newSimplicialIntersection2.domainLocal_[1] = refElement.position(1,dim);
-    newSimplicialIntersection2.targetLocal_[1] = refElement.position(other[1],dim);
-    newSimplicialIntersection2.domainLocal_[2] = refElement.position(3,dim);
-    newSimplicialIntersection2.targetLocal_[2] = refElement.position(other[3],dim);
+    newSimplicialIntersection2.grid1Local_[0] = refElement.position(2,dim);
+    newSimplicialIntersection2.grid2Local_[0] = refElement.position(other[2],dim);
+    newSimplicialIntersection2.grid1Local_[1] = refElement.position(1,dim);
+    newSimplicialIntersection2.grid2Local_[1] = refElement.position(other[1],dim);
+    newSimplicialIntersection2.grid1Local_[2] = refElement.position(3,dim);
+    newSimplicialIntersection2.grid2Local_[2] = refElement.position(other[3],dim);
 
-    newSimplicialIntersection2.domainEntity_ = domainIndex;
-    newSimplicialIntersection2.targetEntity_ = targetIndex;
+    newSimplicialIntersection2.grid1Entity_ = grid1Index;
+    newSimplicialIntersection2.grid2Entity_ = grid2Index;
 
     this->intersections_.push_back(newSimplicialIntersection2);
 
@@ -249,47 +250,47 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
 
 
 template<int dim, int dimworld, typename T>
-inline bool ConformingMerge<dim, dimworld, T>::domainSimplexMatched(unsigned int idx) const
+inline bool ConformingMerge<dim, dimworld, T>::grid1SimplexMatched(unsigned int idx) const
 {
-  // naive: we assume that there is a partner for all domain entities
+  // naive: we assume that there is a partner for all grid1 entities
   return true;
 }
 
 
 template<int dim, int dimworld, typename T>
-inline bool ConformingMerge<dim, dimworld, T>::targetSimplexMatched(unsigned int idx) const
+inline bool ConformingMerge<dim, dimworld, T>::grid2SimplexMatched(unsigned int idx) const
 {
-  // naive: we assume that there is a partner for all target entities
+  // naive: we assume that there is a partner for all grid2 entities
   return true;
 }
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int ConformingMerge<dim, dimworld, T>::domainParent(unsigned int idx) const
+inline unsigned int ConformingMerge<dim, dimworld, T>::grid1Parent(unsigned int idx) const
 {
-  return this->intersections_[idx].domainEntity_;
+  return this->intersections_[idx].grid1Entity_;
 }
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int ConformingMerge<dim, dimworld, T>::targetParent(unsigned int idx) const
+inline unsigned int ConformingMerge<dim, dimworld, T>::grid2Parent(unsigned int idx) const
 {
-  // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
-  return this->intersections_[idx].targetEntity_;
+  // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after grid1 parent indices!!
+  return this->intersections_[idx].grid2Entity_;
 }
 
 
 template<int dim, int dimworld, typename T>
-typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::domainParentLocal(unsigned int idx, unsigned int corner) const
+typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
 {
-  return this->intersections_[idx].domainLocal_[corner];
+  return this->intersections_[idx].grid1Local_[corner];
 }
 
 
 template<int dim, int dimworld, typename T>
-typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::targetParentLocal(unsigned int idx, unsigned int corner) const
+typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
 {
-  return this->intersections_[idx].targetLocal_[corner];
+  return this->intersections_[idx].grid2Local_[corner];
 }
 
 #endif // CONFORMING_MERGE_HH

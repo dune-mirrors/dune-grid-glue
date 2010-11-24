@@ -119,7 +119,7 @@ public:
   /// @brief the coordinate type used in this interface
   typedef Dune::FieldVector<T, dim>  LocalCoords;
 
-protected:
+private:
 
   typedef typename StandardMerge<T,dim,dim,dim>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
@@ -127,38 +127,38 @@ protected:
 
      The result is a set of simplices.
    */
-  void computeIntersection(const Dune::GeometryType& domainElementType,
-                           const std::vector<Dune::FieldVector<T,dim> >& domainElementCorners,
-                           unsigned int domainIndex,
-                           const Dune::GeometryType& targetElementType,
-                           const std::vector<Dune::FieldVector<T,dim> >& targetElementCorners,
-                           unsigned int targetIndex);
+  void computeIntersection(const Dune::GeometryType& grid1ElementType,
+                           const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                           unsigned int grid1Index,
+                           const Dune::GeometryType& grid2ElementType,
+                           const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                           unsigned int grid2Index);
 
-public:
-
-  /**
-   * @brief check if given domain simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a domain simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "domainLocalToMerged" or "domainGlobalToMerged".
-   * @param idx the index of the domain simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  bool domainSimplexMatched(unsigned int idx) const;
+private:
 
   /**
-   * @brief check if given target simplex could be matched in the merged grid
+   * @brief check if given grid1 simplex could be matched in the merged grid
    *
-   * The result of this member even is positive if a target simplex only is
+   * The result of this member even is positive if a grid1 simplex only is
    * partially refined! That means the simplex is not necessarily completely
    * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "targetLocalToMerged" or "targetGlobalToMerged".
-   * @param idx the index of the target simplex
+   * was mapped can be asked via "grid1LocalToMerged" or "grid1GlobalToMerged".
+   * @param idx the index of the grid1 simplex
    * @return TRUE <=> refined in merged grid
    */
-  bool targetSimplexMatched(unsigned int idx) const;
+  bool grid1SimplexMatched(unsigned int idx) const;
+
+  /**
+   * @brief check if given grid2 simplex could be matched in the merged grid
+   *
+   * The result of this member even is positive if a grid2 simplex only is
+   * partially refined! That means the simplex is not necessarily completely
+   * covered in the merged grid. Whether or not a particular point in the simplex
+   * was mapped can be asked via "grid2LocalToMerged" or "grid2GlobalToMerged".
+   * @param idx the index of the grid2 simplex
+   * @return TRUE <=> refined in merged grid
+   */
+  bool grid2SimplexMatched(unsigned int idx) const;
 
 };
 
@@ -167,19 +167,19 @@ public:
 
 template<int dim, typename T>
 void CGALMerge<dim, T>::
-computeIntersection(const Dune::GeometryType& domainElementType,
-                    const std::vector<Dune::FieldVector<T,dim> >& domainElementCorners,
-                    unsigned int domainIndex,
-                    const Dune::GeometryType& targetElementType,
-                    const std::vector<Dune::FieldVector<T,dim> >& targetElementCorners,
-                    unsigned int targetIndex)
+computeIntersection(const Dune::GeometryType& grid1ElementType,
+                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                    unsigned int grid1Index,
+                    const Dune::GeometryType& grid2ElementType,
+                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                    unsigned int grid2Index)
 {
 
   // A few consistency checks
-  assert((Dune::GenericReferenceElements<T,dim>::general(domainElementType).size(dim) == domainElementCorners.size()));
-  assert((Dune::GenericReferenceElements<T,dim>::general(targetElementType).size(dim) == targetElementCorners.size()));
+  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
+  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
 
-  // Make generic geometries representing the domain- and target element.
+  // Make generic geometries representing the grid1- and grid2 element.
   // this eases computation of local coordinates.
   typedef Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> > Geometry;
 
@@ -189,11 +189,11 @@ computeIntersection(const Dune::GeometryType& domainElementType,
 
 #define DUNE_GRID_VERSION_NUMBER (DUNE_GRID_VERSION_MAJOR * 10 + DUNE_GRID_VERSION_MINOR)
 #if DUNE_GRID_VERSION_NUMBER > 20
-  Geometry domainGeometry(Dune::GenericGeometry::topologyId(domainElementType), domainElementCorners);
-  Geometry targetGeometry(Dune::GenericGeometry::topologyId(targetElementType), targetElementCorners);
+  Geometry grid1Geometry(Dune::GenericGeometry::topologyId(grid1ElementType), grid1ElementCorners);
+  Geometry grid2Geometry(Dune::GenericGeometry::topologyId(grid2ElementType), grid2ElementCorners);
 #else
-  Geometry domainGeometry(domainElementType, domainElementCorners);
-  Geometry targetGeometry(targetElementType, targetElementCorners);
+  Geometry grid1Geometry(grid1ElementType, grid1ElementCorners);
+  Geometry grid2Geometry(grid2ElementType, grid2ElementCorners);
 #endif
 
   // /////////////////////////////////////////////////////////////////////////////////////
@@ -206,29 +206,29 @@ computeIntersection(const Dune::GeometryType& domainElementType,
 
     // Check consistent orientation
     // \todo Reverse the orientation if this check fails
-    assert(domainElementCorners[0][0] <= domainElementCorners[1][0]);
-    assert(targetElementCorners[0][0] <= targetElementCorners[1][0]);
+    assert(grid1ElementCorners[0][0] <= grid1ElementCorners[1][0]);
+    assert(grid2ElementCorners[0][0] <= grid2ElementCorners[1][0]);
 
-    T lowerBound = std::max(domainElementCorners[0][0], targetElementCorners[0][0]);
-    T upperBound = std::min(domainElementCorners[1][0], targetElementCorners[1][0]);
+    T lowerBound = std::max(grid1ElementCorners[0][0], grid2ElementCorners[0][0]);
+    T upperBound = std::min(grid1ElementCorners[1][0], grid2ElementCorners[1][0]);
 
     if (lowerBound <= upperBound) {      // Intersection is non-empty
 
       this->intersections_.push_back(RemoteSimplicialIntersection());
 
-      // Compute local coordinates in the domain element
-      this->intersections_.back().domainLocal_[0] = domainGeometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().domainLocal_[1] = domainGeometry.local(Dune::FieldVector<T,dim>(upperBound));
+      // Compute local coordinates in the grid1 element
+      this->intersections_.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      this->intersections_.back().grid1Local_[1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
 
-      // Compute local coordinates in the target element
-      this->intersections_.back().targetLocal_[0] = targetGeometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().targetLocal_[1] = targetGeometry.local(Dune::FieldVector<T,dim>(upperBound));
+      // Compute local coordinates in the grid2 element
+      this->intersections_.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      this->intersections_.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
 
       // Set indices
-      this->intersections_.back().domainEntity_ = domainIndex;
-      this->intersections_.back().targetEntity_ = targetIndex;
+      this->intersections_.back().grid1Entity_ = grid1Index;
+      this->intersections_.back().grid2Entity_ = grid2Index;
 
-      std::cout << "Intersection between elements " << domainIndex << " and " << targetIndex << std::endl;
+      std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
 
     }
 
@@ -247,30 +247,30 @@ computeIntersection(const Dune::GeometryType& domainElementType,
 
     // Construct the two input polygons.
     Polygon_2 P;
-    if (domainElementType.isQuadrilateral()) {
+    if (grid1ElementType.isQuadrilateral()) {
       // Vertex renumbering Dune --> CGAL
-      P.push_back( Point_2(domainElementCorners[0][0], domainElementCorners[0][1]));
-      P.push_back( Point_2(domainElementCorners[1][0], domainElementCorners[1][1]));
-      P.push_back( Point_2(domainElementCorners[3][0], domainElementCorners[3][1]));
-      P.push_back( Point_2(domainElementCorners[2][0], domainElementCorners[2][1]));
+      P.push_back( Point_2(grid1ElementCorners[0][0], grid1ElementCorners[0][1]));
+      P.push_back( Point_2(grid1ElementCorners[1][0], grid1ElementCorners[1][1]));
+      P.push_back( Point_2(grid1ElementCorners[3][0], grid1ElementCorners[3][1]));
+      P.push_back( Point_2(grid1ElementCorners[2][0], grid1ElementCorners[2][1]));
 
     } else
-      for (std::size_t i=0; i<domainElementCorners.size(); i++)
-        P.push_back (Point_2 (domainElementCorners[i][0], domainElementCorners[i][1]));
+      for (std::size_t i=0; i<grid1ElementCorners.size(); i++)
+        P.push_back (Point_2 (grid1ElementCorners[i][0], grid1ElementCorners[i][1]));
 
     //std::cout << "P = "; print_polygon (P);
 
     Polygon_2 Q;
-    if (targetElementType.isQuadrilateral()) {
+    if (grid2ElementType.isQuadrilateral()) {
       // Vertex renumbering Dune --> CGAL
-      Q.push_back( Point_2(targetElementCorners[0][0], targetElementCorners[0][1]));
-      Q.push_back( Point_2(targetElementCorners[1][0], targetElementCorners[1][1]));
-      Q.push_back( Point_2(targetElementCorners[3][0], targetElementCorners[3][1]));
-      Q.push_back( Point_2(targetElementCorners[2][0], targetElementCorners[2][1]));
+      Q.push_back( Point_2(grid2ElementCorners[0][0], grid2ElementCorners[0][1]));
+      Q.push_back( Point_2(grid2ElementCorners[1][0], grid2ElementCorners[1][1]));
+      Q.push_back( Point_2(grid2ElementCorners[3][0], grid2ElementCorners[3][1]));
+      Q.push_back( Point_2(grid2ElementCorners[2][0], grid2ElementCorners[2][1]));
 
     } else
-      for (std::size_t i=0; i<targetElementCorners.size(); i++)
-        Q.push_back (Point_2 (targetElementCorners[i][0], targetElementCorners[i][1]));
+      for (std::size_t i=0; i<grid2ElementCorners.size(); i++)
+        Q.push_back (Point_2 (grid2ElementCorners[i][0], grid2ElementCorners[i][1]));
 
     //std::cout << "Q = "; print_polygon (Q);
 
@@ -336,21 +336,21 @@ computeIntersection(const Dune::GeometryType& domainElementType,
 
         this->intersections_.push_back(RemoteSimplicialIntersection());
 
-        // Compute local coordinates in the domain element
-        this->intersections_.back().domainLocal_[0] = domainGeometry.local(anchorFieldVector);
-        this->intersections_.back().domainLocal_[1] = domainGeometry.local(nextFieldVector);
-        this->intersections_.back().domainLocal_[2] = domainGeometry.local(nextNextFieldVector);
+        // Compute local coordinates in the grid1 element
+        this->intersections_.back().grid1Local_[0] = grid1Geometry.local(anchorFieldVector);
+        this->intersections_.back().grid1Local_[1] = grid1Geometry.local(nextFieldVector);
+        this->intersections_.back().grid1Local_[2] = grid1Geometry.local(nextNextFieldVector);
 
-        // Compute local coordinates in the domain element
-        this->intersections_.back().targetLocal_[0] = targetGeometry.local(anchorFieldVector);
-        this->intersections_.back().targetLocal_[1] = targetGeometry.local(nextFieldVector);
-        this->intersections_.back().targetLocal_[2] = targetGeometry.local(nextNextFieldVector);
+        // Compute local coordinates in the grid1 element
+        this->intersections_.back().grid2Local_[0] = grid2Geometry.local(anchorFieldVector);
+        this->intersections_.back().grid2Local_[1] = grid2Geometry.local(nextFieldVector);
+        this->intersections_.back().grid2Local_[2] = grid2Geometry.local(nextNextFieldVector);
 
         // Set indices
-        this->intersections_.back().domainEntity_ = domainIndex;
-        this->intersections_.back().targetEntity_ = targetIndex;
+        this->intersections_.back().grid1Entity_ = grid1Index;
+        this->intersections_.back().grid2Entity_ = grid2Index;
 
-        //std::cout << "Intersection between elements " << domainIndex << " and " << targetIndex << std::endl;
+        //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
 
         // move to the next triangle
         ++next;
@@ -401,17 +401,17 @@ computeIntersection(const Dune::GeometryType& domainElementType,
 }
 
 template<int dim, typename T>
-inline bool CGALMerge<dim, T>::domainSimplexMatched(unsigned int idx) const
+inline bool CGALMerge<dim, T>::grid1SimplexMatched(unsigned int idx) const
 {
-  // naive: we assume that there is a partner for all domain entities
+  // naive: we assume that there is a partner for all grid1 entities
   return true;
 }
 
 
 template<int dim, typename T>
-inline bool CGALMerge<dim, T>::targetSimplexMatched(unsigned int idx) const
+inline bool CGALMerge<dim, T>::grid2SimplexMatched(unsigned int idx) const
 {
-  // naive: we assume that there is a partner for all target entities
+  // naive: we assume that there is a partner for all grid2 entities
   return true;
 }
 
