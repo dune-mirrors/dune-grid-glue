@@ -107,10 +107,13 @@ void test2dElements()
   triangleFactory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,2), cornerIDs);
 
   //   Finish initialization
-  std::auto_ptr<GridType> triangle(triangleFactory.createGrid());
+  GridType* triangle = triangleFactory.createGrid();
 
   //   Test
   test(*triangle);
+
+  //   cleanup
+  delete triangle;
 
   // //////////////////////////////////////////
   //   Create test quadrilateral
@@ -131,10 +134,13 @@ void test2dElements()
   quadrilateralFactory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,2), cornerIDs);
 
   //   Finish initialization
-  std::auto_ptr<GridType> quadrilateral(quadrilateralFactory.createGrid());
+  GridType* quadrilateral = quadrilateralFactory.createGrid();
 
   //   Test
   test(*quadrilateral);
+
+  //   cleanup
+  delete quadrilateral;
 
 }
 
@@ -163,10 +169,13 @@ void test3dElements()
   tetrahedronFactory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,3), cornerIDs);
 
   //   Finish initialization
-  std::auto_ptr<GridType> tetrahedron(tetrahedronFactory.createGrid());
+  GridType* tetrahedron =  tetrahedronFactory.createGrid();
 
   //   Test
   test(*tetrahedron);
+
+  //   cleanup
+  delete tetrahedron;
 
   // //////////////////////////////////////////
   //   Create test cube
@@ -191,10 +200,13 @@ void test3dElements()
   cubeFactory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,3), cornerIDs);
 
   //   Finish initialization
-  std::auto_ptr<GridType> cube(cubeFactory.createGrid());
+  GridType* cube = cubeFactory.createGrid();
 
   //   Test
   test(*cube);
+
+  //   cleanup
+  delete cube;
 
   // //////////////////////////////////////////
   //   Create test prism
@@ -217,10 +229,13 @@ void test3dElements()
   prismFactory.insertElement(GeometryType(GeometryType::prism,3), cornerIDs);
 
   //   Finish initialization
-  std::auto_ptr<GridType> prism(prismFactory.createGrid());
+  GridType* prism = prismFactory.createGrid();
 
   //   Test
   test(*prism);
+
+  //   cleanup
+  delete prism;
 
   // //////////////////////////////////////////
   //   Create test pyramid
@@ -242,17 +257,25 @@ void test3dElements()
   pyramidFactory.insertElement(GeometryType(GeometryType::pyramid,3), cornerIDs);
 
   //   Finish initialization
-  std::auto_ptr<GridType> pyramid(pyramidFactory.createGrid());
+  GridType* pyramid = pyramidFactory.createGrid();
 
   //   Test
   test(*pyramid);
 
+  //   cleanup
+  delete pyramid;
+
 }
 
-int main()
+int main(int argc, char *argv[]) try
 {
+  Dune::MPIHelper::instance(argc, argv);
+
   test2dElements();
   test3dElements();
 
   return 0;
+}
+catch (Exception e) {
+  std::cout << e << std::endl;
 }
