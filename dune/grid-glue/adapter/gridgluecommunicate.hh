@@ -12,7 +12,12 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
 
-#include <dune/istl/communicator.hh>
+#define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
+#if DUNE_COMMON_VERSION_NUMBER > 20
+  #include <dune/common/parallel/communicator.hh>
+#else
+  #include <dune/istl/communicator.hh>
+#endif
 
 namespace Dune {
   namespace GridGlue {

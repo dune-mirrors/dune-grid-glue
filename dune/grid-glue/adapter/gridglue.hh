@@ -34,11 +34,20 @@
 #include "gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
 
-#include <dune/istl/indexset.hh>
-#include <dune/istl/plocalindex.hh>
-#include <dune/istl/remoteindices.hh>
-#include <dune/istl/communicator.hh>
-#include <dune/istl/interface.hh>
+#define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
+#if DUNE_COMMON_VERSION_NUMBER > 20
+  #include <dune/common/parallel/indexset.hh>
+  #include <dune/common/parallel/plocalindex.hh>
+  #include <dune/common/parallel/remoteindices.hh>
+  #include <dune/common/parallel/communicator.hh>
+  #include <dune/common/parallel/interface.hh>
+#else
+  #include <dune/istl/indexset.hh>
+  #include <dune/istl/plocalindex.hh>
+  #include <dune/istl/remoteindices.hh>
+  #include <dune/istl/communicator.hh>
+  #include <dune/istl/interface.hh>
+#endif
 
 /** Document the relation between the old grid names and the new numbering */
 enum GridOrdering {
