@@ -6,4 +6,10 @@ Module: dune-grid-glue
 Version: 0.1
 Maintainer: christi@uni-hd.de,sander@mi.fu-berlin.de
 #depending on
-Depends: dune-common dune-grid dune-istl
+Depends: dune-common dune-grid
+
+# dune-istl is not actually a suggestion: it is a hard dependency for dune-common 2.0,
+# and unused if you have dune-common 2.1 or later.  We make it a suggestion for
+# backward compatibility.
+Suggests: dune-istl
+
