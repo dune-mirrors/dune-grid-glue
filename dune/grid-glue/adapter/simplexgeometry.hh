@@ -135,71 +135,6 @@ class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, Globa
 
   enum { simplex_corners = coorddim + static_cast<int>(mydim == coorddim) };
 
-protected:
-#if 0
-  /// @brief normal computation module specialized for the case of full-dimensional or
-  /// manifold grids
-  struct CommonNormalComputer
-  {
-    static Dune::FieldVector<typename G::ctype, coorddim> outerNormal(const This& geom, const Dune::FieldVector<typename G::ctype, mydim>& local)
-    {
-      Dune::FieldVector<typename G::ctype, coorddim> result = geom.corner(1);
-      if (coorddim == 2)
-      {
-        result -= geom.corner(0);
-        typename G::ctype temp = result[0];
-        result[0] = result[1];
-        result[1] = -temp;
-        return result;
-      }
-      else if (coorddim == 3)
-      {
-        Dune::FieldVector<typename G::ctype, coorddim> v0 = geom.corner(2), v1 = geom.corner(0);
-        // tris edge vectors (pos. oriented)
-        v0 -= geom.corner(1);
-        v1 -= geom.corner(1);
-        // cross product
-        result[0] = v0[1]*v1[2] - v0[2]*v1[1];
-        result[1] = v0[2]*v1[0] - v0[0]*v1[2];
-        result[2] = v0[0]*v1[1] - v0[1]*v1[0];
-      }
-      else
-        DUNE_THROW(Dune::NotImplemented, "dimension not implemented!");
-      return result;
-    }
-  };
-
-
-  /// @brief for normal computation for hyperdimensional grids
-  /// Note: This degenerates to determining the simplex' orientation.
-  /// The normal then always points to the "added" dimension.
-  struct LiftingNormalComputer
-  {
-    static Dune::FieldVector<typename G::ctype, coorddim + 1> outerNormal(const SimplexGeometry<mydim, coorddim, G>& geom, const Dune::FieldVector<typename G::ctype, mydim>& local)
-    {
-      Dune::FieldVector<typename G::ctype, coorddim + 1> result(0.0);
-      if (coorddim == 1)
-      {
-        result[1] = geom.corner(0)[0] - geom.corner(1)[0];
-        return result;
-      }
-      else if (coorddim == 2)
-      {
-        Dune::FieldVector<typename G::ctype, coorddim> v0 = geom.corner(2), v1 = geom.corner(0);
-        // tris edge vectors (pos. oriented)
-        v0 -= geom.corner(1);
-        v1 -= geom.corner(1);
-        // cross product
-        result[2] = v0[0]*v1[1] - v0[1]*v1[0];
-        return result;
-      }
-      else
-        DUNE_THROW(Dune::NotImplemented, "dimension not implemented");
-    }
-  };
-
-  typedef typename Dune::SelectType<mydim == coorddim, LiftingNormalComputer, CommonNormalComputer>::Type NormalComputer;
-#endif
 public:
 
   typedef typename Base::Mapping Mapping;
@@ -271,12 +206,6 @@ public:
   {}
 
 
-  //	SimplexGeometry& operator=(const SimplexGeometry& geom)
-  //	{
-  //		Base::operator=(Base(geom));
-  //		return *this;
-  //	}
-
   /**
    * @brief Setup method with a geometry type and a set of corners
    * @param type the geometry type of this subface, i.e. most likely a simplex in 1D or 2D
@@ -284,7 +213,6 @@ public:
    */
   void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
   {
-    //		STDOUTLN("LocalSimplexGeometry: trying to set up");
     // set up base class
     // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
 #define DUNE_GRID_VERSION_NUMBER (DUNE_GRID_VERSION_MAJOR * 10 + DUNE_GRID_VERSION_MINOR)
@@ -293,9 +221,6 @@ public:
 #else
     Base::operator=(Base(type, coordinates));
 #endif
-    //		for (int i = 0; i < this->corners(); ++i)
-    //			STDOUT(" (" << this->operator[](i) << ")");
-    //		STDOUTLN("");
   }
 
 };
