@@ -518,7 +518,7 @@ public:
 
   /*! \brief Communicate information on the MergedGrid of a GridGlue
 
-     Template parameter is a model of Dune::GridGlueCommDataHandleIF
+     Template parameter is a model of Dune::GridGlue::CommDataHandle
 
      \param data GridGlueDataHandle
      \param iftype Interface for which the Communication should take place
@@ -526,10 +526,10 @@ public:
    */
 
   template<class DataHandleImp, class DataTypeImp>
-  void communicate (Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+  void communicate (Dune::GridGlue::CommDataHandle<DataHandleImp,DataTypeImp> & data,
                     Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
   {
-    typedef Dune::GridGlueCommDataHandleIF<DataHandleImp,DataTypeImp> DataHandle;
+    typedef Dune::GridGlue::CommDataHandle<DataHandleImp,DataTypeImp> DataHandle;
     typedef typename DataHandle::DataType DataType;
 
 #if HAVE_MPI
@@ -571,7 +571,7 @@ public:
     }
 
     // setup communication info (class needed to tunnel all info to the operator)
-    typedef Dune::GridGlueCommInfo<GridGlue,DataHandleImp,DataTypeImp> CommInfo;
+    typedef Dune::GridGlue::CommInfo<GridGlue,DataHandleImp,DataTypeImp> CommInfo;
     CommInfo commInfo;
     commInfo.gridglue = this;
     commInfo.data = &data;
@@ -583,9 +583,9 @@ public:
     // do communication
     // choose communication direction.
     if (dir == Dune::ForwardCommunication)
-      bComm.forward< Dune::GridGlueForwardOperator >(commInfo, commInfo);
+      bComm.forward< Dune::GridGlue::ForwardOperator >(commInfo, commInfo);
     else
-      bComm.backward< Dune::GridGlueBackwardOperator >(commInfo, commInfo);
+      bComm.backward< Dune::GridGlue::BackwardOperator >(commInfo, commInfo);
 
 #else
     /*
@@ -605,7 +605,7 @@ public:
     RemoteIntersectionIterator ritend = iremoteend();
 
     // gather
-    Dune::GridGlueMessageBuffer<DataType> gatherbuffer(sendbuffer);
+    Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer);
     for (rit = iremotebegin(); rit != ritend; ++rit)
     {
       /*
@@ -638,7 +638,7 @@ public:
       receivebuffer[i] = sendbuffer[i];
 
     // scatter
-    Dune::GridGlueMessageBuffer<DataType> scatterbuffer(receivebuffer);
+    Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer);
     for (rit = iremotebegin(); rit != ritend; ++rit)
     {
       /*
