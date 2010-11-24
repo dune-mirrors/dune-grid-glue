@@ -5,6 +5,8 @@
 - GridGlueVTKWriter doesn't seem to work
 - GridGlueVTKWriter crashes when started on an empty GridGlue
 - compile mergers into separate lib
+- use hybrid geometries instead of simplex geometries (this will allow
+  construction of different geometry types)
 
 For the upcoming paper:
 - remove target/domain naming
