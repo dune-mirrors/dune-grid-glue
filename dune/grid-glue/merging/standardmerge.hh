@@ -477,7 +477,7 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
             // the new target candidate.  We have to do a brute-force search.
             for (std::size_t i=0; i<domain_element_types.size(); i++) {
 
-              std::size_T oldSize = intersections_.size();
+              std::size_t oldSize = intersections_.size();
               bool intersectionFound = testIntersection(i, *it,
                                                         domainCoords,domain_element_types,
                                                         targetCoords,target_element_types);
