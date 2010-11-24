@@ -12,6 +12,7 @@
 template <class ctype, int domainDim, int targetDim, int dimworld>
 class Merger;
 
+// forward calls to the (target/domain)-calls depending on the grid number (0/1)
 template <class ctype, int domainDim, int targetDim, int dimworld, int n>
 struct MergerGridPolicy;
 
