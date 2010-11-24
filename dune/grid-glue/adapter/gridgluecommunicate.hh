@@ -20,6 +20,7 @@ namespace Dune
   /**
      \brief describes the features of a data handle for
      communication in parallel runs using the GridGlue::communicate methods.
+
      Here the Barton-Nackman trick is used to interprete data handle objects
      as its interface. Therefore usable data handle classes need to be
      derived from this class.
