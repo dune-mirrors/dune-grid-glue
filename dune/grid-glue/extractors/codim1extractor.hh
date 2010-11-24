@@ -22,6 +22,10 @@
 #include <set>
 
 #include "extractor.hh"
+#include "extractorpredicate.hh"
+
+#include <deque>
+
 #include <dune/grid-glue/common/orientedsubface.hh>
 
 template<typename GV>
