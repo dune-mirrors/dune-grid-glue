@@ -11,3 +11,4 @@ For the upcoming paper:
 - move parallel index sets from dune-istl to dune-common
 - implement 3d cgal backend
 - codim1-extractor should not triangulate the extracted faces
+- Put everything into the namespace Dune::GridGlue
