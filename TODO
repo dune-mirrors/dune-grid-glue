@@ -10,7 +10,6 @@ For the upcoming paper:
 - remove target/domain naming
 - remove extractortraits
 - remove remoteindex(iterator)impl CRTP magic
-- move parallel index sets from dune-istl to dune-common
 - implement _new_ parallel merging (see article.tex)
 - implement 3d cgal backend
 - Put everything into the namespace Dune::GridGlue
