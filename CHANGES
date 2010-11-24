@@ -1,0 +1,4 @@
+1) removed names domain*, target*
+  - most methods are now parametrized with a 
+    template parameter <int grid> \in [0,1]
+  - the other ones are now called grid(0|1)Foo instead of (domain|target)Foo
