@@ -8,7 +8,7 @@
 For the upcoming paper:
 - remove target/domain naming
 - move parallel index sets from dune-istl to dune-common
-- make parallel merging as local as possible (only on matched bounding boxes)
+- implement _new_ parallel merging (see article.tex)
 - implement 3d cgal backend
 - Put everything into the namespace Dune::GridGlue
 
