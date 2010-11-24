@@ -39,8 +39,14 @@
 
 #include <dune/grid-glue/merging/merger.hh>
 
+#include <tr1/array>
+#if HAVE_PSURFACE
 #include <psurface/ContactMapping.h>
 #include <psurface/DirectionFunction.h>
+#else
+// forward declaration of PSurface classes
+template <int dim, typename ctype> class DirectionFunction;
+#endif
 
 
 /** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
@@ -79,6 +85,8 @@ public:
 
 
 private:
+
+#if HAVE_PSURFACE
 
   /*   P R I V A T E   H E L P E R S   */
 
@@ -240,7 +248,6 @@ private:
     }
   };
 
-
 private:
 
   /*   M E M B E R   V A R I A B L E S   */
@@ -287,15 +294,12 @@ private:
    */
   const DirectionFunction<psurfaceDimworld,ctype>* targetDirections_;
 
+#endif // if HAVE_PSURFACE
 
 public:
 
   PSurfaceMerge(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections = NULL,
-                const DirectionFunction<psurfaceDimworld,ctype>* targetDirections = NULL
-                )
-    : domainDirections_(domainDirections), targetDirections_(targetDirections)
-  {}
-
+                const DirectionFunction<psurfaceDimworld,ctype>* targetDirections = NULL);
 
   /*   M O D E L   S P E C I F I C   E X T E N D I N G   F U N C T I O N A L I T Y   */
 
@@ -307,13 +311,9 @@ public:
    * (default) normals are interpolated.
    * @param value the new function (or NULL to unset the function)
    */
+  inline
   void setSurfaceDirections(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
-                            const DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
-  {
-    domainDirections_ = domainDirections;
-    targetDirections_ = targetDirections;
-  }
-
+                            const DirectionFunction<psurfaceDimworld,ctype>* targetDirections);
 
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
 
@@ -424,8 +424,24 @@ public:
 
 };
 
+#if HAVE_PSURFACE
 
 /* IMPLEMENTATION OF CLASS   C O N T A C T  M A P P I N G  S U R F A C E  M E R G E */
+
+template<int dim, int dimworld, typename T>
+PSurfaceMerge<dim, dimworld, T>::PSurfaceMerge(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
+                                               const DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
+  : domainDirections_(domainDirections), targetDirections_(targetDirections)
+{}
+
+
+template<int dim, int dimworld, typename T>
+void PSurfaceMerge<dim, dimworld, T>::setSurfaceDirections(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
+                                                           const DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
+{
+  domainDirections_ = domainDirections;
+  targetDirections_ = targetDirections;
+}
 
 
 template<int dim, int dimworld, typename T>
@@ -947,5 +963,6 @@ unsigned int PSurfaceMerge<dim, dimworld, T>::OverlapManager::firstTargetParent(
   return p;
 }
 
+#endif
 
 #endif // PSURFACEMERGE_HH_
