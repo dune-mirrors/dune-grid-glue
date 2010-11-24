@@ -158,8 +158,8 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
                                                             unsigned int targetIndex)
 {
   // A few consistency checks
-  assert((Dune::GenericReferenceElements<T,dim>::general(domainElementType).size(dim) == domainElementCorners.size()));
-  assert((Dune::GenericReferenceElements<T,dim>::general(targetElementType).size(dim) == targetElementCorners.size()));
+  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(domainElementType).size(dim) == domainElementCorners.size()));
+  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(targetElementType).size(dim) == targetElementCorners.size()));
 
   // the intersection is either conforming or empty, hence the GeometryTypes have to match
   if (domainElementType != targetElementType)
@@ -170,9 +170,9 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
   // ////////////////////////////////////////////////////////////
   std::vector<int> other(domainElementCorners.size(), -1);
 
-  for (int i=0; i<domainElementCorners.size(); i++) {
+  for (unsigned int i=0; i<domainElementCorners.size(); i++) {
 
-    for (int j=0; j<targetElementCorners.size(); j++) {
+    for (unsigned int j=0; j<targetElementCorners.size(); j++) {
 
       if ( (domainElementCorners[i]-targetElementCorners[j]).two_norm() < tolerance_ ) {
 

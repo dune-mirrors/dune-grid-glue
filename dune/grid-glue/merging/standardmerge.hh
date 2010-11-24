@@ -331,14 +331,14 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
   elementsPerVertex0_.resize(domainCoords.size());
 
   for (std::size_t i=0; i<domainElementCorners_.size(); i++)
-    for (int j=0; j<domainElementCorners_[i].size(); j++)
+    for (std::size_t j=0; j<domainElementCorners_[i].size(); j++)
       elementsPerVertex0_[domainElementCorners_[i][j]].push_back(i);
 
   // then the target side
   elementsPerVertex1_.resize(targetCoords.size());
 
   for (std::size_t i=0; i<target_element_types.size(); i++)
-    for (int j=0; j<targetElementCorners_[i].size(); j++)
+    for (std::size_t j=0; j<targetElementCorners_[i].size(); j++)
       elementsPerVertex1_[targetElementCorners_[i][j]].push_back(i);
 
   std::stack<unsigned int> candidates0;
@@ -411,7 +411,7 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
       if (intersectionFound) {
 
         // get all neighbors of currentCandidate0, but not currentCandidate0 itself
-        for (int i=0; i<domainElementCorners_[currentCandidate0].size(); i++) {
+        for (std::size_t i=0; i<domainElementCorners_[currentCandidate0].size(); i++) {
           unsigned int v = domainElementCorners_[currentCandidate0][i];
 
           // The neighbors of currentCandidate0 are all possible candidates
@@ -436,7 +436,7 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
     // candidates.
 
     // get all neighbors of currentCandidate1, but not currentCandidate1 itself
-    for (int i=0; i<targetElementCorners_[currentCandidate1].size(); i++) {
+    for (std::size_t i=0; i<targetElementCorners_[currentCandidate1].size(); i++) {
       unsigned int v = targetElementCorners_[currentCandidate1][i];
 
       // The unhandled neighbors of currentCandidate1 are all possible candidates
@@ -453,7 +453,7 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
           for (typename std::set<unsigned int>::iterator seedIt = potentialSeeds.begin();
                seedIt != potentialSeeds.end(); ++seedIt) {
 
-            int oldSize = intersections_.size();
+            std::size_t oldSize = intersections_.size();
             bool intersectionFound = testIntersection(*seedIt, *it,
                                                       domainCoords,domain_element_types,
                                                       targetCoords,target_element_types);
@@ -477,7 +477,7 @@ void StandardMerge<T,domainDim,targetDim,dimworld>::build(const std::vector<Dune
             // the new target candidate.  We have to do a brute-force search.
             for (std::size_t i=0; i<domain_element_types.size(); i++) {
 
-              int oldSize = intersections_.size();
+              std::size_T oldSize = intersections_.size();
               bool intersectionFound = testIntersection(i, *it,
                                                         domainCoords,domain_element_types,
                                                         targetCoords,target_element_types);
