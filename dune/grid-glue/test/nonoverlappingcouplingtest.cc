@@ -294,7 +294,7 @@ void testParallelCubeGrids()
   typedef typename GridType0::LevelGridView DomGridView;
   typedef typename GridType1::LevelGridView TarGridView;
 
-  // always test the extractor via the parallel extractor classes, even if we use a seqqential grid.
+  // always test the extractor via the parallel extractor classes, even if we use a sequential grid.
   typedef DefaultExtractionTraits<DomGridView,1,true> DomTraits;
   typedef DefaultExtractionTraits<TarGridView,1,true> TarTraits;
 
