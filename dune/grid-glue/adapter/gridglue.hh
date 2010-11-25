@@ -996,10 +996,10 @@ GridGlue<P0, P1>::itargetbegin(const TargetElement& e) const
 }
 
 // include implementation of subclass RemoteIntersection
-#include "gridglueremoteintersectionimpl.hh"
+#include "gridglueremoteintersection.hh"
 
 // include implementation of subclasses DomainIntersectionIterator and TargetIntersectionIterator
-#include "gridglueremoteintersectioniteratorimpl.hh"
+#include "gridglueremoteintersectioniterator.hh"
 
 
 #endif // GRIDGLUE_HH_

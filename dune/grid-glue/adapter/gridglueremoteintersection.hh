@@ -16,8 +16,8 @@
  * @brief Model of the RemoteIntersection concept provided by GridGlue.
  */
 
-#ifndef GRIDGLUEREMOTEINTERSECTIONIMPL_HH_
-#define GRIDGLUEREMOTEINTERSECTIONIMPL_HH_
+#ifndef DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
+#define DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
 
 #include <dune/grid-glue/adapter/simplexgeometry.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
@@ -410,4 +410,4 @@ GridGlue<P0, P1>::RemoteIntersection::RemoteIntersection(const Parent* glue, uns
   }
 }
 
-#endif // GRIDGLUEREMOTEINTERSECTIONIMPL_HH_
+#endif // DUNE_GRIDGLUE_REMOTEINTERSECTION_HH

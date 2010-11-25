@@ -16,8 +16,8 @@
  * @brief Implementations of iterators over remote intersections provided by GridGlue.
  */
 
-#ifndef GRIDGLUEREMOTEINTERSECTIONITERATOR_HH_
-#define GRIDGLUEREMOTEINTERSECTIONITERATOR_HH_
+#ifndef DUNE_GRIDGLUE_REMOTEINTERSECTIONITERATOR_HH
+#define DUNE_GRIDGLUE_REMOTEINTERSECTIONITERATOR_HH
 
 #include <dune/grid-glue/adapter/gridglue.hh>
 
@@ -256,4 +256,4 @@ public:
 };
 
 
-#endif // GRIDGLUEREMOTEINTERSECTIONITERATOR_HH_
+#endif // DUNE_GRIDGLUE_REMOTEINTERSECTIONITERATOR_HH
