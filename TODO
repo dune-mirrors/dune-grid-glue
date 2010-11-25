@@ -1,5 +1,5 @@
 - Von DefaultExtractionTraits bitte die Templateparameter dokumentieren!
-- Die IteratorFacades verwenden
+./ Die IteratorFacades verwenden
 - Test: Gibt numberInDomainEntity() bei Codim0-Kopplungen immer Null zurück?
 - orientedSubface für Subentities beliebiger Kodimension verallgemeinern
 - GridGlueVTKWriter doesn't seem to work
@@ -11,7 +11,8 @@
 For the upcoming paper:
 - remove target/domain naming
 - remove extractortraits
-- remove remoteindex(iterator)impl CRTP magic
+- rename Extractor to Patch
+./ remove remoteintersection(iterator)impl CRTP magic
 - implement _new_ parallel merging (see article.tex)
 - implement 3d cgal backend
 - Put everything into the namespace Dune::GridGlue
