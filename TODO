@@ -18,6 +18,11 @@ For the upcoming paper:
 - move gridglue/adapter/gridglue.hh to gridglue/gridglue.hh
 - add GridGlue::DirectionFunction and remove dependencies on
   PSurface::DirectionFunction in the interface
+- RemoteIntersections sollen sich wie echte Intersections verhalten
+  (Inside/Outside)
+- beim Iterieren gibt man an, von wo nach wo man koppeln will (0->1 / 1->0)
+  davon hängt die Definition von Inside/Outside ab
+- Beim Kommunizieren sollte auch die Kopplungsrichtung berücksichtigt werden
 
 Questions:
 - how expensive is it to build a new parallel indexset interface?
