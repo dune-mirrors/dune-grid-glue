@@ -177,11 +177,10 @@ protected:
   typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
   typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
 
-
   /************************** MEMBER VARIABLES ************************/
 
   /// @brief the grid object to extract the surface from
-  const GV&                       gv_;
+  const GridView&               gv_;
 
   /*        Geometrical and Topological Information                */
 
@@ -189,7 +188,7 @@ protected:
   std::vector<CoordinateInfo>   coords_;
 
   /// @brief all information about the extracted subEntities
-  std::vector<SubEntityInfo> subEntities_;
+  std::vector<SubEntityInfo>    subEntities_;
 
   /// @brief a map enabling faster access to vertices and coordinates
   ///
@@ -344,11 +343,22 @@ public:
     return gv_.indexSet();
   }
 
-
+  /**
+   * @brief tests that a given entry in the extraction set does have local couplings
+   * @todo parallel interface
+   */
   bool contains (unsigned int global, unsigned int & local) const
   {
     local = global;
     return true;
+  }
+
+  /**
+   * @brief give access to the Dune::GridView where this Patch belongs to
+   */
+  const GridView & gridView() const
+  {
+    return gv_;
   }
 
   /**
