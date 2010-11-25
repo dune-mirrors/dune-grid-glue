@@ -10,8 +10,9 @@
 
 For the upcoming paper:
 - remove target/domain naming
-- remove extractortraits
+./ remove extractortraits
 - rename Extractor to Patch
+./ Extractor/Patch should get the predicate
 ./ remove remoteintersection(iterator)impl CRTP magic
 - implement _new_ parallel merging (see article.tex)
 - implement 3d cgal backend

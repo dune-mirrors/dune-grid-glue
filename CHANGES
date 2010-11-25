@@ -6,4 +6,13 @@
    to be obtained from the value_type.
 3) the RemoteIntersection & RemoteIntersectionIterator interface are
    removed. We have only one implementation (GridGlue::RemoteIntersection(Iterator))
- 
+4) the parameters of GridGlue changed:
+   * GridGlue<Trait1, Trait2> -> GridGlue<Patch1, Patch2>
+   * GridGlue(GV1, GV2)       -> GridGlue(Patch1, Patch2)
+5) the Patch (aka Extractor) needs to be constructed before.
+   * it consists of a GridView and a predicate
+   * GridGlue doesn't store the predicate itself anymore
+   <code>
+   Predicate predicate(...);
+   Patch<GridView> patch(gridView, predicate);
+   </code>

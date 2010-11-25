@@ -11,7 +11,9 @@
 #include <dune/grid/common/quadraturerules.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
-#include <dune/grid-glue/extractors/gridextractiontraits.hh>
+#include <dune/grid-glue/extractors/codim1extractor.hh>
+#include <dune/grid-glue/extractors/parallelextractor.hh>
+
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
@@ -95,21 +97,22 @@ void testMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1> TarTraits;
-#if HAVE_PSURFACE
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
-
-  SurfaceMergeImpl merger;
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
-
   VerticalFaceDescriptor<DomGridView> domdesc(1);
   VerticalFaceDescriptor<TarGridView> tardesc(1);
 
-  glue.setDomainDescriptor(domdesc);
-  glue.setTargetDescriptor(tardesc);
+  typedef Codim1Extractor<DomGridView> DomExtractor;
+  typedef Codim1Extractor<TarGridView> TarExtractor;
+
+  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+
+#if HAVE_PSURFACE
+  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
+
+  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+  SurfaceMergeImpl merger;
+  GlueType glue(domEx, tarEx, &merger);
 
   glue.build();
 
@@ -157,21 +160,22 @@ void testNonMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1> TarTraits;
-#if HAVE_PSURFACE
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
-
-  SurfaceMergeImpl merger;
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
-
   VerticalFaceDescriptor<DomGridView> domdesc(1);
   VerticalFaceDescriptor<TarGridView> tardesc(1);
 
-  glue.setDomainDescriptor(domdesc);
-  glue.setTargetDescriptor(tardesc);
+  typedef Codim1Extractor<DomGridView> DomExtractor;
+  typedef Codim1Extractor<TarGridView> TarExtractor;
+
+  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+
+#if HAVE_PSURFACE
+  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
+
+  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+  SurfaceMergeImpl merger;
+  GlueType glue(domEx, tarEx, &merger);
 
   glue.build();
 
@@ -293,8 +297,15 @@ void testParallelCubeGrids()
   typedef typename GridType1::LevelGridView TarGridView;
 
   // always test the extractor via the parallel extractor classes, even if we use a sequential grid.
-  typedef DefaultExtractionTraits<DomGridView,1,true> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1,true> TarTraits;
+
+  VerticalFaceDescriptor<DomGridView> domdesc(domGen.slice());
+  VerticalFaceDescriptor<TarGridView> tardesc(tarGen.slice());
+
+  typedef ParallelExtractor< Codim1Extractor<DomGridView> > DomExtractor;
+  typedef ParallelExtractor< Codim1Extractor<TarGridView> > TarExtractor;
+
+  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
@@ -302,18 +313,10 @@ void testParallelCubeGrids()
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
+  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   SurfaceMergeImpl merger;
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
-
-  VerticalFaceDescriptor<DomGridView> domdesc(domGen.slice());
-  VerticalFaceDescriptor<TarGridView> tardesc(tarGen.slice());
-
-  glue.setDomainTransformation(domGen.trafo());
-  glue.setTargetTransformation(tarGen.trafo());
-  glue.setDomainDescriptor(domdesc);
-  glue.setTargetDescriptor(tardesc);
+  GlueType glue(domEx, tarEx, &merger);
 
   glue.build();
 

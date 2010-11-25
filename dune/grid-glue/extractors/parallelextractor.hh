@@ -242,9 +242,11 @@ public:
    * @brief Constructor
    * @param gv the grid view object to work with
    */
-  ParallelExtractor(const GV& gv)
-    :  gv_(gv), lx_(gv)
-  {}
+  ParallelExtractor(const GV& gv, const ExtractorPredicate<GV,codim>& descr)
+    :  gv_(gv), lx_(gv, descr)
+  {
+    update(descr);
+  }
 
   /** \brief Destructor frees allocated memory */
   ~ParallelExtractor()
@@ -263,13 +265,14 @@ public:
     global2local_.clear();
   }
 
-  // TODO: doku, get Descriptor Type from LX
-  template<typename Descriptor>
-  void update(const Descriptor& descr)
+  const GridView & gridView() const
   {
-    // setup local extractor
-    lx_.update(descr);
+    return gv_;
+  }
 
+private:
+  void update(const ExtractorPredicate<GV,codim>& descr)
+  {
     // obtain local data
     std::vector<GlobalCoordInfo> localCoordInfos;
     std::vector<GlobalFaceInfo> localFaceInfos;
@@ -430,6 +433,8 @@ public:
     }
 
   };
+
+public:
 
   /*  G E T T E R S  */
 

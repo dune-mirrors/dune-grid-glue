@@ -118,7 +118,7 @@ public:
         // count and remember the corners of this subEntity
         const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
           Dune::GenericReferenceElements<ctype, domainDim>::general(pit->type());
-        int size = refElement.size(face, Glue::DomainExtractor::codim, domainDim);
+        int size = refElement.size(face, Glue::Grid0Patch::codim, domainDim);
         face_corners.push_back(size);
         face_corner_count += size;
 
@@ -152,8 +152,8 @@ public:
         Dune::GenericReferenceElements<ctype, domainDim>::general((*pit)->type());
 
       // Write the current subentity into the fgrid file
-      for (int i=0; i<refElement.size(*faceit, Glue::DomainExtractor::codim, domainDim); i++)
-        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::DomainExtractor::codim, i, domainDim))
+      for (int i=0; i<refElement.size(*faceit, Glue::Grid0Patch::codim, domainDim); i++)
+        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::Grid0Patch::codim, i, domainDim))
               << domainCoordinatePadding
               << std::endl;
 
@@ -185,13 +185,13 @@ public:
       const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
         Dune::GenericReferenceElements<ctype, domainDim>::general((*pit)->type());
 
-      int size = refElement.size(*faceit, Glue::DomainExtractor::codim, domainDim);
+      int size = refElement.size(*faceit, Glue::Grid0Patch::codim, domainDim);
 
       fgrid << size;
 
       // vtk expects the vertices to by cyclically ordered
       // therefore unfortunately we have to deal with several element types on a case-by-case basis
-      if (refElement.type(*faceit,Glue::DomainExtractor::codim).isQuadrilateral()) {
+      if (refElement.type(*faceit,Glue::Grid0Patch::codim).isQuadrilateral()) {
         fgrid << " " << face_corner_count << " " << face_corner_count+1
               << " " << face_corner_count+3 << " " << face_corner_count+2;
 
@@ -205,7 +205,7 @@ public:
     }
     fgrid << std::endl;
 
-    int domainSimplexCorners = domainDim-Glue::DomainExtractor::codim+1;
+    int domainSimplexCorners = domainDim-Glue::Grid0Patch::codim+1;
     fmerged << "POLYGONS " << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {
@@ -292,7 +292,7 @@ public:
         // count and remember the corners of this face
         const Dune::GenericReferenceElement<ctype, targetDim>& refElement =
           Dune::GenericReferenceElements<ctype, targetDim>::general(pit->type());
-        int size = refElement.size(face, Glue::TargetExtractor::codim, targetDim);
+        int size = refElement.size(face, Glue::Grid1Patch::codim, targetDim);
         face_corners.push_back(size);
         face_corner_count += size;
 
@@ -326,8 +326,8 @@ public:
         Dune::GenericReferenceElements<ctype, targetDim>::general((*pit)->type());
 
       // Write the current subentity into the fgrid file
-      for (int i=0; i<refElement.size(*faceit, Glue::TargetExtractor::codim, targetDim); i++)
-        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::TargetExtractor::codim, i, targetDim))
+      for (int i=0; i<refElement.size(*faceit, Glue::Grid1Patch::codim, targetDim); i++)
+        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::Grid1Patch::codim, i, targetDim))
               << targetCoordinatePadding
               << std::endl;
 
@@ -359,13 +359,13 @@ public:
       const Dune::GenericReferenceElement<ctype, targetDim>& refElement =
         Dune::GenericReferenceElements<ctype, targetDim>::general((*pit)->type());
 
-      int size = refElement.size(*faceit, Glue::TargetExtractor::codim, targetDim);
+      int size = refElement.size(*faceit, Glue::Grid1Patch::codim, targetDim);
 
       fgrid << size;
 
       // vtk expects the vertices to by cyclically ordered
       // therefore unfortunately we have to deal with several element types on a case-by-case basis
-      if (refElement.type(*faceit,Glue::TargetExtractor::codim).isQuadrilateral()) {
+      if (refElement.type(*faceit,Glue::Grid1Patch::codim).isQuadrilateral()) {
         fgrid << " " << face_corner_count << " " << face_corner_count+1
               << " " << face_corner_count+3 << " " << face_corner_count+2;
 
@@ -379,7 +379,7 @@ public:
     }
     fgrid << std::endl;
 
-    int targetSimplexCorners = targetDim-Glue::TargetExtractor::codim+1;
+    int targetSimplexCorners = targetDim-Glue::Grid1Patch::codim+1;
     fmerged << "POLYGONS " << overlaps << " " << (targetSimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {

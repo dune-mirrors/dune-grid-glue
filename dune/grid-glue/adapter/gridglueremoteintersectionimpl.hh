@@ -24,13 +24,13 @@
 
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   REMOTE INTERSECTION IMPL   */
 
-template<typename GET1, typename GET2>
-class GridGlue<GET1, GET2>::RemoteIntersection
+template<typename P0, typename P1>
+class GridGlue<P0, P1>::RemoteIntersection
 {
 
 private:
 
-  typedef GridGlue<GET1, GET2> Parent;
+  typedef GridGlue<P0, P1> Parent;
 
   friend class Parent::RemoteIntersectionIterator;
 
@@ -61,15 +61,15 @@ public:
   typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEntityPointer;
 
 
-  dune_static_assert(DomainGrid::dimension - DomainExtractor::codim
-                     == TargetGrid::dimension - TargetExtractor::codim,
+  dune_static_assert(DomainGrid::dimension - Grid0Patch::codim
+                     == TargetGrid::dimension - Grid1Patch::codim,
                      "Currently both coupling extracts need to have the same dimension!");
 
   /** \brief Dimension of the world space of the intersection */
   enum { coorddim = Parent::dimworld };
 
   /** \brief Dimension of the intersection */
-  enum { mydim = Parent::DomainGridView::Grid::dimension - DomainExtractor::codim };
+  enum { mydim = Parent::DomainGridView::Grid::dimension - Grid0Patch::codim };
 
 
   typedef LocalSimplexGeometry<mydim, DomainGridView::dimension, DomainGridType> DomainLocalGeometry;
@@ -128,14 +128,14 @@ public:
           That is the Entity where we started this. */
   DomainEntityPointer entityDomain() const
   {
-    return glue_->domext_.element(glue_->merger_->template parent<0>(mergeindex_));
+    return glue_->patch0_.element(glue_->merger_->template parent<0>(mergeindex_));
   }
 
 
   /** \brief return EntityPointer to the Entity on the outside of this intersection. That is the neighboring Entity. */
   TargetEntityPointer entityTarget() const
   {
-    return glue_->tarext_.element(glue_->merger_->template parent<1>(mergeindex_));
+    return glue_->patch1_.element(glue_->merger_->template parent<1>(mergeindex_));
   }
 
 
@@ -183,26 +183,26 @@ public:
   bool hasTarget() const
   {
     unsigned int localindex;
-    return glue_->tarext_.contains(glue_->merger_->template parent<1>(mergeindex_), localindex);
+    return glue_->patch1_.contains(glue_->merger_->template parent<1>(mergeindex_), localindex);
   }
 
   bool hasDomain() const
   {
     unsigned int localindex;
-    return glue_->domext_.contains(glue_->merger_->template parent<0>(mergeindex_), localindex);
+    return glue_->patch0_.contains(glue_->merger_->template parent<0>(mergeindex_), localindex);
   }
 
   // Local number of codim 1 entity in the inside() Entity where intersection is contained in.
   int numberInDomainEntity() const
   {
-    return glue_->domext_.indexInInside(glue_->merger_->template parent<0>(mergeindex_));
+    return glue_->patch0_.indexInInside(glue_->merger_->template parent<0>(mergeindex_));
   }
 
 
   // Local number of codim 1 entity in outside() Entity where intersection is contained in.
   int numberInTargetEntity() const
   {
-    return glue_->tarext_.indexInInside(glue_->merger_->template parent<1>(mergeindex_));
+    return glue_->patch1_.indexInInside(glue_->merger_->template parent<1>(mergeindex_));
   }
 
 
@@ -311,8 +311,8 @@ private:
 };
 
 
-template<typename GET1, typename GET2>
-bool GridGlue<GET1, GET2>::RemoteIntersection::conforming() const
+template<typename P0, typename P1>
+bool GridGlue<P0, P1>::RemoteIntersection::conforming() const
 {
   std::vector<unsigned int> results;
   // first check the domain side
@@ -326,8 +326,8 @@ bool GridGlue<GET1, GET2>::RemoteIntersection::conforming() const
 }
 
 
-template<typename GET1, typename GET2>
-GridGlue<GET1, GET2>::RemoteIntersection::RemoteIntersection(const Parent* glue, unsigned int mergeindex)
+template<typename P0, typename P1>
+GridGlue<P0, P1>::RemoteIntersection::RemoteIntersection(const Parent* glue, unsigned int mergeindex)
   : glue_(glue), mergeindex_(mergeindex), index_((IndexType)-1),
     domainindex_((IndexType)-1), targetindex_((IndexType)-1)
 {
@@ -340,7 +340,7 @@ GridGlue<GET1, GET2>::RemoteIntersection::RemoteIntersection(const Parent* glue,
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementdim = DomainGridType::template Codim<0>::Geometry::mydimension;
 
-    const int nSimplexCorners = elementdim - Parent::DomainExtractor::codim + 1;
+    const int nSimplexCorners = elementdim - Parent::Grid0Patch::codim + 1;
 
     // coordinates within the subentity that contains the remote intersection
     Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
@@ -356,10 +356,10 @@ GridGlue<GET1, GET2>::RemoteIntersection::RemoteIntersection(const Parent* glue,
 
     unsigned int domainIndex = glue->merger_->template parent<0>(mergeindex);
     unsigned int unused;
-    if (glue->domext_.contains(domainIndex, unused))
+    if (glue->patch0_.contains(domainIndex, unused))
     {
-      typename DomainExtractor::Geometry domainWorldGeometry = glue->domext_.geometry(domainIndex);
-      typename DomainExtractor::LocalGeometry domainLocalGeometry = glue->domext_.geometryLocal(domainIndex);
+      typename Grid0Patch::Geometry domainWorldGeometry = glue->patch0_.geometry(domainIndex);
+      typename Grid0Patch::LocalGeometry domainLocalGeometry = glue->patch0_.geometryLocal(domainIndex);
 
       for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
         corners_element_local[i] = domainLocalGeometry.global(corners_subEntity_local[i]);
@@ -377,7 +377,7 @@ GridGlue<GET1, GET2>::RemoteIntersection::RemoteIntersection(const Parent* glue,
     // compute the coordinates of the subface's corners in codim 0 entity local coordinates
     const int elementdim = TargetGridType::template Codim<0>::Geometry::mydimension;
 
-    const int nSimplexCorners = elementdim - Parent::TargetExtractor::codim + 1;
+    const int nSimplexCorners = elementdim - Parent::Grid1Patch::codim + 1;
 
     // coordinates within the subentity that contains the remote intersection
     Dune::array<LocalCoords, nSimplexCorners> corners_subEntity_local;
@@ -393,10 +393,10 @@ GridGlue<GET1, GET2>::RemoteIntersection::RemoteIntersection(const Parent* glue,
 
     unsigned int targetIndex = glue->merger_->template parent<1>(mergeindex);
     unsigned int unused;
-    if (glue->tarext_.contains(targetIndex, unused))
+    if (glue->patch1_.contains(targetIndex, unused))
     {
-      typename TargetExtractor::Geometry targetWorldGeometry = glue->tarext_.geometry(targetIndex);
-      typename TargetExtractor::LocalGeometry targetLocalGeometry = glue->tarext_.geometryLocal(targetIndex);
+      typename Grid1Patch::Geometry targetWorldGeometry = glue->patch1_.geometry(targetIndex);
+      typename Grid1Patch::LocalGeometry targetLocalGeometry = glue->patch1_.geometryLocal(targetIndex);
 
       for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
         corners_element_local[i] = targetLocalGeometry.global(corners_subEntity_local[i]);

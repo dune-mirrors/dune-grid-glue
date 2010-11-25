@@ -70,22 +70,21 @@ public:
    * @brief Constructor
    * @param gv the grid view object to work with
    */
-  Codim0Extractor(const GV& gv)
+  Codim0Extractor(const GV& gv, const ExtractorPredicate<GV,0>& descr)
     :  Extractor<GV,0>(gv), positiveNormalDirection_(false)
   {
     std::cout << "This is Codim0Extractor on a <"
               << GV::dimension << "," << GV::dimensionworld << "> grid!" << std::endl;
+    update(descr);
   }
-
-  /**
-   */
-  void update(const ExtractorPredicate<GV,0>& descr);
 
   bool & positiveNormalDirection() { return positiveNormalDirection_; }
   const bool & positiveNormalDirection() const { return positiveNormalDirection_; }
 
 protected:
   bool positiveNormalDirection_;
+private:
+  void update(const ExtractorPredicate<GV,0>& descr);
 };
 
 

@@ -9,7 +9,6 @@
 #include <dune/grid/common/quadraturerules.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
-#include <dune/grid-glue/extractors/gridextractiontraits.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 template <class IntersectionIt, int domdimw, int tardimw, class ctype>
@@ -106,8 +105,8 @@ public:
 
 template <class GlueType>
 void testCoupling(const GlueType& glue,
-                  CoordinateTransformation<GlueType::DomainExtractor::dimworld, GlueType::dimworld, typename GlueType::ctype> * domTrafo = 0,
-                  CoordinateTransformation<GlueType::TargetExtractor::dimworld, GlueType::dimworld, typename GlueType::ctype> * tarTrafo = 0 )
+                  CoordinateTransformation<GlueType::Grid0Patch::dimworld, GlueType::dimworld, typename GlueType::ctype> * domTrafo = 0,
+                  CoordinateTransformation<GlueType::Grid1Patch::dimworld, GlueType::dimworld, typename GlueType::ctype> * tarTrafo = 0 )
 {
   typedef typename GlueType::ctype ctype;
 
@@ -117,8 +116,8 @@ void testCoupling(const GlueType& glue,
   // ///////////////////////////////////////
   //   set Identity trafo if necessary
   // ///////////////////////////////////////
-  NoTransformation<GlueType::DomainExtractor::dimworld, GlueType::dimworld, ctype>::assignIfNull(domTrafo);
-  NoTransformation<GlueType::TargetExtractor::dimworld, GlueType::dimworld, ctype>::assignIfNull(tarTrafo);
+  NoTransformation<GlueType::Grid0Patch::dimworld, GlueType::dimworld, ctype>::assignIfNull(domTrafo);
+  NoTransformation<GlueType::Grid1Patch::dimworld, GlueType::dimworld, ctype>::assignIfNull(tarTrafo);
 
   // ///////////////////////////////////////
   //   MergedGrid centric

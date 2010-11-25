@@ -10,7 +10,9 @@
 #include <dune/grid/common/quadraturerules.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
-#include <dune/grid-glue/extractors/gridextractiontraits.hh>
+#include <dune/grid-glue/extractors/codim0extractor.hh>
+#include <dune/grid-glue/extractors/codim1extractor.hh>
+#include <dune/grid-glue/extractors/parallelextractor.hh>
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
@@ -112,22 +114,22 @@ void test1d2dCouplingMatchingDimworld()
   typedef typename GridType2d::LevelGridView DomGridView;
   typedef typename GridType1d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0> TarTraits;
-
-  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
-
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
-
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
+  typedef Codim1Extractor<DomGridView> DomExtractor;
+  typedef Codim0Extractor<TarGridView> TarExtractor;
 
   HorizontalFaceDescriptor<DomGridView> domdesc(0);
   AllElementsDescriptor<TarGridView>  tardesc;
 
-  glue.setDomainDescriptor(domdesc);
-  glue.setTargetDescriptor(tardesc);
-  glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
+  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+  tarEx.positiveNormalDirection() = (slice == 0.0);
+
+  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+#if HAVE_PSURFACE
+  PSurfaceMerge<dim-1,dim,double> merger;
+
+  GlueType glue(domEx, tarEx, &merger);
 
   glue.build();
 
@@ -177,22 +179,22 @@ void test2d1dCouplingMatchingDimworld()
   typedef typename GridType1d::LevelGridView DomGridView;
   typedef typename GridType2d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1> TarTraits;
-
-  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
-
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
-
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
+  typedef Codim0Extractor<DomGridView> DomExtractor;
+  typedef Codim1Extractor<TarGridView> TarExtractor;
 
   AllElementsDescriptor<DomGridView>  domdesc;
   HorizontalFaceDescriptor<TarGridView> tardesc(0);
 
-  glue.setDomainDescriptor(domdesc);
-  glue.setTargetDescriptor(tardesc);
-  glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
+  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
+  domEx.positiveNormalDirection() = (slice == 0.0);
+  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+
+  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+#if HAVE_PSURFACE
+  PSurfaceMerge<dim-1,dim,double> merger;
+
+  GlueType glue(domEx, tarEx, &merger);
 
   glue.build();
 
@@ -241,25 +243,27 @@ void test1d2dCoupling(double slice=0.0)
   typedef typename GridType2d::LevelGridView DomGridView;
   typedef typename GridType1d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,1, par> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,0, par> TarTraits;
-
-  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
-
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
-
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
+  // typedef DefaultExtractionTraits<DomGridView,1, par> DomTraits;
+  // typedef DefaultExtractionTraits<TarGridView,0, par> TarTraits;
+  typedef Codim1Extractor<DomGridView> DomExtractor;
+  typedef Codim0Extractor<TarGridView> TarExtractor;
 
   HorizontalFaceDescriptor<DomGridView> domdesc(slice);
   AllElementsDescriptor<TarGridView>  tardesc;
 
-  glue.setDomainDescriptor(domdesc);
-  glue.setTargetDescriptor(tardesc);
+  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+  tarEx.positiveNormalDirection() = (slice == 0.0);
+
+  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+#if HAVE_PSURFACE
+  PSurfaceMerge<dim-1,dim,double> merger;
+
+  GlueType glue(domEx, tarEx, &merger);
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
   glue.setTargetTransformation(&trafo);
-  glue.targetExtractor().positiveNormalDirection() = (slice == 0.0);
 
   glue.build();
 
@@ -308,25 +312,27 @@ void test2d1dCoupling(double slice=0.0)
   typedef typename GridType1d::LevelGridView DomGridView;
   typedef typename GridType2d::LevelGridView TarGridView;
 
-  typedef DefaultExtractionTraits<DomGridView,0, par> DomTraits;
-  typedef DefaultExtractionTraits<TarGridView,1, par> TarTraits;
-
-  typedef ::GridGlue<DomTraits,TarTraits> GlueType;
-
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
-
-  GlueType glue(cubeGrid0.levelView(0), cubeGrid1.levelView(0), &merger);
+  // typedef DefaultExtractionTraits<DomGridView,0, par> DomTraits;
+  // typedef DefaultExtractionTraits<TarGridView,1, par> TarTraits;
+  typedef Codim0Extractor<DomGridView> DomExtractor;
+  typedef Codim1Extractor<TarGridView> TarExtractor;
 
   AllElementsDescriptor<DomGridView>  domdesc;
   HorizontalFaceDescriptor<TarGridView> tardesc(slice);
 
-  glue.setDomainDescriptor(domdesc);
-  glue.setTargetDescriptor(tardesc);
+  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
+  domEx.positiveNormalDirection() = (slice == 0.0);
+  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+
+  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+#if HAVE_PSURFACE
+  PSurfaceMerge<dim-1,dim,double> merger;
+
+  GlueType glue(domEx, tarEx, &merger);
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
   glue.setDomainTransformation(&trafo);
-  glue.domainExtractor().positiveNormalDirection() = (slice == 0.0);
 
   glue.build();
 

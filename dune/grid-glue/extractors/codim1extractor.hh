@@ -73,16 +73,16 @@ public:
    * @brief Constructor
    * @param gv the grid view object to work with
    */
-  Codim1Extractor(const GV& gv)
+  Codim1Extractor(const GV& gv, const ExtractorPredicate<GV,1>& descr)
     :  Extractor<GV,1>(gv)
   {
     std::cout << "This is Codim1Extractor on a <" << dim
               << "," << dimworld << "> grid!"
               << std::endl;
+    update(descr);
   }
 
-  /*  F U N C T I O N A L I T Y  */
-
+private:
 
   /**
    * Extracts a codimension 1 surface from the grid @c g and builds up two arrays

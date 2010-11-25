@@ -23,13 +23,13 @@
 
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   REMOTE INTERSECTION ITERATOR IMPL   */
 
-template<typename GET1, typename GET2>
-class GridGlue<GET1, GET2>::RemoteIntersectionIterator :
+template<typename P1, typename P2>
+class GridGlue<P1, P2>::RemoteIntersectionIterator :
   public Dune::ForwardIteratorFacade< RemoteIntersectionIterator, const RemoteIntersection>
 {
 private:
 
-  typedef GridGlue<GET1, GET2> Parent;
+  typedef GridGlue<P1, P2> Parent;
 
 public:
 
@@ -81,12 +81,12 @@ public:
 
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   DOMAIN INTERSECTION ITERATOR IMPL   */
 
-template<typename GET1, typename GET2>
-class GridGlue<GET1, GET2>::DomainIntersectionIterator :
+template<typename P1, typename P2>
+class GridGlue<P1, P2>::DomainIntersectionIterator :
   public Dune::ForwardIteratorFacade< DomainIntersectionIterator, const RemoteIntersection>
 {
 private:
-  typedef GridGlue<GET1, GET2> Parent;
+  typedef GridGlue<P1, P2> Parent;
 
 public:
   typedef typename Parent::RemoteIntersection RemoteIntersection;
@@ -165,13 +165,13 @@ public:
 
 
 
-template<typename GET1, typename GET2>
-class GridGlue<GET1, GET2>::TargetIntersectionIterator :
+template<typename P1, typename P2>
+class GridGlue<P1, P2>::TargetIntersectionIterator :
   public Dune::ForwardIteratorFacade< TargetIntersectionIterator, const RemoteIntersection>
 {
 private:
 
-  typedef GridGlue<GET1, GET2> Parent;
+  typedef GridGlue<P1, P2> Parent;
 
 
 public:
