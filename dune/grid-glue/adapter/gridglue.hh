@@ -22,14 +22,13 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/iteratorfacades.hh>
 
 #define QUICKHACK_INDEX 1
 
 #include "../extractors/gridextractiontraits.hh"
 #include "../extractors/extractorselector.hh"
 #include "../extractors/extractorpredicate.hh"
-#include "remoteintersection.hh"
-#include "remoteintersectioniterators.hh"
 #include "coordinatetransformation.hh"
 #include "gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
@@ -86,12 +85,6 @@ private:
 
   /** \brief ParallelIndexSet type (used for communication communication) */
   typedef Dune::ParallelIndexSet <GlobalId, LocalIndex > PIndexSet;
-
-public:
-  class RemoteIntersectionImpl;
-  class RemoteIntersectionIteratorImpl;
-  class DomainIntersectionIteratorImpl;
-  class TargetIntersectionIteratorImpl;
 
 public:
 
@@ -185,19 +178,16 @@ public:
       dimworld>                         Merger;
 
   /** \brief Type of remote intersection objects */
-  typedef RemoteIntersectionInterface::RemoteIntersection<RemoteIntersectionImpl>    RemoteIntersection;
+  class RemoteIntersection;
 
   /** \brief Type of the iterator that iterates over remove intersections */
-  typedef RemoteIntersectionInterface::RemoteIntersectionIterator<RemoteIntersectionImpl, RemoteIntersectionIteratorImpl>
-  RemoteIntersectionIterator;
+  class RemoteIntersectionIterator;
 
   /** \todo Please doc me! */
-  typedef RemoteIntersectionInterface::RemoteIntersectionIterator<RemoteIntersectionImpl, DomainIntersectionIteratorImpl>
-  DomainIntersectionIterator;
+  class DomainIntersectionIterator;
 
   /** \todo Please doc me! */
-  typedef RemoteIntersectionInterface::RemoteIntersectionIterator<RemoteIntersectionImpl, TargetIntersectionIteratorImpl>
-  TargetIntersectionIterator;
+  class TargetIntersectionIterator;
 
 private:
 
@@ -241,7 +231,7 @@ private:
 
   /// @brief an invalid intersection object used as dummy and
   /// also as recognizable end object of iterations over intersections
-  mutable RemoteIntersectionImpl NULL_INTERSECTION;
+  mutable RemoteIntersection NULL_INTERSECTION;
 
 #if HAVE_MPI
   /// @brief MPI_Comm which this GridGlue is working on
@@ -258,7 +248,7 @@ private:
 #endif
 
   /// @brief a vector with intersection elements
-  mutable std::vector<RemoteIntersectionImpl>   intersections_;
+  mutable std::vector<RemoteIntersection>   intersections_;
 
 protected:
 
@@ -275,7 +265,7 @@ protected:
     for (unsigned int i = 0; i < this->merger_->nSimplices(); ++i)
     {
 
-      RemoteIntersectionImpl ri(this, i);
+      RemoteIntersection ri(this, i);
       if (ri.hasDomain())
         ri.domainIndex() = _dindex_sz++;
       if (ri.hasTarget())
@@ -500,7 +490,7 @@ public:
    */
   RemoteIntersectionIterator iremoteend() const
   {
-    return RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->NULL_INTERSECTION));
+    return RemoteIntersectionIterator(this->NULL_INTERSECTION);
   }
 
 
@@ -511,7 +501,7 @@ public:
    */
   DomainIntersectionIterator idomainend() const
   {
-    return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
+    return DomainIntersectionIterator(this->NULL_INTERSECTION);
   }
 
 
@@ -522,7 +512,7 @@ public:
    */
   TargetIntersectionIterator itargetend() const
   {
-    return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
+    return TargetIntersectionIterator(this->NULL_INTERSECTION);
   }
 
   /*! \brief Communicate information on the MergedGrid of a GridGlue
@@ -746,7 +736,7 @@ void GridGlue<GET1, GET2>::build()
 
   // clear the contents from the current intersections array
   {
-    std::vector<RemoteIntersectionImpl> dummy(0, NULL_INTERSECTION);
+    std::vector<RemoteIntersection> dummy(0, NULL_INTERSECTION);
     intersections_.swap(dummy);
   }
 
@@ -857,7 +847,7 @@ int GridGlue<GET1, GET2>::domainEntityNextFace(const DomainElement& e, int index
   while (first < count &&    (this->domext_.indexInInside(first) < index || !this->merger_->template simplexMatched<0>(first)))
     first++;
   if (first == count)
-    return -1;             // no more faces
+    return -1;     // no more faces
   else
     return this->domext_.indexInInside(first);     // found, return the face's number
 }
@@ -876,7 +866,7 @@ int GridGlue<GET1, GET2>::targetEntityNextFace(const TargetElement& e, int index
   while (first < count && (this->tarext_.indexInInside(first) < index || !this->merger_->template simplexMatched<1>(first)))
     first++;
   if (first == count)
-    return -1;             // no more faces
+    return -1;     // no more faces
   else
     return this->tarext_.indexInInside(first);     // found, return the face's number
 }
@@ -886,8 +876,8 @@ template<typename GET1, typename GET2>
 typename GridGlue<GET1, GET2>::RemoteIntersectionIterator GridGlue<GET1, GET2>::iremotebegin() const
 {
   return (this->intersections_.size() > 0)
-         ? RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->intersections_[0]))
-         : RemoteIntersectionIterator(RemoteIntersectionIteratorImpl(this->NULL_INTERSECTION));
+         ? RemoteIntersectionIterator(intersections_[0])
+         : RemoteIntersectionIterator(NULL_INTERSECTION);
 }
 
 
@@ -898,7 +888,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   int first, count;
   bool in_surface = this->domext_.faceIndices(e, first, count);
   if (!in_surface)
-    return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
+    return DomainIntersectionIterator(this->NULL_INTERSECTION);
 
   count += first;
   while (first < count)
@@ -919,7 +909,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
 
       // if sth. has been found, return the iterator
       if (global_results.size() > 0)
-        return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
+        return DomainIntersectionIterator(this->intersections_[global_results[0]], global_results);
 
       // else leave the loop
       break;
@@ -928,7 +918,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   }
 
   // nothing has been found
-  return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
+  return DomainIntersectionIterator(this->NULL_INTERSECTION);
 }
 
 
@@ -939,7 +929,7 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   int first, count;
   bool hasExtractedSubEntity = this->domext_.faceIndices(e, first, count);
   if (!hasExtractedSubEntity)
-    return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
+    return DomainIntersectionIterator(this->NULL_INTERSECTION);
 
 
   // now accumulate all remote intersections of the element's faces
@@ -962,9 +952,9 @@ typename GridGlue<GET1, GET2>::DomainIntersectionIterator GridGlue<GET1, GET2>::
   }
 
   if (found_sth)
-    return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
+    return DomainIntersectionIterator(this->intersections_[global_results[0]], global_results);
   else
-    return DomainIntersectionIterator(DomainIntersectionIteratorImpl(this->NULL_INTERSECTION));
+    return DomainIntersectionIterator(this->NULL_INTERSECTION);
 }
 
 
@@ -995,7 +985,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
 
       // if sth. has been found, return the iterator
       if (global_results.size() > 0)
-        return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
+        return TargetIntersectionIterator(this->intersections_[global_results[0]], global_results);
 
       // else leave the loop
       break;
@@ -1004,7 +994,7 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   }
 
   // nothing has been found
-  return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
+  return TargetIntersectionIterator(this->NULL_INTERSECTION);
 }
 
 
@@ -1037,15 +1027,15 @@ typename GridGlue<GET1, GET2>::TargetIntersectionIterator GridGlue<GET1, GET2>::
   }
 
   if (found_sth)
-    return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->intersections_[global_results[0]], global_results));
+    return TargetIntersectionIterator(this->intersections_[global_results[0]], global_results);
   else
-    return TargetIntersectionIterator(TargetIntersectionIteratorImpl(this->NULL_INTERSECTION));
+    return TargetIntersectionIterator(this->NULL_INTERSECTION);
 }
 
-// include implementation of subclass RemoteIntersectionImpl
+// include implementation of subclass RemoteIntersection
 #include "gridglueremoteintersectionimpl.hh"
 
-// include implementation of subclasses DomainIntersectionIteratorImpl and TargetIntersectionIteratorImpl
+// include implementation of subclasses DomainIntersectionIterator and TargetIntersectionIterator
 #include "gridglueremoteintersectioniteratorimpl.hh"
 
 

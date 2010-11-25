@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 /*
- *  Filename:    GridGlueRemoteIntersectionIteratorImpl.hh
+ *  Filename:    GridGlueRemoteIntersectionIterator.hh
  *  Version:     1.0
  *  Created on:  Mar 2, 2009
  *  Author:      Gerrit Buse
@@ -12,19 +12,20 @@
  *
  */
 /**
- * @file GridGlueRemoteIntersectionIteratorImpl.hh
+ * @file GridGlueRemoteIntersectionIterator.hh
  * @brief Implementations of iterators over remote intersections provided by GridGlue.
  */
 
-#ifndef GRIDGLUEREMOTEINTERSECTIONITERATORIMPL_HH_
-#define GRIDGLUEREMOTEINTERSECTIONITERATORIMPL_HH_
+#ifndef GRIDGLUEREMOTEINTERSECTIONITERATOR_HH_
+#define GRIDGLUEREMOTEINTERSECTIONITERATOR_HH_
 
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   REMOTE INTERSECTION ITERATOR IMPL   */
 
 template<typename GET1, typename GET2>
-class GridGlue<GET1, GET2>::RemoteIntersectionIteratorImpl
+class GridGlue<GET1, GET2>::RemoteIntersectionIterator :
+  public Dune::ForwardIteratorFacade< RemoteIntersectionIterator, const RemoteIntersection>
 {
 private:
 
@@ -46,10 +47,10 @@ private:
 
 public:
 
-  RemoteIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_)
-    : glue_(intersectionImpl_.glue_),
-      intersection_(intersectionImpl_),
-      index_(intersectionImpl_.index())
+  RemoteIntersectionIterator(RemoteIntersection& intersection_)
+    : glue_(intersection_.glue_),
+      intersection_(intersection_),
+      index_(intersection_.index())
   {}
 
 
@@ -70,7 +71,7 @@ public:
   }
 
 
-  bool equals(const RemoteIntersectionIteratorImpl& iter) const
+  bool equals(const RemoteIntersectionIterator& iter) const
   {
     return iter.index_ == this->index_;
   }
@@ -81,7 +82,8 @@ public:
 /*   I M P L E M E N T A T I O N   O F   S U B C L A S S   DOMAIN INTERSECTION ITERATOR IMPL   */
 
 template<typename GET1, typename GET2>
-class GridGlue<GET1, GET2>::DomainIntersectionIteratorImpl
+class GridGlue<GET1, GET2>::DomainIntersectionIterator :
+  public Dune::ForwardIteratorFacade< DomainIntersectionIterator, const RemoteIntersection>
 {
 private:
   typedef GridGlue<GET1, GET2> Parent;
@@ -99,10 +101,10 @@ private:
 
 public:
 
-  DomainIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const std::vector<unsigned int>& parts_)
-    : glue_(intersectionImpl_.glue_),
-      intersection_(intersectionImpl_),
-      index_(intersectionImpl_.index()),
+  DomainIntersectionIterator(RemoteIntersection& intersection_, const std::vector<unsigned int>& parts_)
+    : glue_(intersection_.glue_),
+      intersection_(intersection_),
+      index_(intersection_.index()),
       parent_id_(0),
       current_(0)
   {
@@ -115,10 +117,10 @@ public:
   }
 
 
-  DomainIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_)
-    : glue_(intersectionImpl_.glue_),
-      intersection_(intersectionImpl_),
-      index_(intersectionImpl_.index()),
+  DomainIntersectionIterator(RemoteIntersection& intersection_)
+    : glue_(intersection_.glue_),
+      intersection_(intersection_),
+      index_(intersection_.index()),
       parent_id_(0),
       current_(0)
   {
@@ -141,7 +143,7 @@ public:
   {
     if (++this->current_ < this->parts_.size())
     {
-      const RemoteIntersectionImpl& next = this->glue_->intersections_[this->parts_[this->current_]];
+      const RemoteIntersection& next = this->glue_->intersections_[this->parts_[this->current_]];
       this->index_ = next.index();
       this->intersection_ = next;
     }
@@ -150,7 +152,7 @@ public:
   }
 
 
-  bool equals(const DomainIntersectionIteratorImpl& iter) const
+  bool equals(const DomainIntersectionIterator& iter) const
   {
     return iter.index_ == this->index_;
   }
@@ -164,7 +166,8 @@ public:
 
 
 template<typename GET1, typename GET2>
-class GridGlue<GET1, GET2>::TargetIntersectionIteratorImpl
+class GridGlue<GET1, GET2>::TargetIntersectionIterator :
+  public Dune::ForwardIteratorFacade< TargetIntersectionIterator, const RemoteIntersection>
 {
 private:
 
@@ -193,10 +196,10 @@ private:
 
 public:
 
-  TargetIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_, const std::vector<unsigned int>& parts_)
-    : glue_(intersectionImpl_.glue_),
-      intersection_(intersectionImpl_),
-      index_(intersectionImpl_.index()),
+  TargetIntersectionIterator(RemoteIntersection& intersection_, const std::vector<unsigned int>& parts_)
+    : glue_(intersection_.glue_),
+      intersection_(intersection_),
+      index_(intersection_.index()),
       parent_id_(0),
       current_(0)
   {
@@ -209,10 +212,10 @@ public:
   }
 
 
-  TargetIntersectionIteratorImpl(RemoteIntersectionImpl& intersectionImpl_)
-    : glue_(intersectionImpl_.glue_),
-      intersection_(intersectionImpl_),
-      index_(intersectionImpl_.index()),
+  TargetIntersectionIterator(RemoteIntersection& intersection_)
+    : glue_(intersection_.glue_),
+      intersection_(intersection_),
+      index_(intersection_.index()),
       parent_id_(0),
       current_(0)
   {
@@ -236,7 +239,7 @@ public:
   {
     if (++this->current_ < this->parts_.size())
     {
-      const RemoteIntersectionImpl& next = this->glue_->intersections_[this->parts_[this->current_]];
+      const RemoteIntersection& next = this->glue_->intersections_[this->parts_[this->current_]];
       this->index_ = next.index();
       this->intersection_ = next;
     }
@@ -245,7 +248,7 @@ public:
   }
 
 
-  bool equals(const TargetIntersectionIteratorImpl& iter) const
+  bool equals(const TargetIntersectionIterator& iter) const
   {
     return iter.index_ == this->index_;
   }
@@ -253,4 +256,4 @@ public:
 };
 
 
-#endif // GRIDGLUEREMOTEINTERSECTIONITERATORIMPL_HH_
+#endif // GRIDGLUEREMOTEINTERSECTIONITERATOR_HH_
