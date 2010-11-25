@@ -14,15 +14,16 @@
 
 template <class IntersectionIt, int domdimw, int tardimw, class ctype>
 void testIntersection(const IntersectionIt & rIIt,
-                      CoordinateTransformation<domdimw, IntersectionIt::coorddim, ctype> & domTrafo,
-                      CoordinateTransformation<tardimw, IntersectionIt::coorddim, ctype> & tarTrafo)
+                      CoordinateTransformation<domdimw, IntersectionIt::value_type::coorddim, ctype> & domTrafo,
+                      CoordinateTransformation<tardimw, IntersectionIt::value_type::coorddim, ctype> & tarTrafo)
 {
+  typedef typename IntersectionIt::value_type Intersection;
   // Dimension of the intersection
-  const int dim = IntersectionIt::mydim;
+  const int dim = Intersection::mydim;
 
   // Dimension of world coordinates
   // not needed atm
-  // const int coorddim = IntersectionIt::coorddim;
+  // const int coorddim = Intersection::coorddim;
 
   // Create a set of test points
   const Dune::QuadratureRule<double, dim>& quad = Dune::QuadratureRules<double, dim>::rule(rIIt->type(), 3);
@@ -32,18 +33,18 @@ void testIntersection(const IntersectionIt & rIIt,
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
     // Test whether local domain position is consistent with global domain position
-    Dune::FieldVector<double, IntersectionIt::DomainGridView::dimensionworld> localDomainPos =
+    Dune::FieldVector<double, Intersection::DomainGridView::dimensionworld> localDomainPos =
       rIIt->entityDomain()->geometry().global(rIIt->intersectionDomainLocal().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, IntersectionIt::DomainGridView::dimensionworld> globalDomainPos =
+    Dune::FieldVector<double, Intersection::DomainGridView::dimensionworld> globalDomainPos =
       rIIt->intersectionDomainGlobal().global(quadPos);
 
-    Dune::FieldVector<double, IntersectionIt::TargetGridView::dimensionworld> localTargetPos =
+    Dune::FieldVector<double, Intersection::TargetGridView::dimensionworld> localTargetPos =
       rIIt->entityTarget()->geometry().global(rIIt->intersectionTargetLocal().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, IntersectionIt::TargetGridView::dimensionworld> globalTargetPos =
+    Dune::FieldVector<double, Intersection::TargetGridView::dimensionworld> globalTargetPos =
       rIIt->intersectionTargetGlobal().global(quadPos);
 
     // Test whether local domain position is consistent with global domain position
