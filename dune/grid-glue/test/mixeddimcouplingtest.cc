@@ -2,11 +2,36 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include "config.h"
 
+namespace Dune
+{
+
+  // Due to a bug in Dune, you need the following two structs:
+  namespace Capabilities
+  {
+
+    template< class Grid >
+    struct hasHierarchicIndexSet
+    {
+      static const bool v = false;
+    };
+
+    template< class Grid >
+    struct hasHierarchicIndexSet< const Grid >
+    {
+      static const bool v = hasHierarchicIndexSet< Grid >::v;
+    };
+
+  }
+
+}
+
 #include <iostream>
 
+#include <dune/common/mpihelper.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/nullptr.hh>
 #include <dune/grid/sgrid.hh>
+#include <dune/grid/geometrygrid.hh>
 #include <dune/grid/common/quadraturerules.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
@@ -60,11 +85,10 @@ public:
   }
 };
 
-
-
 /** \brief trafo from dim to dim+1 */
 template<int dim, int dimw, class ctype>
-class MixedDimTrafo : public CoordinateTransformation<dim,dimw,ctype>
+class MixedDimTrafo
+  : public AnalyticalCoordFunction< ctype, dim, dimw, MixedDimTrafo<dim,dimw,ctype> >
 {
   dune_static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
   double yOffset_;
@@ -78,9 +102,13 @@ public:
       x[i] = c[i-1];
     return x;
   }
+
+  //! evaluate method for global mapping
+  void evaluate ( const Dune::FieldVector<ctype, dim> &x, Dune::FieldVector<ctype, dimw> &y ) const
+  {
+    y = (*this)(x);
+  }
 };
-
-
 
 template <int dim>
 void test1d2dCouplingMatchingDimworld()
@@ -234,14 +262,21 @@ void test1d2dCoupling(double slice=0.0)
   FieldVector<double,dim-1> lower1d(0);
   FieldVector<double,dim-1> upper1d(1);
 
-  GridType1d cubeGrid1(elements1d, lower1d, upper1d);
+  typedef GeometryGrid<GridType1d, MixedDimTrafo<dim-1,dim,double> > LiftedGridType;
+
+  GridType1d cubeGrid1_in(elements1d, lower1d, upper1d);
+
+  MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
+
+  LiftedGridType cubeGrid1(cubeGrid1_in, trafo);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
   // ////////////////////////////////////////
 
   typedef typename GridType2d::LevelGridView DomGridView;
-  typedef typename GridType1d::LevelGridView TarGridView;
+  // typedef typename GridType1d::LevelGridView TarGridView;
+  typedef typename LiftedGridType::LevelGridView TarGridView;
 
   // typedef DefaultExtractionTraits<DomGridView,1, par> DomTraits;
   // typedef DefaultExtractionTraits<TarGridView,0, par> TarTraits;
@@ -262,8 +297,8 @@ void test1d2dCoupling(double slice=0.0)
 
   GlueType glue(domEx, tarEx, &merger);
 
-  MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
-  glue.setTargetTransformation(&trafo);
+  // MixedDimTrafo<dim-1,dim,double> trafo(slice); // transform dim-1 to dim
+  // glue.setTargetTransformation(&trafo);
 
   glue.build();
 
@@ -274,7 +309,7 @@ void test1d2dCoupling(double slice=0.0)
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue, (CoordinateTransformation<dim,dim,double>*)nullptr, &trafo);
+  testCoupling(glue);   // , (CoordinateTransformation<dim,dim,double>*)nullptr, &trafo);
 #else
     #warning Not testing, because psurface backend is not available.
 #endif
@@ -295,7 +330,13 @@ void test2d1dCoupling(double slice=0.0)
   FieldVector<double,dim-1> lower1d(0);
   FieldVector<double,dim-1> upper1d(1);
 
-  GridType1d cubeGrid0(elements1d, lower1d, upper1d);
+  typedef GeometryGrid<GridType1d, MixedDimTrafo<dim-1,dim,double> > LiftedGridType;
+
+  GridType1d cubeGrid0_in(elements1d, lower1d, upper1d);
+
+  MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
+
+  LiftedGridType cubeGrid0(cubeGrid0_in, trafo);
 
   typedef SGrid<dim,dim> GridType2d;
 
@@ -309,7 +350,7 @@ void test2d1dCoupling(double slice=0.0)
   //   Set up coupling at their interface
   // ////////////////////////////////////////
 
-  typedef typename GridType1d::LevelGridView DomGridView;
+  typedef typename LiftedGridType::LevelGridView DomGridView;
   typedef typename GridType2d::LevelGridView TarGridView;
 
   // typedef DefaultExtractionTraits<DomGridView,0, par> DomTraits;
@@ -331,9 +372,6 @@ void test2d1dCoupling(double slice=0.0)
 
   GlueType glue(domEx, tarEx, &merger);
 
-  MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
-  glue.setDomainTransformation(&trafo);
-
   glue.build();
 
   std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
@@ -343,7 +381,7 @@ void test2d1dCoupling(double slice=0.0)
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue, &trafo, (CoordinateTransformation<dim,dim,double>*)nullptr);
+  testCoupling(glue);
 #else
     #warning Not testing, because psurface backend is not available.
 #endif
@@ -351,6 +389,8 @@ void test2d1dCoupling(double slice=0.0)
 
 int main(int argc, char *argv[]) try
 {
+  Dune::MPIHelper::instance(argc, argv);
+
   // /////////////////////////////////////////////////////////////
   //   First set of tests: the grid have different dimensions,
   //   but the world dimension is the same for both of them.
@@ -366,10 +406,13 @@ int main(int argc, char *argv[]) try
   test2d1dCouplingMatchingDimworld<2>();
   std::cout << "====================================================\n";
 
+#define _3DTEST 1
+#if _3DTEST
   // Test a unit cube versus a grid one dimension lower
   std::cout << "==== 3d 2d == matching =============================\n";
   test2d1dCouplingMatchingDimworld<3>();
   std::cout << "====================================================\n";
+#endif
 
   // /////////////////////////////////////////////////////////////
   //   Second set of tests: the grid have different dimensions,
@@ -379,8 +422,8 @@ int main(int argc, char *argv[]) try
 
   // Test a unit square versus a grid one dimension lower
   std::cout << "==== 1d 2d === nonmatching ==========================\n";
-  test1d2dCoupling<2>();
-  test1d2dCoupling<2, true>();
+  // test1d2dCoupling<2>();
+  // test1d2dCoupling<2, true>();
   std::cout << "=====================================================\n";
 
   // Test a unit square versus a grid one dimension lower
@@ -389,11 +432,13 @@ int main(int argc, char *argv[]) try
   test2d1dCoupling<2, true>();
   std::cout << "====================================================\n";
 
+#if _3DTEST
   // Test a unit cube versus a grid one dimension lower
   std::cout << "==== 3d 2d == nonmatching ==========================\n";
   test2d1dCoupling<3>();
   test2d1dCoupling<3, true>();
   std::cout << "====================================================\n";
+#endif
 
   // /////////////////////////////////////////////////////////////
   //   Third set of tests: the grid have different dimensions,
@@ -403,8 +448,8 @@ int main(int argc, char *argv[]) try
 
   // Test a unit square versus a grid one dimension lower
   std::cout << "==== 1d 2d == nonmatching top ======================\n";
-  test1d2dCoupling<2>(1.0);
-  test1d2dCoupling<2, true>(1.0);
+  // test1d2dCoupling<2>(1.0);
+  // test1d2dCoupling<2, true>(1.0);
   std::cout << "====================================================\n";
 
   // Test a unit square versus a grid one dimension lower
@@ -413,11 +458,13 @@ int main(int argc, char *argv[]) try
   test2d1dCoupling<2, true>(1.0);
   std::cout << "====================================================\n";
 
+#if _3DTEST
   // Test a unit cube versus a grid one dimension lower
   std::cout << "==== 3d 2d == nonmatching top ======================\n";
   test2d1dCoupling<3>(1.0);
   test2d1dCoupling<3, true>(1.0);
   std::cout << "====================================================\n";
+#endif
 
 }
 catch (Exception e) {

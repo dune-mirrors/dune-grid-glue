@@ -6,6 +6,7 @@
 #ifdef HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
+#include <dune/common/mpihelper.hh>
 #include <dune/grid/common/quadraturerules.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
@@ -284,6 +285,8 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
 
 int main()
 {
+  Dune::MPIHelper::instance(argc, argv);
+
   // //////////////////////////////////////////////////////////
   //   Test with the PSurfaceMerge implementation
   // //////////////////////////////////////////////////////////

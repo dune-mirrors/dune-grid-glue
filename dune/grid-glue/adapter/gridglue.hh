@@ -26,7 +26,6 @@
 
 #define QUICKHACK_INDEX 1
 
-#include "coordinatetransformation.hh"
 #include "gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
 
@@ -133,12 +132,6 @@ public:
   /** \brief The type used for coordinate vectors */
   typedef Dune::FieldVector<ctype, dimworld>                   Coords;
 
-  /** \brief The type of transformation used for the domain grid*/
-  typedef CoordinateTransformation<Grid0Patch::dimworld, dimworld, ctype>      DomainTransformation;
-
-  /** \brief The type of transformation used for the domain grid*/
-  typedef CoordinateTransformation<Grid1Patch::dimworld, dimworld, ctype>      TargetTransformation;
-
   /** \brief The type of the domain grid elements */
   typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainElement;
 
@@ -184,10 +177,6 @@ public:
 private:
 
   /*   M E M B E R   V A R I A B L E S   */
-
-  const DomainTransformation*    domtrafo_;
-
-  const TargetTransformation*    tartrafo_;
 
   /// @brief the "domain" grid view
   const DomainGridView&        domgv_;
@@ -299,8 +288,7 @@ protected:
   void extractGrid (const Extractor & extractor,
                     std::vector<Dune::FieldVector<ctype, dimworld> > & coords,
                     std::vector<unsigned int> & faces,
-                    std::vector<Dune::GeometryType>& geometryTypes,
-                    const CoordinateTransformation<Extractor::dimworld, dimworld, ctype>* trafo) const;
+                    std::vector<Dune::GeometryType>& geometryTypes) const;
 
 public:
 
@@ -360,17 +348,6 @@ public:
   const Merger* merger() const
   {
     return merger_;
-  }
-
-  void setDomainTransformation(const DomainTransformation* trafo)
-  {
-    domtrafo_ = trafo;
-  }
-
-
-  void setTargetTransformation(const TargetTransformation* trafo)
-  {
-    tartrafo_ = trafo;
   }
 
   /*   F U N C T I O N A L I T Y   */
@@ -677,8 +654,7 @@ GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger*
 #else
 GridGlue<P0, P1>::GridGlue(const Grid0Patch & gp1, const Grid1Patch & gp2, Merger* merger)
 #endif
-  : domtrafo_(NULL), tartrafo_(NULL),
-    domgv_(gp1.gridView()), targv_(gp2.gridView()),
+  : domgv_(gp1.gridView()), targv_(gp2.gridView()),
     patch0_(gp1), patch1_(gp2), merger_(merger),
     NULL_INTERSECTION(this),
 #if HAVE_MPI
@@ -711,8 +687,8 @@ void GridGlue<P0, P1>::build()
 
   // retrieve the coordinate and topology information from the extractors
   // and apply transformations if necessary
-  extractGrid(patch0_, domcoords, domfaces, domainElementTypes, domtrafo_);
-  extractGrid(patch1_, tarcoords, tarfaces, targetElementTypes, tartrafo_);
+  extractGrid(patch0_, domcoords, domfaces, domainElementTypes);
+  extractGrid(patch1_, tarcoords, tarfaces, targetElementTypes);
 
 #ifdef WRITE_TO_VTK
   const int dimw = Parent::dimworld;
@@ -748,8 +724,7 @@ template<typename Extractor>
 void GridGlue<P0, P1>::extractGrid (const Extractor & extractor,
                                     std::vector<Dune::FieldVector<ctype, dimworld> > & coords,
                                     std::vector<unsigned int> & faces,
-                                    std::vector<Dune::GeometryType>& geometryTypes,
-                                    const CoordinateTransformation<Extractor::dimworld, dimworld, ctype>* trafo) const
+                                    std::vector<Dune::GeometryType>& geometryTypes) const
 {
   std::vector<typename Extractor::Coords> tempcoords;
   std::vector<typename Extractor::VertexVector> tempfaces;
@@ -758,24 +733,12 @@ void GridGlue<P0, P1>::extractGrid (const Extractor & extractor,
   coords.clear();
   coords.reserve(tempcoords.size());
 
-  if (trafo != NULL)
+  for (unsigned int i = 0; i < tempcoords.size(); ++i)
   {
-    std::cout << "GridGlue::Builder : apply trafo\n";
-    for (size_t i = 0; i < tempcoords.size(); ++i)
-    {
-      Coords temp = (*trafo)(tempcoords[i]);
-      coords.push_back(temp);
-    }
-  }
-  else
-  {
-    for (unsigned int i = 0; i < tempcoords.size(); ++i)
-    {
-      assert(int(dimworld) == int(Extractor::dimworld));
-      coords.push_back(Dune::FieldVector<ctype, dimworld>());
-      for (size_t j = 0; j <dimworld; ++j)
-        coords.back()[j] = tempcoords[i][j];
-    }
+    assert(int(dimworld) == int(Extractor::dimworld));
+    coords.push_back(Dune::FieldVector<ctype, dimworld>());
+    for (size_t j = 0; j <dimworld; ++j)
+      coords.back()[j] = tempcoords[i][j];
   }
 
   extractor.getFaces(tempfaces);

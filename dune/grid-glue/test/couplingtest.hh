@@ -11,10 +11,8 @@
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
-template <class IntersectionIt, int domdimw, int tardimw, class ctype>
-void testIntersection(const IntersectionIt & rIIt,
-                      CoordinateTransformation<domdimw, IntersectionIt::value_type::coorddim, ctype> & domTrafo,
-                      CoordinateTransformation<tardimw, IntersectionIt::value_type::coorddim, ctype> & tarTrafo)
+template <class IntersectionIt>
+void testIntersection(const IntersectionIt & rIIt)
 {
   typedef typename IntersectionIt::value_type Intersection;
   // Dimension of the intersection
@@ -53,71 +51,26 @@ void testIntersection(const IntersectionIt & rIIt,
     assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
 
     // Here we assume that the two interface match geometrically:
-    if ( (domTrafo(globalDomainPos)-tarTrafo(globalTargetPos)).two_norm() >= 1e-6 )
+    if ( (globalDomainPos-globalTargetPos).two_norm() >= 1e-6 )
     {
+      std::cerr << "localDomainPos  = " << localDomainPos << "\n";
       std::cerr << "globalDomainPos = " << globalDomainPos << "\n";
+      std::cerr << "localTargetPos  = " << localTargetPos << "\n";
       std::cerr << "globalTargetPos = " << globalTargetPos << "\n";
-      std::cerr << "domTrafo(globalDomainPos) = " << domTrafo(globalDomainPos) << "\n";
-      std::cerr << "tarTrafo(globalTargetPos) = " << tarTrafo(globalTargetPos) << "\n";
     }
-    assert( (domTrafo(globalDomainPos)-tarTrafo(globalTargetPos)).two_norm() < 1e-6 );
+    assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
 
   }
 }
 
 
-template<int dim, int dimw, typename ctype>
-class NoTransformation : public CoordinateTransformation<dim, dimw, ctype>
-{
-public:
-  static
-  void assignIfNull(CoordinateTransformation<dim, dimw, ctype>* & ptr)
-  {
-    assert(ptr != 0);
-  }
-
-  /** \brief Map a point to a new position */
-  // this works only for dim == dimw
-  virtual Dune::FieldVector<ctype, dim> operator()(const Dune::FieldVector<ctype, dimw>& c) const
-  {
-    assert(false);
-  }
-};
-
-template<int dim, typename ctype>
-class NoTransformation<dim, dim, ctype> : public CoordinateTransformation<dim, dim, ctype>
-{
-public:
-  static
-  void assignIfNull(CoordinateTransformation<dim, dim, ctype>* & ptr)
-  {
-    if (ptr == 0)
-      ptr = new NoTransformation<dim, dim, ctype>;
-  }
-
-  /** \brief Map a point to a new position */
-  // this works only for dim == dimw
-  virtual Dune::FieldVector<ctype, dim> operator()(const Dune::FieldVector<ctype, dim>& c) const
-  {
-    return c;
-  }
-};
-
 template <class GlueType>
-void testCoupling(const GlueType& glue,
-                  CoordinateTransformation<GlueType::Grid0Patch::dimworld, GlueType::dimworld, typename GlueType::ctype> * domTrafo = 0,
-                  CoordinateTransformation<GlueType::Grid1Patch::dimworld, GlueType::dimworld, typename GlueType::ctype> * tarTrafo = 0 )
+void testCoupling(const GlueType& glue)
 {
   typedef typename GlueType::ctype ctype;
 
   int dim = GlueType::domdim;
   dim = GlueType::tardim;
-
-  // ///////////////////////////////////////
-  //   set Identity trafo if necessary
-  // ///////////////////////////////////////
-  NoTransformation<GlueType::Grid0Patch::dimworld, GlueType::dimworld, ctype>::assignIfNull(domTrafo);
-  NoTransformation<GlueType::Grid1Patch::dimworld, GlueType::dimworld, ctype>::assignIfNull(tarTrafo);
 
   // ///////////////////////////////////////
   //   MergedGrid centric
@@ -126,7 +79,7 @@ void testCoupling(const GlueType& glue,
   typename GlueType::RemoteIntersectionIterator rIIt    = glue.iremotebegin();
   typename GlueType::RemoteIntersectionIterator rIEndIt = glue.iremoteend();
   for (; rIIt!=rIEndIt; ++rIIt)
-    testIntersection(rIIt, *domTrafo, *tarTrafo);
+    testIntersection(rIIt);
 
   // ///////////////////////////////////////
   //   Domain Entity centric
@@ -147,7 +100,7 @@ void testCoupling(const GlueType& glue,
       // as we only have a single grid, even when testing the
       // parallel extractor, this assertion should be true
       assert (rIIt->entityDomain() == dit);
-      testIntersection(rIIt, *domTrafo, *tarTrafo);
+      testIntersection(rIIt);
       icount++;
     }
 
@@ -159,7 +112,7 @@ void testCoupling(const GlueType& glue,
       typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityDomain() == dit);
-        testIntersection(rIIt, *domTrafo, *tarTrafo);
+        testIntersection(rIIt);
         icount2++;
       }
     }
@@ -184,7 +137,7 @@ void testCoupling(const GlueType& glue,
     typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
     for (; rIIt!=rIEndIt; ++rIIt) {
       assert (rIIt->entityTarget() == tit);
-      testIntersection(rIIt, *domTrafo, *tarTrafo);
+      testIntersection(rIIt);
       icount++;
     }
 
@@ -196,7 +149,7 @@ void testCoupling(const GlueType& glue,
       typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
       for (; rIIt!=rIEndIt; ++rIIt) {
         assert (rIIt->entityTarget() == tit);
-        testIntersection(rIIt, *domTrafo, *tarTrafo);
+        testIntersection(rIIt);
         icount2++;
       }
     }

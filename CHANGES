@@ -16,3 +16,6 @@
    Predicate predicate(...);
    Patch<GridView> patch(gridView, predicate);
    </code>
+6) the CoordinateTransformation is gone. In order to couple
+   lower-dimensional grids, you have to use Dune::GeometryGrid to lift
+   them into the appropriate world space.
