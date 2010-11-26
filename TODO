@@ -14,6 +14,7 @@ For the upcoming paper:
 - rename Extractor to Patch
 ./ Extractor/Patch should get the predicate
 ./ remove remoteintersection(iterator)impl CRTP magic
+- remove coordinate transformation, use GeometryGrid instead
 - implement _new_ parallel merging (see article.tex)
 - implement 3d cgal backend
 - Put everything into the namespace Dune::GridGlue
@@ -25,9 +26,6 @@ For the upcoming paper:
 - beim Iterieren gibt man an, von wo nach wo man koppeln will (0->1 / 1->0)
   davon hängt die Definition von Inside/Outside ab
 - Beim Kommunizieren sollte auch die Kopplungsrichtung berücksichtigt werden
-
-Questions:
-- how expensive is it to build a new parallel indexset interface?
 
 Interface changes:
 - Merger gets (CoordType, dimG1, dimG2, dimworld, mergedDim) template parameters
