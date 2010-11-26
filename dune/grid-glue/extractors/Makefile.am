@@ -2,10 +2,8 @@
 
 extractorsdir = $(includedir)/dune/glue/extractors
 extractors_HEADERS = codim0extractor.hh codim1extractor.hh extractor.hh \
-        extractorselector.hh\
 	extractorpredicate.hh\
-	gridextractiontraits.hh\
-        parallelextractor.hh \
+    parallelextractor.hh \
 	vtksurfacewriter.hh
 
 include $(top_srcdir)/am/global-rules

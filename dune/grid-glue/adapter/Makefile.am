@@ -4,11 +4,9 @@
 adapterdir = $(includedir)/dune/glue/adapter
 adapter_HEADERS = coordinatetransformation.hh\
 	gridglue.hh\
-	gridglueremoteintersectionimpl.hh\
-	gridglueremoteintersectioniteratorimpl.hh\
+	gridglueremoteintersection.hh\
+	gridglueremoteintersectioniterator.hh\
 	gridgluevtkwriter.hh\
-	remoteintersection.hh\
-	remoteintersectioniterators.hh\
 	simplexgeometry.hh
 
 include $(top_srcdir)/am/global-rules
