@@ -30,19 +30,19 @@ void testIntersection(const IntersectionIt & rIIt)
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
     // Test whether local domain position is consistent with global domain position
-    Dune::FieldVector<double, Intersection::Grid0View::dimensionworld> localDomainPos =
-      rIIt->entityGrid0()->geometry().global(rIIt->geometryInGrid0Entity().global(quadPos));
+    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> localDomainPos =
+      rIIt->inside()->geometry().global(rIIt->geometryInInside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::Grid0View::dimensionworld> globalDomainPos =
-      rIIt->geometryGrid0().global(quadPos);
+    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> globalDomainPos =
+      rIIt->geometry().global(quadPos);
 
-    Dune::FieldVector<double, Intersection::Grid1View::dimensionworld> localTargetPos =
-      rIIt->entityGrid1()->geometry().global(rIIt->geometryInGrid1Entity().global(quadPos));
+    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> localTargetPos =
+      rIIt->outside()->geometry().global(rIIt->geometryInOutside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::Grid1View::dimensionworld> globalTargetPos =
-      rIIt->geometryGrid1().global(quadPos);
+    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> globalTargetPos =
+      rIIt->geometryOutside().global(quadPos);
 
     // Test whether local domain position is consistent with global domain position
     assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
@@ -76,8 +76,8 @@ void testCoupling(const GlueType& glue)
   //   MergedGrid centric
   // ///////////////////////////////////////
 
-  typename GlueType::RemoteIntersectionIterator rIIt    = glue.iremotebegin();
-  typename GlueType::RemoteIntersectionIterator rIEndIt = glue.iremoteend();
+  typename GlueType::IntersectionIterator rIIt    = glue.ibegin();
+  typename GlueType::IntersectionIterator rIEndIt = glue.iend();
   for (; rIIt!=rIEndIt; ++rIIt)
     testIntersection(rIIt);
 
@@ -99,7 +99,7 @@ void testCoupling(const GlueType& glue)
     for (; rIIt!=rIEndIt; ++rIIt) {
       // as we only have a single grid, even when testing the
       // parallel extractor, this assertion should be true
-      assert (rIIt->entityGrid0() == dit);
+      assert (rIIt->inside() == dit);
       testIntersection(rIIt);
       icount++;
     }
@@ -111,7 +111,7 @@ void testCoupling(const GlueType& glue)
       typename GlueType::Grid0IntersectionIterator rIIt    = glue.idomainbegin(*dit, f);
       typename GlueType::Grid0IntersectionIterator rIEndIt = glue.idomainend();
       for (; rIIt!=rIEndIt; ++rIIt) {
-        assert (rIIt->entityGrid0() == dit);
+        assert (rIIt->inside() == dit);
         testIntersection(rIIt);
         icount2++;
       }
@@ -136,7 +136,7 @@ void testCoupling(const GlueType& glue)
     typename GlueType::Grid1IntersectionIterator rIIt    = glue.itargetbegin(*tit);
     typename GlueType::Grid1IntersectionIterator rIEndIt = glue.itargetend();
     for (; rIIt!=rIEndIt; ++rIIt) {
-      assert (rIIt->entityGrid1() == tit);
+      assert (rIIt->inside() == tit);
       testIntersection(rIIt);
       icount++;
     }
@@ -148,7 +148,7 @@ void testCoupling(const GlueType& glue)
       typename GlueType::Grid1IntersectionIterator rIIt    = glue.itargetbegin(*tit, f);
       typename GlueType::Grid1IntersectionIterator rIEndIt = glue.itargetend();
       for (; rIIt!=rIEndIt; ++rIIt) {
-        assert (rIIt->entityGrid1() == tit);
+        assert (rIIt->inside() == tit);
         testIntersection(rIIt);
         icount2++;
       }

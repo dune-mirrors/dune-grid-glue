@@ -26,6 +26,7 @@
 
 #define QUICKHACK_INDEX 1
 
+#include "gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
 
 #define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
@@ -53,8 +54,43 @@ enum GridOrdering {
 template<typename P0, typename P1>
 class GridGlue;
 
-#include "gridgluecommunicate.hh"
-#include "gridglueremoteintersection.hh"
+namespace Dune {
+  namespace GridGlue {
+
+    template<typename P0, typename P1>
+    class IntersectionData;
+
+    template<typename P0, typename P1, int inside, int outside>
+    class Intersection;
+
+    template<typename P0, typename P1, int inside, int outside>
+    class IntersectionIterator;
+
+  }
+}
+
+template<typename P0, typename P1, int P>
+struct GridGlueView;
+
+template<typename P0, typename P1>
+struct GridGlueView<P0,P1,0>
+{
+  typedef P0 Patch;
+  static const P0& patch(const GridGlue<P0,P1>& g)
+  {
+    return g.patch0_;
+  }
+};
+
+template<typename P0, typename P1>
+struct GridGlueView<P0,P1,1>
+{
+  typedef P1 Patch;
+  static const P1& patch(const GridGlue<P0,P1>& g)
+  {
+    return g.patch1_;
+  }
+};
 
 /**
  * @class GridGlue
@@ -106,13 +142,15 @@ public:
 
   /** \brief Grid view of the target grid */
   typedef typename P1::GridView Grid1View;
-  typedef typename P1::GridView GridView1;
 
   /** \brief Target grid type */
   typedef typename Grid1View::Grid TargetGridType;
 
   /** \brief Coupling patch of grid 1 */
   typedef P1 Grid1Patch;
+
+  /** \todo */
+  typedef unsigned int IndexType;
 
   /** \brief Dimension of the target extractor */
   enum {
@@ -170,23 +208,27 @@ public:
       dimworld>                         Merger;
 
   /** \brief Type of remote intersection objects */
-  typedef Dune::GridGlue::AbsoluteIntersection<P0,P1> RemoteIntersection;
-  friend class Dune::GridGlue::AbsoluteIntersection<P0,P1>;
+  typedef Dune::GridGlue::Intersection<P0,P1,0,1> Intersection;
+
+  friend class Dune::GridGlue::IntersectionData<P0,P1>;
+  friend class Dune::GridGlue::Intersection<P0,P1,0,1>;
+  friend class Dune::GridGlue::Intersection<P0,P1,1,0>;
+  friend class Dune::GridGlue::IntersectionIterator<P0,P1,0,1>;
+  friend class Dune::GridGlue::IntersectionIterator<P0,P1,1,0>;
+  friend class GridGlueView<P0,P1,0>;
+  friend class GridGlueView<P0,P1,1>;
 
   /** \todo */
-  typedef Dune::GridGlue::DirectedIntersection<P0,P1,0,1> Grid0Intersection;
-  typedef Dune::GridGlue::DirectedIntersection<P0,P1,1,0> Grid1Intersection;
+  typedef Dune::GridGlue::Intersection<P0,P1,0,1> Grid0Intersection;
+  typedef Dune::GridGlue::Intersection<P0,P1,1,0> Grid1Intersection;
 
   /** \brief Type of the iterator that iterates over remove intersections */
-  class RemoteIntersectionIterator;
+  typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> IntersectionIterator;
 
   /** \todo Please doc me! */
-  class DomainIntersectionIterator;
-  typedef DomainIntersectionIterator Grid0IntersectionIterator;
-
+  typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> Grid0IntersectionIterator;
   /** \todo Please doc me! */
-  class TargetIntersectionIterator;
-  typedef TargetIntersectionIterator Grid1IntersectionIterator;
+  typedef Dune::GridGlue::IntersectionIterator<P0,P1,1,0> Grid1IntersectionIterator;
 
 private:
 
@@ -199,26 +241,16 @@ private:
   const Grid1View&        targv_;
 
   /// @brief the domain surface extractor
-  const Grid0Patch&            patch0_;
+  const Grid0Patch&       patch0_;
 
   /// @brief the target surface extractor
-  const Grid1Patch&            patch1_;
+  const Grid1Patch&       patch1_;
 
   /// @brief the surface merging utility
-  Merger* merger_;
+  Merger*                 merger_;
 
   /// @brief number of intersections
-  unsigned int index__sz;
-
-  /// @brief number of domain intersections
-  unsigned int _dindex_sz;
-
-  /// @brief number of target intersections
-  unsigned int _tindex_sz;
-
-  /// @brief an invalid intersection object used as dummy and
-  /// also as recognizable end object of iterations over intersections
-  mutable RemoteIntersection NULL_INTERSECTION;
+  IndexType index__sz;
 
 #if HAVE_MPI
   /// @brief MPI_Comm which this GridGlue is working on
@@ -234,8 +266,11 @@ private:
   Dune::RemoteIndices<PIndexSet> remoteIndices;
 #endif
 
+  /// \todo
+  typedef Dune::GridGlue::IntersectionData<P0,P1> IntersectionData;
+
   /// @brief a vector with intersection elements
-  mutable std::vector<RemoteIntersection>   intersections_;
+  mutable std::vector<IntersectionData>   intersections_;
 
 protected:
 
@@ -245,39 +280,30 @@ protected:
    */
   void updateIntersections()
   {
-    // build the intersections array again
-    intersections_.resize(merger_->nSimplices(), NULL_INTERSECTION);
-    _dindex_sz = 0;
-    _tindex_sz = 0;
-    for (unsigned int i = 0; i < merger_->nSimplices(); ++i)
-    {
-
-      RemoteIntersection ri(this, i);
-      if (ri.hasGrid0())
-        ri.domainIndex() = _dindex_sz++;
-      if (ri.hasGrid1())
-        ri.targetIndex() = _tindex_sz++;
-      ri.index() = i;
-      intersections_[i] = ri;
-
-    }
-
-    std::cout << "GridGlue::updateIntersections : The number of remote intersections is " << merger_->nSimplices()
-              << " with " << _dindex_sz << " domain entities"
-              << " and " << _tindex_sz << " target entities" << std::endl;
-
     // store the number of remote intersection for later use
     index__sz = merger_->nSimplices();
 
+    // build the intersections array again
+    intersections_.resize(merger_->nSimplices() + 1);
+    for (unsigned int i = 0; i < merger_->nSimplices(); ++i)
+    {
+      IntersectionData data(*this, i);
+      intersections_[i] = data;
+    }
+
+    std::cout << "GridGlue::updateIntersections : "
+    "The number of remote intersections is " << index__sz << std::endl;
+
     ////// create ParallelIndexSet & RemoteIndices
-#if HAVE_MPI
+#if HAVE_MPI && 0
     // setup parallel indexset
     domain_is.beginResize();
     target_is.beginResize();
-    RemoteIntersectionIterator rit = iremotebegin();
-    RemoteIntersectionIterator ritend = iremoteend();
+    IntersectionIterator rit = ibegin();
+    IntersectionIterator ritend = iend();
     for (; rit != ritend; ++rit)
     {
+            #error update this!
       if (rit->hasGrid0())
       {
         domain_is.add (rit->globalIndex(),
@@ -325,14 +351,17 @@ public:
 #endif
   /*   G E T T E R S   */
 
-  const Grid0Patch & grid0Patch() const { return patch0_; }
-
-  const Grid1Patch & grid1Patch() const { return patch1_; }
+  template<int P>
+  const typename GridGlueView<P0,P1,P>::Patch & patch() const
+  {
+    return GridGlueView<P0,P1,P>::patch(*this);
+  }
 
   /**
    * @brief getter for the domain grid view
    * @return the object
    */
+    #warning
   const Grid0View& domainGridView() const
   {
     return domgv_;
@@ -404,7 +433,7 @@ public:
    *
    * @return the iterator
    */
-  RemoteIntersectionIterator iremotebegin() const;
+  IntersectionIterator ibegin() const;
 
 
   /**
@@ -414,7 +443,7 @@ public:
    * @param num the index of the face (codim 1 entity) in @c e entity, ignored if only one face in the surface
    * @return the iterator
    */
-  DomainIntersectionIterator idomainbegin(const DomainElement& e, int num) const;
+  Grid0IntersectionIterator idomainbegin(const DomainElement& e, int num) const;
 
 
   /**
@@ -423,7 +452,7 @@ public:
    * @param e codim 0 entity in the domain grid
    * @return the iterator
    */
-  DomainIntersectionIterator idomainbegin(const DomainElement& e) const;
+  Grid0IntersectionIterator idomainbegin(const DomainElement& e) const;
 
 
   /**
@@ -433,7 +462,7 @@ public:
    * @param num the index of the face (codim 1 entity) in @c e entity, ignored if only one face in the surface
    * @return the iterator
    */
-  TargetIntersectionIterator itargetbegin(const TargetElement& e, int num) const;
+  Grid1IntersectionIterator itargetbegin(const TargetElement& e, int num) const;
 
 
   /**
@@ -442,7 +471,7 @@ public:
    * @param e codim 0 entity in the target grid
    * @return the iterator
    */
-  TargetIntersectionIterator itargetbegin(const TargetElement& e) const;
+  Grid1IntersectionIterator itargetbegin(const TargetElement & e) const;
 
 
   /**
@@ -450,9 +479,9 @@ public:
    *
    * @return the iterator
    */
-  RemoteIntersectionIterator iremoteend() const
+  IntersectionIterator iend() const
   {
-    return RemoteIntersectionIterator(NULL_INTERSECTION);
+    return IntersectionIterator(this, index__sz);
   }
 
 
@@ -461,9 +490,10 @@ public:
    *
    * @return the iterator
    */
-  DomainIntersectionIterator idomainend() const
+  Grid0IntersectionIterator idomainend() const
   {
-    return DomainIntersectionIterator(NULL_INTERSECTION);
+        #warning
+    return Grid0IntersectionIterator(this, index__sz);
   }
 
 
@@ -472,9 +502,10 @@ public:
    *
    * @return the iterator
    */
-  TargetIntersectionIterator itargetend() const
+  Grid1IntersectionIterator itargetend() const
   {
-    return TargetIntersectionIterator(NULL_INTERSECTION);
+        #warning
+    return Grid1IntersectionIterator(this, index__sz);
   }
 
   /*! \brief Communicate information on the MergedGrid of a GridGlue
@@ -642,336 +673,18 @@ public:
     return index__sz;
   }
 
-  size_t domainIndexSet_size() const
-  {
-    return _dindex_sz;
-  }
-
-  size_t targetIndexSet_size() const
-  {
-    return _tindex_sz;
-  }
 #endif
 
-  RemoteIntersection getIntersection(int i) const
+  Intersection getIntersection(int i) const
   {
-    return RemoteIntersection(intersections_[i]);
+    return Intersection(*this, i);
   }
 
 };
 
-/*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
+#include "gridglue.cc"
 
-template<typename P0, typename P1>
-#if HAVE_MPI
-GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger* merger, MPI_Comm m)
-#else
-GridGlue<P0, P1>::GridGlue(const Grid0Patch & gp1, const Grid1Patch & gp2, Merger* merger)
-#endif
-  : domgv_(gp1.gridView()), targv_(gp2.gridView()),
-    patch0_(gp1), patch1_(gp2), merger_(merger),
-    NULL_INTERSECTION(this),
-#if HAVE_MPI
-    mpicomm(m),
-#endif
-    intersections_(0, NULL_INTERSECTION)
-{
-  std::cout << "GridGlue: Constructor succeeded!" << std::endl;
-}
-
-template<typename P0, typename P1>
-void GridGlue<P0, P1>::build()
-{
-  // clear the contents from the current intersections array
-  {
-    std::vector<RemoteIntersection> dummy(0, NULL_INTERSECTION);
-    intersections_.swap(dummy);
-  }
-
-  std::vector<Dune::FieldVector<ctype, dimworld> > domcoords;
-  std::vector<unsigned int> domfaces;
-  std::vector<Dune::GeometryType> domainElementTypes;
-  std::vector<Dune::FieldVector<ctype,dimworld> > tarcoords;
-  std::vector<unsigned int> tarfaces;
-  std::vector<Dune::GeometryType> targetElementTypes;
-
-  /*
-   * extract global surface grids
-   */
-
-  // retrieve the coordinate and topology information from the extractors
-  // and apply transformations if necessary
-  extractGrid(patch0_, domcoords, domfaces, domainElementTypes);
-  extractGrid(patch1_, tarcoords, tarfaces, targetElementTypes);
-
-#ifdef WRITE_TO_VTK
-  const int dimw = Parent::dimworld;
-  const char prefix[] = "GridGlue::Builder::build() : ";
-  char domainsurf[256];
-  sprintf(domainsurf, "/tmp/vtk-domain-test-%i", mpi_rank);
-  char targetsurf[256];
-  sprintf(targetsurf, "/tmp/vtk-target-test-%i", mpi_rank);
-
-  std::cout << prefix << "Writing domain surface to '" << domainsurf << ".vtk'...\n";
-  VtkSurfaceWriter vtksw(domainsurf);
-  vtksw.writeSurface(domcoords, domfaces, dimw, dimw);
-  std::cout << prefix << "Done writing domain surface!\n";
-
-  std::cout << prefix << "Writing target surface to '" << targetsurf << ".vtk'...\n";
-  vtksw.setFilename(targetsurf);
-  vtksw.writeSurface(tarcoords, tarfaces, dimw, dimw);
-  std::cout << prefix << "Done writing target surface!\n";
-#endif // WRITE_TO_VTK
-
-
-  // start the actual build process
-  merger_->build(domcoords, domfaces, domainElementTypes,
-                 tarcoords, tarfaces, targetElementTypes);
-
-  // the intersections need to be recomputed
-  updateIntersections();
-}
-
-
-template<typename P0, typename P1>
-template<typename Extractor>
-void GridGlue<P0, P1>::extractGrid (const Extractor & extractor,
-                                    std::vector<Dune::FieldVector<ctype, dimworld> > & coords,
-                                    std::vector<unsigned int> & faces,
-                                    std::vector<Dune::GeometryType>& geometryTypes) const
-{
-  std::vector<typename Extractor::Coords> tempcoords;
-  std::vector<typename Extractor::VertexVector> tempfaces;
-
-  extractor.getCoords(tempcoords);
-  coords.clear();
-  coords.reserve(tempcoords.size());
-
-  for (unsigned int i = 0; i < tempcoords.size(); ++i)
-  {
-    assert(int(dimworld) == int(Extractor::dimworld));
-    coords.push_back(Dune::FieldVector<ctype, dimworld>());
-    for (size_t j = 0; j <dimworld; ++j)
-      coords.back()[j] = tempcoords[i][j];
-  }
-
-  extractor.getFaces(tempfaces);
-  faces.clear();
-
-  for (unsigned int i = 0; i < tempfaces.size(); ++i) {
-    for (unsigned int j = 0; j < tempfaces[i].size(); ++j)
-      faces.push_back(tempfaces[i][j]);
-  }
-
-  // get the list of geometry types from the extractor
-  extractor.getGeometryTypes(geometryTypes);
-
-}
-
-
-template<typename P0, typename P1>
-int GridGlue<P0, P1>::domainEntityNextFace(const DomainElement& e, int index) const
-{
-  int first, count;
-  // first check if the element forms a part of the extracted surface
-  if (!patch0_.faceIndices(e, first, count))
-    return -1;
-
-  // check all mapped faces and accept the first one with number >=index
-  count += first;
-  while (first < count &&    (patch0_.indexInInside(first) < index || !merger_->template simplexMatched<0>(first)))
-    first++;
-  if (first == count)
-    return -1;     // no more faces
-  else
-    return patch0_.indexInInside(first);     // found, return the face's number
-}
-
-
-template<typename P0, typename P1>
-int GridGlue<P0, P1>::targetEntityNextFace(const TargetElement& e, int index) const
-{
-  int first, count;
-  // first check if the element forms a part of the extracted surface
-  if (!patch1_.faceIndices(e, first, count))
-    return -1;
-
-  // check all mapped faces and accept the first one with number >=index
-  count += first;
-  while (first < count && (patch1_.indexInInside(first) < index || !merger_->template simplexMatched<1>(first)))
-    first++;
-  if (first == count)
-    return -1;     // no more faces
-  else
-    return patch1_.indexInInside(first);     // found, return the face's number
-}
-
-
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::RemoteIntersectionIterator
-GridGlue<P0, P1>::iremotebegin() const
-{
-  return (intersections_.size() > 0)
-         ? RemoteIntersectionIterator(intersections_[0])
-         : RemoteIntersectionIterator(NULL_INTERSECTION);
-}
-
-
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::DomainIntersectionIterator
-GridGlue<P0, P1>::idomainbegin(const DomainElement& e, int num) const
-{
-  // first check if the element forms a part of the extracted surface
-  int first, count;
-  bool in_surface = patch0_.faceIndices(e, first, count);
-  if (!in_surface)
-    return DomainIntersectionIterator(NULL_INTERSECTION);
-
-  count += first;
-  while (first < count)
-  {
-    if (patch0_.indexInInside(first) == num && merger_->template simplexMatched<0>(first))
-    {
-      // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
-      std::vector<unsigned int> global_results;
-      std::vector<unsigned int> local_results;
-
-      // get the remote intersections
-      merger_->template simplexRefined<0>(first, global_results);
-      while (++first < count && patch0_.indexInInside(first) == num && merger_->template simplexRefined<0>(first, local_results))
-      {
-        for (unsigned int i = 0; i < local_results.size(); ++i)
-          global_results.push_back(local_results[i]);
-      }
-
-      // if sth. has been found, return the iterator
-      if (global_results.size() > 0)
-        return DomainIntersectionIterator(intersections_[global_results[0]], global_results);
-
-      // else leave the loop
-      break;
-    }
-    first++;
-  }
-
-  // nothing has been found
-  return DomainIntersectionIterator(NULL_INTERSECTION);
-}
-
-
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::DomainIntersectionIterator
-GridGlue<P0, P1>::idomainbegin(const DomainElement& e) const
-{
-  // first check if the element has at least one extracted subEntity
-  int first, count;
-  bool hasExtractedSubEntity = patch0_.faceIndices(e, first, count);
-  if (!hasExtractedSubEntity)
-    return DomainIntersectionIterator(NULL_INTERSECTION);
-
-
-  // now accumulate all remote intersections of the element's faces
-  std::vector<unsigned int> global_results(0, 0);
-  std::vector<unsigned int> local_results;
-
-  // iterate over all simplices to check if there is more than one simplex refining the face
-  bool found_sth = false;
-  count += first;
-  while (first < count)
-  {
-    if (merger_->template simplexRefined<0>(first, local_results))
-    {
-      if (local_results.size() > 0)
-        found_sth = true;
-      for (unsigned int i = 0; i < local_results.size(); ++i)
-        global_results.push_back(local_results[i]);
-    }
-    first++;
-  }
-
-  if (found_sth)
-    return DomainIntersectionIterator(intersections_[global_results[0]], global_results);
-  else
-    return DomainIntersectionIterator(NULL_INTERSECTION);
-}
-
-
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::TargetIntersectionIterator
-GridGlue<P0, P1>::itargetbegin(const TargetElement& e, int num) const
-{
-  // first check if the element has at least one extracted subEntity
-  int first, count;
-  bool hasExtractedSubEntity = patch1_.faceIndices(e, first, count);
-  if (!hasExtractedSubEntity) return itargetend();
-
-  count += first;
-  while (first < count)
-  {
-    if (patch1_.indexInInside(first) == num && merger_->template simplexMatched<1>(first))
-    {
-      // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
-      std::vector<unsigned int> global_results;
-      std::vector<unsigned int> local_results;
-
-      // get the remote intersections
-      merger_->template simplexRefined<1>(first, global_results);
-      while (++first < count && patch1_.indexInInside(first) == num && merger_->template simplexRefined<1>(first, local_results))
-      {
-        for (unsigned int i = 0; i < local_results.size(); ++i)
-          global_results.push_back(local_results[i]);
-      }
-
-      // if sth. has been found, return the iterator
-      if (global_results.size() > 0)
-        return TargetIntersectionIterator(intersections_[global_results[0]], global_results);
-
-      // else leave the loop
-      break;
-    }
-    first++;
-  }
-
-  // nothing has been found
-  return TargetIntersectionIterator(NULL_INTERSECTION);
-}
-
-
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::TargetIntersectionIterator
-GridGlue<P0, P1>::itargetbegin(const TargetElement& e) const
-{
-  // first check if the element forms a part of the extracted surface
-  int first, count;
-  bool in_surface = patch1_.faceIndices(e, first, count);
-  if (!in_surface) return itargetend();
-
-
-  // now accumulate all remote intersections of the element's faces
-  std::vector<unsigned int> global_results(0, 0);
-  std::vector<unsigned int> local_results;
-
-  // iterate over all simplices to check if there is more than one simplix refining the face
-  bool found_sth = false;
-  count += first;
-  while (first < count)
-  {
-    if (merger_->template simplexRefined<1>(first, local_results))
-    {
-      if (local_results.size() > 0)
-        found_sth = true;
-      for (unsigned int i = 0; i < local_results.size(); ++i)
-        global_results.push_back(local_results[i]);
-    }
-    first++;
-  }
-
-  if (found_sth)
-    return TargetIntersectionIterator(intersections_[global_results[0]], global_results);
-  else
-    return TargetIntersectionIterator(NULL_INTERSECTION);
-}
-
-#include "gridglueremoteintersectioniterator.hh"
+#include "intersection.hh"
+#include "intersectioniterator.hh"
 
 #endif // GRIDGLUE_HH_
