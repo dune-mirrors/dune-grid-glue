@@ -7,6 +7,9 @@
 - compile mergers into separate lib
 - use hybrid geometries instead of simplex geometries (this will allow
   construction of different geometry types)
+- make index_ of NULL_INTERSECTION intersections_.size()
+  * avoids if's in iterator-increment
+  * allows to use size_t for _index
 
 For the upcoming paper:
 - remove target/domain naming

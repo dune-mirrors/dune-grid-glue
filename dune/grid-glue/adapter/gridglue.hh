@@ -26,7 +26,6 @@
 
 #define QUICKHACK_INDEX 1
 
-#include "gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
 
 #define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
@@ -49,6 +48,13 @@ enum GridOrdering {
   Domain = 0,
   Target = 1
 };
+
+// forward declaration
+template<typename P0, typename P1>
+class GridGlue;
+
+#include "gridgluecommunicate.hh"
+#include "gridglueremoteintersection.hh"
 
 /**
  * @class GridGlue
@@ -82,10 +88,10 @@ public:
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
 
   /** \brief Grid view of the domain grid */
-  typedef typename P0::GridView DomainGridView;
+  typedef typename P0::GridView Grid0View;
 
   /** \brief Domain grid type */
-  typedef typename DomainGridView::Grid DomainGridType;
+  typedef typename Grid0View::Grid DomainGridType;
 
   /** \brief Coupling patch of grid 0 */
   typedef P0 Grid0Patch;
@@ -99,10 +105,11 @@ public:
   };
 
   /** \brief Grid view of the target grid */
-  typedef typename P1::GridView TargetGridView;
+  typedef typename P1::GridView Grid1View;
+  typedef typename P1::GridView GridView1;
 
   /** \brief Target grid type */
-  typedef typename TargetGridView::Grid TargetGridType;
+  typedef typename Grid1View::Grid TargetGridType;
 
   /** \brief Coupling patch of grid 1 */
   typedef P1 Grid1Patch;
@@ -133,28 +140,28 @@ public:
   typedef Dune::FieldVector<ctype, dimworld>                   Coords;
 
   /** \brief The type of the domain grid elements */
-  typedef typename DomainGridView::Traits::template Codim<0>::Entity DomainElement;
+  typedef typename Grid0View::Traits::template Codim<0>::Entity DomainElement;
 
   /** \brief Pointer type to domain grid elements */
-  typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainElementPtr;
+  typedef typename Grid0View::Traits::template Codim<0>::EntityPointer DomainElementPtr;
 
   /** \brief The type of the domain grid vertices */
-  typedef typename DomainGridView::Traits::template Codim<DomainGridType::dimension>::Entity DomainVertex;
+  typedef typename Grid0View::Traits::template Codim<DomainGridType::dimension>::Entity DomainVertex;
 
   /** \brief Pointer type to domain grid vertices */
-  typedef typename DomainGridView::Traits::template Codim<DomainGridType::dimension>::EntityPointer DomainVertexPtr;
+  typedef typename Grid0View::Traits::template Codim<DomainGridType::dimension>::EntityPointer DomainVertexPtr;
 
   /** \brief The type of the target grid elements */
-  typedef typename TargetGridView::Traits::template Codim<0>::Entity TargetElement;
+  typedef typename Grid1View::Traits::template Codim<0>::Entity TargetElement;
 
   /** \brief Pointer type to target grid elements */
-  typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetElementPtr;
+  typedef typename Grid1View::Traits::template Codim<0>::EntityPointer TargetElementPtr;
 
   /** \brief The type of the target grid vertices */
-  typedef typename TargetGridView::Traits::template Codim<TargetGridType::dimension>::Entity TargetVertex;
+  typedef typename Grid1View::Traits::template Codim<TargetGridType::dimension>::Entity TargetVertex;
 
   /** \brief Pointer type to target grid vertices */
-  typedef typename TargetGridView::Traits::template Codim<TargetGridType::dimension>::EntityPointer TargetVertexPtr;
+  typedef typename Grid1View::Traits::template Codim<TargetGridType::dimension>::EntityPointer TargetVertexPtr;
 
   /** \todo Please doc me! */
   typedef ::Merger<typename DomainGridType::ctype,
@@ -163,26 +170,33 @@ public:
       dimworld>                         Merger;
 
   /** \brief Type of remote intersection objects */
-  class RemoteIntersection;
+  typedef Dune::GridGlue::AbsoluteIntersection<P0,P1> RemoteIntersection;
+  friend class Dune::GridGlue::AbsoluteIntersection<P0,P1>;
+
+  /** \todo */
+  typedef Dune::GridGlue::DirectedIntersection<P0,P1,0,1> Grid0Intersection;
+  typedef Dune::GridGlue::DirectedIntersection<P0,P1,1,0> Grid1Intersection;
 
   /** \brief Type of the iterator that iterates over remove intersections */
   class RemoteIntersectionIterator;
 
   /** \todo Please doc me! */
   class DomainIntersectionIterator;
+  typedef DomainIntersectionIterator Grid0IntersectionIterator;
 
   /** \todo Please doc me! */
   class TargetIntersectionIterator;
+  typedef TargetIntersectionIterator Grid1IntersectionIterator;
 
 private:
 
   /*   M E M B E R   V A R I A B L E S   */
 
   /// @brief the "domain" grid view
-  const DomainGridView&        domgv_;
+  const Grid0View&        domgv_;
 
   /// @brief the "target" grid view
-  const TargetGridView&        targv_;
+  const Grid1View&        targv_;
 
   /// @brief the domain surface extractor
   const Grid0Patch&            patch0_;
@@ -239,9 +253,9 @@ protected:
     {
 
       RemoteIntersection ri(this, i);
-      if (ri.hasDomain())
+      if (ri.hasGrid0())
         ri.domainIndex() = _dindex_sz++;
-      if (ri.hasTarget())
+      if (ri.hasGrid1())
         ri.targetIndex() = _tindex_sz++;
       ri.index() = i;
       intersections_[i] = ri;
@@ -264,15 +278,15 @@ protected:
     RemoteIntersectionIterator ritend = iremoteend();
     for (; rit != ritend; ++rit)
     {
-      if (rit->hasDomain())
+      if (rit->hasGrid0())
       {
         domain_is.add (rit->globalIndex(),
-                       LocalIndex(rit->index(), rit->entityDomain()->partitionType()) ) ;
+                       LocalIndex(rit->index(), rit->entityGrid0()->partitionType()) ) ;
       }
-      if (rit->hasTarget())
+      if (rit->hasGrid1())
       {
         target_is.add (rit->globalIndex(),
-                       LocalIndex(rit->index(), rit->entityTarget()->partitionType()) ) ;
+                       LocalIndex(rit->index(), rit->entityGrid1()->partitionType()) ) ;
       }
     }
     domain_is.endResize();
@@ -311,15 +325,15 @@ public:
 #endif
   /*   G E T T E R S   */
 
-  const Grid0Patch & grid0Patch() { return patch0_; }
+  const Grid0Patch & grid0Patch() const { return patch0_; }
 
-  const Grid1Patch & grid1Patch() { return patch1_; }
+  const Grid1Patch & grid1Patch() const { return patch1_; }
 
   /**
    * @brief getter for the domain grid view
    * @return the object
    */
-  const DomainGridView& domainGridView() const
+  const Grid0View& domainGridView() const
   {
     return domgv_;
   }
@@ -329,7 +343,7 @@ public:
    * @brief getter for the target grid view
    * @return the object
    */
-  const TargetGridView& targetGridView() const
+  const Grid1View& targetGridView() const
   {
     return targv_;
   }
@@ -958,11 +972,6 @@ GridGlue<P0, P1>::itargetbegin(const TargetElement& e) const
     return TargetIntersectionIterator(NULL_INTERSECTION);
 }
 
-// include implementation of subclass RemoteIntersection
-#include "gridglueremoteintersection.hh"
-
-// include implementation of subclasses DomainIntersectionIterator and TargetIntersectionIterator
 #include "gridglueremoteintersectioniterator.hh"
-
 
 #endif // GRIDGLUE_HH_

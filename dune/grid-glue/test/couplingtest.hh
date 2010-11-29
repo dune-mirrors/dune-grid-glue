@@ -30,19 +30,19 @@ void testIntersection(const IntersectionIt & rIIt)
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
     // Test whether local domain position is consistent with global domain position
-    Dune::FieldVector<double, Intersection::DomainGridView::dimensionworld> localDomainPos =
-      rIIt->entityDomain()->geometry().global(rIIt->intersectionDomainLocal().global(quadPos));
+    Dune::FieldVector<double, Intersection::Grid0View::dimensionworld> localDomainPos =
+      rIIt->entityGrid0()->geometry().global(rIIt->geometryInGrid0Entity().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::DomainGridView::dimensionworld> globalDomainPos =
-      rIIt->intersectionDomainGlobal().global(quadPos);
+    Dune::FieldVector<double, Intersection::Grid0View::dimensionworld> globalDomainPos =
+      rIIt->geometryGrid0().global(quadPos);
 
-    Dune::FieldVector<double, Intersection::TargetGridView::dimensionworld> localTargetPos =
-      rIIt->entityTarget()->geometry().global(rIIt->intersectionTargetLocal().global(quadPos));
+    Dune::FieldVector<double, Intersection::Grid1View::dimensionworld> localTargetPos =
+      rIIt->entityGrid1()->geometry().global(rIIt->geometryInGrid1Entity().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::TargetGridView::dimensionworld> globalTargetPos =
-      rIIt->intersectionTargetGlobal().global(quadPos);
+    Dune::FieldVector<double, Intersection::Grid1View::dimensionworld> globalTargetPos =
+      rIIt->geometryGrid1().global(quadPos);
 
     // Test whether local domain position is consistent with global domain position
     assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
@@ -85,7 +85,7 @@ void testCoupling(const GlueType& glue)
   //   Domain Entity centric
   // ///////////////////////////////////////
 
-  typedef typename GlueType::DomainGridView::template Codim<0>::Iterator DomainIterator;
+  typedef typename GlueType::Grid0View::template Codim<0>::Iterator DomainIterator;
   DomainIterator dit = glue.domainGridView().template begin<0>();
   DomainIterator dend = glue.domainGridView().template end<0>();
   for (; dit != dend; ++dit)
@@ -94,12 +94,12 @@ void testCoupling(const GlueType& glue)
     int icount2 = 0;
 
     // intersection iterators
-    typename GlueType::DomainIntersectionIterator rIIt    = glue.idomainbegin(*dit);
-    typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
+    typename GlueType::Grid0IntersectionIterator rIIt    = glue.idomainbegin(*dit);
+    typename GlueType::Grid0IntersectionIterator rIEndIt = glue.idomainend();
     for (; rIIt!=rIEndIt; ++rIIt) {
       // as we only have a single grid, even when testing the
       // parallel extractor, this assertion should be true
-      assert (rIIt->entityDomain() == dit);
+      assert (rIIt->entityGrid0() == dit);
       testIntersection(rIIt);
       icount++;
     }
@@ -108,10 +108,10 @@ void testCoupling(const GlueType& glue)
     const int num_faces = dit->template count<1>();
     for (int f=0; f<num_faces; ++f)
     {
-      typename GlueType::DomainIntersectionIterator rIIt    = glue.idomainbegin(*dit, f);
-      typename GlueType::DomainIntersectionIterator rIEndIt = glue.idomainend();
+      typename GlueType::Grid0IntersectionIterator rIIt    = glue.idomainbegin(*dit, f);
+      typename GlueType::Grid0IntersectionIterator rIEndIt = glue.idomainend();
       for (; rIIt!=rIEndIt; ++rIIt) {
-        assert (rIIt->entityDomain() == dit);
+        assert (rIIt->entityGrid0() == dit);
         testIntersection(rIIt);
         icount2++;
       }
@@ -124,7 +124,7 @@ void testCoupling(const GlueType& glue)
   //   Target Entity centric
   // ///////////////////////////////////////
 
-  typedef typename GlueType::TargetGridView::template Codim<0>::Iterator TargetIterator;
+  typedef typename GlueType::Grid1View::template Codim<0>::Iterator TargetIterator;
   TargetIterator tit = glue.targetGridView().template begin<0>();
   TargetIterator tend = glue.targetGridView().template end<0>();
   for (; tit != tend; ++tit)
@@ -133,10 +133,10 @@ void testCoupling(const GlueType& glue)
     int icount2 = 0;
 
     // intersection iterators
-    typename GlueType::TargetIntersectionIterator rIIt    = glue.itargetbegin(*tit);
-    typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
+    typename GlueType::Grid1IntersectionIterator rIIt    = glue.itargetbegin(*tit);
+    typename GlueType::Grid1IntersectionIterator rIEndIt = glue.itargetend();
     for (; rIIt!=rIEndIt; ++rIIt) {
-      assert (rIIt->entityTarget() == tit);
+      assert (rIIt->entityGrid1() == tit);
       testIntersection(rIIt);
       icount++;
     }
@@ -145,10 +145,10 @@ void testCoupling(const GlueType& glue)
     const int num_faces = tit->template count<1>();
     for (int f=0; f<num_faces; ++f)
     {
-      typename GlueType::TargetIntersectionIterator rIIt    = glue.itargetbegin(*tit, f);
-      typename GlueType::TargetIntersectionIterator rIEndIt = glue.itargetend();
+      typename GlueType::Grid1IntersectionIterator rIIt    = glue.itargetbegin(*tit, f);
+      typename GlueType::Grid1IntersectionIterator rIEndIt = glue.itargetend();
       for (; rIIt!=rIEndIt; ++rIIt) {
-        assert (rIIt->entityTarget() == tit);
+        assert (rIIt->entityGrid1() == tit);
         testIntersection(rIIt);
         icount2++;
       }

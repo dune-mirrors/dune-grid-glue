@@ -8,6 +8,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/yaspgrid.hh>
+#include <dune/grid/geometrygrid.hh>
 #include <dune/grid/common/quadraturerules.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
@@ -51,11 +52,11 @@ private:
 };
 
 /** \brief trafo used for yaspgrids */
-template<int dim>
-class ShiftTrafo : public CoordinateTransformation<dim,dim,double>
+template<int dim, int dimw, typename ctype>
+class ShiftTrafo
+  : public AnalyticalCoordFunction< ctype, dim, dimw, ShiftTrafo<dim,dimw,ctype> >
 {
   double shift;
-
 public:
   ShiftTrafo(double x) : shift(x) {};
 
@@ -65,8 +66,13 @@ public:
     x[0] += shift;
     return x;
   }
-};
 
+  //! evaluate method for global mapping
+  void evaluate ( const Dune::FieldVector<ctype, dim> &x, Dune::FieldVector<ctype, dimw> &y ) const
+  {
+    y = (*this)(x);
+  }
+};
 
 template <int dim>
 void testMatchingCubeGrids()
@@ -223,11 +229,6 @@ public:
   {
     return 1.0;
   }
-
-  CoordinateTransformation<dim, dim, double> * trafo()
-  {
-    return 0;
-  }
 };
 
 
@@ -261,14 +262,6 @@ public:
     if (tar)
       return 0.0;
     return 1.0;
-  }
-
-  CoordinateTransformation<dim, dim, double> * trafo()
-  {
-    double shift = 0.0;
-    if (tar)
-      shift = 1.0;
-    return new ShiftTrafo<dim>(shift);
   }
 };
 
@@ -327,7 +320,7 @@ void testParallelCubeGrids()
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue, domGen.trafo(), tarGen.trafo());
+  testCoupling(glue);   // , domGen.trafo(), tarGen.trafo());
 #else
     #warning Not testing, because psurface backend is not available.
 #endif

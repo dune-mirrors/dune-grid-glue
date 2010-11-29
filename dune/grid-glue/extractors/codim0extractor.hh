@@ -165,7 +165,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
           // The following test only works if the zero-th coordinate is the
           // one that defines the orientation.  A sufficient condition for
           // this is dimworld == 1
-          assert(dimworld==1);
+          /* assert(dimworld==1); */
           bool elementNormalDirection =
             (elit->geometry().corner(1)[0] < elit->geometry().corner(0)[0]);
           if ( positiveNormalDirection_ != elementNormalDirection )

@@ -283,7 +283,7 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
 #endif
 
 
-int main()
+int main(int argc, char** argv)
 {
   Dune::MPIHelper::instance(argc, argv);
 

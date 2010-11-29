@@ -406,7 +406,7 @@ int main(int argc, char *argv[]) try
   test2d1dCouplingMatchingDimworld<2>();
   std::cout << "====================================================\n";
 
-#define _3DTEST 1
+#define _3DTEST 0
 #if _3DTEST
   // Test a unit cube versus a grid one dimension lower
   std::cout << "==== 3d 2d == matching =============================\n";
