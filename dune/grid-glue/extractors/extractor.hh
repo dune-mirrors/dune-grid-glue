@@ -413,12 +413,7 @@ typename Extractor<GV,cd>::Geometry Extractor<GV,cd>::geometry(unsigned int inde
   for (unsigned int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = this->coords_[this->subEntities_[index].corners[i].idx].coord;
 
-#define DUNE_GRID_VERSION_NUMBER (DUNE_GRID_VERSION_MAJOR * 10 + DUNE_GRID_VERSION_MINOR)
-#if DUNE_GRID_VERSION_NUMBER > 20
-  return Geometry(Dune::GenericGeometry::topologyId(subEntities_[index].geometryType_), corners);
-    #else
   return Geometry(subEntities_[index].geometryType_, corners);
-#endif
 }
 
 
@@ -440,11 +435,7 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   for (unsigned int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = re.position(face.corners[i].num,dim);
 
-#if DUNE_GRID_VERSION_NUMBER > 20
-  return LocalGeometry(Dune::GenericGeometry::topologyId(facetype), corners);
-#else
   return LocalGeometry(facetype, corners);
-#endif
 }
 
 #endif // DUNE_EXTRACTOR_HH
