@@ -174,8 +174,6 @@ GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::G
   }
 
 #ifndef NDEBUG
-  std::cout << "INTERSECTIONS: " << p_first << "/" << p_cnt << std::endl;
-  std::cout << "INTERSECTIONS:";
   for (unsigned int j = 0; j < indices.size(); j++)
   {
     int is = intersections_[indices[j]].index_;
@@ -186,9 +184,7 @@ GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::G
     EPtr ep(e);
     EPtr ex = patch<P>().element(idx);
     assert(ep == ex);
-    std::cout << "\t" << is;
   }
-  std::cout << std::endl;
 #endif
 
   // add end iterator

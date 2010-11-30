@@ -343,10 +343,10 @@ int main(int argc, char *argv[]) try
   std::cout << "==== 2D hybrid =============================================\n";
   testMatchingCubeGrids<2>();
   testNonMatchingCubeGrids<2>();
-  // testParallelCubeGrids<2,Seq,Seq>();
-  // testParallelCubeGrids<2,Par,Seq>();
-  // testParallelCubeGrids<2,Seq,Par>();
-  // testParallelCubeGrids<2,Par,Par>();
+  testParallelCubeGrids<2,Seq,Seq>();
+  testParallelCubeGrids<2,Par,Seq>();
+  testParallelCubeGrids<2,Seq,Par>();
+  testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
   // 3d Tests
@@ -357,10 +357,10 @@ int main(int argc, char *argv[]) try
   std::cout << "==== 3D hybrid =============================================\n";
   testMatchingCubeGrids<3>();
   testNonMatchingCubeGrids<3>();
-  // testParallelCubeGrids<3,Seq3d,Seq3d>();
-  // testParallelCubeGrids<3,Par3d,Seq3d>();
-  // testParallelCubeGrids<3,Seq3d,Par3d>();
-  // testParallelCubeGrids<3,Par3d,Par3d>();
+  testParallelCubeGrids<3,Seq3d,Seq3d>();
+  testParallelCubeGrids<3,Par3d,Seq3d>();
+  testParallelCubeGrids<3,Seq3d,Par3d>();
+  testParallelCubeGrids<3,Par3d,Par3d>();
   std::cout << "============================================================\n";
 
 }

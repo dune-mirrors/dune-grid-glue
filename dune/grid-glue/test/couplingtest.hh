@@ -54,12 +54,13 @@ void testIntersection(const IntersectionIt & rIIt)
     // Here we assume that the two interface match geometrically:
     if ( (globalDomainPos-globalTargetPos).two_norm() >= 1e-6 )
     {
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 ) failed\n";
       std::cerr << "localDomainPos  = " << localDomainPos << "\n";
       std::cerr << "globalDomainPos = " << globalDomainPos << "\n";
       std::cerr << "localTargetPos  = " << localTargetPos << "\n";
       std::cerr << "globalTargetPos = " << globalTargetPos << "\n";
     }
-    assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
+    //assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
 
   }
 }
@@ -93,7 +94,7 @@ void testCoupling(const GlueType& glue)
   std::vector<unsigned int> countOutside0(view0mapper.size(), 0);
 
   // ///////////////////////////////////////
-  //   MergedGrid centric
+  //   MergedGrid centric Grid0->Grid1
   // ///////////////////////////////////////
 
   typename GlueType::IntersectionIterator rIIt    = glue.ibegin();
@@ -106,7 +107,16 @@ void testCoupling(const GlueType& glue)
   }
 
   // ///////////////////////////////////////
-  //   Domain Entity centric
+  //   MergedGrid centric Grid1->Grid0
+  // ///////////////////////////////////////
+
+  /*
+     TODO:
+     add test for the opposite intersection orientation
+   */
+
+  // ///////////////////////////////////////
+  //   Grid0 Entity centric
   // ///////////////////////////////////////
 
   typedef typename GlueType::Grid0View::template Codim<0>::Iterator DomainIterator;
@@ -115,6 +125,7 @@ void testCoupling(const GlueType& glue)
   for (; dit != dend; ++dit)
   {
     unsigned int icount = 0;
+    std::cout << "checking: " << view0mapper.map(*dit) << std::endl;
 
     // intersection iterators
     typename GlueType::Grid0CellIntersectionIterator rIIt    = glue.template ibegin<0>(*dit);
@@ -127,17 +138,11 @@ void testCoupling(const GlueType& glue)
       icount++;
     }
 
-    // assert(icount == countInside0[view0mapper.map(*dit)]);
-    if(icount != countInside0[view0mapper.map(*dit)])
-    {
-      std::cout << "error: icount " << icount
-                << " vs countInside0[" << view0mapper.map(*dit) << "] "
-                << countInside0[view0mapper.map(*dit)] << std::endl;
-    }
+    assert(icount == countInside0[view0mapper.map(*dit)]);
   }
 
   // ///////////////////////////////////////
-  //   Target Entity centric
+  //   Grid1 Entity centric
   // ///////////////////////////////////////
 
   typedef typename GlueType::Grid1View::template Codim<0>::Iterator TargetIterator;
@@ -146,6 +151,7 @@ void testCoupling(const GlueType& glue)
   for (; tit != tend; ++tit)
   {
     unsigned int icount = 0;
+    std::cout << "checking: " << view1mapper.map(*tit) << std::endl;
 
     // intersection iterators
     typename GlueType::Grid1CellIntersectionIterator rIIt    = glue.template ibegin<1>(*tit);
@@ -156,14 +162,7 @@ void testCoupling(const GlueType& glue)
       icount++;
     }
 
-    // assert(icount == countOutside1[view1mapper.map(*tit)]);
-    if(icount != countOutside1[view1mapper.map(*tit)])
-    {
-      std::cout << "error: icount " << icount
-                << " vs countOutside1[" << view1mapper.map(*tit) << "] "
-                << countOutside1[view1mapper.map(*tit)] << std::endl;
-    }
-
+    assert(icount == countOutside1[view1mapper.map(*tit)]);
   }
 
 }

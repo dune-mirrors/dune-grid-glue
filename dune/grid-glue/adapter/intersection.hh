@@ -389,7 +389,7 @@ namespace Dune {
 
       /** \brief geometrical information about this intersection in global coordinates in the inside grid.
           takes local domain intersection coords and maps them to domain grid world coords */
-      const OutsideGeometry& geometryOutside() const DUNE_DEPRECATED
+      const OutsideGeometry& geometryOutside() const // DUNE_DEPRECATED
       {
         return IntersectionDataView<P0,P1,O>::geometry(*i_);
       }
