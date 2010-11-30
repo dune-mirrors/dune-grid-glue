@@ -52,9 +52,9 @@ private:
 };
 
 /** \brief trafo used for yaspgrids */
-template<int dim, int dimw, typename ctype>
+template<int dim, typename ctype>
 class ShiftTrafo
-  : public AnalyticalCoordFunction< ctype, dim, dimw, ShiftTrafo<dim,dimw,ctype> >
+  : public AnalyticalCoordFunction< ctype, dim, dim, ShiftTrafo<dim,ctype> >
 {
   double shift;
 public:
@@ -68,7 +68,7 @@ public:
   }
 
   //! evaluate method for global mapping
-  void evaluate ( const Dune::FieldVector<ctype, dim> &x, Dune::FieldVector<ctype, dimw> &y ) const
+  void evaluate ( const Dune::FieldVector<ctype, dim> &x, Dune::FieldVector<ctype, dim> &y ) const
   {
     y = (*this)(x);
   }
@@ -280,14 +280,16 @@ void testParallelCubeGrids()
   TarGen tarGen(1);
 
   GridType0 & cubeGrid0 = domGen.generate();
-  GridType1 & cubeGrid1 = tarGen.generate();
+  typedef GeometryGrid<GridType1, ShiftTrafo<dim,double> > ShiftedGridType;
+  ShiftTrafo<dim,double> trafo(tarGen.slice());   // transform dim-1 to dim
+  ShiftedGridType cubeGrid1(tarGen.generate(), trafo);
 
   // ////////////////////////////////////////
   //   Set up Traits
   // ////////////////////////////////////////
 
   typedef typename GridType0::LevelGridView DomGridView;
-  typedef typename GridType1::LevelGridView TarGridView;
+  typedef typename ShiftedGridType::LevelGridView TarGridView;
 
   // always test the extractor via the parallel extractor classes, even if we use a sequential grid.
 
@@ -320,7 +322,7 @@ void testParallelCubeGrids()
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue);   // , domGen.trafo(), tarGen.trafo());
+  testCoupling(glue);
 #else
     #warning Not testing, because psurface backend is not available.
 #endif
@@ -339,10 +341,10 @@ int main(int argc, char *argv[]) try
   std::cout << "==== 2D hybrid =============================================\n";
   testMatchingCubeGrids<2>();
   testNonMatchingCubeGrids<2>();
-  testParallelCubeGrids<2,Seq,Seq>();
-  testParallelCubeGrids<2,Par,Seq>();
-  testParallelCubeGrids<2,Seq,Par>();
-  testParallelCubeGrids<2,Par,Par>();
+  // testParallelCubeGrids<2,Seq,Seq>();
+  // testParallelCubeGrids<2,Par,Seq>();
+  // testParallelCubeGrids<2,Seq,Par>();
+  // testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
   // 3d Tests
