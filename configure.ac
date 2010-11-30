@@ -14,9 +14,12 @@ DUNE_CHECK_ALL
 # implicitly set the Dune-flags everywhere
 AC_SUBST(AM_CPPFLAGS, '$(DUNE_CPPFLAGS) -I$(top_srcdir)')
 AC_SUBST(AM_LDFLAGS, '$(DUNE_LDFLAGS)')
+AC_SUBST([LDADD], '$(top_builddir)/lib/libdunegridglue.la $(DUNE_LIBS)')
 LIBS="$DUNE_LIBS"
 
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([
+  dune-grid-glue.pc
+  Makefile
   dune/Makefile
   dune/grid-glue/Makefile
   dune/grid-glue/adapter/Makefile
@@ -28,7 +31,7 @@ AC_CONFIG_FILES([Makefile
   doc/doxygen/Makefile
   doc/doxygen/Doxyfile
   m4/Makefile
-  dune-grid-glue.pc
+  lib/Makefile
 ])
 AC_OUTPUT
 # finally print the summary information
