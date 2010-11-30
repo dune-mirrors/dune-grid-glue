@@ -520,16 +520,6 @@ public:
 
 
   /**
-   * @brief getter for internally used index set (grid's index set)
-   * @return the index set
-   */
-  const IndexSet& indexSet() const
-  {
-    return lx_.indexSet();
-  }
-
-
-  /**
    * @brief gets the parent element for a given face index,
    * throws an exception if index not valid
    * @param index the index of the face

@@ -4,7 +4,7 @@
  *  Filename:    codim0extractor.hh
  *  Version:     1.0
  *  Created on:  Jun 23, 2009
- *  Author:      Oliver Sander
+ *  Author:      Oliver Sander, Christian Engwer
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: base class for grid extractors extracting surface grids
@@ -30,19 +30,6 @@ template<typename GV>
 class Codim0Extractor : public Extractor<GV,0>
 {
 
-protected:
-
-  /** \brief Layout class needed to create a consecutive index for all element types together */
-  template <int dim>
-  struct P0Layout
-  {
-    /// Return true if gt has the same dimension as the grid
-    bool contains (Dune::GeometryType gt) const
-    {
-      return (gt.dim()==dim);
-    }
-  };
-
 public:
 
   /*  E X P O R T E D  T Y P E S   A N D   C O N S T A N T S  */
@@ -50,14 +37,12 @@ public:
   typedef typename Extractor<GV,0>::ctype ctype;
   using Extractor<GV,0>::dim;
   using Extractor<GV,0>::dimworld;
+  typedef typename Extractor<GV,0>::IndexType IndexType;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
   static const Dune::PartitionIteratorType PType = Dune::All_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
-
-  // index sets and index types
-  typedef typename GV::IndexSet::IndexType IndexType;
 
   // import typedefs from base class
   typedef typename Extractor<GV,0>::SubEntityInfo SubEntityInfo;
@@ -106,14 +91,11 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
   // information can be stored at first
   std::deque<SubEntityInfo> temp_faces;
 
-  // Make a set of consecutive indices for the elements, irrespective of the element types
-  Dune::MultipleCodimMultipleGeomTypeMapper<GV, P0Layout > elementMapper(this->gv_);
-
   // iterate over all codim 0 elements on the grid
   for (ElementIter elit = this->gv_.template begin<0>(); elit != this->gv_.template end<0>(); ++elit)
   {
 
-    IndexType eindex = elementMapper.map(*elit);
+    IndexType eindex = this->cellMapper_.map(*elit);
 
     // only do sth. if this element is "interesting"
     // implicit cast is done automatically
@@ -133,7 +115,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
 
         // get the vertex pointer and the index from the index set
         VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
-        IndexType vindex = this->indexSet().template index<dim>(*vptr);
+        IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
 
         // if the vertex is not yet inserted in the vertex info map
         // it is a new one -> it will be inserted now!

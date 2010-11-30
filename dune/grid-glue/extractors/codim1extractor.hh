@@ -39,6 +39,7 @@ public:
   using Extractor<GV,1>::dim;
   using Extractor<GV,1>::codim;
   using Extractor<GV,1>::cube_corners;
+  typedef typename Extractor<GV,1>::IndexType IndexType;
 
   /// @brief compile time number of corners of surface simplices
   enum
@@ -57,10 +58,6 @@ public:
   typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
 
   typedef typename GV::IntersectionIterator IsIter;
-
-  // index sets and index types
-  typedef typename GV::IndexSet IndexSet;
-  typedef typename IndexSet::IndexType IndexType;
 
   // import typedefs from base class
   typedef typename Codim1Extractor<GV>::SubEntityInfo SubEntityInfo;
@@ -148,7 +145,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
       {
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
-        eindex = this->indexSet().template index<0>(*elit);
+        eindex = this->gv_.indexSet().template index<0>(*elit);
         this->elmtInfo_[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, 0);
 
         // now add the faces in ascending order of their indices
@@ -181,7 +178,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
-              IndexType vindex = this->indexSet().template index<dim>(*vptr);
+              IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
               temp_faces.back().corners[i].num = vertex_number;
@@ -224,7 +221,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
-              IndexType vindex = this->indexSet().template index<dim>(*vptr);
+              IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
               temp_faces.back().corners[i].num = vertex_number;
@@ -266,7 +263,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
-              IndexType vindex = this->indexSet().template index<dim>(*vptr);
+              IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
