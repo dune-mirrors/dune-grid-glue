@@ -4,7 +4,7 @@
  *  Filename:    codim1extractor.hh
  *  Version:     1.0
  *  Created on:  Jun 23, 2009
- *  Author:      Oliver Sander
+ *  Author:      Oliver Sander, Christian Engwer
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: class for grid extractors extracting surface grids
@@ -145,7 +145,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
       {
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
-        eindex = this->gv_.indexSet().template index<0>(*elit);
+        eindex = this->cellMapper_.map(*elit);
         this->elmtInfo_[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, 0);
 
         // now add the faces in ascending order of their indices
@@ -155,8 +155,6 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
           // get the corner count of this face
           const int face_corners = Dune::GenericReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
 
-          // register the additional face(s)
-          this->elmtInfo_[eindex]->faces += (face_corners - 2);
 
           // now we only have to care about the 3D case, i.e. a triangle face can be
           // inserted directly whereas a quadrilateral face has to be divided into two triangles
@@ -164,7 +162,10 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
           {
           case 2 :
             assert(dim == 2);
-            // we have a triangle here
+            // we have a line here
+
+            // register the additional face(s)
+            this->elmtInfo_[eindex]->faces++;
 
             // add a new face to the temporary collection
             temp_faces.push_back(SubEntityInfo(eindex, *sit,
@@ -208,6 +209,9 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
           case 3 :
             assert(dim == 3);
             // we have a triangle here
+
+            // register the additional face(s)
+            this->elmtInfo_[eindex]->faces++;
 
             // add a new face to the temporary collection
             temp_faces.push_back(SubEntityInfo(eindex, *sit,
@@ -253,6 +257,9 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             // we have a quadrilateral here
             unsigned int vertex_indices[4];
             unsigned int vertex_numbers[4];
+
+            // register the additional face(s) (2 simplices)
+            this->elmtInfo_[eindex]->faces += 2;
 
             // get the vertex pointers for the quadrilateral's corner vertices
             // and try for each of them whether it is already inserted or not
