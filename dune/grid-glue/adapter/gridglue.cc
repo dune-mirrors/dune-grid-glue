@@ -107,217 +107,118 @@ void GridGlue<P0, P1>::extractGrid (const Extractor & extractor,
 }
 
 
-template<typename P0, typename P1>
-int GridGlue<P0, P1>::domainEntityNextFace(const DomainElement& e, int index) const
-{
-  int first, count;
-  // first check if the element forms a part of the extracted surface
-  if (!patch0_.faceIndices(e, first, count))
-    return -1;
+// template<typename P0, typename P1>
+// int GridGlue<P0, P1>::domainEntityNextFace(const DomainElement& e, int index) const
+// {
+//     int first, count;
+//     // first check if the element forms a part of the extracted surface
+//     if (!patch0_.faceIndices(e, first, count))
+//         return -1;
 
-  // check all mapped faces and accept the first one with number >=index
-  count += first;
-  while (first < count &&    (patch0_.indexInInside(first) < index || !merger_->template simplexMatched<0>(first)))
-    first++;
-  if (first == count)
-    return -1;     // no more faces
-  else
-    return patch0_.indexInInside(first);     // found, return the face's number
-}
-
-
-template<typename P0, typename P1>
-int GridGlue<P0, P1>::targetEntityNextFace(const TargetElement& e, int index) const
-{
-  int first, count;
-  // first check if the element forms a part of the extracted surface
-  if (!patch1_.faceIndices(e, first, count))
-    return -1;
-
-  // check all mapped faces and accept the first one with number >=index
-  count += first;
-  while (first < count && (patch1_.indexInInside(first) < index || !merger_->template simplexMatched<1>(first)))
-    first++;
-  if (first == count)
-    return -1;     // no more faces
-  else
-    return patch1_.indexInInside(first);     // found, return the face's number
-}
+//     // check all mapped faces and accept the first one with number >=index
+//     count += first;
+//     while (first < count &&    (patch0_.indexInInside(first) < index || !merger_->template simplexMatched<0>(first)))
+//         first++;
+//     if (first == count)
+//         return -1; // no more faces
+//     else
+//         return patch0_.indexInInside(first); // found, return the face's number
+// }
 
 
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::IntersectionIterator
-GridGlue<P0, P1>::ibegin() const
-{
-  return IntersectionIterator(this, 0);
-}
+// template<typename P0, typename P1>
+// int GridGlue<P0, P1>::targetEntityNextFace(const TargetElement& e, int index) const
+// {
+//     int first, count;
+//     // first check if the element forms a part of the extracted surface
+//     if (!patch1_.faceIndices(e, first, count))
+//         return -1;
+
+//     // check all mapped faces and accept the first one with number >=index
+//     count += first;
+//     while (first < count && (patch1_.indexInInside(first) < index || !merger_->template simplexMatched<1>(first)))
+//         first++;
+//     if (first == count)
+//         return -1; // no more faces
+//     else
+//         return patch1_.indexInInside(first); // found, return the face's number
+// }
 
 
 template<typename P0, typename P1>
-typename GridGlue<P0, P1>::Grid0IntersectionIterator
-GridGlue<P0, P1>::idomainbegin(const DomainElement& e, int num) const
-{
-  // first check if the element forms a part of the extracted surface
-  int first, count;
-  bool in_surface = patch0_.faceIndices(e, first, count);
-  if (!in_surface)
-                      #warning Not Implemented
-    return Grid0IntersectionIterator(this, index__sz);
-
-  count += first;
-  while (first < count)
-  {
-    if (patch0_.indexInInside(first) == num && merger_->template simplexMatched<0>(first))
-    {
-      // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
-      std::vector<unsigned int> global_results;
-      std::vector<unsigned int> local_results;
-
-      // get the remote intersections
-      merger_->template simplexRefined<0>(first, global_results);
-      while (++first < count && patch0_.indexInInside(first) == num && merger_->template simplexRefined<0>(first, local_results))
-      {
-        for (unsigned int i = 0; i < local_results.size(); ++i)
-          global_results.push_back(local_results[i]);
-      }
-
-      // if sth. has been found, return the iterator
-      if (global_results.size() > 0)
-                                            #warning Not Implemented
-        assert(false);
-      //                 return Grid0IntersectionIterator(intersections_[global_results[0]], global_results);
-
-      // else leave the loop
-      break;
-    }
-    first++;
-  }
-
-  // nothing has been found
-    #warning Not Implemented
-  return Grid0IntersectionIterator(this, index__sz);
-}
-
-
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::Grid0IntersectionIterator
-GridGlue<P0, P1>::idomainbegin(const DomainElement& e) const
+template<int P>
+bool
+GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::GridElement& e, std::vector<unsigned int> & indices) const
 {
   // first check if the element has at least one extracted subEntity
-  int first, count;
-  bool hasExtractedSubEntity = patch0_.faceIndices(e, first, count);
+  int p_first, p_cnt;
+  bool hasExtractedSubEntity = patch<P>().faceIndices(e, p_first, p_cnt);
   if (!hasExtractedSubEntity)
-                                 #warning Not Implemented
-    return Grid0IntersectionIterator(this, index__sz);
-
+    return false;
 
   // now accumulate all remote intersections of the element's faces
-  std::vector<unsigned int> global_results(0, 0);
-  std::vector<unsigned int> local_results;
+  indices.clear();
+  assert(indices.size() == 0);
+  std::vector<unsigned int> tmp;
 
   // iterate over all simplices to check if there is more than one simplex refining the face
-  bool found_sth = false;
-  count += first;
-  while (first < count)
+  for (int p = 0; p < p_cnt; p++)
   {
-    if (merger_->template simplexRefined<0>(first, local_results))
+    if (merger_->template simplexRefined<P>(p_first+p, tmp))
     {
-      if (local_results.size() > 0)
-        found_sth = true;
-      for (unsigned int i = 0; i < local_results.size(); ++i)
-        global_results.push_back(local_results[i]);
-    }
-    first++;
-  }
-
-  if (found_sth)
-                    #warning Not Implemented
-    assert(false);
-  //        return Grid0IntersectionIterator(this, intersections_[global_results[0]], global_results);
-  else
-          #warning Not Implemented
-    return Grid0IntersectionIterator(this, index__sz);
-}
-
-
-template<typename P0, typename P1>
-typename GridGlue<P0, P1>::Grid1IntersectionIterator
-GridGlue<P0, P1>::itargetbegin(const TargetElement& e, int num) const
-{
-  // first check if the element has at least one extracted subEntity
-  int first, count;
-  bool hasExtractedSubEntity = patch1_.faceIndices(e, first, count);
-  if (!hasExtractedSubEntity) return itargetend();
-
-  count += first;
-  while (first < count)
-  {
-    if (patch1_.indexInInside(first) == num && merger_->template simplexMatched<1>(first))
-    {
-      // perfect candidate found! done searching bec. of consecutive order of extracted simplices!
-      std::vector<unsigned int> global_results;
-      std::vector<unsigned int> local_results;
-
-      // get the remote intersections
-      merger_->template simplexRefined<1>(first, global_results);
-      while (++first < count && patch1_.indexInInside(first) == num && merger_->template simplexRefined<1>(first, local_results))
+      for (unsigned int i = 0; i < tmp.size(); ++i)
       {
-        for (unsigned int i = 0; i < local_results.size(); ++i)
-          global_results.push_back(local_results[i]);
+        indices.push_back(tmp[i]);
       }
-
-      // if sth. has been found, return the iterator
-      if (global_results.size() > 0)
-                                            #warning Not Implemented
-        assert(false);
-      // return Grid1IntersectionIterator(this, intersections_[global_results[0]], global_results);
-
-      // else leave the loop
-      break;
     }
-    first++;
   }
 
-  // nothing has been found
-    #warning Not Implemented
-  return Grid1IntersectionIterator(this, index__sz);
+#ifndef NDEBUG
+  std::cout << "INTERSECTIONS: " << p_first << "/" << p_cnt << std::endl;
+  std::cout << "INTERSECTIONS:";
+  for (unsigned int j = 0; j < indices.size(); j++)
+  {
+    int is = intersections_[indices[j]].index_;
+    int idx = merger_->template parent<P>(is);
+    typedef typename GridGlueView<P0,P1,P>::Patch::GridView::template Codim<0>::EntityPointer EPtr;
+    assert(idx >= p_first);
+    assert(idx < p_first+p_cnt);
+    EPtr ep(e);
+    EPtr ex = patch<P>().element(idx);
+    assert(ep == ex);
+    std::cout << "\t" << is;
+  }
+  std::cout << std::endl;
+#endif
+
+  // add end iterator
+  indices.push_back(index__sz);
+
+  return (indices.size() > 0);
 }
 
 
 template<typename P0, typename P1>
-typename GridGlue<P0, P1>::Grid1IntersectionIterator
-GridGlue<P0, P1>::itargetbegin(const TargetElement& e) const
+template<int I>
+typename GridGlueView<P0,P1,I>::CellIntersectionIterator
+GridGlue<P0, P1>::ibegin(const typename GridGlueView<P0,P1,I>::GridElement& e) const
 {
-  // first check if the element forms a part of the extracted surface
-  int first, count;
-  bool in_surface = patch1_.faceIndices(e, first, count);
-  if (!in_surface) return itargetend();
+  typedef typename GridGlueView<P0,P1,I>::CellIntersectionIterator CellIntersectionIterator;
+  // first check if the element has at least one intersection
+  std::vector<unsigned int> indices;
+  bool hasExtractedSubEntity = getIntersectionIndices<I>(e, indices);
+  if (!hasExtractedSubEntity)
+    return CellIntersectionIterator(this);
+
+  return CellIntersectionIterator(this, indices);
+}
 
 
-  // now accumulate all remote intersections of the element's faces
-  std::vector<unsigned int> global_results(0, 0);
-  std::vector<unsigned int> local_results;
-
-  // iterate over all simplices to check if there is more than one simplix refining the face
-  bool found_sth = false;
-  count += first;
-  while (first < count)
-  {
-    if (merger_->template simplexRefined<1>(first, local_results))
-    {
-      if (local_results.size() > 0)
-        found_sth = true;
-      for (unsigned int i = 0; i < local_results.size(); ++i)
-        global_results.push_back(local_results[i]);
-    }
-    first++;
-  }
-
-  if (found_sth)
-                    #warning Not Implemented
-    assert(false);
-  // return Grid1IntersectionIterator(this, intersections_[global_results[0]], global_results);
-  else
-          #warning Not Implemented
-    return Grid1IntersectionIterator(this, index__sz);
+template<typename P0, typename P1>
+template<int I>
+typename GridGlueView<P0,P1,I>::CellIntersectionIterator
+GridGlue<P0, P1>::iend(const typename GridGlueView<P0,P1,I>::GridElement& e) const
+{
+  typedef typename GridGlueView<P0,P1,I>::CellIntersectionIterator CellIntersectionIterator;
+  return CellIntersectionIterator(this);
 }

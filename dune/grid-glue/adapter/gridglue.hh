@@ -66,6 +66,9 @@ namespace Dune {
     template<typename P0, typename P1, int inside, int outside>
     class IntersectionIterator;
 
+    template<typename P0, typename P1, int inside, int outside>
+    class CellIntersectionIterator;
+
   }
 }
 
@@ -76,6 +79,9 @@ template<typename P0, typename P1>
 struct GridGlueView<P0,P1,0>
 {
   typedef P0 Patch;
+  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,0,1> CellIntersectionIterator;
+  typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> IntersectionIterator;
+  typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
   static const P0& patch(const GridGlue<P0,P1>& g)
   {
     return g.patch0_;
@@ -86,6 +92,9 @@ template<typename P0, typename P1>
 struct GridGlueView<P0,P1,1>
 {
   typedef P1 Patch;
+  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,1,0> CellIntersectionIterator;
+  typedef Dune::GridGlue::IntersectionIterator<P0,P1,1,0> IntersectionIterator;
+  typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
   static const P1& patch(const GridGlue<P0,P1>& g)
   {
     return g.patch1_;
@@ -215,12 +224,10 @@ public:
   friend class Dune::GridGlue::Intersection<P0,P1,1,0>;
   friend class Dune::GridGlue::IntersectionIterator<P0,P1,0,1>;
   friend class Dune::GridGlue::IntersectionIterator<P0,P1,1,0>;
+  friend class Dune::GridGlue::CellIntersectionIterator<P0,P1,0,1>;
+  friend class Dune::GridGlue::CellIntersectionIterator<P0,P1,1,0>;
   friend class GridGlueView<P0,P1,0>;
   friend class GridGlueView<P0,P1,1>;
-
-  /** \todo */
-  typedef Dune::GridGlue::Intersection<P0,P1,0,1> Grid0Intersection;
-  typedef Dune::GridGlue::Intersection<P0,P1,1,0> Grid1Intersection;
 
   /** \brief Type of the iterator that iterates over remove intersections */
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> IntersectionIterator;
@@ -229,6 +236,11 @@ public:
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> Grid0IntersectionIterator;
   /** \todo Please doc me! */
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,1,0> Grid1IntersectionIterator;
+
+  /** \todo Please doc me! */
+  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,0,1> Grid0CellIntersectionIterator;
+  /** \todo Please doc me! */
+  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,1,0> Grid1CellIntersectionIterator;
 
 private:
 
@@ -330,6 +342,9 @@ protected:
                     std::vector<unsigned int> & faces,
                     std::vector<Dune::GeometryType>& geometryTypes) const;
 
+  template<int P>
+  bool getIntersectionIndices(const typename GridGlueView<P0,P1,P>::GridElement& e, std::vector<unsigned int> & indices) const;
+
 public:
 
   /*   C O N S T R U C T O R S   A N D   D E S T R U C T O R S   */
@@ -361,7 +376,7 @@ public:
    * @brief getter for the domain grid view
    * @return the object
    */
-    #warning
+    #warning Please Change Interface
   const Grid0View& domainGridView() const
   {
     return domgv_;
@@ -372,6 +387,7 @@ public:
    * @brief getter for the target grid view
    * @return the object
    */
+    #warning Please Change Interface
   const Grid1View& targetGridView() const
   {
     return targv_;
@@ -397,35 +413,6 @@ public:
 
   void build();
 
-  /**
-   * @brief tells whether a codim 0 entity's face(s) (or at least a part)
-   * could be mapped
-   *
-   * For the given entity  could be mapped, if the latter is the case the number of the
-   * face in the parent element is returned.
-   * Note: Calling this function with only @c e given and checking the return value
-   * (-1 or not) is the easiest way to determine whether any of the entity's faces were mapped.
-   * @param e the element
-   * @param index number of the first face that is checked, faces with lower index are ignored
-   * @return -1 if there is no face mapped with number >=@c index, else next face's number
-   */
-  int domainEntityNextFace(const DomainElement& e, int index = 0) const;
-
-
-  /**
-   * @brief tells whether a codim 0 entity's face(s) (or at least a part)
-   * could be mapped
-   *
-   * For the given entity  could be mapped, if the latter is the case the number of the
-   * face in the parent element is returned.
-   * Note: Calling this function with only @c e given and checking the return value
-   * (-1 or not) is the easiest way to determine whether any of the entity's faces were mapped.
-   * @param e the element
-   * @param index number of the first face that is checked, faces with lower index are ignored
-   * @return -1 if there is no face mapped with number >=@c index, else next face's number
-   */
-  int targetEntityNextFace(const TargetElement& e, int index = 0) const;
-
   /*   I N T E R S E C T I O N S   A N D   I N T E R S E C T I O N   I T E R A T O R S   */
 
   /**
@@ -433,45 +420,10 @@ public:
    *
    * @return the iterator
    */
-  IntersectionIterator ibegin() const;
-
-
-  /**
-   * @brief gets an iterator over the remote intersections of a given codim 1 entity in the domain grid
-   *
-   * @param e codim 0 entity in the domain grid
-   * @param num the index of the face (codim 1 entity) in @c e entity, ignored if only one face in the surface
-   * @return the iterator
-   */
-  Grid0IntersectionIterator idomainbegin(const DomainElement& e, int num) const;
-
-
-  /**
-   * @brief gets an iterator over the remote intersections of a given codim 0 entity in the domain grid
-   *
-   * @param e codim 0 entity in the domain grid
-   * @return the iterator
-   */
-  Grid0IntersectionIterator idomainbegin(const DomainElement& e) const;
-
-
-  /**
-   * @brief gets an iterator over the remote intersections of a given codim 1 entity in the target grid
-   *
-   * @param e codim 0 entity in the target grid
-   * @param num the index of the face (codim 1 entity) in @c e entity, ignored if only one face in the surface
-   * @return the iterator
-   */
-  Grid1IntersectionIterator itargetbegin(const TargetElement& e, int num) const;
-
-
-  /**
-   * @brief gets an iterator over the remote intersections of a given codim 0 entity in the target grid
-   *
-   * @param e codim 0 entity in the target grid
-   * @return the iterator
-   */
-  Grid1IntersectionIterator itargetbegin(const TargetElement & e) const;
+  IntersectionIterator ibegin() const
+  {
+    return IntersectionIterator(this, 0);
+  }
 
 
   /**
@@ -486,14 +438,60 @@ public:
 
 
   /**
+   * @brief gets an iterator over the intersections of a given codim 0 entity in grid I
+   *
+   * @tparam I number of the inside grid
+   * @param e codim 0 entity in grid I
+   * @return the iterator
+   */
+  template<int I>
+  typename GridGlueView<P0,P1,I>::CellIntersectionIterator
+  ibegin(const typename GridGlueView<P0,P1,I>::GridElement& e) const;
+
+  /**
+   * @brief gets the end iterator for the intersections of a given codim 0 entity in grid I
+   *
+   * @tparam I number of the inside grid
+   * @param e codim 0 entity in grid I
+   * @return the end-iterator
+   */
+  template<int I>
+  typename GridGlueView<P0,P1,I>::CellIntersectionIterator
+  iend(const typename GridGlueView<P0,P1,I>::GridElement& e) const;
+
+
+  /**
+   * @brief gets an iterator over the remote intersections of a given codim 0 entity in the domain grid
+   *
+   * @param e codim 0 entity in the domain grid
+   * @return the iterator
+   */
+  Grid0CellIntersectionIterator idomainbegin(const DomainElement& e) const DUNE_DEPRECATED
+  {
+    return ibegin<0>(e);
+  }
+
+
+  /**
+   * @brief gets an iterator over the remote intersections of a given codim 0 entity in the target grid
+   *
+   * @param e codim 0 entity in the target grid
+   * @return the iterator
+   */
+  Grid1CellIntersectionIterator itargetbegin(const TargetElement & e) const DUNE_DEPRECATED
+  {
+    return ibegin<1>(e);
+  }
+
+
+  /**
    * @brief gets the (general) end-iterator for iterations over domain codim 0 entities' faces
    *
    * @return the iterator
    */
-  Grid0IntersectionIterator idomainend() const
+  Grid0CellIntersectionIterator idomainend(const DomainElement& e) const DUNE_DEPRECATED
   {
-        #warning
-    return Grid0IntersectionIterator(this, index__sz);
+    return iend<0>(e);
   }
 
 
@@ -502,11 +500,11 @@ public:
    *
    * @return the iterator
    */
-  Grid1IntersectionIterator itargetend() const
+  Grid1CellIntersectionIterator itargetend(const TargetElement& e) const DUNE_DEPRECATED
   {
-        #warning
-    return Grid1IntersectionIterator(this, index__sz);
+    return iend<1>(e);
   }
+
 
   /*! \brief Communicate information on the MergedGrid of a GridGlue
 

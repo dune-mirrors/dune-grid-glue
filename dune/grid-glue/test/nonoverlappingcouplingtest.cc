@@ -13,7 +13,7 @@
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim1extractor.hh>
-#include <dune/grid-glue/extractors/parallelextractor.hh>
+// #include <dune/grid-glue/extractors/parallelextractor.hh>
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
@@ -296,8 +296,10 @@ void testParallelCubeGrids()
   VerticalFaceDescriptor<DomGridView> domdesc(domGen.slice());
   VerticalFaceDescriptor<TarGridView> tardesc(tarGen.slice());
 
-  typedef ParallelExtractor< Codim1Extractor<DomGridView> > DomExtractor;
-  typedef ParallelExtractor< Codim1Extractor<TarGridView> > TarExtractor;
+  // typedef ParallelExtractor< Codim1Extractor<DomGridView> > DomExtractor;
+  // typedef ParallelExtractor< Codim1Extractor<TarGridView> > TarExtractor;
+  typedef Codim1Extractor<DomGridView> DomExtractor;
+  typedef Codim1Extractor<TarGridView> TarExtractor;
 
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
@@ -355,10 +357,10 @@ int main(int argc, char *argv[]) try
   std::cout << "==== 3D hybrid =============================================\n";
   testMatchingCubeGrids<3>();
   testNonMatchingCubeGrids<3>();
-  testParallelCubeGrids<3,Seq3d,Seq3d>();
-  testParallelCubeGrids<3,Par3d,Seq3d>();
-  testParallelCubeGrids<3,Seq3d,Par3d>();
-  testParallelCubeGrids<3,Par3d,Par3d>();
+  // testParallelCubeGrids<3,Seq3d,Seq3d>();
+  // testParallelCubeGrids<3,Par3d,Seq3d>();
+  // testParallelCubeGrids<3,Seq3d,Par3d>();
+  // testParallelCubeGrids<3,Par3d,Par3d>();
   std::cout << "============================================================\n";
 
 }

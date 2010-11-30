@@ -19,6 +19,8 @@
 #ifndef DUNE_PARALLEL_EXTRACTOR_HH
 #define DUNE_PARALLEL_EXTRACTOR_HH
 
+#error ParallelExtractor should not be use atm
+
 #include <vector>
 #include <deque>
 #include <map>

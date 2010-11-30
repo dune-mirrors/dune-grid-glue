@@ -7,6 +7,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/grid/common/quadraturerules.hh>
+#include <dune/grid/common/mcmgmapper.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
@@ -63,6 +64,15 @@ void testIntersection(const IntersectionIt & rIIt)
   }
 }
 
+template<int dim>
+struct CellLayout
+{
+  bool contains (Dune::GeometryType gt)
+  {
+    return gt.dim()==dim;
+  }
+};
+
 
 template <class GlueType>
 void testCoupling(const GlueType& glue)
@@ -72,6 +82,16 @@ void testCoupling(const GlueType& glue)
   int dim = GlueType::domdim;
   dim = GlueType::tardim;
 
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, CellLayout > View0Mapper;
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, CellLayout > View1Mapper;
+  View0Mapper view0mapper(glue.domainGridView());
+  View1Mapper view1mapper(glue.targetGridView());
+
+  std::vector<unsigned int> countInside0(view0mapper.size());
+  std::vector<unsigned int> countOutside1(view1mapper.size());
+  std::vector<unsigned int> countInside1(view1mapper.size(), 0);
+  std::vector<unsigned int> countOutside0(view0mapper.size(), 0);
+
   // ///////////////////////////////////////
   //   MergedGrid centric
   // ///////////////////////////////////////
@@ -79,7 +99,11 @@ void testCoupling(const GlueType& glue)
   typename GlueType::IntersectionIterator rIIt    = glue.ibegin();
   typename GlueType::IntersectionIterator rIEndIt = glue.iend();
   for (; rIIt!=rIEndIt; ++rIIt)
+  {
+    countInside0[view0mapper.map(*rIIt->inside())]++;
+    countOutside1[view1mapper.map(*rIIt->outside())]++;
     testIntersection(rIIt);
+  }
 
   // ///////////////////////////////////////
   //   Domain Entity centric
@@ -90,12 +114,11 @@ void testCoupling(const GlueType& glue)
   DomainIterator dend = glue.domainGridView().template end<0>();
   for (; dit != dend; ++dit)
   {
-    int icount = 0;
-    int icount2 = 0;
+    unsigned int icount = 0;
 
     // intersection iterators
-    typename GlueType::Grid0IntersectionIterator rIIt    = glue.idomainbegin(*dit);
-    typename GlueType::Grid0IntersectionIterator rIEndIt = glue.idomainend();
+    typename GlueType::Grid0CellIntersectionIterator rIIt    = glue.template ibegin<0>(*dit);
+    typename GlueType::Grid0CellIntersectionIterator rIEndIt = glue.template iend<0>(*dit);
     for (; rIIt!=rIEndIt; ++rIIt) {
       // as we only have a single grid, even when testing the
       // parallel extractor, this assertion should be true
@@ -104,20 +127,13 @@ void testCoupling(const GlueType& glue)
       icount++;
     }
 
-    // face intersection iterators
-    const int num_faces = dit->template count<1>();
-    for (int f=0; f<num_faces; ++f)
+    // assert(icount == countInside0[view0mapper.map(*dit)]);
+    if(icount != countInside0[view0mapper.map(*dit)])
     {
-      typename GlueType::Grid0IntersectionIterator rIIt    = glue.idomainbegin(*dit, f);
-      typename GlueType::Grid0IntersectionIterator rIEndIt = glue.idomainend();
-      for (; rIIt!=rIEndIt; ++rIIt) {
-        assert (rIIt->inside() == dit);
-        testIntersection(rIIt);
-        icount2++;
-      }
+      std::cout << "error: icount " << icount
+                << " vs countInside0[" << view0mapper.map(*dit) << "] "
+                << countInside0[view0mapper.map(*dit)] << std::endl;
     }
-
-    assert(icount == icount2);
   }
 
   // ///////////////////////////////////////
@@ -129,32 +145,25 @@ void testCoupling(const GlueType& glue)
   TargetIterator tend = glue.targetGridView().template end<0>();
   for (; tit != tend; ++tit)
   {
-    int icount = 0;
-    int icount2 = 0;
+    unsigned int icount = 0;
 
     // intersection iterators
-    typename GlueType::Grid1IntersectionIterator rIIt    = glue.itargetbegin(*tit);
-    typename GlueType::Grid1IntersectionIterator rIEndIt = glue.itargetend();
+    typename GlueType::Grid1CellIntersectionIterator rIIt    = glue.template ibegin<1>(*tit);
+    typename GlueType::Grid1CellIntersectionIterator rIEndIt = glue.template iend<1>(*tit);
     for (; rIIt!=rIEndIt; ++rIIt) {
       assert (rIIt->inside() == tit);
       testIntersection(rIIt);
       icount++;
     }
 
-    // face intersection iterators
-    const int num_faces = tit->template count<1>();
-    for (int f=0; f<num_faces; ++f)
+    // assert(icount == countOutside1[view1mapper.map(*tit)]);
+    if(icount != countOutside1[view1mapper.map(*tit)])
     {
-      typename GlueType::Grid1IntersectionIterator rIIt    = glue.itargetbegin(*tit, f);
-      typename GlueType::Grid1IntersectionIterator rIEndIt = glue.itargetend();
-      for (; rIIt!=rIEndIt; ++rIIt) {
-        assert (rIIt->inside() == tit);
-        testIntersection(rIIt);
-        icount2++;
-      }
+      std::cout << "error: icount " << icount
+                << " vs countOutside1[" << view1mapper.map(*tit) << "] "
+                << countOutside1[view1mapper.map(*tit)] << std::endl;
     }
 
-    assert(icount == icount2);
   }
 
 }

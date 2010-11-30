@@ -57,6 +57,59 @@ namespace Dune {
       Intersection intersection_;
     };
 
+
+    /** @todo documentation */
+    template<typename P0, typename P1, int inside, int outside>
+    class CellIntersectionIterator :
+      public Dune::ForwardIteratorFacade< CellIntersectionIterator<P0,P1,inside,outside>,
+          const Intersection<P0,P1,inside,outside> >
+    {
+    public:
+
+      typedef ::GridGlue<P0, P1> GridGlue;
+      typedef Dune::GridGlue::Intersection<P0,P1,inside,outside> Intersection;
+
+      CellIntersectionIterator(const GridGlue * glue, std::vector<unsigned int> i)
+        : glue_(glue),
+          index_(0),
+          indices_(i),
+          intersection_(glue_, & glue_->intersections_[i[0]])
+      {}
+
+      // end iterator
+      CellIntersectionIterator(const GridGlue * glue)
+        : glue_(glue),
+          index_(0),
+          indices_(1, glue_->index__sz),
+          intersection_(glue_, & glue_->intersections_[glue_->index__sz])
+      {}
+
+      const Intersection& dereference() const
+      {
+        assert(("never dereference the end iterator" &&
+                indices_[index_] < glue_->index__sz));
+        return intersection_;
+      }
+
+      void increment()
+      {
+        ++index_;
+        unsigned int i = indices_[index_];
+        intersection_ = Intersection(glue_, & glue_->intersections_[i]);
+      }
+
+      bool equals(const CellIntersectionIterator& iter) const
+      {
+        return iter.indices_[iter.index_] == indices_[index_];
+      }
+
+    private:
+      const GridGlue*   glue_;
+      unsigned int index_;
+      std::vector<unsigned int> indices_;
+      Intersection intersection_;
+    };
+
   } // end namespace GridGlue
 } // end namespace Dune
 
