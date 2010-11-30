@@ -4,7 +4,7 @@
  *  Filename:    GridGlue.hh
  *  Version:     1.0
  *  Created on:  Feb 2, 2009
- *  Author:      Gerrit Buse
+ *  Author:      Gerrit Buse, Christian Engwer
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: Central component of the module implementing the coupling of two grids.
@@ -230,7 +230,6 @@ public:
   friend class GridGlueView<P0,P1,1>;
 
   /** \brief Type of the iterator that iterates over remove intersections */
-  typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> IntersectionIterator;
 
   /** \todo Please doc me! */
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> Grid0IntersectionIterator;
@@ -245,12 +244,6 @@ public:
 private:
 
   /*   M E M B E R   V A R I A B L E S   */
-
-  /// @brief the "domain" grid view
-  const Grid0View&        domgv_;
-
-  /// @brief the "target" grid view
-  const Grid1View&        targv_;
 
   /// @brief the domain surface extractor
   const Grid0Patch&       patch0_;
@@ -373,24 +366,13 @@ public:
   }
 
   /**
-   * @brief getter for the domain grid view
+   * @brief getter for the GridView of patch P
    * @return the object
    */
-    #warning Please Change Interface
-  const Grid0View& domainGridView() const
+  template<int P>
+  const typename GridGlueView<P0,P1,P>::Patch::GridView & gridView() const
   {
-    return domgv_;
-  }
-
-
-  /**
-   * @brief getter for the target grid view
-   * @return the object
-   */
-    #warning Please Change Interface
-  const Grid1View& targetGridView() const
-  {
-    return targv_;
+    return GridGlueView<P0,P1,P>::patch(*this).gridView();
   }
 
 
@@ -420,9 +402,10 @@ public:
    *
    * @return the iterator
    */
-  IntersectionIterator ibegin() const
+  template<int I>
+  typename GridGlueView<P0,P1,I>::IntersectionIterator ibegin() const
   {
-    return IntersectionIterator(this, 0);
+    return typename GridGlueView<P0,P1,I>::IntersectionIterator(this, 0);
   }
 
 
@@ -431,9 +414,10 @@ public:
    *
    * @return the iterator
    */
-  IntersectionIterator iend() const
+  template<int I>
+  typename GridGlueView<P0,P1,I>::IntersectionIterator iend() const
   {
-    return IntersectionIterator(this, index__sz);
+    return typename GridGlueView<P0,P1,I>::IntersectionIterator(this, index__sz);
   }
 
 
@@ -458,52 +442,6 @@ public:
   template<int I>
   typename GridGlueView<P0,P1,I>::CellIntersectionIterator
   iend(const typename GridGlueView<P0,P1,I>::GridElement& e) const;
-
-
-  /**
-   * @brief gets an iterator over the remote intersections of a given codim 0 entity in the domain grid
-   *
-   * @param e codim 0 entity in the domain grid
-   * @return the iterator
-   */
-  Grid0CellIntersectionIterator idomainbegin(const DomainElement& e) const DUNE_DEPRECATED
-  {
-    return ibegin<0>(e);
-  }
-
-
-  /**
-   * @brief gets an iterator over the remote intersections of a given codim 0 entity in the target grid
-   *
-   * @param e codim 0 entity in the target grid
-   * @return the iterator
-   */
-  Grid1CellIntersectionIterator itargetbegin(const TargetElement & e) const DUNE_DEPRECATED
-  {
-    return ibegin<1>(e);
-  }
-
-
-  /**
-   * @brief gets the (general) end-iterator for iterations over domain codim 0 entities' faces
-   *
-   * @return the iterator
-   */
-  Grid0CellIntersectionIterator idomainend(const DomainElement& e) const DUNE_DEPRECATED
-  {
-    return iend<0>(e);
-  }
-
-
-  /**
-   * @brief gets the (general) end-iterator for iterations over target codim 0 entities' faces
-   *
-   * @return the iterator
-   */
-  Grid1CellIntersectionIterator itargetend(const TargetElement& e) const DUNE_DEPRECATED
-  {
-    return iend<1>(e);
-  }
 
 
   /*! \brief Communicate information on the MergedGrid of a GridGlue

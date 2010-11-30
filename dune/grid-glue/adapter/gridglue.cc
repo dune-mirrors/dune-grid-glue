@@ -8,7 +8,7 @@ GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger*
 #else
 GridGlue<P0, P1>::GridGlue(const Grid0Patch & gp1, const Grid1Patch & gp2, Merger* merger)
 #endif
-  : domgv_(gp1.gridView()), targv_(gp2.gridView()),
+  :
     patch0_(gp1), patch1_(gp2), merger_(merger)
 #if HAVE_MPI
     , mpicomm(m)
@@ -105,44 +105,6 @@ void GridGlue<P0, P1>::extractGrid (const Extractor & extractor,
   extractor.getGeometryTypes(geometryTypes);
 
 }
-
-
-// template<typename P0, typename P1>
-// int GridGlue<P0, P1>::domainEntityNextFace(const DomainElement& e, int index) const
-// {
-//     int first, count;
-//     // first check if the element forms a part of the extracted surface
-//     if (!patch0_.faceIndices(e, first, count))
-//         return -1;
-
-//     // check all mapped faces and accept the first one with number >=index
-//     count += first;
-//     while (first < count &&    (patch0_.indexInInside(first) < index || !merger_->template simplexMatched<0>(first)))
-//         first++;
-//     if (first == count)
-//         return -1; // no more faces
-//     else
-//         return patch0_.indexInInside(first); // found, return the face's number
-// }
-
-
-// template<typename P0, typename P1>
-// int GridGlue<P0, P1>::targetEntityNextFace(const TargetElement& e, int index) const
-// {
-//     int first, count;
-//     // first check if the element forms a part of the extracted surface
-//     if (!patch1_.faceIndices(e, first, count))
-//         return -1;
-
-//     // check all mapped faces and accept the first one with number >=index
-//     count += first;
-//     while (first < count && (patch1_.indexInInside(first) < index || !merger_->template simplexMatched<1>(first)))
-//         first++;
-//     if (first == count)
-//         return -1; // no more faces
-//     else
-//         return patch1_.indexInInside(first); // found, return the face's number
-// }
 
 
 template<typename P0, typename P1>

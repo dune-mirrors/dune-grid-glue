@@ -85,8 +85,8 @@ void testCoupling(const GlueType& glue)
 
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, CellLayout > View0Mapper;
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, CellLayout > View1Mapper;
-  View0Mapper view0mapper(glue.domainGridView());
-  View1Mapper view1mapper(glue.targetGridView());
+  View0Mapper view0mapper(glue.template gridView<0>());
+  View1Mapper view1mapper(glue.template gridView<1>());
 
   std::vector<unsigned int> countInside0(view0mapper.size());
   std::vector<unsigned int> countOutside1(view1mapper.size());
@@ -97,31 +97,39 @@ void testCoupling(const GlueType& glue)
   //   MergedGrid centric Grid0->Grid1
   // ///////////////////////////////////////
 
-  typename GlueType::IntersectionIterator rIIt    = glue.ibegin();
-  typename GlueType::IntersectionIterator rIEndIt = glue.iend();
-  for (; rIIt!=rIEndIt; ++rIIt)
   {
-    countInside0[view0mapper.map(*rIIt->inside())]++;
-    countOutside1[view1mapper.map(*rIIt->outside())]++;
-    testIntersection(rIIt);
+    typename GlueType::Grid0IntersectionIterator rIIt    = glue.template ibegin<0>();
+    typename GlueType::Grid0IntersectionIterator rIEndIt = glue.template iend<0>();
+    for (; rIIt!=rIEndIt; ++rIIt)
+    {
+      countInside0[view0mapper.map(*rIIt->inside())]++;
+      countOutside1[view1mapper.map(*rIIt->outside())]++;
+      testIntersection(rIIt);
+    }
   }
 
   // ///////////////////////////////////////
   //   MergedGrid centric Grid1->Grid0
   // ///////////////////////////////////////
 
-  /*
-     TODO:
-     add test for the opposite intersection orientation
-   */
+  {
+    typename GlueType::Grid1IntersectionIterator rIIt    = glue.template ibegin<1>();
+    typename GlueType::Grid1IntersectionIterator rIEndIt = glue.template iend<1>();
+    for (; rIIt!=rIEndIt; ++rIIt)
+    {
+      countInside1[view1mapper.map(*rIIt->inside())]++;
+      countOutside0[view0mapper.map(*rIIt->outside())]++;
+      testIntersection(rIIt);
+    }
+  }
 
   // ///////////////////////////////////////
   //   Grid0 Entity centric
   // ///////////////////////////////////////
 
   typedef typename GlueType::Grid0View::template Codim<0>::Iterator DomainIterator;
-  DomainIterator dit = glue.domainGridView().template begin<0>();
-  DomainIterator dend = glue.domainGridView().template end<0>();
+  DomainIterator dit = glue.template gridView<0>().template begin<0>();
+  DomainIterator dend = glue.template gridView<0>().template end<0>();
   for (; dit != dend; ++dit)
   {
     unsigned int icount = 0;
@@ -138,6 +146,7 @@ void testCoupling(const GlueType& glue)
     }
 
     assert(icount == countInside0[view0mapper.map(*dit)]);
+    assert(icount == countOutside0[view0mapper.map(*dit)]);
   }
 
   // ///////////////////////////////////////
@@ -145,8 +154,8 @@ void testCoupling(const GlueType& glue)
   // ///////////////////////////////////////
 
   typedef typename GlueType::Grid1View::template Codim<0>::Iterator TargetIterator;
-  TargetIterator tit = glue.targetGridView().template begin<0>();
-  TargetIterator tend = glue.targetGridView().template end<0>();
+  TargetIterator tit = glue.template gridView<1>().template begin<0>();
+  TargetIterator tend = glue.template gridView<1>().template end<0>();
   for (; tit != tend; ++tit)
   {
     unsigned int icount = 0;
@@ -160,6 +169,7 @@ void testCoupling(const GlueType& glue)
       icount++;
     }
 
+    assert(icount == countInside1[view1mapper.map(*tit)]);
     assert(icount == countOutside1[view1mapper.map(*tit)]);
   }
 
