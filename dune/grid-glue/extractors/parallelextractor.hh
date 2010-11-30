@@ -63,9 +63,9 @@ public:
   {
     typedef typename BUF::value_type V;
     MPI_Allgather(&in[0], in.size(),
-                  Dune::Generic_MPI_Datatype<V>::get(),
+                  Dune::MPITraits<V>::getType(),
                   &out[0], outsz,
-                  Dune::Generic_MPI_Datatype<V>::get(), comm);
+                  Dune::MPITraits<V>::getType(), comm);
   }
 };
 #endif
