@@ -60,17 +60,11 @@ class ShiftTrafo
 public:
   ShiftTrafo(double x) : shift(x) {};
 
-  virtual Dune::FieldVector<double, dim> operator()(const Dune::FieldVector<double, dim>& c) const
-  {
-    Dune::FieldVector<double, dim> x(c);
-    x[0] += shift;
-    return x;
-  }
-
   //! evaluate method for global mapping
   void evaluate ( const Dune::FieldVector<ctype, dim> &x, Dune::FieldVector<ctype, dim> &y ) const
   {
-    y = (*this)(x);
+    y = x;
+    y[0] += shift;
   }
 };
 
@@ -224,11 +218,6 @@ public:
     GridType * gridp = new GridType(elements, lower, upper);
     return *gridp;
   }
-
-  double slice()
-  {
-    return 1.0;
-  }
 };
 
 
@@ -239,7 +228,8 @@ class MeshGenerator<dim, true>
 public:
   MeshGenerator(bool b) : tar(b) {};
 
-  typedef YaspGrid<dim> GridType;
+  typedef YaspGrid<dim> HostGridType;
+  typedef GeometryGrid<HostGridType, ShiftTrafo<dim,double> > GridType;
 
   GridType & generate()
   {
@@ -247,21 +237,18 @@ public:
     FieldVector<double,dim> size(1);
     FieldVector<bool,dim> periodic(false);
     int overlap = 1;
+    double shift = 0.0;
 
     if (tar)
     {
       elements = 4;
+      shift = 1.0;
     }
 
-    GridType * gridp = new GridType(size, elements, periodic, overlap);
+    HostGridType * hostgridp = new HostGridType(size, elements, periodic, overlap);
+    ShiftTrafo<dim,double> * trafop = new ShiftTrafo<dim,double>(shift);
+    GridType * gridp = new GridType(*hostgridp, *trafop);
     return *gridp;
-  }
-
-  double slice()
-  {
-    if (tar)
-      return 0.0;
-    return 1.0;
   }
 };
 
@@ -279,22 +266,22 @@ void testParallelCubeGrids()
   DomGen domGen(0);
   TarGen tarGen(1);
 
+  double slice = 1.0;
+
   GridType0 & cubeGrid0 = domGen.generate();
-  typedef GeometryGrid<GridType1, ShiftTrafo<dim,double> > ShiftedGridType;
-  ShiftTrafo<dim,double> trafo(tarGen.slice());   // transform dim-1 to dim
-  ShiftedGridType cubeGrid1(tarGen.generate(), trafo);
+  GridType1 & cubeGrid1 = tarGen.generate();
 
   // ////////////////////////////////////////
   //   Set up Traits
   // ////////////////////////////////////////
 
   typedef typename GridType0::LevelGridView DomGridView;
-  typedef typename ShiftedGridType::LevelGridView TarGridView;
+  typedef typename GridType1::LevelGridView TarGridView;
 
   // always test the extractor via the parallel extractor classes, even if we use a sequential grid.
 
-  VerticalFaceDescriptor<DomGridView> domdesc(domGen.slice());
-  VerticalFaceDescriptor<TarGridView> tardesc(tarGen.slice());
+  VerticalFaceDescriptor<DomGridView> domdesc(slice);
+  VerticalFaceDescriptor<TarGridView> tardesc(slice);
 
   // typedef ParallelExtractor< Codim1Extractor<DomGridView> > DomExtractor;
   // typedef ParallelExtractor< Codim1Extractor<TarGridView> > TarExtractor;
@@ -342,10 +329,15 @@ int main(int argc, char *argv[]) try
   // Test two unit squares
   std::cout << "==== 2D hybrid =============================================\n";
   testMatchingCubeGrids<2>();
+  std::cout << "============================================================\n";
   testNonMatchingCubeGrids<2>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<2,Seq,Seq>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<2,Par,Seq>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<2,Seq,Par>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
@@ -356,10 +348,15 @@ int main(int argc, char *argv[]) try
   // Test two unit cubes
   std::cout << "==== 3D hybrid =============================================\n";
   testMatchingCubeGrids<3>();
+  std::cout << "============================================================\n";
   testNonMatchingCubeGrids<3>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<3,Seq3d,Seq3d>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<3,Par3d,Seq3d>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<3,Seq3d,Par3d>();
+  std::cout << "============================================================\n";
   testParallelCubeGrids<3,Par3d,Par3d>();
   std::cout << "============================================================\n";
 

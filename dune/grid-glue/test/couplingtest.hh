@@ -125,7 +125,6 @@ void testCoupling(const GlueType& glue)
   for (; dit != dend; ++dit)
   {
     unsigned int icount = 0;
-    std::cout << "checking: " << view0mapper.map(*dit) << std::endl;
 
     // intersection iterators
     typename GlueType::Grid0CellIntersectionIterator rIIt    = glue.template ibegin<0>(*dit);
@@ -151,7 +150,6 @@ void testCoupling(const GlueType& glue)
   for (; tit != tend; ++tit)
   {
     unsigned int icount = 0;
-    std::cout << "checking: " << view1mapper.map(*tit) << std::endl;
 
     // intersection iterators
     typename GlueType::Grid1CellIntersectionIterator rIIt    = glue.template ibegin<1>(*tit);
