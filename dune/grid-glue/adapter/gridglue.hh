@@ -529,12 +529,12 @@ public:
     DataType* receivebuffer = new DataType[rsz];
 
     // iterators
-    RemoteIntersectionIterator rit = iremotebegin();
-    RemoteIntersectionIterator ritend = iremoteend();
+    Grid0IntersectionIterator rit = ibegin<0>();
+    Grid0IntersectionIterator ritend = iend<0>();
 
     // gather
     Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer);
-    for (rit = iremotebegin(); rit != ritend; ++rit)
+    for (; rit != ritend; ++rit)
     {
       /*
          we need to have to variants depending on the communication direction.
@@ -567,7 +567,7 @@ public:
 
     // scatter
     Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer);
-    for (rit = iremotebegin(); rit != ritend; ++rit)
+    for (rit = ibegin<0>(); rit != ritend; ++rit)
     {
       /*
          we need to have to variants depending on the communication direction.
