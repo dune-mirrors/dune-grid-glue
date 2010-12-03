@@ -19,3 +19,15 @@
 6) the CoordinateTransformation is gone. In order to couple
    lower-dimensional grids, you have to use Dune::GeometryGrid to lift
    them into the appropriate world space.
+7) Several names of methods of the RemoteIntersection class changed,
+   to conform more to the naming of the dune-grid Intersection class.
+   In particular
+   - entityDomain()              -->   inside()
+   - entityTarget()              -->   outside()
+   - numberInDomainEntity()      -->   indexInInside()
+   - numberInTargetEntity()      -->   indexInOutside()
+   - intersectionDomainGlobal()  -->  geometry()
+   - intersectionTargetGlobal()  -->  geometryOutside()
+   - intersectionDomainLocal()   -->   geometryInInside()
+   - intersectionTargetLocal()   -->   geometryInOutside()
+
