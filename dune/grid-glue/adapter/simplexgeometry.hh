@@ -27,6 +27,7 @@
 #include <dune/grid/genericgeometry/geometrytraits.hh>
 #include <dune/grid/genericgeometry/cornermapping.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 
 /**
@@ -49,11 +50,10 @@ struct LocalSimplexGeometryTraits
 {
   typedef typename Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld - static_cast<int>(is_manifold), true> Base;
 
-  /// @brief we only talk about simplices here!
+  // This traits class represents a single type only ...
   static const bool hybrid = false;
-
-  /// @brief since non-hybrid, an element type can be specified
-  static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
+  // ... and this type is 'simplex'.
+  static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< G::dimension >::type::id;
 
   /**
    * Note:
@@ -93,10 +93,10 @@ struct GlobalSimplexGeometryTraits
 {
   typedef typename Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, true> Base;
 
-  /// @brief we only talk about simplices here!
+  // This traits class represents a single type only...
   static const bool hybrid = false;
-
-  static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
+  // ... and this type is 'simplex'.
+  static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< G::dimensionworld >::type::id;
 
   /**
    * Note:
