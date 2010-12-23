@@ -149,10 +149,9 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
 
 
 #if HAVE_UG
-void testTriangleGridsUG(Merger<double,2,2,2>& merger, const FieldVector<double,2>& gridOffset)
+template <int dim>
+void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
 {
-  const int dim = 2;
-
   // /////////////////////////////////////////////////////////////////
   //   Make two triangle grids that are slightly shifted wrt each other
   // /////////////////////////////////////////////////////////////////
@@ -175,8 +174,8 @@ void testTriangleGridsUG(Merger<double,2,2,2>& merger, const FieldVector<double,
   //   Set up an overlapping coupling
   // ////////////////////////////////////////
 
-  typedef GridType::LeafGridView DomGridView;
-  typedef GridType::LeafGridView TarGridView;
+  typedef typename GridType::LeafGridView DomGridView;
+  typedef typename GridType::LeafGridView TarGridView;
 
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
@@ -266,7 +265,7 @@ int main(int argc, char** argv)
 
   testSimplexGrids<1>(psurfaceMerge1d, FieldVector<double,1>(0.05));
 #if HAVE_UG
-  testTriangleGridsUG(psurfaceMerge2d, FieldVector<double,2>(0.05));
+  testSimplexGridsUG(psurfaceMerge2d, FieldVector<double,2>(0.05));
   testHybridGridsUG<2>(psurfaceMerge2d, FieldVector<double,2>(0.05));
 #endif
 #endif
@@ -284,7 +283,7 @@ int main(int argc, char** argv)
 
   testSimplexGrids<1>(cgalMerge1d, FieldVector<double,1>(0.05));
 #if HAVE_UG
-  testTriangleGridsUG(cgalMerge2d, FieldVector<double,2>(0.05));
+  testSimplexGridsUG(cgalMerge2d, FieldVector<double,2>(0.05));
 
   testHybridGridsUG<2>(cgalMerge2d, FieldVector<double,2>(0.05));
 #endif
@@ -304,7 +303,7 @@ int main(int argc, char** argv)
 
   testSimplexGrids<1>(conformingMerge1d, FieldVector<double,1>(0));
 #if HAVE_UG
-  testTriangleGridsUG(conformingMerge2d, FieldVector<double,2>(0));
+  testSimplexGridsUG(conformingMerge2d, FieldVector<double,2>(0));
 
   testHybridGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
