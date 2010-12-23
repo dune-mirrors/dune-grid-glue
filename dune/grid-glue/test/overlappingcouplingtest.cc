@@ -8,6 +8,7 @@
 #endif
 #include <dune/common/mpihelper.hh>
 #include <dune/grid/common/quadraturerules.hh>
+#include <dune/grid/utility/structuredgridfactory.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
@@ -158,51 +159,17 @@ void testTriangleGridsUG(Merger<double,2,2,2>& merger, const FieldVector<double,
 
   typedef UGGrid<dim> GridType;
 
-  GridFactory<GridType> factory0, factory1;
+  FieldVector<double,dim> lowerLeft(0);
+  FieldVector<double,dim> upperRight(1);
+  array<unsigned int, dim> elements;
+  std::fill(elements.begin(), elements.end(), 10);
 
-  // insert vertices
-  for (int i=0; i<11; i++) {
-    for (int j=0; j<11; j++) {
+  StructuredGridFactory<GridType> factory;
+  shared_ptr<GridType> grid0 = factory.createSimplexGrid(lowerLeft, upperRight, elements);
 
-      FieldVector<double,2> pos;
-      pos[0] = i * 0.1;
-      pos[1] = j * 0.1;
-
-      factory0.insertVertex(pos);
-
-      pos += gridOffset;
-
-      factory1.insertVertex(pos);
-
-    }
-
-  }
-
-
-  // insert elements
-  std::vector<unsigned int> vertices(3);
-
-  for (int i=0; i<10; i++) {
-
-    for (int j=0; j<10; j++) {
-
-      unsigned int base = j*11 + i;
-
-      vertices[0] = base;   vertices[1] = base+1;   vertices[2] = base + 11;
-      factory0.insertElement(GeometryType(GeometryType::simplex,dim), vertices);
-      factory1.insertElement(GeometryType(GeometryType::simplex,dim), vertices);
-
-      vertices[0] = base+1;   vertices[1] = base+12;   vertices[2] = base + 11;
-      factory0.insertElement(GeometryType(GeometryType::simplex,dim), vertices);
-      factory1.insertElement(GeometryType(GeometryType::simplex,dim), vertices);
-
-    }
-
-  }
-
-  GridType* grid0 = factory0.createGrid();
-  GridType* grid1 = factory1.createGrid();
-
+  lowerLeft  += gridOffset;
+  upperRight += gridOffset;
+  shared_ptr<GridType> grid1 = factory.createSimplexGrid(lowerLeft, upperRight, elements);
 
   // ////////////////////////////////////////
   //   Set up an overlapping coupling
