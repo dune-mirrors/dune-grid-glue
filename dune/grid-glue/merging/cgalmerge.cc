@@ -75,6 +75,44 @@ void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container
   }
   std::cout << " }" << std::endl;
 }
+
+/** See CGAL manual Section 25.3.7 to see how this works
+ * \tparam T The type used by Dune for coordinates
+ * \tparam dim The element dimension.  It must be 3.
+ *         It is a template parameter only to make the code compile
+ */
+template <class Polyhedron, class T, int dim>
+void makeHexahedron(Polyhedron& P,
+                    const std::vector<Dune::FieldVector<T,dim> >& c)
+{
+  // appends a cube of size [0,1]ˆ3 to the polyhedron P.
+  CGAL_precondition( P.is_valid());
+  typedef typename Polyhedron::Point_3 Point;
+  typedef typename Polyhedron::Halfedge_handle Halfedge_handle;
+  Halfedge_handle h = P.make_tetrahedron( Point( c[1][0], c[1][1], c[1][2] ),       // vertex 1
+                                          Point( c[4][0], c[4][1], c[4][2] ),       // vertex 4
+                                          Point( c[0][0], c[0][1], c[0][2] ),       // vertex 0
+                                          Point( c[2][0], c[2][1], c[2][2] ));      // vertex 2
+  Halfedge_handle g = h->next()->opposite()->next();
+
+  P.split_edge( h->next());
+  P.split_edge( g->next());
+  P.split_edge( g);
+
+  h->next()->vertex()->point()     = Point( c[5][0], c[5][1], c[5][2] );            // vertex 5
+  g->next()->vertex()->point()     = Point( c[6][0], c[6][1], c[6][2] );            // vertex 6
+  g->opposite()->vertex()->point() = Point( c[3][0], c[3][1], c[3][2] );            // vertex 3
+
+  Halfedge_handle f = P.split_facet( g->next(),
+                                     g->next()->next()->next());
+
+  Halfedge_handle e = P.split_edge( f);
+  e->vertex()->point() = Point( c[7][0], c[7][1], c[7][2] );                        // vertex 7
+
+  P.split_facet( e, f->next()->next());
+
+  CGAL_postcondition( P.is_valid());
+}
 #endif
 
 
@@ -133,7 +171,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       this->intersections_.back().grid1Entity_ = grid1Index;
       this->intersections_.back().grid2Entity_ = grid2Index;
 
-      std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
+      //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
 
     }
 
@@ -269,31 +307,216 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
   }
   case 3 : {
 
-#if 0
-    typedef CGAL::Homogeneous<CGAL::Gmpz>  Kernel;
-    typedef CGAL::Polyhedron_3<Kernel>  Polyhedron;
-    typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
-    typedef Kernel::Vector_3 Vector_3;
-    typedef Kernel::Aff_transformation_3 Aff_transformation_3;
+    typedef CGAL::Cartesian<Number_type>   Kernel;
+    typedef typename Kernel::Point_3 Point_3;
+    typedef CGAL::Polyhedron_3<Kernel>     Polyhedron_3;
+    typedef CGAL::Nef_polyhedron_3<Kernel> Nef_Polyhedron_3;
 
-    Polyhedron P;
-    std::cin >> P;
-    if(P.is_closed()) {
-      Nef_polyhedron N1(P);
-      Nef_polyhedron N2(N1);
-      Aff_transformation_3 aff(CGAL::TRANSLATION, Vector_3(2,2,0,1));
-      N2.transform(aff);
-      N1 += N2;
+    // Construct the two input polyhedra.
+    Polyhedron_3 P;
 
-      if(N1.is_simple()) {
-        N1.convert_to_polyhedron(P);
-        std::cout << P;
+    if (grid1ElementType.isSimplex()) {
+      P.make_tetrahedron(Point_3 (grid1ElementCorners[0][0], grid1ElementCorners[0][1], grid1ElementCorners[0][2]),
+                         Point_3 (grid1ElementCorners[1][0], grid1ElementCorners[1][1], grid1ElementCorners[1][2]),
+                         Point_3 (grid1ElementCorners[2][0], grid1ElementCorners[2][1], grid1ElementCorners[2][2]),
+                         Point_3 (grid1ElementCorners[3][0], grid1ElementCorners[3][1], grid1ElementCorners[3][2]));
+    } if (grid1ElementType.isCube()) {
+
+      makeHexahedron(P, grid1ElementCorners);
+
+    } else
+      DUNE_THROW(Dune::GridError, "Type " << grid1ElementType << " not supported by CGALMerge yet");
+    //std::cout << "P = "; print_polygon (P);
+
+    // Turn polyhedron into a Nef polyhedron
+    Nef_Polyhedron_3 NP(P);
+
+    Polyhedron_3 Q;
+
+    if (grid2ElementType.isSimplex()) {
+      Q.make_tetrahedron(Point_3 (grid2ElementCorners[0][0], grid2ElementCorners[0][1], grid2ElementCorners[0][2]),
+                         Point_3 (grid2ElementCorners[1][0], grid2ElementCorners[1][1], grid2ElementCorners[1][2]),
+                         Point_3 (grid2ElementCorners[2][0], grid2ElementCorners[2][1], grid2ElementCorners[2][2]),
+                         Point_3 (grid2ElementCorners[3][0], grid2ElementCorners[3][1], grid2ElementCorners[3][2]));
+    } if (grid2ElementType.isCube()) {
+
+      makeHexahedron(Q, grid2ElementCorners);
+
+    } else
+      DUNE_THROW(Dune::GridError, "Type " << grid2ElementType << " not supported by CGALMerge yet");
+
+    Nef_Polyhedron_3 NQ(Q);
+    //std::cout << "Q = "; print_polygon (Q);
+
+    //////////////////////////////////////////////////////////
+    // Compute the intersection of P and Q.
+    //////////////////////////////////////////////////////////
+    Nef_Polyhedron_3 intersection = NP * NQ;
+
+    Polyhedron_3 intersectionP;
+    if(intersection.is_simple()) {
+      intersection.convert_to_polyhedron(intersectionP);
+      std::cout << intersectionP;
+    } else
+      std::cerr << "N1 is not a 2-manifold." << std::endl;
+
+    std::cout << "Intersection has " << intersection.number_of_vertices() << " vertices\n";
+
+    //////////////////////////////////////////////////////////////////////
+    //  Triangulate the intersection polyhedron.
+    //  For this we first compute the centroid to have a point that
+    //  is certainly within the intersection.  (this of course presupposes
+    //  that the intersection is convex).  Then we connect the centroid
+    //  to all facets.
+    //////////////////////////////////////////////////////////////////////
+
+    assert(intersectionP.is_closed());
+
+    // If the intersection is a tetrahedron we take a shortcut
+    if (intersectionP.is_tetrahedron(intersectionP.halfedges_begin())) {
+
+      // Make Dune types from CGAL types
+
+      // The following check is there, because we are using CGAL::to_double().
+      // If necessary the code can be generalized somewhat.
+      dune_static_assert((Dune::is_same<T,double>::value), "T must be 'double'");
+
+      Dune::array<Dune::FieldVector<T,dim>, 4> duneVertexPos;
+
+      typename Polyhedron_3::Point_iterator vIt = intersectionP.points_begin();
+
+      for (int i=0; i<4; ++i, ++vIt)
+        for (int j=0; j<3; j++)
+          duneVertexPos[i][j] = CGAL::to_double((*vIt)[j]);
+
+      assert(vIt==intersectionP.points_end());
+
+      // ///////////////////////////////////////////////////
+      // Output the tetrahedron
+      // ///////////////////////////////////////////////////
+
+      this->intersections_.push_back(RemoteSimplicialIntersection());
+
+      // Compute local coordinates in the grid1 and grid2 elements
+      for (int i=0; i<4; i++) {
+        this->intersections_.back().grid1Local_[i] = grid1Geometry.local(duneVertexPos[i]);
+        this->intersections_.back().grid2Local_[i] = grid2Geometry.local(duneVertexPos[i]);
       }
-      else
-        std::cerr << "N1 is not a 2-manifold." << std::endl;
+
+      // Set indices
+      this->intersections_.back().grid1Entity_ = grid1Index;
+      this->intersections_.back().grid2Entity_ = grid2Index;
+
+      //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
+
+    } else {
+
+      //////////////////////////////////////////////////////////////////
+      //   Compute the centroid
+      //////////////////////////////////////////////////////////////////
+
+      Dune::FieldVector<T,dim> centroid(0);
+
+      for (typename Polyhedron_3::Point_iterator vIt = intersectionP.points_begin();
+           vIt != intersectionP.points_end();
+           ++vIt) {
+        for (int i=0; i<dim; i++)
+          centroid[i] += CGAL::to_double((*vIt)[i]);
+      }
+
+      //////////////////////////////////////////////////////////////////////////
+      //  Loop over all facets, triangulate the facet and create
+      //  an intersection from each such triangle together with the centroid
+      //////////////////////////////////////////////////////////////////////////
+
+      for (typename Polyhedron_3::Facet_iterator fIt = intersectionP.facets_begin();
+           fIt != intersectionP.facets_end();
+           ++fIt) {
+
+        ////////////////////////////////////////////////////////////
+        // Get the vertices of this facet in circular order
+        ////////////////////////////////////////////////////////////
+        unsigned int nVertices = fIt->facet_degree();
+
+        std::vector<Dune::FieldVector<T,dim> > facetVertices(nVertices);
+
+        typename Polyhedron_3::Facet::Halfedge_around_facet_circulator fVCirc = fIt->facet_begin();
+        assert (fVCirc != 0);          // an empty circulator would be an error
+        int i=0;           // array iterator
+
+        do {
+
+          for (int j=0; j<dim; j++)
+            facetVertices[i][j] = CGAL::to_double(fVCirc->vertex()->point()[j]);
+
+          ++i;
+
+        } while (++fVCirc != fIt->facet_begin());
+
+        /////////////////////////////////////////////////////////////////////////
+        //  Triangulate the facet and enter an intersection for each triangle
+        /////////////////////////////////////////////////////////////////////////
+
+        typename Polyhedron_3::Facet::Halfedge_around_facet_circulator anchor = fIt->facet_begin();
+
+        typename Polyhedron_3::Facet::Halfedge_around_facet_circulator next = anchor;
+        ++next;
+
+        typename Polyhedron_3::Facet::Halfedge_around_facet_circulator nextNext = next;
+        ++nextNext;
+
+        do {
+
+          // Make Dune types from CGAL types
+
+          // The following check is there, because we are using CGAL::to_double().
+          // If necessary the code can be generalized somewhat.
+          dune_static_assert((Dune::is_same<T,double>::value), "T must be 'double'");
+
+          Dune::FieldVector<T,dim> anchorFieldVector;
+          Dune::FieldVector<T,dim> nextFieldVector;
+          Dune::FieldVector<T,dim> nextNextFieldVector;
+
+          for (int i=0; i<dim; i++) {
+            anchorFieldVector[i]   = CGAL::to_double(anchor->vertex()->point()[i]);
+            nextFieldVector[i]     = CGAL::to_double(next->vertex()->point()[i]);
+            nextNextFieldVector[i] = CGAL::to_double(nextNext->vertex()->point()[i]);
+          }
+
+          // ////////////////////////////////////////////////////////////
+          // Output the tetrahedron (anchor, next, nextNext, centroid)
+          // ////////////////////////////////////////////////////////////
+
+          this->intersections_.push_back(RemoteSimplicialIntersection());
+
+          // Compute local coordinates in the grid1 element
+          this->intersections_.back().grid1Local_[0] = grid1Geometry.local(anchorFieldVector);
+          this->intersections_.back().grid1Local_[1] = grid1Geometry.local(nextFieldVector);
+          this->intersections_.back().grid1Local_[2] = grid1Geometry.local(nextNextFieldVector);
+          this->intersections_.back().grid1Local_[3] = grid1Geometry.local(centroid);
+
+          // Compute local coordinates in the grid1 element
+          this->intersections_.back().grid2Local_[0] = grid2Geometry.local(anchorFieldVector);
+          this->intersections_.back().grid2Local_[1] = grid2Geometry.local(nextFieldVector);
+          this->intersections_.back().grid2Local_[2] = grid2Geometry.local(nextNextFieldVector);
+          this->intersections_.back().grid2Local_[3] = grid2Geometry.local(centroid);
+
+          // Set indices
+          this->intersections_.back().grid1Entity_ = grid1Index;
+          this->intersections_.back().grid2Entity_ = grid2Index;
+
+          //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
+
+          // move to the next triangle
+          ++next;
+          ++nextNext;
+
+        } while (nextNext != fIt->facet_begin());
+
+      }
+
     }
 
-#endif
   }
   break;
 #endif
@@ -341,7 +564,7 @@ inline bool CGALMerge<dim, T>::grid2SimplexMatched(unsigned int idx) const
 
 CGAL_INSTANTIATION(1, double);
 CGAL_INSTANTIATION(2, double);
-// CGAL_INSTANTIATION(3, double);
+CGAL_INSTANTIATION(3, double);
 // CGAL_INSTANTIATION(1, float);
 // CGAL_INSTANTIATION(2, float);
 // CGAL_INSTANTIATION(3, float);
