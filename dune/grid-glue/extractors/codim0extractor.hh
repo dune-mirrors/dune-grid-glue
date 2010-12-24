@@ -189,8 +189,6 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
           }
           break;
         }
-        default :
-          DUNE_THROW(Dune::NotImplemented,"flipping for dim>2");
         }
       }
 
