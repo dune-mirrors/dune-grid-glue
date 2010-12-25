@@ -424,6 +424,8 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
           centroid[i] += CGAL::to_double((*vIt)[i]);
       }
 
+      centroid /= intersectionP.size_of_vertices();
+
       //////////////////////////////////////////////////////////////////////////
       //  Loop over all facets, triangulate the facet and create
       //  an intersection from each such triangle together with the centroid
