@@ -85,18 +85,17 @@ public:
     fgrid.open(fngrid.c_str());
     fmerged.open(fnmerged.c_str());
 
-    typedef typename Glue::DomainGridView DomainGridView;
-    typedef typename Glue::DomainGridType DomainGridType;
-    typedef typename DomainGridView::Traits::template Codim<0>::Iterator DomainIter;
-    typedef typename DomainGridView::Traits::template Codim<0>::EntityPointer DomainEPtr;
-    const int domainDim = DomainGridView::dimension;
-    const int domdimw = DomainGridType::dimensionworld;
+    typedef typename Glue::Grid0View Grid0View;
+    typedef typename Grid0View::Traits::template Codim<0>::Iterator DomainIter;
+    typedef typename Grid0View::Traits::template Codim<0>::EntityPointer DomainEPtr;
+    const int domainDim = Grid0View::dimension;
+    const int domdimw = Grid0View::dimensionworld;
 
     std::string domainCoordinatePadding;
     for (int i=domdimw; i<dimw; i++)
       domainCoordinatePadding += " 0";
 
-    const DomainGridView& domgv = glue.domainGridView();
+    const Grid0View& domgv = glue.template gridView<0>();
 
     // remember the entities that have been mapped
     std::list<DomainEPtr> domeptrs(0, (DomainEPtr) domgv.template begin<0>());
@@ -251,18 +250,17 @@ public:
     fgrid.open(fngrid.c_str());
     fmerged.open(fnmerged.c_str());
 
-    typedef typename Glue::TargetGridView TargetGridView;
-    typedef typename Glue::TargetGridType TargetGridType;
-    typedef typename TargetGridView::Traits::template Codim<0>::Iterator TargetIter;
-    typedef typename TargetGridView::Traits::template Codim<0>::EntityPointer TargetEPtr;
-    const int targetDim = TargetGridView::dimension;
-    const int tardimw = TargetGridType::dimensionworld;
+    typedef typename Glue::Grid1View Grid1View;
+    typedef typename Grid1View::Traits::template Codim<0>::Iterator TargetIter;
+    typedef typename Grid1View::Traits::template Codim<0>::EntityPointer TargetEPtr;
+    const int targetDim = Grid1View::dimension;
+    const int tardimw = Grid1View::dimensionworld;
 
     std::string targetCoordinatePadding;
     for (int i=tardimw; i<dimw; i++)
       targetCoordinatePadding += " 0";
 
-    const TargetGridView& targv = glue.targetGridView();
+    const Grid1View& targv = glue.template gridView<1>();
 
     // remember the entities that have been mapped
     std::list<TargetEPtr> tareptrs(0, targv.template begin<0>());
