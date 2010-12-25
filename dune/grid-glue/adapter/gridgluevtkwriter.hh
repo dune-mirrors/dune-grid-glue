@@ -12,8 +12,8 @@
  *
  */
 /**
- * @file GridGlueVtkWriter.hh
- * @brief Class thought to make graphical debugging of couplings easier.
+ * @file
+ * @brief Write all remote intersections to a vtk file for debugging
  */
 
 #ifndef GRIDGLUEVTKWRITER_HH_
