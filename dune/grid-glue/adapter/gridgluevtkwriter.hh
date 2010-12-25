@@ -101,7 +101,7 @@ public:
     // remember the entities that have been mapped
     std::list<DomainEPtr> domeptrs(0, (DomainEPtr) domgv.template begin<0>());
 
-    int overlaps = 0, parents = 0, face_corner_count = 0;
+    int overlaps = 0, face_corner_count = 0;
 
     fgrid << "# vtk DataFile Version 2.0\nFilename: " << fngrid << "\nASCII" << std::endl;
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
@@ -121,8 +121,6 @@ public:
         int size = refElement.size(face, Glue::Grid0Patch::codim, domainDim);
         face_corners.push_back(size);
         face_corner_count += size;
-
-        parents++;
 
         int num_parts = 0;
         for (typename Glue::DomainIntersectionIterator domisit = glue.idomainbegin(*pit, face); domisit != glue.idomainend(); ++domisit)
@@ -171,7 +169,7 @@ public:
     // WRITE POLYGONS
     // ----------------
 
-    fgrid << "POLYGONS " << parents << " " << parents + face_corner_count << std::endl;
+    fgrid << "POLYGONS " << faces.size() << " " << faces.size() + face_corner_count << std::endl;
 
     facecornerit = face_corners.begin();
     face_corner_count = 0;
@@ -218,9 +216,9 @@ public:
 
     // WRITE CELL DATA
     // ---------------
-    ctype accum = 0.0, delta = 1.0 / (ctype) (parents-1);
+    ctype accum = 0.0, delta = 1.0 / (ctype) (faces.size()-1);
 
-    fgrid << "CELL_DATA " << parents << std::endl;
+    fgrid << "CELL_DATA " << faces.size() << std::endl;
     fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
     fgrid << "LOOKUP_TABLE default" << std::endl;
 
@@ -273,7 +271,6 @@ public:
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
 
     // reset some of the variables
-    parents = 0;
     overlaps = 0;
     face_corner_count = 0;
     faces.clear();
@@ -295,8 +292,6 @@ public:
         int size = refElement.size(face, Glue::Grid1Patch::codim, targetDim);
         face_corners.push_back(size);
         face_corner_count += size;
-
-        parents++;
 
         int num_parts = 0;
         for (typename Glue::TargetIntersectionIterator tarisit = glue.itargetbegin(*pit, face); tarisit != glue.itargetend(); ++tarisit)
@@ -345,7 +340,7 @@ public:
     // WRITE POLYGONS
     // ----------------
 
-    fgrid << "POLYGONS " << parents << " " << parents + face_corner_count << std::endl;
+    fgrid << "POLYGONS " << faces.size() << " " << faces.size() + face_corner_count << std::endl;
 
     facecornerit = face_corners.begin();
     face_corner_count = 0;
@@ -392,9 +387,9 @@ public:
     // WRITE CELL DATA
     // ---------------
     accum = 0.0;
-    delta = 1.0 / (ctype) (parents-1);
+    delta = 1.0 / (ctype) (faces.size()-1);
 
-    fgrid << "CELL_DATA " << parents << std::endl;
+    fgrid << "CELL_DATA " << faces.size() << std::endl;
     fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
     fgrid << "LOOKUP_TABLE default" << std::endl;
 
