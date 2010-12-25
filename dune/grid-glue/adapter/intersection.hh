@@ -275,9 +275,7 @@ namespace Dune {
       typedef Dune::FieldVector<ctype, coorddim>   GlobalCoordinate;
     };
 
-    /**
-       @class
-       @brief The intersection of two entites of the two patches of a GridGlue
+    /** @brief The intersection of two entities of the two patches of a GridGlue
      */
     template<typename P0, typename P1, int I, int O>
     class Intersection
