@@ -2,8 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 /**
    @file
-   @autohor Christian Engwer
-   @brief implement
+   @author Christian Engwer
+   @brief Model of the RemoteIntersection concept provided by GridGlue.
+
  *  Filename:    GridGlueRemoteIntersection.hh
  *  Version:     1.0
  *  Created on:  Mar 2, 2009
@@ -13,10 +14,6 @@
  *  Description: Model of the RemoteIntersection concept provided by GridGlue.
  *  subversion:  $Id$
  *
- */
-/**
- * @file GridGlueRemoteIntersection.hh
- * @brief Model of the RemoteIntersection concept provided by GridGlue.
  */
 
 #ifndef DUNE_GRIDGLUE_REMOTEINTERSECTION_HH

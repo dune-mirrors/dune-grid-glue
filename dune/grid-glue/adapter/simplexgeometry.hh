@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file SimplexGeometry.hh
+ * @file
  * @brief contains customized geometry implementations that can be used to
  * describe the mappings between simplex element, their faces and simplicial
  * parts inside those faces

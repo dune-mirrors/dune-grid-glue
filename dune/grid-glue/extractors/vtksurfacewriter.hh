@@ -12,7 +12,7 @@
  *
  */
 /**
- * @file VtkSurfaceWriter.hh
+ * @file
  * @brief helper class for graphical output of grids in generic representation
  */
 
