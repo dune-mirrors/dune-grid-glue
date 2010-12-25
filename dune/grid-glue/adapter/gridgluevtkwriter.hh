@@ -100,7 +100,8 @@ public:
     // remember the entities that have been mapped
     std::list<DomainEPtr> domeptrs(0, (DomainEPtr) domgv.template begin<0>());
 
-    int overlaps = 0, face_corner_count = 0;
+    int face_corner_count = 0;
+    int overlaps = glue.merger()->nSimplices();
 
     fgrid << "# vtk DataFile Version 2.0\nFilename: " << fngrid << "\nASCII" << std::endl;
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
@@ -123,10 +124,7 @@ public:
 
         int num_parts = 0;
         for (typename Glue::DomainIntersectionIterator domisit = glue.idomainbegin(*pit, face); domisit != glue.idomainend(); ++domisit)
-        {
           num_parts++;
-          overlaps++;
-        }
         parts.push_back(num_parts);
 
         face++;                 // move to next face
@@ -269,7 +267,6 @@ public:
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
 
     // reset some of the variables
-    overlaps = 0;
     face_corner_count = 0;
     faces.clear();
     face_corners.clear();
@@ -293,10 +290,7 @@ public:
 
         int num_parts = 0;
         for (typename Glue::TargetIntersectionIterator tarisit = glue.itargetbegin(*pit, face); tarisit != glue.itargetend(); ++tarisit)
-        {
           num_parts++;
-          overlaps++;
-        }
         parts.push_back(num_parts);
 
         face++;                 // move to next face
