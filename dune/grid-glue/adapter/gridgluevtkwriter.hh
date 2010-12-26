@@ -73,7 +73,7 @@ public:
 
     typedef std::list<int> FaceList;
     FaceList faces, parts, face_corners;
-    typename FaceList::iterator faceit, facecornerit;
+    typename FaceList::iterator facecornerit;
 
     std::ofstream fgrid, fmerged;
 
@@ -98,7 +98,15 @@ public:
     const Grid0View& domgv = glue.template gridView<0>();
 
     // remember the entities that have been mapped
+    typedef std::pair<DomainEPtr,int> Grid0SubEntityHandle;
     std::list<DomainEPtr> domeptrs(0, (DomainEPtr) domgv.template begin<0>());
+
+    // Hack:
+    // The 0 entry of the array corresponds to the old 'face_corners' field
+    // The 1 entry of the array corresponds to the old 'num_parts' field
+    typedef std::map<Grid0SubEntityHandle, Dune::array<int,2> > Grid0SubEntityData;
+
+    Grid0SubEntityData grid0SubEntityData;
 
     int face_corner_count = 0;
     int overlaps = glue.merger()->nSimplices();
@@ -109,23 +117,24 @@ public:
     // count the points and the polygons
     for (DomainIter pit = domgv.template begin<0>(); pit != domgv.template end<0>(); ++pit)
     {
-      int face = 0;
-      while ((face = glue.domainEntityNextFace(*pit, face)) != -1)
+      typename Glue::Grid0CellIntersectionIterator face = glue.template ibegin<0>(*pit);
+      while ( face != glue.template iend<0>(*pit) )
       {
-        faces.push_back(face);
-        domeptrs.push_back(pit);
+        // Initialize the entry for this subentity, if we haven't seen it before
+        if (grid0SubEntityData.find(std::make_pair(pit,face->indexInInside()))==grid0SubEntityData.end()) {
+          grid0SubEntityData[std::make_pair(pit,face->indexInInside())][0] = 0;
+          grid0SubEntityData[std::make_pair(pit,face->indexInInside())][1] = 0;
+        }
 
         // count and remember the corners of this subEntity
         const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
           Dune::GenericReferenceElements<ctype, domainDim>::general(pit->type());
-        int size = refElement.size(face, Glue::Grid0Patch::codim, domainDim);
-        face_corners.push_back(size);
+        int size = refElement.size(face->indexInInside(), Glue::Grid0Patch::codim, domainDim);
+        //face_corners.push_back(size);
+        grid0SubEntityData[std::make_pair(pit,face->indexInInside())][0] = size;
         face_corner_count += size;
 
-        int num_parts = 0;
-        for (typename Glue::DomainIntersectionIterator domisit = glue.idomainbegin(*pit, face); domisit != glue.idomainend(); ++domisit)
-          num_parts++;
-        parts.push_back(num_parts);
+        grid0SubEntityData[std::make_pair(pit,face->indexInInside())][1]++;
 
         face++;                 // move to next face
       }
@@ -138,28 +147,34 @@ public:
     fgrid << "DATASET POLYDATA\nPOINTS " << face_corner_count << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
     fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*3 << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
-    faceit = faces.begin();
     facecornerit = face_corners.begin();
-    for (typename std::list<DomainEPtr>::const_iterator pit = domeptrs.begin(); pit != domeptrs.end(); ++pit, ++faceit)
+    for (typename Grid0SubEntityData::const_iterator sEIt = grid0SubEntityData.begin();
+         sEIt != grid0SubEntityData.end();
+         ++sEIt)
     {
 
       const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
-        Dune::GenericReferenceElements<ctype, domainDim>::general((*pit)->type());
+        Dune::GenericReferenceElements<ctype, domainDim>::general(sEIt->first.first->type());
 
       // Write the current subentity into the fgrid file
-      for (int i=0; i<refElement.size(*faceit, Glue::Grid0Patch::codim, domainDim); i++)
-        fgrid << (*pit)->geometry().corner(refElement.subEntity(*faceit, Glue::Grid0Patch::codim, i, domainDim))
+      for (int i=0; i<refElement.size(sEIt->first.second, Glue::Grid0Patch::codim, domainDim); i++)
+        fgrid << sEIt->first.first->geometry().corner(refElement.subEntity(sEIt->first.second, Glue::Grid0Patch::codim, i, domainDim))
               << domainCoordinatePadding
               << std::endl;
 
       // write the remote intersections of the current subentity into the fmerged file
-      for (typename Glue::DomainIntersectionIterator domisit = glue.idomainbegin(**pit, *faceit); domisit != glue.idomainend(); ++domisit)
+      for (typename Glue::Grid0CellIntersectionIterator isIt = glue.template ibegin<0>(*sEIt->first.first);
+           isIt != glue.template iend<0>(*sEIt->first.first);
+           ++isIt)
       {
-        // Later down we assume that all remote intersections are simplices
-        assert(domisit->intersectionDomainGlobal().type().isSimplex());
+        if (isIt->indexInInside() != sEIt->first.second)
+          continue;
 
-        for (int i = 0; i < domisit->intersectionDomainGlobal().corners(); ++i)
-          fmerged << domisit->intersectionDomainGlobal().corner(i) << domainCoordinatePadding << std::endl;
+        // Later down we assume that all remote intersections are simplices
+        assert(isIt->geometry().type().isSimplex());
+
+        for (int i = 0; i < isIt->geometry().corners(); ++i)
+          fmerged << isIt->geometry().corner(i) << domainCoordinatePadding << std::endl;
       }
     }
 
@@ -171,22 +186,22 @@ public:
     facecornerit = face_corners.begin();
     face_corner_count = 0;
 
-    faceit = faces.begin();
     facecornerit = face_corners.begin();
-    for (typename std::list<DomainEPtr>::const_iterator pit = domeptrs.begin();
-         pit != domeptrs.end();
-         ++pit, ++faceit) {
+    for (typename Grid0SubEntityData::const_iterator sEIt = grid0SubEntityData.begin();
+         sEIt != grid0SubEntityData.end();
+         ++sEIt)
+    {
 
       const Dune::GenericReferenceElement<ctype, domainDim>& refElement =
-        Dune::GenericReferenceElements<ctype, domainDim>::general((*pit)->type());
+        Dune::GenericReferenceElements<ctype, domainDim>::general(sEIt->first.first->type());
 
-      int size = refElement.size(*faceit, Glue::Grid0Patch::codim, domainDim);
+      int size = refElement.size(sEIt->first.second, Glue::Grid0Patch::codim, domainDim);
 
       fgrid << size;
 
       // vtk expects the vertices to by cyclically ordered
       // therefore unfortunately we have to deal with several element types on a case-by-case basis
-      if (refElement.type(*faceit,Glue::Grid0Patch::codim).isQuadrilateral()) {
+      if (refElement.type(sEIt->first.second,Glue::Grid0Patch::codim).isQuadrilateral()) {
         fgrid << " " << face_corner_count << " " << face_corner_count+1
               << " " << face_corner_count+3 << " " << face_corner_count+2;
 
@@ -223,12 +238,14 @@ public:
     fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
     fmerged << "LOOKUP_TABLE default" << std::endl;
 
-    for (faceit = parts.begin(); faceit != parts.end(); ++faceit, accum += delta)
+    for (typename Grid0SubEntityData::const_iterator sEIt = grid0SubEntityData.begin();
+         sEIt != grid0SubEntityData.end();
+         ++sEIt, accum += delta)
     {
       // "encode" the parent with one color...
       fgrid << accum << std::endl;
       // ...and mark all of its merged grid parts with the same color
-      for (int j = 0; j < *faceit; ++j)
+      for (int j = 0; j < sEIt->first.second; ++j)
         fmerged << accum << std::endl;
     }
 
@@ -247,6 +264,8 @@ public:
 
     fgrid.open(fngrid.c_str());
     fmerged.open(fnmerged.c_str());
+
+    typename FaceList::iterator faceit;
 
     typedef typename Glue::Grid1View Grid1View;
     typedef typename Grid1View::Traits::template Codim<0>::Iterator TargetIter;
