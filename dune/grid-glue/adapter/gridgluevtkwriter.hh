@@ -249,7 +249,8 @@ class GridGlueVtkWriter
 
     // the merged grid (i.e. the set of remote intersections
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
-    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dim+1) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fmerged << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
+    fmerged << "POINTS " << overlaps*(dim+1) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
          isIt != glue.template iend<side>();
@@ -272,13 +273,24 @@ class GridGlueVtkWriter
       faceCornerCount += faces[i].size();
 
     int domainSimplexCorners = dim-Glue::Grid0Patch::codim+1;
-    fmerged << "POLYGONS " << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
+    fmerged << ((dim==3) ? "CELLS " : "POLYGONS ")
+            << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {
       fmerged << domainSimplexCorners;
       for (int j=0; j<domainSimplexCorners; j++)
         fmerged << " " << domainSimplexCorners*i+j;
       fmerged << std::endl;
+    }
+
+    // 3d VTK files need an extra section specifying the CELL_TYPES aka GeometryTypes
+    if (dim==3) {
+
+      fmerged << "CELL_TYPES " << overlaps << std::endl;
+
+      for (size_t i=0; i<overlaps; i++)
+        fmerged << "10" << std::endl;
+
     }
 
 #if 0
