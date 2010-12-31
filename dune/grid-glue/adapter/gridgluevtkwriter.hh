@@ -106,10 +106,13 @@ class GridGlueVtkWriter
     std::vector<typename Extractor::Coords> coords;
     glue.template patch<side>().getCoords(coords);
 
-    fgrid << "DATASET POLYDATA\nPOINTS " << coords.size() << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fgrid << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
+    fgrid << "POINTS " << coords.size() << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
 
     for (size_t i=0; i<coords.size(); i++)
       fgrid << coords[i] << coordinatePadding << std::endl;
+
+    fgrid << std::endl;
 
     // the merged grid (i.e. the set of remote intersections
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
@@ -135,7 +138,8 @@ class GridGlueVtkWriter
     for (size_t i=0; i<faces.size(); i++)
       faceCornerCount += faces[i].size();
 
-    fgrid << "POLYGONS " << geometryTypes.size() << " " << geometryTypes.size() + faceCornerCount << std::endl;
+    fgrid << ((dim==3) ? "CELLS " : "POLYGONS ")
+          << geometryTypes.size() << " " << geometryTypes.size() + faceCornerCount << std::endl;
 
     for (size_t i=0; i<faces.size(); i++) {
 
@@ -151,6 +155,20 @@ class GridGlueVtkWriter
         fgrid << " " << faces[i][0] << " " << faces[i][1]
               << " " << faces[i][3] << " " << faces[i][2];
 
+      } else if (geometryTypes[i].isPyramid()) {
+        fgrid << " " << faces[i][0] << " " << faces[i][1]
+              << " " << faces[i][3] << " " << faces[i][2] << " " << faces[i][4];
+
+      } else if (geometryTypes[i].isPrism()) {
+        fgrid << " " << faces[i][0] << " " << faces[i][2] << " " << faces[i][1]
+              << " " << faces[i][3] << " " << faces[i][5] << " " << faces[i][4];
+
+      } else if (geometryTypes[i].isHexahedron()) {
+        fgrid << " " << faces[i][0] << " " << faces[i][1]
+              << " " << faces[i][3] << " " << faces[i][2]
+              << " " << faces[i][4] << " " << faces[i][5]
+              << " " << faces[i][7] << " " << faces[i][6];
+
       } else {
         DUNE_THROW(Dune::NotImplemented, "Geometry type " << geometryTypes[i] << " not supported yet");
       }
@@ -159,6 +177,27 @@ class GridGlueVtkWriter
     }
 
     fgrid << std::endl;
+
+    // 3d VTK files need an extra section specifying the CELL_TYPES aka GeometryTypes
+    if (dim==3) {
+
+      fgrid << "CELL_TYPES " << geometryTypes.size() << std::endl;
+
+      for (size_t i=0; i<geometryTypes.size(); i++) {
+        if (geometryTypes[i].isSimplex())
+          fgrid << "10" << std::endl;
+        else if (geometryTypes[i].isHexahedron())
+          fgrid << "12" << std::endl;
+        else if (geometryTypes[i].isPrism())
+          fgrid << "13" << std::endl;
+        else if (geometryTypes[i].isPyramid())
+          fgrid << "14" << std::endl;
+        else
+          DUNE_THROW(Dune::NotImplemented, "Geometry type " << geometryTypes[i] << " not supported yet");
+
+      }
+
+    }
 
     int domainSimplexCorners = dim-Glue::Grid0Patch::codim+1;
     fmerged << "POLYGONS " << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
