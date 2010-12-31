@@ -384,7 +384,6 @@ public:
    * may provide different configuration possibilities this part has to remain
    * implementation specific. Through this getter one can retrieve the internal
    * matcher and configure it before its "build" member is called.
-   * @return a (non-const) reference the object
    */
   const Merger* merger() const
   {
