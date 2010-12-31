@@ -67,14 +67,13 @@ class GridGlueVtkWriter
    * \tparam side Write the grid0-side if this is 0, and grid1 if it is 1.
    */
   template <class Glue, int side>
-  static void writeOneSide(const Glue& glue, const std::string& fngrid, const std::string& fnmerged)
+  static void writeExtractedPart(const Glue& glue, const std::string& filename)
   {
     dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
-    std::ofstream fgrid, fmerged;
+    std::ofstream fgrid;
 
-    fgrid.open(fngrid.c_str());
-    fmerged.open(fnmerged.c_str());
+    fgrid.open(filename.c_str());
 
     typedef typename Dune::SelectType<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::Type GridView;
     typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
@@ -98,7 +97,7 @@ class GridGlueVtkWriter
 
     int overlaps = glue.merger()->nSimplices();
 
-    fgrid << "# vtk DataFile Version 2.0\nFilename: " << fngrid << "\nASCII" << std::endl;
+    fgrid << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
 
     // WRITE POINTS
     // ----------------
@@ -113,18 +112,6 @@ class GridGlueVtkWriter
       fgrid << coords[i] << coordinatePadding << std::endl;
 
     fgrid << std::endl;
-
-    // the merged grid (i.e. the set of remote intersections
-    fmerged << "# vtk DataFile Version 2.0\nFilename: " << fnmerged << "\nASCII" << std::endl;
-    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dim+1) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
-
-    for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
-         isIt != glue.template iend<side>();
-         ++isIt)
-    {
-      for (int i = 0; i < isIt->geometry().corners(); ++i)
-        fmerged << isIt->geometry().corner(i) << coordinatePadding << std::endl;
-    }
 
     // WRITE POLYGONS
     // ----------------
@@ -199,6 +186,91 @@ class GridGlueVtkWriter
 
     }
 
+#if 0
+    // WRITE CELL DATA
+    // ---------------
+    ctype accum = 0.0, delta = 1.0 / (ctype) (gridSubEntityData.size()-1);
+
+    fgrid << "CELL_DATA " << gridSubEntityData.size() << std::endl;
+    fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+    fgrid << "LOOKUP_TABLE default" << std::endl;
+
+    for (typename GridSubEntityData::const_iterator sEIt = gridSubEntityData.begin();
+         sEIt != gridSubEntityData.end();
+         ++sEIt, accum += delta)
+    {
+      // "encode" the parent with one color...
+      fgrid << accum << std::endl;
+    }
+#endif
+    fgrid.close();
+  }
+
+
+  /** \brief Write either the grid0 or the grid1-side into streams
+   * \tparam side Write the grid0-side if this is 0, and grid1 if it is 1.
+   */
+  template <class Glue, int side>
+  static void writeIntersections(const Glue& glue, const std::string& filename)
+  {
+    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+
+    std::ofstream fmerged;
+
+    fmerged.open(filename.c_str());
+
+    typedef typename Dune::SelectType<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::Type GridView;
+    typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
+    typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
+    typedef typename Dune::SelectType<(side==0),
+        typename Glue::Grid0IntersectionIterator,
+        typename Glue::Grid1IntersectionIterator>::Type RemoteIntersectionIterator;
+
+    typedef typename GridView::ctype ctype;
+
+    const int dim = GridView::dimension;
+    const int dimw = Glue::dimworld;
+    const int domdimw = GridView::dimensionworld;
+
+    // coordinates have to be in R^3 in the VTK format
+    std::string coordinatePadding;
+    for (int i=domdimw; i<3; i++)
+      coordinatePadding += " 0";
+
+    const GridView& gridView = glue.template gridView<side>();
+
+    int overlaps = glue.merger()->nSimplices();
+
+    // WRITE POINTS
+    // ----------------
+    typedef typename Glue::Grid0Patch Extractor;
+    std::vector<typename Extractor::Coords> coords;
+    glue.template patch<side>().getCoords(coords);
+
+    // the merged grid (i.e. the set of remote intersections
+    fmerged << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
+    fmerged << "DATASET POLYDATA\nPOINTS " << overlaps*(dim+1) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+
+    for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
+         isIt != glue.template iend<side>();
+         ++isIt)
+    {
+      for (int i = 0; i < isIt->geometry().corners(); ++i)
+        fmerged << isIt->geometry().corner(i) << coordinatePadding << std::endl;
+    }
+
+    // WRITE POLYGONS
+    // ----------------
+
+    std::vector<typename Extractor::VertexVector> faces;
+    std::vector<Dune::GeometryType> geometryTypes;
+    glue.template patch<side>().getFaces(faces);
+    glue.template patch<side>().getGeometryTypes(geometryTypes);
+
+    unsigned int faceCornerCount = 0;
+    for (size_t i=0; i<faces.size(); i++)
+      faceCornerCount += faces[i].size();
+
     int domainSimplexCorners = dim-Glue::Grid0Patch::codim+1;
     fmerged << "POLYGONS " << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
 
@@ -214,10 +286,6 @@ class GridGlueVtkWriter
     // ---------------
     ctype accum = 0.0, delta = 1.0 / (ctype) (gridSubEntityData.size()-1);
 
-    fgrid << "CELL_DATA " << gridSubEntityData.size() << std::endl;
-    fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
-    fgrid << "LOOKUP_TABLE default" << std::endl;
-
     fmerged << "CELL_DATA " << overlaps << std::endl;
     fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
     fmerged << "LOOKUP_TABLE default" << std::endl;
@@ -226,14 +294,11 @@ class GridGlueVtkWriter
          sEIt != gridSubEntityData.end();
          ++sEIt, accum += delta)
     {
-      // "encode" the parent with one color...
-      fgrid << accum << std::endl;
       // ...and mark all of its merged grid parts with the same color
       for (int j = 0; j < sEIt->first.second; ++j)
         fmerged << accum << std::endl;
     }
 #endif
-    fgrid.close();
     fmerged.close();
   }
 
@@ -243,14 +308,18 @@ public:
   {
 
     // Write extracted grid and remote intersection on the grid0-side
-    writeOneSide<Glue,0>(glue,
-                         filenameTrunk + "-domain.vtk",
-                         filenameTrunk + "-intersections-domain.vtk");
+    writeExtractedPart<Glue,0>(glue,
+                               filenameTrunk + "-domain.vtk");
+
+    writeIntersections<Glue,0>(glue,
+                               filenameTrunk + "-intersections-domain.vtk");
 
     // Write extracted grid and remote intersection on the grid1-side
-    writeOneSide<Glue,1>(glue,
-                         filenameTrunk + "-target.vtk",
-                         filenameTrunk + "-intersections-target.vtk");
+    writeExtractedPart<Glue,1>(glue,
+                               filenameTrunk + "-target.vtk");
+
+    writeIntersections<Glue,1>(glue,
+                               filenameTrunk + "-intersections-target.vtk");
 
   }
 
