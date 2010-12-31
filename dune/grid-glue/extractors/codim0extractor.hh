@@ -169,21 +169,18 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
           if ( positiveNormalDirection_ != elementNormalDirection )
           {
             std::cout << "swap\n";
-            switch (elit->type().basicType())
+            if (elit->type().isCube())
             {
-            case Dune::GeometryType::cube :
               for (int i = 0; i < (1<<dim); i+=2)
               {
                 // swap i and i+1
                 std::swap(vertex_indices[i], vertex_indices[i+1]);
                 std::swap(vertex_numbers[i], vertex_numbers[i+1]);
               }
-              break;
-            case Dune::GeometryType::simplex :
+            } else if (elit->type().isSimplex()) {
               std::swap(vertex_indices[0], vertex_indices[1]);
               std::swap(vertex_numbers[0], vertex_numbers[1]);
-              break;
-            default :
+            } else {
               DUNE_THROW(Dune::Exception, "Unexpected Geometrytype");
             }
           }
