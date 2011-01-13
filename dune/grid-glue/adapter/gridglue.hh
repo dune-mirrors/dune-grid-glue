@@ -292,7 +292,10 @@ protected:
     intersections_.resize(merger_->nSimplices() + 1);
     for (unsigned int i = 0; i < merger_->nSimplices(); ++i)
     {
-      IntersectionData data(*this, i);
+      // currently we only support local merging!
+      bool g0local = true;
+      bool g1local = true;
+      IntersectionData data(*this, i, g0local, g1local);
       intersections_[i] = data;
     }
 

@@ -56,8 +56,11 @@ namespace Dune {
       typedef SimplexGeometry<mydim, GridGlue::Grid1View::dimensionworld, typename GridGlue::Grid1View::Grid>
       Grid1Geometry;
 
-      /** \brief Constructor the n'th AbsoluteIntersection of a given GridGlue */
-      IntersectionData(const GridGlue& glue, unsigned int mergeindex);
+      typedef typename GridGlue::Grid0View::IndexSet::IndexType Grid0IndexType;
+      typedef typename GridGlue::Grid1View::IndexSet::IndexType Grid1IndexType;
+
+      /** \brief Constructor the n'th IntersectionData of a given GridGlue */
+      IntersectionData(const GridGlue& glue, unsigned int mergeindex, bool grid0local, bool grid1local);
 
       /** \brief Default Constructor */
       IntersectionData() {}
@@ -66,6 +69,11 @@ namespace Dune {
 
       /// @brief index of this intersection after GridGlue interface
       IndexType index_;
+
+      bool grid0local_;              //!< true if the associated grid0 entity is local
+      Grid0IndexType grid0index_;    //!< index of the associated local grid0 entity
+      bool grid1local_;              //!< true if the associated grid1 entity is local
+      Grid0IndexType grid1index_;    //!< index of the associated local grid1 entity
 
       Grid0LocalGeometry grid0localgeom_;
       Grid0Geometry grid0geom_;
@@ -76,8 +84,13 @@ namespace Dune {
 
     //! \todo move this functionality to GridGlue
     template<typename P0, typename P1>
-    IntersectionData<P0, P1>::IntersectionData(const GridGlue& glue, unsigned int mergeindex)
-      : index_(mergeindex)
+    IntersectionData<P0, P1>::IntersectionData(const GridGlue& glue, unsigned int mergeindex,
+                                               bool grid0local, bool grid1local)
+      : index_(mergeindex),
+        grid0local_(grid0local),
+        grid0index_(0),
+        grid1local_(grid1local),
+        grid1index_(0)
     {
       typedef typename GridGlue::ctype ctype;
       typedef Dune::FieldVector<ctype, mydim>      LocalCoordinate;
@@ -107,8 +120,7 @@ namespace Dune {
         Dune::array<Dune::FieldVector<ctype, GridGlue::Grid0View::dimensionworld>, nSimplexCorners> corners_global;
 
         unsigned int domainIndex = glue.merger_->template parent<0>(mergeindex);
-        unsigned int unused;
-        if (glue.template patch<0>().contains(domainIndex, unused))
+        if (grid0local)
         {
           typename GridGlue::Grid0Patch::Geometry
           domainWorldGeometry = glue.template patch<0>().geometry(domainIndex);
@@ -128,6 +140,7 @@ namespace Dune {
 #endif
           grid0localgeom_.setup(type, corners_element_local);
           grid0geom_.setup(type, corners_global);
+          grid0index_ = glue.merger_->template parent<0>(index_);
         }
       }
 
@@ -152,7 +165,7 @@ namespace Dune {
 
         unsigned int targetIndex = glue.merger_->template parent<1>(mergeindex);
         unsigned int unused;
-        if (glue.template patch<1>().contains(targetIndex, unused))
+        if (grid1local)
         {
           typename GridGlue::Grid1Patch::Geometry
           targetWorldGeometry = glue.template patch<1>().geometry(targetIndex);
@@ -172,6 +185,7 @@ namespace Dune {
 #endif
           grid1localgeom_.setup(type, corners_element_local);
           grid1geom_.setup(type, corners_global);
+          grid1index_ = glue.merger_->template parent<1>(index_);
         }
       }
     }
@@ -188,6 +202,7 @@ namespace Dune {
     {
       typedef const typename IntersectionData<P0,P1>::Grid0LocalGeometry LocalGeometry;
       typedef const typename IntersectionData<P0,P1>::Grid0Geometry Geometry;
+      typedef const typename IntersectionData<P0,P1>::Grid0IndexType IndexType;
       static LocalGeometry& localGeometry(const IntersectionData<P0,P1> & i)
       {
         return i.grid0localgeom_;
@@ -196,6 +211,14 @@ namespace Dune {
       {
         return i.grid0geom_;
       }
+      static bool local(const IntersectionData<P0,P1> & i)
+      {
+        return i.grid0local_;
+      }
+      static IndexType index(const IntersectionData<P0,P1> & i)
+      {
+        return i.grid0index_;
+      }
     };
 
     template<typename P0, typename P1>
@@ -203,6 +226,7 @@ namespace Dune {
     {
       typedef const typename IntersectionData<P0,P1>::Grid1LocalGeometry LocalGeometry;
       typedef const typename IntersectionData<P0,P1>::Grid1Geometry Geometry;
+      typedef const typename IntersectionData<P0,P1>::Grid1IndexType IndexType;
       static LocalGeometry& localGeometry(const IntersectionData<P0,P1> & i)
       {
         return i.grid1localgeom_;
@@ -210,6 +234,14 @@ namespace Dune {
       static Geometry& geometry(const IntersectionData<P0,P1> & i)
       {
         return i.grid1geom_;
+      }
+      static IndexType local(const IntersectionData<P0,P1> & i)
+      {
+        return i.grid1local_;
+      }
+      static IndexType index(const IntersectionData<P0,P1> & i)
+      {
+        return i.grid1index_;
       }
     };
 
@@ -259,6 +291,8 @@ namespace Dune {
       typedef const typename IntersectionData::Grid0LocalGeometry OutsideLocalGeometry;
       typedef const typename IntersectionData::Grid1Geometry Geometry;
       typedef const typename IntersectionData::Grid0Geometry OutsideGeometry;
+      typedef const typename IntersectionData::Grid1IndexType InsideIndexType;
+      typedef const typename IntersectionData::Grid0IndexType OutsideIndexType;
 
       enum {
         coorddim = IntersectionData::coorddim,
@@ -331,13 +365,17 @@ namespace Dune {
               That is the Entity where we started this. */
       InsideEntityPointer inside() const
       {
-        return glue_->template patch<I>().element(glue_->merger_->template parent<I>(i_->index_));
+        assert(self());
+        return glue_->template patch<I>().element(
+                 IntersectionDataView<P0,P1,I>::index(*i_));
       }
 
       /** \brief return EntityPointer to the Entity on the outside of this intersection. That is the neighboring Entity. */
       OutsideEntityPointer outside() const
       {
-        return glue_->template patch<O>().element(glue_->merger_->template parent<O>(i_->index_));
+        assert(neighbor());
+        return glue_->template patch<O>().element(
+                 IntersectionDataView<P0,P1,O>::index(*i_));
       }
 
       /** \brief Return true if intersection is conforming */
@@ -404,27 +442,29 @@ namespace Dune {
       /** \brief return true if inside() entity exists locally */
       bool self() const
       {
-        unsigned int localindex;
-        return glue_->template patch<I>().contains(glue_->merger_->template parent<I>(i_->index_), localindex);
+        return IntersectionDataView<P0,P1,I>::local(*i_);
       }
 
       /** \brief return true if outside() entity exists locally */
       bool neighbor() const
       {
-        unsigned int localindex;
-        return glue_->template patch<O>().contains(glue_->merger_->template parent<O>(i_->index_), localindex);
+        return IntersectionDataView<P0,P1,O>::local(*i_);
       }
 
       /** \brief Local number of codim 1 entity in the inside() Entity where intersection is contained in. */
       int indexInInside() const
       {
-        return glue_->template patch<I>().indexInInside(glue_->merger_->template parent<I>(i_->index_));
+        assert(self());
+        return glue_->template patch<I>().indexInInside(
+                 IntersectionDataView<P0,P1,I>::index(*i_));
       }
 
       /** \brief Local number of codim 1 entity in outside() Entity where intersection is contained in. */
       int indexInOutside() const
       {
-        return glue_->template patch<O>().indexInInside(glue_->merger_->template parent<O>(i_->index_));
+        assert(neighbor());
+        return glue_->template patch<O>().indexInInside(
+                 IntersectionDataView<P0,P1,O>::index(*i_));
       }
 
       /** \brief Return an outer normal (length not necessarily 1) */

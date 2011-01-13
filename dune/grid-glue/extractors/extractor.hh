@@ -348,15 +348,15 @@ public:
     return index < subEntities_.size() ? subEntities_[index].num_in_parent : -1;
   }
 
-  /**
-   * @brief tests that a given entry in the extraction set does have local couplings
-   * @todo parallel interface
-   */
-  bool contains (unsigned int global, unsigned int & local) const
-  {
-    local = global;
-    return true;
-  }
+  // /**
+  //  * @brief tests that a given entry in the extraction set does have local couplings
+  //  * @todo parallel interface
+  //  */
+  // bool contains (unsigned int global, unsigned int & local) const
+  // {
+  //     local = global;
+  //     return true;
+  // }
 
   /**
    * @brief give access to the Dune::GridView where this Patch belongs to
