@@ -2,6 +2,6 @@
 
 commondir = $(includedir)/dune/grid-glue/common
 
-common_HEADERS = box.hh multidimoctree.hh orientedsubface.hh
+common_HEADERS = orientedsubface.hh
 
 include $(top_srcdir)/am/global-rules
