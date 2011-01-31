@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
 
+#include "intersection.hh"
+
 template<typename P0, typename P1>
 #if HAVE_MPI
 GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger* merger, MPI_Comm m)
@@ -144,8 +146,7 @@ GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::G
 #ifndef NDEBUG
   for (unsigned int j = 0; j < indices.size(); j++)
   {
-    int is = intersections_[indices[j]].index_;
-    int idx = merger_->template parent<P>(is);
+    int idx = Dune::GridGlue::IntersectionDataView<P0,P1,P>::index(intersections_[indices[j]]);
     typedef typename GridGlueView<P0,P1,P>::Patch::GridView::template Codim<0>::EntityPointer EPtr;
     assert(idx >= p_first);
     assert(idx < p_first+p_cnt);

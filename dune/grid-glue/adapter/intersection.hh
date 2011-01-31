@@ -73,7 +73,7 @@ namespace Dune {
       bool grid0local_;              //!< true if the associated grid0 entity is local
       Grid0IndexType grid0index_;    //!< index of the associated local grid0 entity
       bool grid1local_;              //!< true if the associated grid1 entity is local
-      Grid0IndexType grid1index_;    //!< index of the associated local grid1 entity
+      Grid1IndexType grid1index_;    //!< index of the associated local grid1 entity
 
       Grid0LocalGeometry grid0localgeom_;
       Grid0Geometry grid0geom_;
@@ -119,13 +119,13 @@ namespace Dune {
         // world coordinates of the remote intersection corners
         Dune::array<Dune::FieldVector<ctype, GridGlue::Grid0View::dimensionworld>, nSimplexCorners> corners_global;
 
-        unsigned int domainIndex = glue.merger_->template parent<0>(mergeindex);
         if (grid0local)
         {
+          grid0index_ = glue.merger_->template parent<0>(index_);
           typename GridGlue::Grid0Patch::Geometry
-          domainWorldGeometry = glue.template patch<0>().geometry(domainIndex);
+          domainWorldGeometry = glue.template patch<0>().geometry(grid0index_);
           typename GridGlue::Grid0Patch::LocalGeometry
-          domainLocalGeometry = glue.template patch<0>().geometryLocal(domainIndex);
+          domainLocalGeometry = glue.template patch<0>().geometryLocal(grid0index_);
 
           for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
             corners_element_local[i] = domainLocalGeometry.global(corners_subEntity_local[i]);
@@ -140,7 +140,6 @@ namespace Dune {
 #endif
           grid0localgeom_.setup(type, corners_element_local);
           grid0geom_.setup(type, corners_global);
-          grid0index_ = glue.merger_->template parent<0>(index_);
         }
       }
 
@@ -163,13 +162,13 @@ namespace Dune {
         // world coordinates of the remote intersection corners
         Dune::array<Dune::FieldVector<ctype, GridGlue::Grid1View::dimensionworld>, nSimplexCorners> corners_global;
 
-        unsigned int targetIndex = glue.merger_->template parent<1>(mergeindex);
         if (grid1local)
         {
+          grid1index_ = glue.merger_->template parent<1>(index_);
           typename GridGlue::Grid1Patch::Geometry
-          targetWorldGeometry = glue.template patch<1>().geometry(targetIndex);
+          targetWorldGeometry = glue.template patch<1>().geometry(grid1index_);
           typename GridGlue::Grid1Patch::LocalGeometry
-          targetLocalGeometry = glue.template patch<1>().geometryLocal(targetIndex);
+          targetLocalGeometry = glue.template patch<1>().geometryLocal(grid1index_);
 
           for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
             corners_element_local[i] = targetLocalGeometry.global(corners_subEntity_local[i]);
@@ -184,7 +183,6 @@ namespace Dune {
 #endif
           grid1localgeom_.setup(type, corners_element_local);
           grid1geom_.setup(type, corners_global);
-          grid1index_ = glue.merger_->template parent<1>(index_);
         }
       }
     }

@@ -379,20 +379,6 @@ public:
   }
 
 
-  /**
-   * @brief getter for the surface matcher utility
-   *
-   * This grants access to the surface merger. This Merger class has to be a model
-   * of the SurfaceMergeConcept, but since different implementations of matchers
-   * may provide different configuration possibilities this part has to remain
-   * implementation specific. Through this getter one can retrieve the internal
-   * matcher and configure it before its "build" member is called.
-   */
-  const Merger* merger() const
-  {
-    return merger_;
-  }
-
   /*   F U N C T I O N A L I T Y   */
 
   void build();
