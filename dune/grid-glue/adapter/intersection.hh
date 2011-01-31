@@ -164,7 +164,6 @@ namespace Dune {
         Dune::array<Dune::FieldVector<ctype, GridGlue::Grid1View::dimensionworld>, nSimplexCorners> corners_global;
 
         unsigned int targetIndex = glue.merger_->template parent<1>(mergeindex);
-        unsigned int unused;
         if (grid1local)
         {
           typename GridGlue::Grid1Patch::Geometry
@@ -476,7 +475,6 @@ namespace Dune {
       /** \brief Return a unit outer normal of the target intersection */
       GlobalCoordinate unitOuterNormal(const Dune::FieldVector<ctype, mydim> &local) const
       {
-        #warning isn't this provided by geometry?'
         Dune::FieldVector<ctype, coorddim> normal = outerNormal(local);
         normal /= normal.two_norm();
         return normal;
@@ -485,13 +483,11 @@ namespace Dune {
       /** \brief Return an outer normal (length not necessarily 1) */
       GlobalCoordinate integrationOuterNormal(const Dune::FieldVector<ctype, mydim> &local) const
       {
-        #warning isn't this provided by geometry?'
         return (unitOuterNormal(local) *= geometry().integrationElement(local));
       }
 
       GlobalCoordinate centerUnitOuterNormal () const
       {
-        #warning isn't this provided by geometry?'
         assert(("Not Implemented", false));
       }
 
