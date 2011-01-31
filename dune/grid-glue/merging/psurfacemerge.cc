@@ -90,8 +90,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
   }
 
-  this->domi_.resize(numDomainSimplices);
-  this->tari_.resize(numTargetSimplices);
+  domi_.resize(numDomainSimplices);
+  tari_.resize(numTargetSimplices);
 
   // copy and split the domain surface
   Dune::BitSetVector<1> domainIsSecondTriangle(numDomainSimplices, false);
@@ -174,23 +174,23 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   // ////////////////////////////////////////////////////////////
   //   copy the coordinates to internal arrays of coordinates
   // ////////////////////////////////////////////////////////////
-  this->domc_.resize(domain_coords.size());
-  for (size_t i = 0; i < this->domc_.size(); ++i)
+  domc_.resize(domain_coords.size());
+  for (size_t i = 0; i < domc_.size(); ++i)
     for (size_t j = 0; j < dimworld; ++j)
-      this->domc_[i][j] = domain_coords[i][j];
+      domc_[i][j] = domain_coords[i][j];
 
-  this->tarc_.resize(target_coords.size());
-  for (size_t i = 0; i < this->tarc_.size(); ++i)
+  tarc_.resize(target_coords.size());
+  for (size_t i = 0; i < tarc_.size(); ++i)
     for (size_t j = 0; j < dimworld; ++j)
-      this->tarc_[i][j] = target_coords[i][j];
+      tarc_[i][j] = target_coords[i][j];
 
   // psurface doesn't actually support the case dim==dimworld.  Therefore we
   // use a trick: we just embed everything in a space of dimension dimworld+1
   if (dim==dimworld) {
-    for (size_t i = 0; i < this->domc_.size(); ++i)
+    for (size_t i = 0; i < domc_.size(); ++i)
       domc_[i][dim] = 0;
 
-    for (size_t i = 0; i < this->domc_.size(); ++i)
+    for (size_t i = 0; i < domc_.size(); ++i)
       tarc_[i][dim] = 1;
   }
 
@@ -202,13 +202,13 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
     ConstantDirection<-1> negativeDirection;
 
     // compute the merged grid using the psurface library
-    this->cm_.build(domc_, domi_,tarc_, tari_,
-                    &positiveDirection, &negativeDirection);
+    cm_.build(domc_, domi_,tarc_, tari_,
+              &positiveDirection, &negativeDirection);
   } else {
 
     // compute the merged grid using the psurface library
-    this->cm_.build(domc_, domi_,tarc_, tari_,
-                    domainDirections_, targetDirections_);
+    cm_.build(domc_, domi_,tarc_, tari_,
+              domainDirections_, targetDirections_);
 
   }
 
@@ -216,7 +216,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
   // get the representation from the contact mapping object
   std::vector<IntersectionPrimitive<dim,ctype> > overlaps;
-  this->cm_.getOverlaps(overlaps);
+  cm_.getOverlaps(overlaps);
 
   // /////////////////////////////////////////////////////////////////////////////
   //  If overlaps refer to triangular elements that have been created
@@ -299,6 +299,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
   this->olm_.setOverlaps(overlaps);
 
+  valid = true;
 }
 
 
@@ -411,6 +412,8 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 template<int dim, int dimworld, typename T>
 void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<dim,ctype> >& unordered)
 {
+  this->domOrder.clear();
+  this->tarOrder.clear();
   this->domOrder.resize(unordered.size());
   this->tarOrder.resize(unordered.size(), NULL);
 

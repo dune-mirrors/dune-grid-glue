@@ -65,6 +65,10 @@ public:
 
 protected:
 
+  bool valid;
+
+  StandardMerge() : valid(false) {}
+
   struct RemoteSimplicialIntersection
   {
     // Local coordinates in the grid1 entity
@@ -144,7 +148,28 @@ public:
   /// The indices are then in 0..nSimplices()-1
   unsigned int nSimplices() const;
 
+  void clear()
+  {
+    // Delete old internal data, from a possible previous run
+    purge(intersections_);
+    purge(grid1ElementCorners_);
+    purge(grid2ElementCorners_);
+    purge(elementsPerVertex0_);
+    purge(elementsPerVertex1_);
+
+    valid = false;
+  }
+
 private:
+
+  /** clear arbitrary containers */
+  template<typename V>
+  static void purge(V & v)
+  {
+    v.clear();
+    V v2(v);
+    v.swap(v2);
+  }
 
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
 
@@ -255,12 +280,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
   std::cout << "StandardMerge building merged grid..." << std::endl;
 
-  // Delete old internal data, from a possible previous run
-  intersections_.clear();
-  grid1ElementCorners_.clear();
-  grid2ElementCorners_.clear();
-  elementsPerVertex0_.clear();
-  elementsPerVertex1_.clear();
+  clear();
 
   // /////////////////////////////////////////////////////////////////////
   //   Copy element corners into a data structure with block-structure.
@@ -490,8 +510,9 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
     }
 
-
   }
+
+  valid = true;
 
 }
 
@@ -499,12 +520,14 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::nSimplices() const
 {
+  assert(valid);
   return intersections_.size();
 }
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parent(unsigned int idx) const
 {
+  assert(valid);
   return intersections_[idx].grid1Entity_;
 }
 
@@ -512,13 +535,16 @@ inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parent(uns
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2Parent(unsigned int idx) const
 {
+  assert(valid);
   return intersections_[idx].grid2Entity_;
 }
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
-  // WARNING: stupid linear algorithm!
+  assert(valid);
+
+#warning stupid linear algorithm!
   indices.resize(0);
 
   for (size_t i=0; i<intersections_.size(); i++)
@@ -532,7 +558,9 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1SimplexRefined(unsigned i
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
 {
-  // WARNING: stupid linear algorithm!
+  assert(valid);
+
+#warning stupid linear algorithm!
   indices.resize(0);
 
   for (size_t i=0; i<intersections_.size(); i++)
@@ -546,6 +574,7 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2SimplexRefined(unsigned i
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid1Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
 {
+  assert(valid);
   return intersections_[idx].grid1Local_[corner];
 }
 
@@ -553,6 +582,7 @@ typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid1Coords StandardMerge<
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid2Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
 {
+  assert(valid);
   return intersections_[idx].grid2Local_[corner];
 }
 

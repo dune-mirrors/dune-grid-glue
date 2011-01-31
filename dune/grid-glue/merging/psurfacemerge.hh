@@ -285,6 +285,8 @@ private:
    */
   const DirectionFunction<psurfaceDimworld,ctype>* targetDirections_;
 
+  bool valid;
+
 #endif // if HAVE_PSURFACE
 
 public:
@@ -335,7 +337,26 @@ public:
   /// The indices are then in 0..nSimplices()-1
   unsigned int nSimplices() const;
 
+  void clear()
+  {
+    // Delete old internal data, from a possible previous run
+    purge(domi_);
+    purge(tari_);
+    purge(domc_);
+    purge(domi_);
+
+    valid = false;
+  }
+
 private:
+
+  template<typename V>
+  static void purge(V & v)
+  {
+    v.clear();
+    V v2(v);
+    v.swap(v2);
+  }
 
   /**
    * @brief check if given grid1 simplex could be matched in the merged grid
@@ -424,7 +445,7 @@ private:
 template<int dim, int dimworld, typename T>
 PSurfaceMerge<dim, dimworld, T>::PSurfaceMerge(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
                                                const DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
-  : domainDirections_(domainDirections), targetDirections_(targetDirections)
+  : domainDirections_(domainDirections), targetDirections_(targetDirections), valid(false)
 {}
 
 
@@ -434,12 +455,14 @@ inline void PSurfaceMerge<dim, dimworld, T>::setSurfaceDirections(const Directio
 {
   domainDirections_ = domainDirections;
   targetDirections_ = targetDirections;
+  valid = false;
 }
 
 
 template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
 {
+  assert(valid);
   return this->olm_.nOverlaps();
 }
 
@@ -447,6 +470,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
 template<int dim, int dimworld, typename T>
 inline bool PSurfaceMerge<dim, dimworld, T>::grid1SimplexMatched(unsigned int idx) const
 {
+  assert(valid);
   // if the simplex was matched the result returned by "firstDomainParent" is in the valid range
   return (this->olm_.firstDomainParent(idx) < this->olm_.nOverlaps());
 }
@@ -455,6 +479,7 @@ inline bool PSurfaceMerge<dim, dimworld, T>::grid1SimplexMatched(unsigned int id
 template<int dim, int dimworld, typename T>
 inline bool PSurfaceMerge<dim, dimworld, T>::grid2SimplexMatched(unsigned int idx) const
 {
+  assert(valid);
   // if the simplex was matched the result returned by "firstTargetParent" is in the valid range
   return (this->olm_.firstTargetParent(idx) < this->olm_.nOverlaps());
 }
@@ -463,6 +488,7 @@ inline bool PSurfaceMerge<dim, dimworld, T>::grid2SimplexMatched(unsigned int id
 template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int idx) const
 {
+  assert(valid);
   return this->olm_.domain(idx).tris[0];
 }
 
@@ -470,6 +496,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int id
 template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int idx) const
 {
+  assert(valid);
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!
   return this->olm_.domain(idx).tris[1];
 }

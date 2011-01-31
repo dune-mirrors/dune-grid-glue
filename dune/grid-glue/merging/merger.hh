@@ -147,6 +147,8 @@ public:
    */
   virtual unsigned int nSimplices() const = 0;
 
+  virtual void clear() = 0;
+
   /**
    * @brief check if given grid-n simplex could be matched in the merged grid
    *
