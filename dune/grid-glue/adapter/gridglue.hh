@@ -604,6 +604,11 @@ public:
     return Intersection(*this, i);
   }
 
+  size_t size() const
+  {
+    return intersections_.size();
+  }
+
 };
 
 #include "gridglue.cc"
