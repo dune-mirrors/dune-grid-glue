@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include "config.h"
 
+// #include "stacktrace.hh"
+
 #include <dune/common/mpihelper.hh>
 #include <iostream>
 
@@ -116,8 +118,8 @@ void testMatchingCubeGrids()
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -179,8 +181,8 @@ void testNonMatchingCubeGrids()
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -304,8 +306,8 @@ void testParallelCubeGrids()
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling

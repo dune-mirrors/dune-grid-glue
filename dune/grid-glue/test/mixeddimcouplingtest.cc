@@ -161,8 +161,8 @@ void test1d2dCouplingMatchingDimworld()
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -226,8 +226,8 @@ void test2d1dCouplingMatchingDimworld()
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -302,8 +302,8 @@ void test1d2dCoupling(double slice=0.0)
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -374,8 +374,8 @@ void test2d1dCoupling(double slice=0.0)
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling

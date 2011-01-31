@@ -82,8 +82,8 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -136,8 +136,8 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -190,8 +190,8 @@ void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<do
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
@@ -236,8 +236,8 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
 
   glue.build();
 
-  std::cout << "Gluing successful, " << merger.nSimplices() << " remote intersections found!" << std::endl;
-  assert(merger.nSimplices() > 0);
+  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
+  assert(glue.size() > 0);
 
   // ///////////////////////////////////////////
   //   Test the coupling
