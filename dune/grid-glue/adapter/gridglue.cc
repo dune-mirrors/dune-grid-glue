@@ -70,6 +70,8 @@ void GridGlue<P0, P1>::build()
 
   // the intersections need to be recomputed
   updateIntersections();
+
+  merger_->clear();
 }
 
 
