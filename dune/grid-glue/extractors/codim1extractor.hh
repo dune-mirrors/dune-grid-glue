@@ -50,7 +50,7 @@ public:
   typedef GV GridView;
 
   typedef typename GV::Grid::ctype ctype;
-  typedef Dune::FieldVector<ctype, dimworld>                           Coords;
+  typedef Dune::FieldVector<ctype, dimworld>                       Coords;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
 
@@ -60,7 +60,11 @@ public:
   typedef typename GV::IntersectionIterator IsIter;
 
   // import typedefs from base class
-  typedef typename Codim1Extractor<GV>::SubEntityInfo SubEntityInfo;
+  typedef typename Extractor<GV,1>::SubEntityInfo SubEntityInfo;
+  typedef typename Extractor<GV,1>::ElementInfo ElementInfo;
+  typedef typename Extractor<GV,1>::VertexInfo VertexInfo;
+  typedef typename Extractor<GV,1>::CoordinateInfo CoordinateInfo;
+  typedef typename Extractor<GV,1>::VertexInfoMap VertexInfoMap;
 
 public:
 
@@ -125,6 +129,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
     // iterate over all codim 0 elements on the grid
     for (ElementIter elit = this->gv_.template begin<0>(); elit != this->gv_.template end<0>(); ++elit)
     {
+      ElementPtr eptr(elit);
       Dune::GeometryType gt = elit->type();
 
       // remember the indices of the faces that shall become
@@ -136,7 +141,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
       for (IsIter is = this->gv_.ibegin(*elit); is != this->gv_.iend(*elit); ++is)
       {
         // only look at boundary faces
-        if (is->boundary() && descr.contains(elit, is->indexInInside()))
+        if (is->boundary() && descr.contains(eptr, is->indexInInside()))
           boundary_faces.insert(is->indexInInside());
       }
 
@@ -146,7 +151,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
         eindex = this->cellMapper_.map(*elit);
-        this->elmtInfo_[eindex] = new typename Codim1Extractor<GV>::ElementInfo(simplex_index, elit, 0);
+        this->elmtInfo_[eindex] = new ElementInfo(simplex_index, eptr, 0);
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
@@ -186,11 +191,11 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
-              typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
+              typename VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
               if (vimit == this->vtxInfo_.end())
               {
                 // insert into the map
-                this->vtxInfo_[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, vptr);
+                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
                 // remember the vertex as a corner of the current face in temp_faces
                 temp_faces.back().corners[i].idx = vertex_index;
                 // increase the current index
@@ -232,11 +237,11 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
-              typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
+              typename VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
               if (vimit == this->vtxInfo_.end())
               {
                 // insert into the map
-                this->vtxInfo_[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, vptr);
+                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
                 // remember the vertex as a corner of the current face in temp_faces
                 temp_faces.back().corners[i].idx = vertex_index;
                 // increase the current index
@@ -274,11 +279,11 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
-              typename Codim1Extractor<GV>::VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
+              typename VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
               if (vimit == this->vtxInfo_.end())
               {
                 // insert into the map
-                this->vtxInfo_[vindex] = new typename Codim1Extractor<GV>::VertexInfo(vertex_index, vptr);
+                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
                 // remember this vertex' index
                 vertex_indices[i] = vertex_index;
                 // increase the current index
@@ -338,11 +343,11 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
   // now first write the array with the coordinates...
   this->coords_.resize(this->vtxInfo_.size());
-  typename Codim1Extractor<GV>::VertexInfoMap::const_iterator it1 = this->vtxInfo_.begin();
+  typename VertexInfoMap::const_iterator it1 = this->vtxInfo_.begin();
   for (; it1 != this->vtxInfo_.end(); ++it1)
   {
     // get a pointer to the associated info object
-    typename Codim1Extractor<GV>::CoordinateInfo* current = &this->coords_[it1->second->idx];
+    CoordinateInfo* current = &this->coords_[it1->second->idx];
     // store this coordinates index // NEEDED?
     current->index = it1->second->idx;
     // store the vertex' index for the index2vertex mapping

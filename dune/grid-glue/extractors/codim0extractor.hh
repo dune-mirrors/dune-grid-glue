@@ -40,6 +40,7 @@ public:
   typedef typename Extractor<GV,0>::IndexType IndexType;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
+  typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
 
   static const Dune::PartitionIteratorType PType = Dune::All_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
@@ -94,15 +95,15 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
   // iterate over all codim 0 elements on the grid
   for (ElementIter elit = this->gv_.template begin<0>(); elit != this->gv_.template end<0>(); ++elit)
   {
-
+    ElementPtr eptr(elit);
     IndexType eindex = this->cellMapper_.map(*elit);
 
     // only do sth. if this element is "interesting"
     // implicit cast is done automatically
-    if (descr.contains(elit,0))
+    if (descr.contains(eptr,0))
     {
       // add an entry to the element info map, the index will be set properly later
-      this->elmtInfo_[eindex] = new ElementInfo(element_index, elit, 1);
+      this->elmtInfo_[eindex] = new ElementInfo(element_index, eptr, 1);
 
       int numCorners = elit->template count<dim>();
       unsigned int vertex_indices[numCorners];       // index in global vector
