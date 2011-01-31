@@ -115,7 +115,7 @@ GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::G
 #if HAVE_MPI
   int sz;
   MPI_Comm_size(mpicomm, & sz);
-  assert("It is not clear if the code works in parallel, as we need information from merger_ and patch<P>" && sz == 0);
+  assert("It is not clear if the code works in parallel, as we need information from merger_ and patch<P>" && sz == 1);
 #endif
 
   // first check if the element has at least one extracted subEntity
