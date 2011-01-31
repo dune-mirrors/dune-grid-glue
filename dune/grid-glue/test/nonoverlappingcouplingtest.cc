@@ -2,8 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include "config.h"
 
-// #include "stacktrace.hh"
-
 #include <dune/common/mpihelper.hh>
 #include <iostream>
 
