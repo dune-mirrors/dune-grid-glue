@@ -469,7 +469,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           }
 
           if (seed < 0) {
-            // The fast method didn't find a grid1 element that intersections with
+            // The fast method didn't find a grid1 element that intersects with
             // the new grid2 candidate.  We have to do a brute-force search.
             for (std::size_t i=0; i<grid1_element_types.size(); i++) {
 
