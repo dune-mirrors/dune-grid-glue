@@ -339,6 +339,7 @@ public:
 
   void clear()
   {
+#ifdef HAVE_PSURFACE
     // Delete old internal data, from a possible previous run
     purge(domi_);
     purge(tari_);
@@ -346,6 +347,7 @@ public:
     purge(domi_);
 
     valid = false;
+#endif
   }
 
 private:
@@ -501,7 +503,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int id
   return this->olm_.domain(idx).tris[1];
 }
 
-#endif
+#endif // HAVE_PSURFACE
 
 #ifdef PSURFACE_EXTRA_TYPES
 #define PSURFACE_EXTERN
