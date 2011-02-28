@@ -9,7 +9,7 @@ acx_cgal_found=no
 
 AC_LANG_PUSH([C++])
 
-if test "x$with_cgal" != x ; then
+if test "$with_cgal" != no && test "x$with_cgal" != x ; then
     if ! test -d $with_cgal; then
               AC_MSG_WARN([cgal directory $with_cgal does not exist!])
           else
@@ -23,7 +23,10 @@ if test "x$with_cgal" != x ; then
     fi
 fi
 
-dnl if test "$acx_cgal_found" == no; then
+if test "$with_cgal" != no; then
+
+    AC_MSG_CHECKING(CGAL)
+
 	AC_CHECK_HEADER(CGAL/Exact_predicates_inexact_constructions_kernel.h, cgal_have_header=yes, cgal_have_header=no)
 	if test "$cgal_have_header" == yes; then
 		AC_CHECK_LIB(CGAL, main, cgal_have_lib=yes, cgal_have_lib=no)
@@ -46,7 +49,15 @@ dnl if test "$acx_cgal_found" == no; then
 	if test "$acx_cgal_found" == yes; then 
 		AC_CHECK_LIB(Core, main, [CGAL_LIBS="$CGAL_LIBS -lCore"])
 	fi
-dnl fi
+
+    if test "$acx_cgal_found" == yes; then 
+        AC_MSG_RESULT(yes);
+        $1
+    else
+        AC_MSG_RESULT(no)
+        $2
+    fi
+fi
 
 AC_LANG_POP([C++])
 
@@ -61,14 +72,7 @@ fi
 # Mention in the module summary that cgal has been found
 DUNE_ADD_SUMMARY_ENTRY([cgal],[$acx_cgal_found])
 
-AC_MSG_CHECKING(CGAL)
-if test "$acx_cgal_found" == yes; then 
-	AC_MSG_RESULT(yes);
-	$1
-else
-	AC_MSG_RESULT(no)
-	$2
-fi])
+])
 
 
 dnl CHECK CGAL END
