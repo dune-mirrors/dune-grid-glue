@@ -70,6 +70,12 @@ struct LocalSimplexGeometryTraits
   };
 
   // caching configuration chosen in base class is fine
+
+#define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
+#if DUNE_COMMON_VERSION_NUMBER < 21
+  // The type used for 1d reference elements
+  static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
+#endif
 };
 
 
@@ -112,6 +118,13 @@ struct GlobalSimplexGeometryTraits
   };
 
   // caching configuration chosen in base class is fine
+
+
+#define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
+#if DUNE_COMMON_VERSION_NUMBER < 21
+  // The type used for 1d reference elements
+  static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
+#endif
 };
 
 
