@@ -360,11 +360,11 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
     Polyhedron_3 intersectionP;
     if(intersection.is_simple()) {
       intersection.convert_to_polyhedron(intersectionP);
-      std::cout << intersectionP;
+      //std::cout << intersectionP;
     } else
       std::cerr << "N1 is not a 2-manifold." << std::endl;
 
-    std::cout << "Intersection has " << intersection.number_of_vertices() << " vertices\n";
+    //std::cout << "Intersection has " << intersection.number_of_vertices() << " vertices\n";
 
     //////////////////////////////////////////////////////////////////////
     //  Triangulate the intersection polyhedron.
