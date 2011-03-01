@@ -166,6 +166,8 @@ public:
     purge(grid2ElementCorners_);
 
     valid = false;
+#else
+        #warning out-commented, because we still need all this data to access the intersections
 #endif
   }
 
