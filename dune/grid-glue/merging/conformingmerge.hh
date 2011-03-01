@@ -196,12 +196,12 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
   //   Set up the new remote intersection
   // ////////////////////////////////////////////////////////////
 
+  const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
+
   /** \todo Currently the RemoteIntersections have to be simplices */
   if (grid1ElementType.isSimplex()) {
 
     this->intersections_.push_back(RemoteSimplicialIntersection());
-
-    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
 
     for (int i=0; i<refElement.size(dim); i++) {
       this->intersections_.back().grid1Local_[i] = refElement.position(i,dim);
@@ -214,15 +214,13 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
   } else if (grid1ElementType.isQuadrilateral()) {
 
     // split the quadrilateral into two triangles
-    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
-
     const unsigned int subVertices[2][3] = {{0,1,3}, {0,3,2}};
 
     for (int i=0; i<2; i++) {
 
       RemoteSimplicialIntersection newSimplicialIntersection;
 
-      for (int j=0; j<3; j++) {
+      for (int j=0; j<dim+1; j++) {
         newSimplicialIntersection.grid1Local_[j] = refElement.position(subVertices[i][j],dim);
         newSimplicialIntersection.grid2Local_[j] = refElement.position(subVertices[i][other[j]],dim);
       }
@@ -238,15 +236,13 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
 
     // split the hexahedron into five tetrahedra
     // This can be removed if ever we allow RemoteIntersections that are not simplices
-    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
-
     const unsigned int subVertices[5][4] = {{0,1,3,5}, {0,3,2,6}, {4,5,0,6}, {6,7,6,3}, {6,0,5,3}};
 
     for (int i=0; i<5; i++) {
 
       RemoteSimplicialIntersection newSimplicialIntersection;
 
-      for (int j=0; j<4; j++) {
+      for (int j=0; j<dim+1; j++) {
         newSimplicialIntersection.grid1Local_[j] = refElement.position(subVertices[i][j],dim);
         newSimplicialIntersection.grid2Local_[j] = refElement.position(subVertices[i][other[j]],dim);
       }
