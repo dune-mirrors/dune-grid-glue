@@ -14,6 +14,7 @@
 #include <vector>
 #include <stack>
 #include <set>
+#include <map>
 #include <algorithm>
 
 #include <dune/common/fvector.hh>
@@ -110,6 +111,9 @@ protected:
                        const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
                        const std::vector<Dune::GeometryType>& grid2_element_types);
 
+  void computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_types,
+                                  const std::vector<Dune::GeometryType>& grid2_element_types);
+
   /*   M E M B E R   V A R I A B L E S   */
 
   /** \brief The computed intersections */
@@ -121,6 +125,8 @@ protected:
   std::vector<std::vector<int> > elementsPerVertex0_;
   std::vector<std::vector<int> > elementsPerVertex1_;
 
+  std::vector<std::vector<int> > elementNeighbors1_;
+  std::vector<std::vector<int> > elementNeighbors2_;
 
 public:
 
@@ -305,6 +311,107 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::bruteForceSearch(int candidate1
 }
 
 
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::
+computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_types,
+                           const std::vector<Dune::GeometryType>& grid2_element_types
+                           )
+{
+  typedef std::vector<unsigned int> FaceType;
+  typedef std::map<FaceType, std::pair<unsigned int, unsigned int> > FaceSetType;
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //  First: grid 1
+  ///////////////////////////////////////////////////////////////////////////////////////
+  FaceSetType faces;
+  elementNeighbors1_.resize(grid1_element_types.size());
+
+  for (size_t i=0; i<grid1_element_types.size(); i++)
+    elementNeighbors1_[i].resize(Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1), -1);
+
+  for (size_t i=0; i<grid1_element_types.size(); i++) {
+
+    const Dune::GenericReferenceElement<T,grid1Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
+
+    for (size_t j=0; j<refElement.size(1); j++) {
+
+      FaceType face;
+      // extract element face
+      for (size_t k=0; k<refElement.size(j,1,grid1Dim); k++)
+        face.push_back(grid1ElementCorners_[i][refElement.subEntity(j,1,k,grid1Dim)]);
+
+      // sort the face vertices to get rid of twists and other permutations
+      std::sort(face.begin(), face.end());
+
+      typename FaceSetType::iterator faceHandle = faces.find(face);
+
+      if (faceHandle == faces.end()) {
+
+        // face has not been visited before
+        faces.insert(std::make_pair(face, std::make_pair(i,j)));
+
+      } else {
+
+        // face has been visited before: store the mutual neighbor information
+        elementNeighbors1_[i][j] = faceHandle->second.first;
+        elementNeighbors1_[faceHandle->second.first][faceHandle->second.second] = i;
+
+        faces.erase(faceHandle);
+
+      }
+
+    }
+
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //  Next: grid 2
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  faces.clear();
+  elementNeighbors2_.resize(grid2_element_types.size());
+
+  for (size_t i=0; i<grid2_element_types.size(); i++)
+    elementNeighbors2_[i].resize(Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(1), -1);
+
+  for (size_t i=0; i<grid2_element_types.size(); i++) {
+
+    const Dune::GenericReferenceElement<T,grid2Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid2_element_types[i]);
+
+    for (size_t j=0; j<refElement.size(1); j++) {
+
+      FaceType face;
+      // extract element face
+      for (size_t k=0; k<refElement.size(j,1,grid2Dim); k++)
+        face.push_back(grid2ElementCorners_[i][refElement.subEntity(j,1,k,grid2Dim)]);
+
+      // sort the face vertices to get rid of twists and other permutations
+      std::sort(face.begin(), face.end());
+
+      typename FaceSetType::iterator faceHandle = faces.find(face);
+
+      if (faceHandle == faces.end()) {
+
+        // face has not been visited before
+        faces.insert(std::make_pair(face, std::make_pair(i,j)));
+
+      } else {
+
+        // face has been visited before: store the mutual neighbor information
+        elementNeighbors2_[i][j] = faceHandle->second.first;
+        elementNeighbors2_[faceHandle->second.first][faceHandle->second.second] = i;
+
+        faces.erase(faceHandle);
+
+      }
+
+    }
+
+  }
+
+
+}
+
 // /////////////////////////////////////////////////////////////////////
 //   Compute the intersection of all pairs of elements
 //   Linear algorithm by Gander and Japhet, Proc. of DD18
@@ -381,6 +488,33 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   for (std::size_t i=0; i<grid2_element_types.size(); i++)
     for (std::size_t j=0; j<grid2ElementCorners_[i].size(); j++)
       elementsPerVertex1_[grid2ElementCorners_[i][j]].push_back(i);
+
+  ////////////////////////////////////////////////////////////////////////
+  //  Compute the face neighbors for each element
+  ////////////////////////////////////////////////////////////////////////
+
+  computeNeighborsPerElement(grid1_element_types, grid2_element_types);
+#if 0
+  std::cout << "   --- grid 1 --- " << std::endl;
+  for (int i=0; i<elementNeighbors1_.size(); i++) {
+    std::cout << "neighbors of element " << i << ":   ";
+    for (int j=0; j<elementNeighbors1_[i].size(); j++)
+      std::cout << elementNeighbors1_[i][j] << "  ";
+    std::cout << std::endl;
+  }
+
+  std::cout << "   --- grid 2 --- " << std::endl;
+  for (int i=0; i<elementNeighbors2_.size(); i++) {
+    std::cout << "neighbors of element " << i << ":   ";
+    for (int j=0; j<elementNeighbors2_[i].size(); j++)
+      std::cout << elementNeighbors2_[i][j] << "  ";
+    std::cout << std::endl;
+  }
+#endif
+
+  ////////////////////////////////////////////////////////////////////////
+  //   Data structures for the advancing-front algorithm
+  ////////////////////////////////////////////////////////////////////////
 
   std::stack<unsigned int> candidates0;
   std::stack<std::pair<unsigned int,unsigned int> > candidates1;
