@@ -122,7 +122,6 @@ protected:
   /** \brief Temporary internal data */
   std::vector<std::vector<unsigned int> > grid1ElementCorners_;
   std::vector<std::vector<unsigned int> > grid2ElementCorners_;
-  std::vector<std::vector<int> > elementsPerVertex1_;
 
   std::vector<std::vector<int> > elementNeighbors1_;
   std::vector<std::vector<int> > elementNeighbors2_;
@@ -165,7 +164,6 @@ public:
     purge(intersections_);
     purge(grid1ElementCorners_);
     purge(grid2ElementCorners_);
-    purge(elementsPerVertex1_);
 
     valid = false;
 #endif
@@ -468,18 +466,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
   }
 
-  // /////////////////////////////////////////////////////////////////////
-  //   Set of lists of elements per vertex.  This is needed to find
-  //   neighboring elements later.
-  // /////////////////////////////////////////////////////////////////////
-
-  // then the grid2 side
-  elementsPerVertex1_.resize(grid2Coords.size());
-
-  for (std::size_t i=0; i<grid2_element_types.size(); i++)
-    for (std::size_t j=0; j<grid2ElementCorners_[i].size(); j++)
-      elementsPerVertex1_[grid2ElementCorners_[i][j]].push_back(i);
-
   ////////////////////////////////////////////////////////////////////////
   //  Compute the face neighbors for each element
   ////////////////////////////////////////////////////////////////////////
@@ -589,62 +575,60 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     // candidates.
 
     // get all neighbors of currentCandidate1, but not currentCandidate1 itself
-    for (std::size_t i=0; i<grid2ElementCorners_[currentCandidate1].size(); i++) {
-      unsigned int v = grid2ElementCorners_[currentCandidate1][i];
+    for (size_t i=0; i<elementNeighbors2_[currentCandidate1].size(); i++) {
 
-      // The unhandled neighbors of currentCandidate1 are all possible candidates
-      for (typename std::vector<int>::iterator it = elementsPerVertex1_[v].begin();
-           it != elementsPerVertex1_[v].end(); ++it) {
+      int neighbor = elementNeighbors2_[currentCandidate1][i];
 
-        if (!isHandled1[*it][0] && !isCandidate1[*it][0]) {
+      if (neighbor == -1)
+        continue;
 
-          // Get a seed element for the new grid2 element
-          // Look for an element on the grid1 side that intersects the new grid2 element.
-          // Look only among the ones that have been tested during the last iteration.
-          int seed = -1;
+      if (!isHandled1[neighbor][0] && !isCandidate1[neighbor][0]) {
 
-          for (typename std::set<unsigned int>::iterator seedIt = potentialSeeds.begin();
-               seedIt != potentialSeeds.end(); ++seedIt) {
+        // Get a seed element for the new grid2 element
+        // Look for an element on the grid1 side that intersects the new grid2 element.
+        // Look only among the ones that have been tested during the last iteration.
+        int seed = -1;
 
-            std::size_t oldSize = intersections_.size();
-            bool intersectionFound = testIntersection(*seedIt, *it,
-                                                      grid1Coords,grid1_element_types,
-                                                      grid2Coords,grid2_element_types);
+        for (typename std::set<unsigned int>::iterator seedIt = potentialSeeds.begin();
+             seedIt != potentialSeeds.end(); ++seedIt) {
 
-            if (intersectionFound) {
+          std::size_t oldSize = intersections_.size();
+          bool intersectionFound = testIntersection(*seedIt, neighbor,
+                                                    grid1Coords,grid1_element_types,
+                                                    grid2Coords,grid2_element_types);
 
-              // i is our new seed candidate on the grid1 side
-              seed = *seedIt;
+          if (intersectionFound) {
 
-              while (intersections_.size() > oldSize)
-                intersections_.pop_back();
+            // i is our new seed candidate on the grid1 side
+            seed = *seedIt;
 
-              break;
+            while (intersections_.size() > oldSize)
+              intersections_.pop_back();
 
-            }
+            break;
 
           }
-
-          if (seed < 0) {
-            // The fast method didn't find a grid1 element that intersects with
-            // the new grid2 candidate.  We have to do a brute-force search.
-            seed = bruteForceSearch(*it,
-                                    grid1Coords,grid1_element_types,
-                                    grid2Coords,grid2_element_types);
-
-          }
-
-          // We have tried all we could: the candidate is 'handled' now
-          isCandidate1[*it] = true;
-
-          if (seed < 0)
-            // still no seed?  Then the new grid2 candidate isn't overlapped by anything
-            continue;
-
-          // we have a seed now
-          candidates1.push(std::make_pair(*it,seed));
 
         }
+
+        if (seed < 0) {
+          // The fast method didn't find a grid1 element that intersects with
+          // the new grid2 candidate.  We have to do a brute-force search.
+          seed = bruteForceSearch(neighbor,
+                                  grid1Coords,grid1_element_types,
+                                  grid2Coords,grid2_element_types);
+
+        }
+
+        // We have tried all we could: the candidate is 'handled' now
+        isCandidate1[neighbor] = true;
+
+        if (seed < 0)
+          // still no seed?  Then the new grid2 candidate isn't overlapped by anything
+          continue;
+
+        // we have a seed now
+        candidates1.push(std::make_pair(neighbor,seed));
 
       }
 
