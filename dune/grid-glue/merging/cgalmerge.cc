@@ -127,6 +127,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
                     const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
                     unsigned int grid2Index)
 {
+  this->counter++;
 
   // A few consistency checks
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
@@ -353,6 +354,9 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
     //////////////////////////////////////////////////////////
     Nef_Polyhedron_3 intersection = NP * NQ;
 
+    if (intersection.is_empty())
+      return;
+
     Polyhedron_3 intersectionP;
     if(intersection.is_simple()) {
       intersection.convert_to_polyhedron(intersectionP);
@@ -527,8 +531,6 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
     DUNE_THROW(Dune::NotImplemented, "CGALMerge is not implemented for dim==" << dim << "!");
 
   }
-
-  this->counter++;
 
 }
 
