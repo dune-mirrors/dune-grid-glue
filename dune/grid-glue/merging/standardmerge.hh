@@ -122,7 +122,6 @@ protected:
   /** \brief Temporary internal data */
   std::vector<std::vector<unsigned int> > grid1ElementCorners_;
   std::vector<std::vector<unsigned int> > grid2ElementCorners_;
-  std::vector<std::vector<int> > elementsPerVertex0_;
   std::vector<std::vector<int> > elementsPerVertex1_;
 
   std::vector<std::vector<int> > elementNeighbors1_;
@@ -166,7 +165,6 @@ public:
     purge(intersections_);
     purge(grid1ElementCorners_);
     purge(grid2ElementCorners_);
-    purge(elementsPerVertex0_);
     purge(elementsPerVertex1_);
 
     valid = false;
@@ -475,13 +473,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //   neighboring elements later.
   // /////////////////////////////////////////////////////////////////////
 
-  // first the grid1 side
-  elementsPerVertex0_.resize(grid1Coords.size());
-
-  for (std::size_t i=0; i<grid1ElementCorners_.size(); i++)
-    for (std::size_t j=0; j<grid1ElementCorners_[i].size(); j++)
-      elementsPerVertex0_[grid1ElementCorners_[i][j]].push_back(i);
-
   // then the grid2 side
   elementsPerVertex1_.resize(grid2Coords.size());
 
@@ -575,19 +566,16 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
       if (intersectionFound) {
 
-        // get all neighbors of currentCandidate0, but not currentCandidate0 itself
-        for (std::size_t i=0; i<grid1ElementCorners_[currentCandidate0].size(); i++) {
-          unsigned int v = grid1ElementCorners_[currentCandidate0][i];
+        for (size_t i=0; i<elementNeighbors1_[currentCandidate0].size(); i++) {
 
-          // The neighbors of currentCandidate0 are all possible candidates
-          for (typename std::vector<int>::iterator it = elementsPerVertex0_[v].begin();
-               it != elementsPerVertex0_[v].end(); ++it) {
+          int neighbor = elementNeighbors1_[currentCandidate0][i];
 
-            if (!isHandled0[*it][0] && !isCandidate0[*it][0]) {
-              candidates0.push(*it);
-              isCandidate0[*it] = true;
-            }
+          if (neighbor == -1)
+            continue;
 
+          if (!isHandled0[neighbor][0] && !isCandidate0[neighbor][0]) {
+            candidates0.push(neighbor);
+            isCandidate0[neighbor] = true;
           }
 
         }
