@@ -314,12 +314,12 @@ public:
 
 
   /**
-   * @brief gets index of first face as well as the total number of faces that
+   * @brief gets index of first subentity as well as the total number of subentities that
    * were extracted from this element
-   * @param e the element
-   * @param first will contain the first index if found, else -1
-   * @param count will contain the number of faces if found, else 0
-   * @return success
+   * @param[in] e the element
+   * @param[out] first will contain the index of the first subentity if it exists, else -1
+   * @param[out] count will contain the number of subentities extracted from this element
+   * @return true if at least one subentity was extracted from this element
    */
   bool faceIndices(const Element& e, int& first, int& count) const
   {
