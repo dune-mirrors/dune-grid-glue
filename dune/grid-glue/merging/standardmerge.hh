@@ -104,6 +104,11 @@ protected:
                         const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
                         const std::vector<Dune::GeometryType>& grid2_element_types);
 
+  int bruteForceSearch(int candidate1,
+                       const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
+                       const std::vector<Dune::GeometryType>& grid1_element_types,
+                       const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
+                       const std::vector<Dune::GeometryType>& grid2_element_types);
 
   /*   M E M B E R   V A R I A B L E S   */
 
@@ -265,6 +270,41 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::testIntersection(unsigned int 
 }
 
 
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::bruteForceSearch(int candidate1,
+                                                                  const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
+                                                                  const std::vector<Dune::GeometryType>& grid1_element_types,
+                                                                  const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
+                                                                  const std::vector<Dune::GeometryType>& grid2_element_types)
+{
+  int seed = -1;
+
+  for (std::size_t i=0; i<grid1_element_types.size(); i++) {
+
+    std::size_t oldSize = intersections_.size();
+    bool intersectionFound = testIntersection(i, candidate1,
+                                              grid1Coords,grid1_element_types,
+                                              grid2Coords,grid2_element_types);
+
+    if (intersectionFound) {
+
+      // i is our new seed candidate on the grid1 side
+      seed = i;
+
+      while (intersections_.size()> oldSize)
+        intersections_.pop_back();
+
+      break;
+
+    }
+
+  }
+
+  return seed;
+
+}
+
+
 // /////////////////////////////////////////////////////////////////////
 //   Compute the intersection of all pairs of elements
 //   Linear algorithm by Gander and Japhet, Proc. of DD18
@@ -283,6 +323,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   std::cout << "StandardMerge building merged grid..." << std::endl;
 
   clear();
+  // clear global intersection list
+  intersections_.clear();
 
   // /////////////////////////////////////////////////////////////////////
   //   Copy element corners into a data structure with block-structure.
@@ -347,26 +389,16 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //   to start the advancing-front type algorithm with.
   // /////////////////////////////////////////////////////////////////////
 
-  for (std::size_t i=0; i<grid1_element_types.size(); i++) {
+  for (std::size_t j=0; j<grid2_element_types.size(); j++) {
 
-    for (std::size_t j=0; j<grid2_element_types.size(); j++) {
+    int seed = bruteForceSearch(j,grid1Coords,grid1_element_types,grid2Coords,grid2_element_types);
 
-      if (testIntersection(i,j,grid1Coords,grid1_element_types,grid2Coords,grid2_element_types)) {
-        candidates1.push(std::make_pair(j,i));          // the candidate and a seed for the candidate
-        break;
-      }
-
+    if (seed >=0) {
+      candidates1.push(std::make_pair(j,seed));        // the candidate and a seed for the candidate
+      break;
     }
 
-    // Have we found an intersection?
-    if (intersections_.size() > 0)
-      break;
-
   }
-
-  // clear global intersection list again:  the main algorithm wants to start with
-  // an empty list.
-  intersections_.clear();
 
   // /////////////////////////////////////////////////////////////////////
   //   Main loop
@@ -473,26 +505,9 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           if (seed < 0) {
             // The fast method didn't find a grid1 element that intersects with
             // the new grid2 candidate.  We have to do a brute-force search.
-            for (std::size_t i=0; i<grid1_element_types.size(); i++) {
-
-              std::size_t oldSize = intersections_.size();
-              bool intersectionFound = testIntersection(i, *it,
-                                                        grid1Coords,grid1_element_types,
-                                                        grid2Coords,grid2_element_types);
-
-              if (intersectionFound) {
-
-                // i is our new seed candidate on the grid1 side
-                seed = i;
-
-                while (intersections_.size()> oldSize)
-                  intersections_.pop_back();
-
-                break;
-
-              }
-
-            }
+            seed = bruteForceSearch(*it,
+                                    grid1Coords,grid1_element_types,
+                                    grid2Coords,grid2_element_types);
 
           }
 
