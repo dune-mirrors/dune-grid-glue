@@ -216,37 +216,28 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
     // split the quadrilateral into two triangles
     const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
 
-    // triangle 1
-    RemoteSimplicialIntersection newSimplicialIntersection1;
+    const unsigned int subVertices[2][3] = {{0,1,3}, {0,3,2}};
 
-    for (int i=0; i<3; i++) {
-      newSimplicialIntersection1.grid1Local_[i] = refElement.position(i,dim);
-      newSimplicialIntersection1.grid2Local_[i] = refElement.position(other[i],dim);
+    for (int i=0; i<2; i++) {
+
+      RemoteSimplicialIntersection newSimplicialIntersection;
+
+      for (int j=0; j<3; j++) {
+        newSimplicialIntersection.grid1Local_[j] = refElement.position(subVertices[i][j],dim);
+        newSimplicialIntersection.grid2Local_[j] = refElement.position(subVertices[i][other[j]],dim);
+      }
+
+      newSimplicialIntersection.grid1Entity_ = grid1Index;
+      newSimplicialIntersection.grid2Entity_ = grid2Index;
+
+      this->intersections_.push_back(newSimplicialIntersection);
+
     }
-
-    newSimplicialIntersection1.grid1Entity_ = grid1Index;
-    newSimplicialIntersection1.grid2Entity_ = grid2Index;
-
-    this->intersections_.push_back(newSimplicialIntersection1);
-
-    // triangle 2
-    RemoteSimplicialIntersection newSimplicialIntersection2;
-
-    newSimplicialIntersection2.grid1Local_[0] = refElement.position(2,dim);
-    newSimplicialIntersection2.grid2Local_[0] = refElement.position(other[2],dim);
-    newSimplicialIntersection2.grid1Local_[1] = refElement.position(1,dim);
-    newSimplicialIntersection2.grid2Local_[1] = refElement.position(other[1],dim);
-    newSimplicialIntersection2.grid1Local_[2] = refElement.position(3,dim);
-    newSimplicialIntersection2.grid2Local_[2] = refElement.position(other[3],dim);
-
-    newSimplicialIntersection2.grid1Entity_ = grid1Index;
-    newSimplicialIntersection2.grid2Entity_ = grid2Index;
-
-    this->intersections_.push_back(newSimplicialIntersection2);
 
   } else if (grid1ElementType.isHexahedron()) {
 
     // split the hexahedron into five tetrahedra
+    // This can be removed if ever we allow RemoteIntersections that are not simplices
     const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
 
     const unsigned int subVertices[5][4] = {{0,1,3,5}, {0,3,2,6}, {4,5,0,6}, {6,7,6,3}, {6,0,5,3}};
