@@ -244,6 +244,29 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
 
     this->intersections_.push_back(newSimplicialIntersection2);
 
+  } else if (grid1ElementType.isHexahedron()) {
+
+    // split the hexahedron into five tetrahedra
+    const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
+
+    const unsigned int subVertices[5][4] = {{0,1,3,5}, {0,3,2,6}, {4,5,0,6}, {6,7,6,3}, {6,0,5,3}};
+
+    for (int i=0; i<5; i++) {
+
+      RemoteSimplicialIntersection newSimplicialIntersection;
+
+      for (int j=0; j<4; j++) {
+        newSimplicialIntersection.grid1Local_[j] = refElement.position(subVertices[i][j],dim);
+        newSimplicialIntersection.grid2Local_[j] = refElement.position(subVertices[i][other[j]],dim);
+      }
+
+      newSimplicialIntersection.grid1Entity_ = grid1Index;
+      newSimplicialIntersection.grid2Entity_ = grid2Index;
+
+      this->intersections_.push_back(newSimplicialIntersection);
+
+    }
+
   } else
     DUNE_THROW(Dune::GridError, "Unsupported element type");
 
