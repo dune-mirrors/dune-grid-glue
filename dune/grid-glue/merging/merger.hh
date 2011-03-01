@@ -206,6 +206,13 @@ public:
     return GridTraits<n>::Policy::parentLocal(*this, idx, corner);
   }
 
+  /** \brief Counts the number of times the computeIntersection method has been called
+   *
+   * Used temporarily to speed up the implementation
+   */
+  unsigned int counter;
+
+
 private:
   /**
    * @brief check if given grid1 simplex could be matched in the merged grid

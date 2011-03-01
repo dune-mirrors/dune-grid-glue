@@ -528,6 +528,8 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
   }
 
+  this->counter++;
+
 }
 
 template<int dim, typename T>

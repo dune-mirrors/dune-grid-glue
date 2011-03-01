@@ -325,6 +325,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   clear();
   // clear global intersection list
   intersections_.clear();
+  this->counter = 0;
 
   // /////////////////////////////////////////////////////////////////////
   //   Copy element corners into a data structure with block-structure.

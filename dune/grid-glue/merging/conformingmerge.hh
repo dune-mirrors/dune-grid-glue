@@ -158,6 +158,8 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
                                                             const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
                                                             unsigned int grid2Index)
 {
+  this->counter++;
+
   // A few consistency checks
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
