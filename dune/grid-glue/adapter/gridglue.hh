@@ -606,7 +606,7 @@ public:
 
   size_t size() const
   {
-    return intersections_.size();
+    return index__sz;
   }
 
 };
