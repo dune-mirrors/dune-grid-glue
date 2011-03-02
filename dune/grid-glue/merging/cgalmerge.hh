@@ -57,9 +57,11 @@ private:
   void computeIntersection(const Dune::GeometryType& grid1ElementType,
                            const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
                            unsigned int grid1Index,
+                           std::bitset<(1<<dim)>& neighborIntersects1,
                            const Dune::GeometryType& grid2ElementType,
                            const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
-                           unsigned int grid2Index);
+                           unsigned int grid2Index,
+                           std::bitset<(1<<dim)>& neighborIntersects2);
 
 private:
 

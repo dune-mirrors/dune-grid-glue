@@ -123,9 +123,11 @@ void CGALMerge<dim, T>::
 computeIntersection(const Dune::GeometryType& grid1ElementType,
                     const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
                     unsigned int grid1Index,
+                    std::bitset<(1<<dim)>& neighborIntersects1,
                     const Dune::GeometryType& grid2ElementType,
                     const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
-                    unsigned int grid2Index)
+                    unsigned int grid2Index,
+                    std::bitset<(1<<dim)>& neighborIntersects2)
 {
   this->counter++;
 
@@ -560,9 +562,11 @@ inline bool CGALMerge<dim, T>::grid2SimplexMatched(unsigned int idx) const
   DECL template void CGALMerge<D, T>::computeIntersection(const Dune::GeometryType& grid1ElementType, \
                                                           const std::vector<Dune::FieldVector<T,D> >& grid1ElementCorners, \
                                                           unsigned int grid1Index, \
+                                                          std::bitset<(1<<D)>& neighborIntersects1, \
                                                           const Dune::GeometryType& grid2ElementType, \
                                                           const std::vector<Dune::FieldVector<T,D> >& grid2ElementCorners, \
-                                                          unsigned int grid2Index); \
+                                                          unsigned int grid2Index, \
+                                                          std::bitset<(1<<D)>& neighborIntersects2); \
 \
   DECL template bool CGALMerge<D, T>::grid1SimplexMatched(unsigned int idx) const; \
 \

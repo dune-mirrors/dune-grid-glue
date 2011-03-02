@@ -92,9 +92,11 @@ protected:
   virtual void computeIntersection(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                                    unsigned int grid1Index,
+                                   std::bitset<(1<<grid1Dim)>& neighborIntersects1,
                                    const Dune::GeometryType& grid2ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
-                                   unsigned int grid2Index) = 0;
+                                   unsigned int grid2Index,
+                                   std::bitset<(1<<grid2Dim)>& neighborIntersects2) = 0;
 
   /** \brief Test whether the two given elements intersect
       \note If they do intersect their intersection is automatically added to the list!
@@ -102,8 +104,10 @@ protected:
   bool testIntersection(unsigned int candidate0, unsigned int candidate1,
                         const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
                         const std::vector<Dune::GeometryType>& grid1_element_types,
+                        std::bitset<(1<<grid1Dim)>& neighborIntersects1,
                         const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
-                        const std::vector<Dune::GeometryType>& grid2_element_types);
+                        const std::vector<Dune::GeometryType>& grid2_element_types,
+                        std::bitset<(1<<grid2Dim)>& neighborIntersects2);
 
   int bruteForceSearch(int candidate1,
                        const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
@@ -244,8 +248,10 @@ template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::testIntersection(unsigned int candidate0, unsigned int candidate1,
                                                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
                                                                    const std::vector<Dune::GeometryType>& grid1_element_types,
+                                                                   std::bitset<(1<<grid1Dim)>& neighborIntersects1,
                                                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
-                                                                   const std::vector<Dune::GeometryType>& grid2_element_types)
+                                                                   const std::vector<Dune::GeometryType>& grid2_element_types,
+                                                                   std::bitset<(1<<grid2Dim)>& neighborIntersects2)
 {
   unsigned int oldNumberOfIntersections = intersections_.size();
 
@@ -265,8 +271,8 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::testIntersection(unsigned int 
   //   Compute the intersection between the two elements
   // ///////////////////////////////////////////////////////
 
-  computeIntersection(grid1_element_types[candidate0], grid1ElementCorners, candidate0,
-                      grid2_element_types[candidate1], grid2ElementCorners, candidate1);
+  computeIntersection(grid1_element_types[candidate0], grid1ElementCorners, candidate0, neighborIntersects1,
+                      grid2_element_types[candidate1], grid2ElementCorners, candidate1, neighborIntersects2);
 
   // Have we found an intersection?
   return (intersections_.size() > oldNumberOfIntersections);
@@ -286,9 +292,11 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::bruteForceSearch(int candidate1
   for (std::size_t i=0; i<grid1_element_types.size(); i++) {
 
     std::size_t oldSize = intersections_.size();
+    std::bitset<(1<<grid1Dim)> neighborIntersects1;
+    std::bitset<(1<<grid2Dim)> neighborIntersects2;
     bool intersectionFound = testIntersection(i, candidate1,
-                                              grid1Coords,grid1_element_types,
-                                              grid2Coords,grid2_element_types);
+                                              grid1Coords,grid1_element_types, neighborIntersects1,
+                                              grid2Coords,grid2_element_types, neighborIntersects2);
 
     if (intersectionFound) {
 
@@ -549,8 +557,11 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
       potentialSeeds.insert(currentCandidate0);
 
       // Test whether there is an intersection between currentCandidate0 and currentCandidate1
+      std::bitset<(1<<grid1Dim)> neighborIntersects1;
+      std::bitset<(1<<grid2Dim)> neighborIntersects2;
       bool intersectionFound = testIntersection(currentCandidate0, currentCandidate1,
-                                                grid1Coords,grid1_element_types,grid2Coords,grid2_element_types);
+                                                grid1Coords,grid1_element_types, neighborIntersects1,
+                                                grid2Coords,grid2_element_types, neighborIntersects2);
 
       if (intersectionFound) {
 
@@ -595,9 +606,11 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
              seedIt != potentialSeeds.end(); ++seedIt) {
 
           std::size_t oldSize = intersections_.size();
+          std::bitset<(1<<grid1Dim)> neighborIntersects1;
+          std::bitset<(1<<grid2Dim)> neighborIntersects2;
           bool intersectionFound = testIntersection(*seedIt, neighbor,
-                                                    grid1Coords,grid1_element_types,
-                                                    grid2Coords,grid2_element_types);
+                                                    grid1Coords,grid1_element_types, neighborIntersects1,
+                                                    grid2Coords,grid2_element_types, neighborIntersects2);
 
           if (intersectionFound) {
 

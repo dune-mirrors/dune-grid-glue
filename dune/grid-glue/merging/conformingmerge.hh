@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+#include <bitset>
 
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
@@ -72,9 +73,11 @@ private:
   virtual void computeIntersection(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                                    unsigned int grid1Index,
+                                   std::bitset<(1<<dim)>& neighborIntersects1,
                                    const Dune::GeometryType& grid2ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
-                                   unsigned int grid2Index);
+                                   unsigned int grid2Index,
+                                   std::bitset<(1<<dim)>& neighborIntersects2);
 
 public:
 
@@ -154,15 +157,21 @@ template<int dim, int dimworld, typename T>
 void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
                                                             const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                                                             unsigned int grid1Index,
+                                                            std::bitset<(1<<dim)>& neighborIntersects1,
                                                             const Dune::GeometryType& grid2ElementType,
                                                             const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
-                                                            unsigned int grid2Index)
+                                                            unsigned int grid2Index,
+                                                            std::bitset<(1<<dim)>& neighborIntersects2)
 {
   this->counter++;
 
   // A few consistency checks
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
+
+  // any intersection we may find will be the entire elements.
+  neighborIntersects1.reset();
+  neighborIntersects2.reset();
 
   // the intersection is either conforming or empty, hence the GeometryTypes have to match
   if (grid1ElementType != grid2ElementType)
