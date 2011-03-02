@@ -555,7 +555,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   ////////////////////////////////////////////////////////////////////////
 
   std::stack<unsigned int> candidates0;
-  std::stack<std::pair<unsigned int,unsigned int> > candidates1;
+  std::stack<unsigned int> candidates1;
 
   std::vector<int> seeds(grid2_element_types.size(), -1);
 
@@ -569,7 +569,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     int seed = bruteForceSearch(j,grid1Coords,grid1_element_types,grid2Coords,grid2_element_types);
 
     if (seed >=0) {
-      candidates1.push(std::make_pair(j,seed));        // the candidate and a seed for the candidate
+      candidates1.push(j);        // the candidate and a seed for the candidate
       seeds[j] = seed;
       break;
     }
@@ -589,9 +589,9 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   while (!candidates1.empty()) {
 
     // Get the next element on the grid2 side
-    unsigned int currentCandidate1 = candidates1.top().first;
-    unsigned int seed = candidates1.top().second;
-    assert(seed == seeds[currentCandidate1]);
+    unsigned int currentCandidate1 = candidates1.top();
+    unsigned int seed = seeds[currentCandidate1];
+    assert(seed >= 0);
 
     candidates1.pop();
     isHandled1[currentCandidate1] = true;
@@ -693,7 +693,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           continue;
 
         // we have a seed now
-        candidates1.push(std::make_pair(neighbor,seed));
+        candidates1.push(neighbor);
         seeds[neighbor] = seed;
 
       }
