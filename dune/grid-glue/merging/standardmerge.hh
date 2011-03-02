@@ -557,6 +557,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   std::stack<unsigned int> candidates0;
   std::stack<std::pair<unsigned int,unsigned int> > candidates1;
 
+  std::vector<int> seeds(grid2_element_types.size(), -1);
+
   // /////////////////////////////////////////////////////////////////////
   //   Do a brute-force search to find one pair of intersecting elements
   //   to start the advancing-front type algorithm with.
@@ -568,6 +570,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
     if (seed >=0) {
       candidates1.push(std::make_pair(j,seed));        // the candidate and a seed for the candidate
+      seeds[j] = seed;
       break;
     }
 
@@ -588,6 +591,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     // Get the next element on the grid2 side
     unsigned int currentCandidate1 = candidates1.top().first;
     unsigned int seed = candidates1.top().second;
+    assert(seed == seeds[currentCandidate1]);
+
     candidates1.pop();
     isHandled1[currentCandidate1] = true;
 
@@ -689,6 +694,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
         // we have a seed now
         candidates1.push(std::make_pair(neighbor,seed));
+        seeds[neighbor] = seed;
 
       }
 
