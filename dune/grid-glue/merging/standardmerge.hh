@@ -19,6 +19,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/bitsetvector.hh>
+#include <dune/common/timer.hh>
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
@@ -481,6 +482,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 {
 
   std::cout << "StandardMerge building merged grid..." << std::endl;
+  Dune::Timer watch;
 
   clear();
   // clear global intersection list
@@ -545,6 +547,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     std::cout << std::endl;
   }
 #endif
+
+  std::cout << "setup took " << watch.elapsed() << " seconds." << std::endl;
 
   ////////////////////////////////////////////////////////////////////////
   //   Data structures for the advancing-front algorithm
@@ -693,7 +697,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   }
 
   valid = true;
-
+  std::cout << "intersection construction took " << watch.elapsed() << " seconds." << std::endl;
 }
 
 
