@@ -282,55 +282,28 @@ protected:
   /**
    * @brief after building the merged grid the intersection can be updated
    * through this method (for internal use)
+   *
+   * @param patch0coords the patch0 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
+   * @param patch0entities array with all patch0 entities represented as corner indices into @c patch0coords;
+   * the entities are just written to this array one after another
+   * @param patch0types array with all patch0 entities types
+   * @param patch0local boolean to indicate if this patch is local (i.e. the entity is accessible) or not
+   *
+   * @param patch1coords the patch2 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
+   * @param patch1entities just like with the patch0entities and patch0corners
+   * @param patch1types array with all patch1 entities types
+   * @param patch1local boolean to indicate if this patch is local (i.e. the entity is accessible) or not
+   *
    */
-  void updateIntersections()
-  {
-    // store the number of remote intersection for later use
-    index__sz = merger_->nSimplices();
+  void mergePatches(const std::vector<Dune::FieldVector<ctype,dimworld> >& patch0coords,
+                    const std::vector<unsigned int>& patch0entities,
+                    const std::vector<Dune::GeometryType>& patch0types,
+                    const bool patch0local,
+                    const std::vector<Dune::FieldVector<ctype,dimworld> >& patch1coords,
+                    const std::vector<unsigned int>& patch1entities,
+                    const std::vector<Dune::GeometryType>& patch1types,
+                    const bool patch1local);
 
-    // build the intersections array again
-    intersections_.resize(merger_->nSimplices() + 1);
-    for (unsigned int i = 0; i < merger_->nSimplices(); ++i)
-    {
-      // currently we only support local merging!
-      bool g0local = true;
-      bool g1local = true;
-      IntersectionData data(*this, i, g0local, g1local);
-      intersections_[i] = data;
-    }
-
-    std::cout << "GridGlue::updateIntersections : "
-    "The number of remote intersections is " << index__sz << std::endl;
-
-    ////// create ParallelIndexSet & RemoteIndices
-#if HAVE_MPI && 0
-    // setup parallel indexset
-    domain_is.beginResize();
-    target_is.beginResize();
-    IntersectionIterator rit = ibegin();
-    IntersectionIterator ritend = iend();
-    for (; rit != ritend; ++rit)
-    {
-            #error update this!
-      if (rit->hasGrid0())
-      {
-        domain_is.add (rit->globalIndex(),
-                       LocalIndex(rit->index(), rit->entityGrid0()->partitionType()) ) ;
-      }
-      if (rit->hasGrid1())
-      {
-        target_is.add (rit->globalIndex(),
-                       LocalIndex(rit->index(), rit->entityGrid1()->partitionType()) ) ;
-      }
-    }
-    domain_is.endResize();
-    target_is.endResize();
-
-    // setup remote index information
-    remoteIndices.setIndexSets(domain_is, target_is, mpicomm) ;
-    remoteIndices.rebuild<true>();
-#endif
-  }
 
   template<typename Extractor>
   void extractGrid (const Extractor & extractor,
