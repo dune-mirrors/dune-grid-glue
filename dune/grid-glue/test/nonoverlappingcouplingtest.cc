@@ -13,12 +13,12 @@
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim1extractor.hh>
-// #include <dune/grid-glue/extractors/parallelextractor.hh>
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
+#include <dune/grid-glue/test/communicationtest.hh>
 
 using namespace Dune;
 
@@ -278,13 +278,9 @@ void testParallelCubeGrids()
   typedef typename GridType0::LevelGridView DomGridView;
   typedef typename GridType1::LevelGridView TarGridView;
 
-  // always test the extractor via the parallel extractor classes, even if we use a sequential grid.
-
   VerticalFaceDescriptor<DomGridView> domdesc(slice);
   VerticalFaceDescriptor<TarGridView> tardesc(slice);
 
-  // typedef ParallelExtractor< Codim1Extractor<DomGridView> > DomExtractor;
-  // typedef ParallelExtractor< Codim1Extractor<TarGridView> > TarExtractor;
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
@@ -312,6 +308,7 @@ void testParallelCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
+  testCommunication(glue);
 #else
     #warning Not testing, because psurface backend is not available.
 #endif
