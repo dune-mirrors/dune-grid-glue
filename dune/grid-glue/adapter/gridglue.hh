@@ -508,9 +508,9 @@ public:
         /*
            dir : Forward (domain -> target)
          */
-        if (rit->hasDomain())
+        if (rit->self())
         {
-          data.gather(gatherbuffer, rit->entityDomain(), *rit);
+          data.gather(gatherbuffer, rit->inside(), *rit);
         }
       }
       else       // (dir == Dune::BackwardCommunication)
@@ -518,9 +518,9 @@ public:
         /*
            dir : Backward (target -> domain)
          */
-        if (rit->hasTarget())
+        if (rit->neighbor())
         {
-          data.gather(gatherbuffer, rit->entityTarget(), *rit);
+          data.gather(gatherbuffer, rit->outside(), *rit);
         }
       }
     }
@@ -541,8 +541,8 @@ public:
         /*
            dir : Forward (domain -> target)
          */
-        if (rit->hasTarget())
-          data.scatter(scatterbuffer, rit->entityTarget(), *rit,
+        if (rit->neighbor())
+          data.scatter(scatterbuffer, rit->outside(), *rit,
                        data.size(*rit));
       }
       else       // (dir == Dune::BackwardCommunication)
@@ -550,8 +550,8 @@ public:
         /*
            dir : Backward (target -> domain)
          */
-        if (rit->hasDomain())
-          data.scatter(scatterbuffer, rit->entityDomain(), *rit,
+        if (rit->self())
+          data.scatter(scatterbuffer, rit->inside(), *rit,
                        data.size(*rit));
       }
     }
