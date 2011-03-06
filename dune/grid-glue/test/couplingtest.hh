@@ -52,9 +52,9 @@ void testIntersection(const IntersectionIt & rIIt)
     assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
 
     // Here we assume that the two interface match geometrically:
-    if ( (globalDomainPos-globalTargetPos).two_norm() >= 1e-6 )
+    if ( (globalDomainPos-globalTargetPos).two_norm() >= 1e-4 )
     {
-      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 ) failed\n";
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-4 ) failed\n";
       std::cerr << "localDomainPos  = " << localDomainPos << "\n";
       std::cerr << "globalDomainPos = " << globalDomainPos << "\n";
       std::cerr << "localTargetPos  = " << localTargetPos << "\n";
@@ -123,7 +123,6 @@ void testCoupling(const GlueType& glue)
     }
   }
 
-#ifndef ENABLE_CLEAR
   // ///////////////////////////////////////
   //   Grid0 Entity centric
   // ///////////////////////////////////////
@@ -173,7 +172,6 @@ void testCoupling(const GlueType& glue)
     assert(icount == countInside1[view1mapper.map(*tit)]);
     assert(icount == countOutside1[view1mapper.map(*tit)]);
   }
-#endif
 }
 
 #endif // GRIDGLUE_COUPLINGTEST_HH

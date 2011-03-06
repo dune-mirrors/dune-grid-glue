@@ -311,6 +311,7 @@ protected:
                     std::vector<unsigned int> & faces,
                     std::vector<Dune::GeometryType>& geometryTypes) const;
 
+  /** \deprecated not needed once ibegin(Entity&) is removed */
   template<int P>
   bool getIntersectionIndices(const typename GridGlueView<P0,P1,P>::GridElement& e, std::vector<unsigned int> & indices) const;
 
@@ -389,6 +390,7 @@ public:
    * @param e codim 0 entity in grid I
    * @return the iterator
    */
+  /** \deprecated */
   template<int I>
   typename GridGlueView<P0,P1,I>::CellIntersectionIterator
   ibegin(const typename GridGlueView<P0,P1,I>::GridElement& e) const;
@@ -400,6 +402,7 @@ public:
    * @param e codim 0 entity in grid I
    * @return the end-iterator
    */
+  /** \deprecated not needed once ibegin(Entity&) is removed */
   template<int I>
   typename GridGlueView<P0,P1,I>::CellIntersectionIterator
   iend(const typename GridGlueView<P0,P1,I>::GridElement& e) const;

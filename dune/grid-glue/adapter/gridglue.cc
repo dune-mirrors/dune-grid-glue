@@ -224,19 +224,28 @@ GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::G
   // now accumulate all remote intersections of the element's faces
   indices.clear();
   assert(indices.size() == 0);
-  std::vector<unsigned int> tmp;
 
-  // iterate over all simplices to check if there is more than one simplex refining the face
-  for (int p = 0; p < p_cnt; p++)
+  static int warning = 0;
+  if (warning == 0)
   {
-    if (merger_->template simplexRefined<P>(p_first+p, tmp))
-    {
-      for (unsigned int i = 0; i < tmp.size(); ++i)
-      {
-        indices.push_back(tmp[i]);
-      }
-    }
+    std::cerr << "Warning: don't use ibegin(Entity&), this method is going to be removed,\n"
+              << "         as it is possible to implement it in an efficient way.\n";
+    warning = 1;
   }
+
+  // find intersections associated with the current cell
+  for (unsigned int j = 0; j < intersections_.size(); j++)
+  {
+    unsigned int i = 0;
+    if (P == 0  && ! intersections_[j].grid0local_) continue;
+    if (P == 1  && ! intersections_[j].grid1local_) continue;
+    if (P == 0) i = intersections_[j].grid0index_;
+    if (P == 1) i = intersections_[j].grid1index_;
+
+    if (i >= (unsigned int) p_first && i < (unsigned int) (p_first + p_cnt))
+      indices.push_back(j);
+  }
+
 
 #ifndef NDEBUG
   for (unsigned int j = 0; j < indices.size(); j++)
