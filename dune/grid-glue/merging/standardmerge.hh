@@ -348,7 +348,6 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::bruteForceSearch(int candidate1
 {
   for (std::size_t i=0; i<grid1_element_types.size(); i++) {
 
-    std::size_t oldSize = intersections_.size();
     std::bitset<(1<<grid1Dim)> neighborIntersects1;
     std::bitset<(1<<grid2Dim)> neighborIntersects2;
     bool intersectionFound = testIntersection(i, candidate1,
@@ -661,7 +660,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         for (typename std::set<unsigned int>::iterator seedIt = potentialSeeds.begin();
              seedIt != potentialSeeds.end(); ++seedIt) {
 
-          std::size_t oldSize = intersections_.size();
           std::bitset<(1<<grid1Dim)> neighborIntersects1;
           std::bitset<(1<<grid2Dim)> neighborIntersects2;
           bool intersectionFound = testIntersection(*seedIt, neighbor,
