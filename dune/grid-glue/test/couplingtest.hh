@@ -123,6 +123,7 @@ void testCoupling(const GlueType& glue)
     }
   }
 
+#ifndef ENABLE_CLEAR
   // ///////////////////////////////////////
   //   Grid0 Entity centric
   // ///////////////////////////////////////
@@ -172,7 +173,7 @@ void testCoupling(const GlueType& glue)
     assert(icount == countInside1[view1mapper.map(*tit)]);
     assert(icount == countOutside1[view1mapper.map(*tit)]);
   }
-
+#endif
 }
 
 #endif // GRIDGLUE_COUPLINGTEST_HH

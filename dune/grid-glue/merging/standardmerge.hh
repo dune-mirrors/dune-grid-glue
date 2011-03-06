@@ -175,8 +175,8 @@ public:
 
   void clear()
   {
-#if 0  // out-commented, because we still need all this data to access the intersections
-       // Delete old internal data, from a possible previous run
+#ifdef ENABLE_CLEAR  // out-commented, because we still need all this data to access the intersections
+    // Delete old internal data, from a possible previous run
     purge(intersections_);
     purge(grid1ElementCorners_);
     purge(grid2ElementCorners_);
