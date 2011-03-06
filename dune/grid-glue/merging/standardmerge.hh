@@ -386,11 +386,11 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
 
     const Dune::GenericReferenceElement<T,grid1Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
 
-    for (size_t j=0; j<refElement.size(1); j++) {
+    for (size_t j=0; j<(size_t)refElement.size(1); j++) {
 
       FaceType face;
       // extract element face
-      for (size_t k=0; k<refElement.size(j,1,grid1Dim); k++)
+      for (size_t k=0; k<(size_t)refElement.size(j,1,grid1Dim); k++)
         face.push_back(grid1ElementCorners_[i][refElement.subEntity(j,1,k,grid1Dim)]);
 
       // sort the face vertices to get rid of twists and other permutations
@@ -431,11 +431,11 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
 
     const Dune::GenericReferenceElement<T,grid2Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid2_element_types[i]);
 
-    for (size_t j=0; j<refElement.size(1); j++) {
+    for (size_t j=0; j<(size_t)refElement.size(1); j++) {
 
       FaceType face;
       // extract element face
-      for (size_t k=0; k<refElement.size(j,1,grid2Dim); k++)
+      for (size_t k=0; k<(size_t)refElement.size(j,1,grid2Dim); k++)
         face.push_back(grid2ElementCorners_[i][refElement.subEntity(j,1,k,grid2Dim)]);
 
       // sort the face vertices to get rid of twists and other permutations
