@@ -95,7 +95,7 @@ class GridGlueVtkWriter
 
     const GridView& gridView = glue.template gridView<side>();
 
-    int overlaps = glue.merger()->nSimplices();
+    int overlaps = glue.size();
 
     fgrid << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
 
@@ -239,7 +239,7 @@ class GridGlueVtkWriter
 
     const GridView& gridView = glue.template gridView<side>();
 
-    int overlaps = glue.merger()->nSimplices();
+    int overlaps = glue.size();
 
     // WRITE POINTS
     // ----------------
