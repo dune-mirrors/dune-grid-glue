@@ -22,6 +22,21 @@
 namespace Dune {
   namespace GridGlue {
 
+    typedef std::pair<int, int> RankPair;
+    struct GlobalId : public std::pair<RankPair, unsigned int>
+    {
+      GlobalId() {
+        this->first.first = 0;
+        this->first.second = 0;
+        this->second = 0;
+      }
+      GlobalId(int i) {
+        this->first.first = i;
+        this->first.second = i;
+        this->second = 0;
+      }
+    };
+
     /**
        \brief describes the features of a data handle for
        communication in parallel runs using the GridGlue::communicate methods.
