@@ -53,7 +53,7 @@ namespace Dune {
       IntersectionData(const GridGlue& glue, unsigned int mergeindex, bool grid0local, bool grid1local);
 
       /** \brief Default Constructor */
-      IntersectionData() {}
+      IntersectionData() : grid0local_(false), grid1local_(false) {}
 
       /*   M E M B E R   V A R  I A B L E S   */
 
