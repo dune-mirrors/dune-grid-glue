@@ -72,12 +72,19 @@ void GridGlue<P0, P1>::build()
   target_is.beginResize();
 #endif
 
+  int myrank = 0;
+  int commsize = 1;
+#if HAVE_MPI
+  MPI_Comm_rank(mpicomm, &myrank);
+  MPI_Comm_size(mpicomm, &commsize);
+#endif
+
   // merge local patches and add to intersection list
-  mergePatches(patch0coords, patch0entities, patch0types, /*local?*/ true,
-               patch1coords, patch1entities, patch1types, /*local?*/ true);
+  mergePatches(patch0coords, patch0entities, patch0types, myrank,
+               patch1coords, patch1entities, patch1types, myrank);
 
 #if 0
-  if (mpicomm.size() > 1)
+  if (commsize > 1)
   {
     std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords;
     std::vector<unsigned int> remotePatch0entities;
@@ -88,17 +95,19 @@ void GridGlue<P0, P1>::build()
 
     // communicate patches in the ring
 
-    for (int i=0; i<mpicomm.size(); i++)
+    for (int i=0; i<commsize; i++)
     {
+      int remoterank = (myrank + i) % commsize;
+
       // send remote to right neighbor
 
       // receive remote from left neighbor
 
       // merge local & remote patches
-      mergePatches(patch0coords, patch0entities, patch0types, true,
-                   remotePatch1coords, remotePatch1entities, remotePatch1types, false);
-      mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, false,
-                   patch1coords, patch1entities, patch1types, true);
+      mergePatches(patch0coords, patch0entities, patch0types, myrank,
+                   remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
+      mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, remoterank,
+                   patch1coords, patch1entities, patch1types, myrank);
     }
   }
 #endif
@@ -121,18 +130,27 @@ void GridGlue<P0, P1>::mergePatches(
   const std::vector<Dune::FieldVector<ctype,dimworld> >& patch0coords,
   const std::vector<unsigned int>& patch0entities,
   const std::vector<Dune::GeometryType>& patch0types,
-  const bool patch0local,
+  const int patch0rank,
   const std::vector<Dune::FieldVector<ctype,dimworld> >& patch1coords,
   const std::vector<unsigned int>& patch1entities,
   const std::vector<Dune::GeometryType>& patch1types,
-  const bool patch1local)
+  const int patch1rank)
 {
+  int myrank = 0;
+#if HAVE_MPI
+  MPI_Comm_rank(mpicomm, &myrank);
+#endif
+
+  // which patches are local?
+  const bool patch0local = (myrank == patch0rank);
+  const bool patch1local = (myrank == patch1rank);
+
+  // remember the number of previous remote intersections
+  const unsigned int offset = intersections_.size();
+
   // start the actual build process
   merger_->build(patch0coords, patch0entities, patch0types,
                  patch1coords, patch1entities, patch1types);
-
-  // store the number of remote intersection for later use
-  unsigned int offset = intersections_.size();
 
   // append to intersections list
   intersections_.resize(merger_->nSimplices() + offset + 1);
@@ -149,10 +167,7 @@ void GridGlue<P0, P1>::mergePatches(
   << "GridGlue::mergePatches : "
   << "The number of remote intersections is " << intersections_.size()-1 << std::endl;
 
-#ifdef HAVE_MPI
-#warning update to work in parallel
-  int patch0rank = 0;
-  int patch1rank = 0;
+#if HAVE_MPI
   for (unsigned int i = 0; i < merger_->nSimplices(); i++)
   {
     const IntersectionData & it = intersections_[i];

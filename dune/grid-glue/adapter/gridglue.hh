@@ -283,22 +283,22 @@ protected:
    * @param patch0entities array with all patch0 entities represented as corner indices into @c patch0coords;
    * the entities are just written to this array one after another
    * @param patch0types array with all patch0 entities types
-   * @param patch0local boolean to indicate if this patch is local (i.e. the entity is accessible) or not
+   * @param patch0rank  rank of the process where patch0 was extracted
    *
    * @param patch1coords the patch2 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
    * @param patch1entities just like with the patch0entities and patch0corners
    * @param patch1types array with all patch1 entities types
-   * @param patch1local boolean to indicate if this patch is local (i.e. the entity is accessible) or not
+   * @param patch1rank  rank of the process where patch1 was extracted
    *
    */
   void mergePatches(const std::vector<Dune::FieldVector<ctype,dimworld> >& patch0coords,
                     const std::vector<unsigned int>& patch0entities,
                     const std::vector<Dune::GeometryType>& patch0types,
-                    const bool patch0local,
+                    const int patch0rank,
                     const std::vector<Dune::FieldVector<ctype,dimworld> >& patch1coords,
                     const std::vector<unsigned int>& patch1entities,
                     const std::vector<Dune::GeometryType>& patch1types,
-                    const bool patch1local);
+                    const int patch1rank);
 
 
   template<typename Extractor>
