@@ -573,7 +573,7 @@ public:
 
   Intersection getIntersection(int i) const
   {
-    return Intersection(*this, i);
+    return Intersection(this, & intersections_[i]);
   }
 
   size_t size() const
