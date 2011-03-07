@@ -83,26 +83,87 @@ void GridGlue<P0, P1>::build()
   mergePatches(patch0coords, patch0entities, patch0types, myrank,
                patch1coords, patch1entities, patch1types, myrank);
 
-#if 0
   if (commsize > 1)
   {
-    std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords;
-    std::vector<unsigned int> remotePatch0entities;
-    std::vector<Dune::GeometryType> remotePatch0types;
-    std::vector<Dune::FieldVector<ctype,dimworld> > remotePatch1coords;
-    std::vector<unsigned int> remotePatch1entities;
-    std::vector<Dune::GeometryType> remotePatch1types;
+#warning implement ring comm of patches
+    DUNE_THROW(Dune::Exception, "TODO: implement ring comm of patches");
+
+    // communicate max patch size
+    int patchCoords_maxSize;
+    int patchEntites_maxSize;
+
+    // allocate remote buffers (maxsize to avoid reallocation)
+    std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( patchCoords_maxSize );
+    std::vector<unsigned int> remotePatch0entities ( patchEntites_maxSize );
+    std::vector<Dune::GeometryType> remotePatch0types ( patchEntites_maxSize );
+    std::vector<Dune::FieldVector<ctype,dimworld> > remotePatch1coords ( patchCoords_maxSize );
+    std::vector<unsigned int> remotePatch1entities ( patchEntites_maxSize );
+    std::vector<Dune::GeometryType> remotePatch1types ( patchEntites_maxSize );
+
+    // copy local patches to remote patch buffers
+#warning todo
+
+    // allocate tmp buffers (maxsize to avoid reallocation)
+    std::vector<Dune::FieldVector<ctype, dimworld> > tmpPatchCoords ( patchCoords_maxSize );
+    std::vector<unsigned int> tmpPatchEntities ( patchEntites_maxSize );
+    std::vector<Dune::GeometryType> tmpPatchTypes ( patchEntites_maxSize );
 
     // communicate patches in the ring
-
     for (int i=0; i<commsize; i++)
     {
-      int remoterank = (myrank + i) % commsize;
+      int remoterank = (myrank - i) % commsize;
+      int rightrank  = (myrank + 1) % commsize;
+      int leftrank   = (myrank - 1) % commsize;
 
-      // send remote to right neighbor
+      // communicate actual patch sizes
+      int patch0coordsSize;
+      int patch0entitiesSize;
+      int patch1coordsSize;
+      int patch1entitiesSize;
 
-      // receive remote from left neighbor
+#warning todo
+      // int MPI_Send( void *buf, int count, MPI_Datatype datatype, int dest,
+      //     int tag, MPI_Comm comm );
 
+      /* patch0 */
+      tmpPatchCoords.resize(patch0coordsSize);
+      tmpPatchEntities.resize(patch0entitiesSize);
+      tmpPatchTypes.resize(patch0entitiesSize);
+
+      // send remote patch to right neighbor
+#warning todo
+
+      // receive remote patch from left neighbor
+#warning todo
+
+      // finish communication
+#warning todo
+
+      // swap communcation buffers
+      remotePatch0coords.swap(tmpPatchCoords);
+      remotePatch0entities.swap(tmpPatchEntities);
+      remotePatch0types.swap(tmpPatchTypes);
+
+      /* patch1 */
+      tmpPatchCoords.resize(patch1coordsSize);
+      tmpPatchEntities.resize(patch1entitiesSize);
+      tmpPatchTypes.resize(patch1entitiesSize);
+
+      // send remote patch to right neighbor
+#warning todo
+
+      // receive remote patch from left neighbor
+#warning todo
+
+      // finish communication
+#warning todo
+
+      // swap communcation buffers
+      remotePatch1coords.swap(tmpPatchCoords);
+      remotePatch1entities.swap(tmpPatchEntities);
+      remotePatch1types.swap(tmpPatchTypes);
+
+      /* merging */
       // merge local & remote patches
       mergePatches(patch0coords, patch0entities, patch0types, myrank,
                    remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
@@ -110,7 +171,6 @@ void GridGlue<P0, P1>::build()
                    patch1coords, patch1entities, patch1types, myrank);
     }
   }
-#endif
 
 #if HAVE_MPI
   ////// finalize ParallelIndexSet & RemoteIndices
@@ -136,6 +196,9 @@ void GridGlue<P0, P1>::mergePatches(
   const std::vector<Dune::GeometryType>& patch1types,
   const int patch1rank)
 {
+
+#warning howto handle overlap etc?
+
   int myrank = 0;
 #if HAVE_MPI
   MPI_Comm_rank(mpicomm, &myrank);
