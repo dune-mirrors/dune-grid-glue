@@ -105,12 +105,8 @@ struct GridGlueView<P0,P1,1>
  * @class GridGlue
  * @brief sequential adapter to couple two grids at specified close together boundaries
  *
- *
- * @tparam GET1 a first traits class to determine the type of surface extractor to use for the domain grid,
- * has to be a model of GridExtractionTraitsConcept
- * @tparam GET2 a second traits class to determine the type of surface extractor to use for the target grid,
- * has to be a model of GridExtractionTraitsConcept
- * @tparam SM the surface merging class, has to be a model of the SurfaceMergeConcept
+ * @tparam P0 patch (extractor) to use for grid 0
+ * @tparam P1 patch (extractor) to use for grid 1
  */
 template<typename P0, typename P1>
 class GridGlue
@@ -564,7 +560,7 @@ public:
 
 #if QUICKHACK_INDEX
   /*
-   * @brief return an IndexSet mapping from RemoteIntersection to IndexType
+   * @brief return an IndexSet mapping from Intersection to IndexType
    */
 
   // indexset size

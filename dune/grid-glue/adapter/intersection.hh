@@ -3,17 +3,7 @@
 /**
    @file
    @author Christian Engwer
-   @brief Model of the RemoteIntersection concept provided by GridGlue.
-
- *  Filename:    GridGlueRemoteIntersection.hh
- *  Version:     1.0
- *  Created on:  Mar 2, 2009
- *  Author:      Gerrit Buse
- *  ---------------------------------
- *  Project:     dune-grid-glue
- *  Description: Model of the RemoteIntersection concept provided by GridGlue.
- *  subversion:  $Id$
- *
+   @brief Model of the Intersection concept provided by GridGlue.
  */
 
 #ifndef DUNE_GRIDGLUE_REMOTEINTERSECTION_HH

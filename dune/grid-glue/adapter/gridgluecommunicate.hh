@@ -60,7 +60,7 @@ namespace Dune {
       /** @brief pack data from user to message buffer
           @param buff message buffer provided by the grid
           @param e entity for which date should be packed to buffer
-          @param i RemoteIntersection for which date should be packed to buffer
+          @param i Intersection for which date should be packed to buffer
        */
       template<class MessageBufferImp, class EntityType, class RISType>
       void gather (MessageBufferImp& buff, const EntityType& e, const RISType & i) const

@@ -7,7 +7,7 @@
  *  Author:      Gerrit Buse
  *  ---------------------------------
  *  Project:     dune-grid-glue
- *  Description: classes used for local and global geometries of RemoteIntersection implementations
+ *  Description: classes used for local and global geometries of Intersection implementations
  *  subversion:  $Id$
  *
  */
