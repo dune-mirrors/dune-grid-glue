@@ -17,7 +17,7 @@ public:
   template<class MessageBuffer, class EntityType, class RISType>
   void gather (MessageBuffer& buff, const EntityType& e, const RISType & i) const
   {
-    for (int n=0; n<size(i); n++)
+    for (size_t n=0; n<size(i); n++)
       buff.write(i.geometry().corner(n));
   }
 
@@ -25,7 +25,7 @@ public:
   void scatter (MessageBuffer& buff, const EntityType& e, const RISType & i, size_t n)
   {
     assert(n == size(i));
-    for (int n=0; n<size(i); n++)
+    for (size_t n=0; n<size(i); n++)
     {
       Dune::FieldVector<ctype,dimw> x;
       buff.read(x);
