@@ -116,13 +116,13 @@ private:
   /*   P R I V A T E   T Y P E S   */
 
   /** \brief GlobalId type of an intersection (used for communication) */
-  typedef unsigned int GlobalId;
+  typedef Dune::GridGlue::GlobalId GlobalId;
 
   /** \brief LocalIndex type of an intersection (used for communication) */
-  typedef Dune::ParallelLocalIndex<Dune::PartitionType> LocalIndex;
+  typedef Dune::ParallelLocalIndex <Dune::PartitionType> LocalIndex;
 
   /** \brief ParallelIndexSet type (used for communication communication) */
-  typedef Dune::ParallelIndexSet <GlobalId, LocalIndex > PIndexSet;
+  typedef Dune::ParallelIndexSet <GlobalId, LocalIndex> PIndexSet;
 
 public:
 

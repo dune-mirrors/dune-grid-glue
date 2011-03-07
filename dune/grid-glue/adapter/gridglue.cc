@@ -66,6 +66,12 @@ void GridGlue<P0, P1>::build()
   // clear old intersection list
   intersections_.clear();
 
+#if HAVE_MPI
+  // setup parallel indexset
+  domain_is.beginResize();
+  target_is.beginResize();
+#endif
+
   // merge local patches and add to intersection list
   mergePatches(patch0coords, patch0entities, patch0types, /*local?*/ true,
                patch1coords, patch1entities, patch1types, /*local?*/ true);
@@ -96,6 +102,18 @@ void GridGlue<P0, P1>::build()
     }
   }
 #endif
+
+#if HAVE_MPI
+  ////// finalize ParallelIndexSet & RemoteIndices
+  domain_is.endResize();
+  target_is.endResize();
+
+  // setup remote index information
+  remoteIndices.setIncludeSelf(false);
+  remoteIndices.setIndexSets(domain_is, target_is, mpicomm) ;
+  remoteIndices.rebuild<true>();
+#endif
+
 }
 
 template<typename P0, typename P1>
@@ -114,54 +132,45 @@ void GridGlue<P0, P1>::mergePatches(
                  patch1coords, patch1entities, patch1types);
 
   // store the number of remote intersection for later use
-  index__sz = merger_->nSimplices();
-
-  // store the number of remote intersection for later use
   unsigned int offset = intersections_.size();
 
   // append to intersections list
-  intersections_.resize(merger_->nSimplices() + 1);
+  intersections_.resize(merger_->nSimplices() + offset + 1);
   for (unsigned int i = 0; i < merger_->nSimplices(); ++i)
   {
     // currently we only support local merging!
-    bool g0local = true;
-    bool g1local = true;
-    IntersectionData data(*this, offset+i, g0local, g1local);
+    IntersectionData data(*this, offset+i, patch0local, patch1local);
     intersections_[offset+i] = data;
   }
 
-  // index__sz = intersections_.size();
+  index__sz = intersections_.size() - 1;
 
-  std::cout << "GridGlue::updateIntersections : "
-  "The number of remote intersections is " << intersections_.size() << std::endl;
+  std::cout
+  << "GridGlue::mergePatches : "
+  << "The number of remote intersections is " << intersections_.size()-1 << std::endl;
 
-  ////// create ParallelIndexSet & RemoteIndices
-#if HAVE_MPI && 0
-  // setup parallel indexset
-  domain_is.beginResize();
-  target_is.beginResize();
-  IntersectionIterator rit = ibegin();
-  IntersectionIterator ritend = iend();
-  for (; rit != ritend; ++rit)
+#ifdef HAVE_MPI
+#warning update to work in parallel
+  int patch0rank = 0;
+  int patch1rank = 0;
+  for (unsigned int i = 0; i < merger_->nSimplices(); i++)
   {
-#error update this!
-    if (rit->hasGrid0())
+    const IntersectionData & it = intersections_[i];
+    GlobalId gid;
+    gid.first.first = patch0rank;
+    gid.first.second = patch1rank;
+    gid.second = offset+i;
+    if (it.grid0local_)
     {
-      domain_is.add (rit->globalIndex(),
-                     LocalIndex(rit->index(), rit->entityGrid0()->partitionType()) ) ;
+      Dune::PartitionType ptype = patch0_.element(it.grid0index_)->partitionType();
+      domain_is.add (gid, LocalIndex(offset+i, ptype) );
     }
-    if (rit->hasGrid1())
+    if (it.grid1local_)
     {
-      target_is.add (rit->globalIndex(),
-                     LocalIndex(rit->index(), rit->entityGrid1()->partitionType()) ) ;
+      Dune::PartitionType ptype = patch1_.element(it.grid1index_)->partitionType();
+      target_is.add (gid, LocalIndex(offset+i, ptype) );
     }
   }
-  domain_is.endResize();
-  target_is.endResize();
-
-  // setup remote index information
-  remoteIndices.setIndexSets(domain_is, target_is, mpicomm) ;
-  remoteIndices.rebuild<true>();
 #endif
 
   // cleanup theh merger
@@ -234,7 +243,7 @@ GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::G
   }
 
   // find intersections associated with the current cell
-  for (unsigned int j = 0; j < intersections_.size(); j++)
+  for (unsigned int j = 0; j < intersections_.size() - 1; j++)
   {
     unsigned int i = 0;
     if (P == 0  && ! intersections_[j].grid0local_) continue;
