@@ -614,13 +614,18 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
                                                    grid1Coords,grid1_element_types, neighborIntersects1,
                                                    grid2Coords,grid2_element_types, neighborIntersects2);
 
+      for (int i=0; i<neighborIntersects2.size(); i++)
+        if (neighborIntersects2[i] and elementNeighbors2_[currentCandidate1][i] != -1)
+          seeds[elementNeighbors2_[currentCandidate1][i]] = currentCandidate0;
+
+      // add neighbors of candidate0 to the list of elements to be checked
       if (intersectionFound) {
 
         for (size_t i=0; i<elementNeighbors1_[currentCandidate0].size(); i++) {
 
           int neighbor = elementNeighbors1_[currentCandidate0][i];
 
-          if (neighbor == -1)
+          if (neighbor == -1)            // do nothing at the grid boundary
             continue;
 
           if (!isHandled0[neighbor][0] && !isCandidate0[neighbor][0]) {
@@ -638,21 +643,42 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     // Now we add all neighbors of currentCandidate1 that have not been treated yet as new
     // candidates.
 
+    // Do we have an unhandled neighbor with a seed?
+    bool seedFound = false;
+    for (size_t i=0; i<elementNeighbors2_[currentCandidate1].size(); i++) {
+
+      int neighbor = elementNeighbors2_[currentCandidate1][i];
+
+      if (neighbor == -1)         // do nothing at the grid boundary
+        continue;
+
+      if (!isHandled1[neighbor][0] && !isCandidate1[neighbor][0] and seeds[neighbor]>0) {
+        candidates1.push(neighbor);
+        seedFound = true;
+        break;
+      }
+
+    }
+
+    if (seedFound)
+      continue;
+
+    // There is no neighbor with a seed, so we need to be a bit more aggressive...
     // get all neighbors of currentCandidate1, but not currentCandidate1 itself
     for (size_t i=0; i<elementNeighbors2_[currentCandidate1].size(); i++) {
 
       int neighbor = elementNeighbors2_[currentCandidate1][i];
 
-      if (neighbor == -1)
+      if (neighbor == -1)         // do nothing at the grid boundary
         continue;
 
       if (!isHandled1[neighbor][0] && !isCandidate1[neighbor][0]) {
 
         // Get a seed element for the new grid2 element
         // Look for an element on the grid1 side that intersects the new grid2 element.
-        // Look only among the ones that have been tested during the last iteration.
         int seed = -1;
 
+        // Look among the ones that have been tested during the last iteration.
         for (typename std::set<unsigned int>::iterator seedIt = potentialSeeds.begin();
              seedIt != potentialSeeds.end(); ++seedIt) {
 
