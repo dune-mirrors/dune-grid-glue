@@ -575,10 +575,10 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //   Main loop
   // /////////////////////////////////////////////////////////////////////
 
-  Dune::BitSetVector<1> isHandled0(grid1_element_types.size());
+  std::set<unsigned int> isHandled0;
   Dune::BitSetVector<1> isHandled1(grid2_element_types.size());
 
-  Dune::BitSetVector<1> isCandidate0(grid1_element_types.size());
+  std::set<unsigned int> isCandidate0;
   Dune::BitSetVector<1> isCandidate1(grid2_element_types.size());
 
   while (!candidates1.empty()) {
@@ -595,8 +595,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     // we stored along with the current grid2 element
     candidates0.push(seed);
 
-    isHandled0.unsetAll();
-    isCandidate0.unsetAll();
+    isHandled0.clear();
+    isCandidate0.clear();
 
     std::set<unsigned int> potentialSeeds;
 
@@ -604,7 +604,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
       unsigned int currentCandidate0 = candidates0.top();
       candidates0.pop();
-      isHandled0[currentCandidate0] = true;
+      isHandled0.insert(currentCandidate0);
       potentialSeeds.insert(currentCandidate0);
 
       // Test whether there is an intersection between currentCandidate0 and currentCandidate1
@@ -628,9 +628,10 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           if (neighbor == -1)            // do nothing at the grid boundary
             continue;
 
-          if (!isHandled0[neighbor][0] && !isCandidate0[neighbor][0]) {
+          if (isHandled0.find(neighbor) == isHandled0.end()
+              && isCandidate0.find(neighbor) == isCandidate0.end()) {
             candidates0.push(neighbor);
-            isCandidate0[neighbor] = true;
+            isCandidate0.insert(neighbor);
           }
 
         }
