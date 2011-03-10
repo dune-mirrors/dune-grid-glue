@@ -115,6 +115,97 @@ void makeHexahedron(Polyhedron& P,
 }
 #endif
 
+//////////////////////////////////////////////////////////////////////
+//  Compute for each face of each element whether it will also intersect
+//////////////////////////////////////////////////////////////////////
+
+typedef CGAL::Cartesian<Number_type>   Kernel;
+typedef Kernel::Point_3 Point_3;
+typedef CGAL::Polyhedron_3<Kernel>     Polyhedron_3;
+typedef CGAL::Nef_polyhedron_3<Kernel> Nef_Polyhedron_3;
+
+
+/** \todo This method should really be a private class method, but then we'd get in trouble
+ * because we don't want cgal stuff in cgalmerge.hh at all (because of compile time).
+ * I guess the proper solution is a separate implementation class.
+ */
+template<int dim, typename T>
+void computeNeighborIntersections(const Polyhedron_3& P,
+                                  const Dune::GeometryType& elementType,
+                                  const std::vector<Dune::FieldVector<T,dim> >& elementCorners,
+                                  const Nef_Polyhedron_3& NQ,
+                                  const Nef_Polyhedron_3& intersection,
+                                  std::bitset<(1<<dim)>& neighborIntersects
+                                  )
+{
+  const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(elementType);
+
+  // for each vertex: is it also a vertex of the intersection?
+  Dune::BitSetVector<1> isVertexInIntersection(elementCorners.size(),false);
+  Dune::BitSetVector<1> isContainedInOtherElement(elementCorners.size(),false);
+
+  //typename Polyhedron_3::Point_const_iterator vIt = P.points_begin();
+
+  //for (int i=0; vIt != P.points_end(); ++vIt, ++i) {
+  for (int i=0; i!=elementCorners.size(); ++i) {
+
+    Point_3 v(elementCorners[i][0], elementCorners[i][1], elementCorners[i][2]);
+    /*        std::cout << CGAL::to_double((*vIt)[0]) << "  " << CGAL::to_double((*vIt)[1])
+                      << "  " << CGAL::to_double((*vIt)[2]) << std::endl;*/
+
+    typename Nef_Polyhedron_3::Volume_const_handle volumeHandle;
+    typename Nef_Polyhedron_3::Halffacet_const_handle facetHandle;
+    typename Nef_Polyhedron_3::Halfedge_const_handle edgeHandle;
+    typename Nef_Polyhedron_3::Vertex_const_handle vertexHandle;
+    isVertexInIntersection[i] = assign(vertexHandle, intersection.locate(v));
+
+    if (isVertexInIntersection[i][0]) {
+      // if the vertex is a vertex of the intersection it must necessarily
+      // be contained in the other element
+      isContainedInOtherElement[i] = true;
+    } else {
+      typename Nef_Polyhedron_3::Object_handle q_handle = NQ.locate(v);
+
+      /*            std::cout << "volume: " << (assign(volumeHandle, q_handle) && volumeHandle->mark()) << std::endl;
+                  std::cout << "facet: " << assign(facetHandle, q_handle) << std::endl;
+                  std::cout << "edge: " << assign(edgeHandle, q_handle) << std::endl;
+                  std::cout << "vertex: " << assign(vertexHandle, q_handle) << std::endl;*/
+
+      isContainedInOtherElement[i] = (assign(volumeHandle, q_handle) && volumeHandle->mark())
+                                     or assign(facetHandle, q_handle)
+                                     or assign(edgeHandle, q_handle)
+                                     or assign(vertexHandle, q_handle);
+    }
+  }
+
+  /*    std::cout << "isVertexInIntersection1: " << isVertexInIntersection << std::endl;
+      std::cout << "isContainedInOtherElement1: " << isContainedInOtherElement << std::endl;*/
+
+  //
+  for (size_t i=0; i<refElement.size(1); i++) {
+
+    // how many vertices of this face are a vertex of the intersection?
+    int count = 0;
+    for (size_t j=0; j<refElement.size(i,1,dim); j++)
+      count += isVertexInIntersection[refElement.subEntity(i,1,j,dim)][0];
+
+    if (count != 0 and count != refElement.size(i,1,dim)) {
+      neighborIntersects[i] = true;
+    } else {
+
+      int countInOther = 0;
+      for (size_t j=0; j<refElement.size(i,1,dim); j++)
+        countInOther += isContainedInOtherElement[refElement.subEntity(i,1,j,dim)][0];
+
+      neighborIntersects[i] = (countInOther == refElement.size(i,1,dim));
+
+    }
+
+  }
+
+  //std::cout << "neighborIntersects: " << neighborIntersects << std::endl;
+
+}
 
 /* IMPLEMENTATION */
 
@@ -329,11 +420,10 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
     } else
       DUNE_THROW(Dune::GridError, "Type " << grid1ElementType << " not supported by CGALMerge yet");
-    //std::cout << "P = "; print_polygon (P);
+    //std::cout << "P = " << P << std::endl;
 
     // Turn polyhedron into a Nef polyhedron
     Nef_Polyhedron_3 NP(P);
-
     Polyhedron_3 Q;
 
     if (grid2ElementType.isSimplex()) {
@@ -349,7 +439,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       DUNE_THROW(Dune::GridError, "Type " << grid2ElementType << " not supported by CGALMerge yet");
 
     Nef_Polyhedron_3 NQ(Q);
-    //std::cout << "Q = "; print_polygon (Q);
+    //std::cout << "Q = " << Q << std::endl;
 
     //////////////////////////////////////////////////////////
     // Compute the intersection of P and Q.
@@ -367,6 +457,14 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       std::cerr << "N1 is not a 2-manifold." << std::endl;
 
     //std::cout << "Intersection has " << intersection.number_of_vertices() << " vertices\n";
+
+    //////////////////////////////////////////////////////////////////////
+    //  Compute for each face of each element whether it will also intersect
+    //////////////////////////////////////////////////////////////////////
+
+    computeNeighborIntersections(P, grid1ElementType, grid1ElementCorners, NQ, intersection, neighborIntersects1);
+
+    computeNeighborIntersections(Q, grid2ElementType, grid2ElementCorners, NP, intersection, neighborIntersects2);
 
     //////////////////////////////////////////////////////////////////////
     //  Triangulate the intersection polyhedron.
