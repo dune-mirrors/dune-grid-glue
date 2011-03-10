@@ -130,8 +130,7 @@ typedef CGAL::Nef_polyhedron_3<Kernel> Nef_Polyhedron_3;
  * I guess the proper solution is a separate implementation class.
  */
 template<int dim, typename T>
-void computeNeighborIntersections(const Polyhedron_3& P,
-                                  const Dune::GeometryType& elementType,
+void computeNeighborIntersections(const Dune::GeometryType& elementType,
                                   const std::vector<Dune::FieldVector<T,dim> >& elementCorners,
                                   const Nef_Polyhedron_3& NQ,
                                   const Nef_Polyhedron_3& intersection,
@@ -144,14 +143,9 @@ void computeNeighborIntersections(const Polyhedron_3& P,
   Dune::BitSetVector<1> isVertexInIntersection(elementCorners.size(),false);
   Dune::BitSetVector<1> isContainedInOtherElement(elementCorners.size(),false);
 
-  //typename Polyhedron_3::Point_const_iterator vIt = P.points_begin();
-
-  //for (int i=0; vIt != P.points_end(); ++vIt, ++i) {
   for (int i=0; i!=elementCorners.size(); ++i) {
 
     Point_3 v(elementCorners[i][0], elementCorners[i][1], elementCorners[i][2]);
-    /*        std::cout << CGAL::to_double((*vIt)[0]) << "  " << CGAL::to_double((*vIt)[1])
-                      << "  " << CGAL::to_double((*vIt)[2]) << std::endl;*/
 
     typename Nef_Polyhedron_3::Volume_const_handle volumeHandle;
     typename Nef_Polyhedron_3::Halffacet_const_handle facetHandle;
@@ -462,9 +456,9 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
     //  Compute for each face of each element whether it will also intersect
     //////////////////////////////////////////////////////////////////////
 
-    computeNeighborIntersections(P, grid1ElementType, grid1ElementCorners, NQ, intersection, neighborIntersects1);
+    computeNeighborIntersections(grid1ElementType, grid1ElementCorners, NQ, intersection, neighborIntersects1);
 
-    computeNeighborIntersections(Q, grid2ElementType, grid2ElementCorners, NP, intersection, neighborIntersects2);
+    computeNeighborIntersections(grid2ElementType, grid2ElementCorners, NP, intersection, neighborIntersects2);
 
     //////////////////////////////////////////////////////////////////////
     //  Triangulate the intersection polyhedron.
