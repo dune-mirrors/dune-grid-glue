@@ -598,14 +598,11 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     isHandled0.clear();
     isCandidate0.clear();
 
-    std::set<unsigned int> potentialSeeds;
-
     while (!candidates0.empty()) {
 
       unsigned int currentCandidate0 = candidates0.top();
       candidates0.pop();
       isHandled0.insert(currentCandidate0);
-      potentialSeeds.insert(currentCandidate0);
 
       // Test whether there is an intersection between currentCandidate0 and currentCandidate1
       std::bitset<(1<<grid1Dim)> neighborIntersects1;
@@ -680,8 +677,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         int seed = -1;
 
         // Look among the ones that have been tested during the last iteration.
-        for (typename std::set<unsigned int>::iterator seedIt = potentialSeeds.begin();
-             seedIt != potentialSeeds.end(); ++seedIt) {
+        for (typename std::set<unsigned int>::iterator seedIt = isHandled0.begin();
+             seedIt != isHandled0.end(); ++seedIt) {
 
           std::bitset<(1<<grid1Dim)> neighborIntersects1;
           std::bitset<(1<<grid2Dim)> neighborIntersects2;
