@@ -146,7 +146,7 @@ class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, Globa
 
   typedef Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<G> > Base;
 
-  enum { simplex_corners = coorddim + static_cast<int>(mydim == coorddim) };
+  enum { simplex_corners = mydim+1 };
 
 public:
 
@@ -193,7 +193,7 @@ class LocalSimplexGeometry
 {
   typedef Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<G, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
 
-  enum { simplex_corners = coorddim + static_cast<int>(mydim == coorddim) };
+  enum { simplex_corners = mydim+1 };
 
 public:
 
