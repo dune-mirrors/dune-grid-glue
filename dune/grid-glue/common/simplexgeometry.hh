@@ -18,8 +18,8 @@
  * parts inside those faces
  */
 
-#ifndef SIMPLEXGEOMETRY_HH_
-#define SIMPLEXGEOMETRY_HH_
+#ifndef SIMPLEXGEOMETRY_HH
+#define SIMPLEXGEOMETRY_HH
 
 #include <dune/common/static_assert.hh>
 #include <dune/common/array.hh>
@@ -229,4 +229,4 @@ public:
 };
 
 
-#endif // SIMPLEXGEOMETRY_HH_
+#endif // SIMPLEXGEOMETRY_HH
