@@ -170,12 +170,7 @@ public:
     // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
     Base::operator=(Base(type, coordinates));
   }
-#if 0
-  const Dune::FieldVector<typename G::ctype, coorddim + static_cast<int>(coorddim==mydim)> outerNormal(const Dune::FieldVector<typename G::ctype, mydim>& local) const
-  {
-    return This::NormalComputer::outerNormal(*this, local);
-  }
-#endif
+
 };
 
 
