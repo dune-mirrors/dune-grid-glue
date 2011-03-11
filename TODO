@@ -10,6 +10,8 @@
 - make index_ of NULL_INTERSECTION intersections_.size()
   * avoids if's in iterator-increment
   * allows to use size_t for _index
+- When gcc is used, CGAL needs the flag -frounding-math.  When other compilers
+  are used, some other flags may be necessary.
 
 For the upcoming paper:
 - remove target/domain naming
