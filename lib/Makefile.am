@@ -4,6 +4,7 @@ lib_LTLIBRARIES = libdunegridglue.la
 
 libdunegridglue_la_SOURCES = \
   ../dune/grid-glue/merging/cgalmerge.cc \
+  ../dune/grid-glue/merging/cgalmergeimp.cc \
   ../dune/grid-glue/merging/psurfacemerge.cc \
   ../dune/grid-glue/merging/standardmerge.cc
 libdunegridglue_la_CPPFLAGS = $(AM_CPPFLAGS) $(PSURFACE_CPPFLAGS)
