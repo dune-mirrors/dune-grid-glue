@@ -48,6 +48,16 @@ namespace Dune {
         del = ", ";
       }
     };
+    struct MultiVectorAssign
+    {
+      size_t pos1, pos2;
+      MultiVectorAssign(size_t p1, size_t p2) : pos1(p1), pos2(p2) {}
+      template <class E1, class E2>
+      void visit(E1& elem1, E2& elem2)
+      {
+        elem1[pos1] = elem2[pos2];
+      }
+    };
   } // end empty namespace
 #endif
 
@@ -107,11 +117,9 @@ namespace Dune {
       std::cerr << "Assign " << name << "," << pos
                 << "\n   from " << other.name << "," << other.pos << std::endl;
 #endif
-#warning TODO: Assign-TMP
-      get<0>() = other.get<0>();
-      get<1>() = other.get<1>();
-      get<2>() = other.get<2>();
-      get<3>() = other.get<3>();
+      MultiVectorAssign assign(pos, other.pos);
+      ForEachValuePair<T,const T> forEach(_vectors, other._vectors);
+      forEach.apply(assign);
     }
   };
 
