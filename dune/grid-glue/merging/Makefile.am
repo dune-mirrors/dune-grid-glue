@@ -2,6 +2,7 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 mergingdir = $(includedir)/dune/glue/merging
-merging_HEADERS = psurfacemerge.hh merger.hh
+merging_HEADERS = merger.hh \
+                  psurfacemerge.hh
 
 include $(top_srcdir)/am/global-rules
