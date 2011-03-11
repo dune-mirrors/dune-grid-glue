@@ -35,16 +35,16 @@
  * This geometry traits class configures BasicGeometry to use only affine mappings
  * for simplicial (i.e. especially non-hybrid) grid structures.
  */
-template<typename G, bool is_manifold = false>
+template<class ctype, int dim, int dimworld, bool is_manifold = false>
 struct LocalSimplexGeometryTraits
-  : public Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld - static_cast<int>(is_manifold), true>
+  : public Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld - static_cast<int>(is_manifold), true>
 {
-  typedef typename Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld - static_cast<int>(is_manifold), true> Base;
+  typedef typename Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld - static_cast<int>(is_manifold), true> Base;
 
   // This traits class represents a single type only ...
   static const bool hybrid = false;
   // ... and this type is 'simplex'.
-  static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< G::dimension >::type::id;
+  static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< dim >::type::id;
 
   template<class Topology>
   struct Mapping
@@ -68,16 +68,16 @@ struct LocalSimplexGeometryTraits
  * This geometry traits class configures BasicGeometry to use only affine mappings
  * for simplicial (i.e. especially non-hybrid) grid structures.
  */
-template<typename G>
+template<class ctype, int dim, int dimworld>
 struct GlobalSimplexGeometryTraits
-  : public Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, true>
+  : public Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld, true>
 {
-  typedef typename Dune::GenericGeometry::DefaultGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, true> Base;
+  typedef typename Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld, true> Base;
 
   // This traits class represents a single type only...
   static const bool hybrid = false;
   // ... and this type is 'simplex'.
-  static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< G::dimensionworld >::type::id;
+  static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< dimworld >::type::id;
 
   /**
    * Note:
@@ -113,11 +113,11 @@ struct GlobalSimplexGeometryTraits
  * for the case of exclusively simplicial geometries.
  */
 template<int mydim, int coorddim, typename G>
-class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<G> >
+class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> >
 {
   typedef SimplexGeometry<mydim, coorddim, G> This;
 
-  typedef Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<G> > Base;
+  typedef Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> > Base;
 
   enum { simplex_corners = mydim+1 };
 
@@ -162,9 +162,9 @@ public:
  */
 template<int mydim, int coorddim, typename G>
 class LocalSimplexGeometry
-  : public Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<G, (coorddim < static_cast<int>(G::dimensionworld))> >
+  : public Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> >
 {
-  typedef Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<G, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
+  typedef Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
 
   enum { simplex_corners = mydim+1 };
 
