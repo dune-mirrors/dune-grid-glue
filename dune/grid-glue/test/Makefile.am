@@ -1,6 +1,10 @@
 # -*- tab-width: 4; indent-tabs-mode: nil -*-
 
-TESTPROGS = nonoverlappingcouplingtest overlappingcouplingtest mixeddimcouplingtest
+TESTPROGS = \
+    mixeddimcouplingtest       \
+    multivectortest            \
+    nonoverlappingcouplingtest \
+    overlappingcouplingtest
 
 if MPI
 TESTPROGS += nonoverlappingcouplingtest_mpi
@@ -32,6 +36,7 @@ nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
 nonoverlappingcouplingtest_mpi_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
+multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 orientedsubfacetest_SOURCES = orientedsubfacetest.cc
 
