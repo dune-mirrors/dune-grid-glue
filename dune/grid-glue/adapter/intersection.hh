@@ -9,7 +9,7 @@
 #ifndef DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
 #define DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
 
-#include <dune/grid-glue/adapter/simplexgeometry.hh>
+#include <dune/grid-glue/common/simplexgeometry.hh>
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 #define ONLY_SIMPLEX_INTERSECTIONS

@@ -2,6 +2,7 @@
 
 commondir = $(includedir)/dune/grid-glue/common
 
-common_HEADERS = orientedsubface.hh
+common_HEADERS = orientedsubface.hh \
+                 simplexgeometry.hh
 
 include $(top_srcdir)/am/global-rules

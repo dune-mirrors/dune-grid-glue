@@ -6,7 +6,6 @@ adapter_HEADERS = \
 	gridglue.hh\
 	gridgluevtkwriter.hh\
 	intersection.hh\
-	intersectioniterator.hh\
-	simplexgeometry.hh
+	intersectioniterator.hh
 
 include $(top_srcdir)/am/global-rules
