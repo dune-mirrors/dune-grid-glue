@@ -98,6 +98,28 @@ public:
                                     std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
                                     );
 
+  static void compute2dIntersection(const Dune::GeometryType& grid1ElementType,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
+                                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                    unsigned int grid1Index,
+                                    const Dune::GeometryType& grid2ElementType,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
+                                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                    unsigned int grid2Index,
+                                    std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                    );
+
+  static void compute3dIntersection(const Dune::GeometryType& grid1ElementType,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
+                                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                    unsigned int grid1Index,
+                                    const Dune::GeometryType& grid2ElementType,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
+                                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                    unsigned int grid2Index,
+                                    std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                    );
+
 private:
 
 };

@@ -241,6 +241,157 @@ void CGALMergeImp<dim,T>::compute1dIntersection(const Dune::GenericGeometry::Bas
 }
 
 
+template<int dim, typename T>
+void CGALMergeImp<dim,T>::compute2dIntersection(const Dune::GeometryType& grid1ElementType,
+                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
+                                                const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                                unsigned int grid1Index,
+                                                const Dune::GeometryType& grid2ElementType,
+                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
+                                                const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                                unsigned int grid2Index,
+                                                std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                                )
+{
+  typedef CGAL::Cartesian<Number_type>               Kernel;
+  typedef typename Kernel::Point_2 Point_2;
+  typedef CGAL::Polygon_2<Kernel>                    Polygon_2;
+  typedef CGAL::Polygon_with_holes_2<Kernel>         Polygon_with_holes_2;
+  typedef std::list<Polygon_with_holes_2>            Pwh_list_2;
+
+  // Construct the two input polygons.
+  Polygon_2 P;
+  if (grid1ElementType.isQuadrilateral()) {
+    // Vertex renumbering Dune --> CGAL
+    P.push_back( Point_2(grid1ElementCorners[0][0], grid1ElementCorners[0][1]));
+    P.push_back( Point_2(grid1ElementCorners[1][0], grid1ElementCorners[1][1]));
+    P.push_back( Point_2(grid1ElementCorners[3][0], grid1ElementCorners[3][1]));
+    P.push_back( Point_2(grid1ElementCorners[2][0], grid1ElementCorners[2][1]));
+
+  } else
+    for (std::size_t i=0; i<grid1ElementCorners.size(); i++)
+      P.push_back (Point_2 (grid1ElementCorners[i][0], grid1ElementCorners[i][1]));
+
+  //std::cout << "P = "; print_polygon (P);
+
+  Polygon_2 Q;
+  if (grid2ElementType.isQuadrilateral()) {
+    // Vertex renumbering Dune --> CGAL
+    Q.push_back( Point_2(grid2ElementCorners[0][0], grid2ElementCorners[0][1]));
+    Q.push_back( Point_2(grid2ElementCorners[1][0], grid2ElementCorners[1][1]));
+    Q.push_back( Point_2(grid2ElementCorners[3][0], grid2ElementCorners[3][1]));
+    Q.push_back( Point_2(grid2ElementCorners[2][0], grid2ElementCorners[2][1]));
+
+  } else
+    for (std::size_t i=0; i<grid2ElementCorners.size(); i++)
+      Q.push_back (Point_2 (grid2ElementCorners[i][0], grid2ElementCorners[i][1]));
+
+  //std::cout << "Q = "; print_polygon (Q);
+
+  // Compute the intersection of P and Q.
+  Pwh_list_2 intR;
+  typename Pwh_list_2::const_iterator it;
+
+  CGAL::intersection (P, Q, std::back_inserter(intR));
+
+  //std::cout << "The intersection:" << std::endl;
+  for (it = intR.begin(); it != intR.end(); ++it) {
+    //             std::cout << "--> ";
+    //             print_polygon_with_holes (*it);
+
+    // Intersections of bounded polygons must be bounded
+    assert(!it->is_unbounded());
+
+    // We cannot have holes
+    assert (it->number_of_holes() == 0);
+
+    // Today I am too lazy to program anything more general than convex intersections
+    if (not it->outer_boundary().is_convex())
+      DUNE_THROW(Dune::NotImplemented, "CGAL merging with non-convex intersections");
+
+    // Less than 3 vertices would be a bug
+    assert(it->outer_boundary().size() >= 3);
+
+    // Now we split the intersection into triangles.  We use the simplest algorithm
+    // conceivable, because triangle quality is not important here.
+
+    typename Polygon_2::Vertex_const_iterator anchor = it->outer_boundary().vertices_begin();
+
+    typename Polygon_2::Vertex_const_iterator next = anchor;
+    ++next;
+
+    typename Polygon_2::Vertex_const_iterator nextNext = next;
+    ++nextNext;
+
+    do {
+
+      // Make Dune types from CGAL types
+
+      // The following check is there, because we are using CGAL::to_double().
+      // If necessary the code can be generalized somewhat.
+      dune_static_assert((Dune::is_same<T,double>::value), "T must be 'double'");
+
+
+      Dune::FieldVector<T,dim> anchorFieldVector;
+      anchorFieldVector[0] = CGAL::to_double(anchor->x());
+      anchorFieldVector[1] = CGAL::to_double(anchor->y());
+
+      Dune::FieldVector<T,dim> nextFieldVector;
+      nextFieldVector[0] = CGAL::to_double(next->x());
+      nextFieldVector[1] = CGAL::to_double(next->y());
+
+      Dune::FieldVector<T,dim> nextNextFieldVector;
+      nextNextFieldVector[0] = CGAL::to_double(nextNext->x());
+      nextNextFieldVector[1] = CGAL::to_double(nextNext->y());
+
+      // ///////////////////////////////////////////////////
+      // Output the triangle (anchor, next, nextNext)
+      // ///////////////////////////////////////////////////
+
+      intersections.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
+
+      // Compute local coordinates in the grid1 element
+      intersections.back().grid1Local_[0] = grid1Geometry.local(anchorFieldVector);
+      intersections.back().grid1Local_[1] = grid1Geometry.local(nextFieldVector);
+      intersections.back().grid1Local_[2] = grid1Geometry.local(nextNextFieldVector);
+
+      // Compute local coordinates in the grid1 element
+      intersections.back().grid2Local_[0] = grid2Geometry.local(anchorFieldVector);
+      intersections.back().grid2Local_[1] = grid2Geometry.local(nextFieldVector);
+      intersections.back().grid2Local_[2] = grid2Geometry.local(nextNextFieldVector);
+
+      // Set indices
+      intersections.back().grid1Entity_ = grid1Index;
+      intersections.back().grid2Entity_ = grid2Index;
+
+      //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
+
+      // move to the next triangle
+      ++next;
+      ++nextNext;
+
+    } while (nextNext != it->outer_boundary().vertices_end());
+
+  }
+
+}
+
+
+template<int dim, typename T>
+void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1ElementType,
+                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
+                                                const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                                unsigned int grid1Index,
+                                                const Dune::GeometryType& grid2ElementType,
+                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
+                                                const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                                unsigned int grid2Index,
+                                                std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                                )
+{}
+
+
+
 // Explicit instantiation
 #ifdef CGAL_EXTERN
 #define DECL extern
