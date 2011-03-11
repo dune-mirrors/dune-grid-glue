@@ -200,6 +200,47 @@ void CGALMergeImp<dim,T>::computeNeighborIntersections(const Dune::GeometryType&
 }
 
 
+template<int dim, typename T>
+void CGALMergeImp<dim,T>::compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
+                                                const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                                unsigned int grid1Index,
+                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
+                                                const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                                unsigned int grid2Index,
+                                                std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                                )
+{
+  // Check consistent orientation
+  // \todo Reverse the orientation if this check fails
+  assert(grid1ElementCorners[0][0] <= grid1ElementCorners[1][0]);
+  assert(grid2ElementCorners[0][0] <= grid2ElementCorners[1][0]);
+
+  T lowerBound = std::max(grid1ElementCorners[0][0], grid2ElementCorners[0][0]);
+  T upperBound = std::min(grid1ElementCorners[1][0], grid2ElementCorners[1][0]);
+
+  if (lowerBound <= upperBound) {    // Intersection is non-empty
+
+    intersections.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
+
+    // Compute local coordinates in the grid1 element
+    intersections.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+    intersections.back().grid1Local_[1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+
+    // Compute local coordinates in the grid2 element
+    intersections.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+    intersections.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+
+    // Set indices
+    intersections.back().grid1Entity_ = grid1Index;
+    intersections.back().grid2Entity_ = grid2Index;
+
+    //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
+
+  }
+
+}
+
+
 // Explicit instantiation
 #ifdef CGAL_EXTERN
 #define DECL extern

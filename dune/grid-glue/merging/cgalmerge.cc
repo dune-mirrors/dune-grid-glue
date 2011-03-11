@@ -78,33 +78,10 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
   switch (dim) {
   case 1 : {
 
-    // Check consistent orientation
-    // \todo Reverse the orientation if this check fails
-    assert(grid1ElementCorners[0][0] <= grid1ElementCorners[1][0]);
-    assert(grid2ElementCorners[0][0] <= grid2ElementCorners[1][0]);
-
-    T lowerBound = std::max(grid1ElementCorners[0][0], grid2ElementCorners[0][0]);
-    T upperBound = std::min(grid1ElementCorners[1][0], grid2ElementCorners[1][0]);
-
-    if (lowerBound <= upperBound) {      // Intersection is non-empty
-
-      this->intersections_.push_back(RemoteSimplicialIntersection());
-
-      // Compute local coordinates in the grid1 element
-      this->intersections_.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid1Local_[1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
-
-      // Compute local coordinates in the grid2 element
-      this->intersections_.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
-
-      // Set indices
-      this->intersections_.back().grid1Entity_ = grid1Index;
-      this->intersections_.back().grid2Entity_ = grid2Index;
-
-      //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
-
-    }
+    CGALMergeImp<dim,T>::compute1dIntersection(grid1Geometry, grid1ElementCorners, grid1Index,
+                                               grid2Geometry, grid2ElementCorners, grid2Index,
+                                               this->intersections_
+                                               );
 
     break;
   }
@@ -208,7 +185,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         // Output the triangle (anchor, next, nextNext)
         // ///////////////////////////////////////////////////
 
-        this->intersections_.push_back(RemoteSimplicialIntersection());
+        this->intersections_.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
 
         // Compute local coordinates in the grid1 element
         this->intersections_.back().grid1Local_[0] = grid1Geometry.local(anchorFieldVector);
@@ -336,7 +313,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       // Output the tetrahedron
       // ///////////////////////////////////////////////////
 
-      this->intersections_.push_back(RemoteSimplicialIntersection());
+      this->intersections_.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
 
       // Compute local coordinates in the grid1 and grid2 elements
       for (int i=0; i<4; i++) {
@@ -430,7 +407,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
           // Output the tetrahedron (anchor, next, nextNext, centroid)
           // ////////////////////////////////////////////////////////////
 
-          this->intersections_.push_back(RemoteSimplicialIntersection());
+          this->intersections_.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
 
           // Compute local coordinates in the grid1 element
           this->intersections_.back().grid1Local_[0] = grid1Geometry.local(anchorFieldVector);

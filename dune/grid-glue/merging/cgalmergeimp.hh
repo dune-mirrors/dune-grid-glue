@@ -18,8 +18,9 @@
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
-
 #include <dune/grid/genericgeometry/geometry.hh>
+
+#include <dune/grid-glue/merging/remotesimplicialintersection.hh>
 
 #ifdef HAVE_CGAL  // without CGAL we can still handle 1d problems
 // 2d
@@ -66,7 +67,7 @@ typedef CGAL::Quotient<CGAL::MP_Float>                Number_type;
    \tparam dim Grid dimension of the coupling grids.  The world dimension is assumed to be the same.
    \tparam T Type used for coordinates
  */
-template<int dim, typename T = double>
+template<int dim, typename T>
 class CGALMergeImp
 {
 
@@ -88,6 +89,14 @@ public:
                                            );
 
 
+  static void compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
+                                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                    unsigned int grid1Index,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
+                                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                    unsigned int grid2Index,
+                                    std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                    );
 
 private:
 
