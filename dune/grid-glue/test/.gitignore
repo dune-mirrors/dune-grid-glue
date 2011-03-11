@@ -1,0 +1,9 @@
+Makefile.in
+Makefile
+.deps
+mixeddimcouplingtest
+multivectortest
+nonoverlappingcouplingtest
+nonoverlappingcouplingtest_mpi
+orientedsubfacetest
+overlappingcouplingtest
