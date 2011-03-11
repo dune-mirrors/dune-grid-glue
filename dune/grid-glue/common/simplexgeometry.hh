@@ -13,9 +13,7 @@
  */
 /**
  * @file
- * @brief contains customized geometry implementations that can be used to
- * describe the mappings between simplex element, their faces and simplicial
- * parts inside those faces
+ * @brief contains customized geometry implementations for simplices
  */
 
 #ifndef SIMPLEXGEOMETRY_HH
@@ -32,17 +30,10 @@
 
 /**
  * @class LocalSimplexGeometryTraits
- * @brief tweaked geometry traits passed to GenericGeometry::BasicGeometry
+ * @brief Geometry traits for simplices passed to GenericGeometry::BasicGeometry
  *
  * This geometry traits class configures BasicGeometry to use only affine mappings
  * for simplicial (i.e. especially non-hybrid) grid structures.
- * The traits class is suited for the use with full-dimensional structures as well as
- * manifolds and flat hyperdimensional meshes. It chooses the correct mapping from
- * a subface simplex in the surface (or the grid mesh) to it's parent codimension 0
- * entity. Take the 3D case with (dimension, dimensionworld) for example:
- * - surfaces    (3,3): triangle -> tetrahedron
- * - manifolds   (2,3): triangle -> triangle
- * - flat meshes (2,2): triangle -> triangle
  */
 template<typename G, bool is_manifold = false>
 struct LocalSimplexGeometryTraits
@@ -55,21 +46,12 @@ struct LocalSimplexGeometryTraits
   // ... and this type is 'simplex'.
   static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< G::dimension >::type::id;
 
-  /**
-   * Note:
-   * The coorddimension of the mapping is set to the adjusted value of dimWorld!
-   * It won't work if you use G::dimensionworld, instead the construct  "G::dimensionworld - static_cast<int>(is_manifold)"
-   * has to be used, which is identical with Base::dimWorld.
-   * The problem only occurs when working with manifold, hence the name of the template parameter.
-   */
   template<class Topology>
   struct Mapping
   {
     typedef Dune::GenericGeometry::CoordStorage<typename Base::CoordTraits, Topology, Base::dimWorld>                        CornerStorage;
     typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
   };
-
-  // caching configuration chosen in base class is fine
 
 #define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
 #if DUNE_COMMON_VERSION_NUMBER < 21
@@ -81,17 +63,10 @@ struct LocalSimplexGeometryTraits
 
 /**
  * @class SimplexGeometryTraits
- * @brief tweaked geometry traits passed to Dune::GenericGeometry::BasicGeometry
+ * @brief Geometry traits for simplex elements passed to Dune::GenericGeometry::BasicGeometry
  *
  * This geometry traits class configures BasicGeometry to use only affine mappings
  * for simplicial (i.e. especially non-hybrid) grid structures.
- * The traits class is suited for the use with full-dimensional structures as well as
- * manifolds and flat hyperdimensional meshes. It chooses the correct mapping from
- * a subface simplex in the surface (or the grid mesh) to it's parent codimension 0
- * entity. Take the 3D case with (dimension, dimensionworld) for example:
- * - surfaces    (3,3): triangle -> tetrahedron
- * - manifolds   (2,3): triangle -> tetrahedron
- * - flat meshes (2,2): triangle -> triangle
  */
 template<typename G>
 struct GlobalSimplexGeometryTraits
@@ -116,8 +91,6 @@ struct GlobalSimplexGeometryTraits
     typedef Dune::GenericGeometry::CoordStorage<typename Base::CoordTraits, Topology, Base::dimWorld>                        CornerStorage;
     typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
   };
-
-  // caching configuration chosen in base class is fine
 
 
 #define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
