@@ -4,7 +4,6 @@
 - orientedSubface für Subentities beliebiger Kodimension verallgemeinern
 - GridGlueVTKWriter doesn't seem to work
 - GridGlueVTKWriter crashes when started on an empty GridGlue
-- compile mergers into separate lib
 - use hybrid geometries instead of simplex geometries (this will allow
   construction of different geometry types)
 - make index_ of NULL_INTERSECTION intersections_.size()
