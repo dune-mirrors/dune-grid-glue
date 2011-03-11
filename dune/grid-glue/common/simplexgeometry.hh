@@ -115,8 +115,6 @@ struct GlobalSimplexGeometryTraits
 template<int mydim, int coorddim, typename G>
 class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> >
 {
-  typedef SimplexGeometry<mydim, coorddim, G> This;
-
   typedef Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> > Base;
 
   enum { simplex_corners = mydim+1 };
