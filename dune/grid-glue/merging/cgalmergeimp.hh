@@ -113,10 +113,12 @@ public:
                                     const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
                                     const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
                                     unsigned int grid1Index,
+                                    std::bitset<(1<<dim)>& neighborIntersects1,
                                     const Dune::GeometryType& grid2ElementType,
                                     const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
                                     const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
                                     unsigned int grid2Index,
+                                    std::bitset<(1<<dim)>& neighborIntersects2,
                                     std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
                                     );
 
