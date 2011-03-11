@@ -3,6 +3,9 @@
 #ifndef DUNE_MULTIVECTOR_HH
 #define DUNE_MULTIVECTOR_HH
 
+#include <dune/common/tuples.hh>
+#include <dune/common/tupleutility.hh>
+#include <dune/common/typetraits.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/typetraits.hh>
 #include <vector>
@@ -12,42 +15,70 @@
 
 namespace Dune {
 
+#ifndef DOXYGEN
+  // TMPs for the MultiVector tuples stuff
+  namespace {
+    struct MultiVectorAssertSize
+    {
+      size_t sz_;
+      MultiVectorAssertSize(size_t sz) : sz_(sz) {}
+      template <class E>
+      void visit(E& elem) { assert(elem.size() == sz_); }
+    };
+    struct MultiVectorEraser
+    {
+      size_t front, back;
+      MultiVectorEraser(size_t f, size_t b) : front(f), back(b) {}
+      template <class E>
+      void visit(E& elem)
+      {
+        elem.erase( elem.begin()+front, elem.begin()+back );
+      }
+    };
+    struct MultiVectorPrinter
+    {
+      std::ostream & s;
+      size_t pos;
+      std::string del;
+      MultiVectorPrinter(std::ostream & _s, size_t p) : s(_s), pos(p), del("") {}
+      template <class E>
+      void visit(E& elem)
+      {
+        s << del << elem[pos];
+        del = ", ";
+      }
+    };
+  } // end empty namespace
+#endif
+
   /**
      proxy object to give access
+
+     @tparam T the tuple< vector<...> > type
    */
-  template<typename A, typename B, typename C, typename D>
+  template< typename T >
   struct MultiDataProxy;
 
-  template<typename A, typename B, typename C, typename D>
+  template< typename T >
   struct MultiDataProxy
   {
-    typedef MultiDataProxy<typename remove_const<A>::type,
-        typename remove_const<B>::type,
-        typename remove_const<C>::type,
-        typename remove_const<D>::type> MutableProxy;
-    typedef MultiDataProxy<const typename remove_const<A>::type,
-        const typename remove_const<B>::type,
-        const typename remove_const<C>::type,
-        const typename remove_const<D>::type> ConstProxy;
-
-    A & _a;
-    B & _b;
-    C & _c;
-    D & _d;
+    typedef MultiDataProxy<typename remove_const<T>::type> MutableProxy;
+    typedef MultiDataProxy<const typename remove_const<T>::type> ConstProxy;
+    T & _vectors;
 
     int pos;
     std::string name;
-    MultiDataProxy(A& a, B& b, C& c, D& d, size_t pos, std::string _n) :
-      _a(a), _b(b), _c(c), _d(d), pos(pos), name(_n) {}
+    MultiDataProxy(T & v, size_t pos, std::string _n) :
+      _vectors(v), pos(pos), name(_n) {}
     MultiDataProxy(ConstProxy & other) :
-      _a(other._a), _b(other._b), _c(other._c), _d(other._d), pos(other.pos), name(other.name) {}
+      _vectors(other._vectors), pos(other.pos), name(other.name) {}
     MultiDataProxy(MutableProxy & other) :
-      _a(other._a), _b(other._b), _c(other._c), _d(other._d), pos(other.pos), name(other.name) {}
+      _vectors(other._vectors), pos(other.pos), name(other.name) {}
     // compare
-    bool operator == (const MultiDataProxy & other) const { return a() == other.a(); }
-    bool operator != (const MultiDataProxy & other) const { return a() != other.a(); }
-    bool operator  < (const MultiDataProxy & other) const { return a()  < other.a(); }
-    bool operator  > (const MultiDataProxy & other) const { return a()  > other.a(); }
+    bool operator == (const MultiDataProxy & other) const { return get<0>() == other.get<0>(); }
+    bool operator != (const MultiDataProxy & other) const { return get<0>() != other.get<0>(); }
+    bool operator  < (const MultiDataProxy & other) const { return get<0>()  < other.get<0>(); }
+    bool operator  > (const MultiDataProxy & other) const { return get<0>()  > other.get<0>(); }
     // assign
     MultiDataProxy& operator = (const ConstProxy & other) {
       assign(other);
@@ -59,14 +90,16 @@ namespace Dune {
     }
 
     // access
-    typename A::reference  a () { return _a[pos]; }
-    typename B::reference  b () { return _b[pos]; }
-    typename C::reference  c () { return _c[pos]; }
-    typename D::reference  d () { return _d[pos]; }
-    typename A::value_type a () const { return _a[pos]; }
-    typename B::value_type b () const { return _b[pos]; }
-    typename C::value_type c () const { return _c[pos]; }
-    typename D::value_type d () const { return _d[pos]; }
+    template <size_t N>
+    typename TypeTraits<typename tuple_element<N,T>::type>::ReferredType::reference
+    get() {
+      return Dune::get<N>(_vectors)[pos];
+    }
+    template <size_t N>
+    typename TypeTraits<typename tuple_element<N,T>::type>::ReferredType::const_reference
+    get() const {
+      return Dune::get<N>(_vectors)[pos];
+    }
   private:
     template<typename P>
     void assign(const P & other) {
@@ -74,43 +107,44 @@ namespace Dune {
       std::cerr << "Assign " << name << "," << pos
                 << "\n   from " << other.name << "," << other.pos << std::endl;
 #endif
-      a() = other.a();
-      b() = other.b();
-      c() = other.c();
-      d() = other.d();
+#warning TODO: Assign-TMP
+      get<0>() = other.get<0>();
+      get<1>() = other.get<1>();
+      get<2>() = other.get<2>();
+      get<3>() = other.get<3>();
     }
   };
 
-  template<typename A, typename B, typename C, typename D>
-  std::ostream& operator<< (std::ostream & s, const MultiDataProxy<A,B,C,D> & i)
+  template< typename T >
+  std::ostream& operator<< (std::ostream & s, const MultiDataProxy<T> & i)
   {
-    return s << "("
-           << i.a() << ", "
-           << i.b() << ", "
-           << i.c() << ", "
-           << i.d() << ")";
+    s << "(";
+    MultiVectorPrinter printer(s, i.pos);
+    ForEachValue<T> forEach(i._vectors);
+    forEach.apply(printer);
+    s << ")";
+    return s;
   }
 
-  template<typename A, typename B, typename C, typename D>
+  template< typename T >
   class MultiVectorIterator :
-    public Dune::BidirectionalIteratorFacade< MultiVectorIterator<A,B,C,D>,
-        MultiDataProxy<A,B,C,D> >
+    public Dune::BidirectionalIteratorFacade< MultiVectorIterator<T>,
+        MultiDataProxy<T> >
   {
     // friend class MultiVectorIterator<typename remove_const<C>::type, typename remove_const<T>::type >;
     // friend class TestIterator<const typename remove_const<C>::type, const typename remove_const<T>::type >;
   public:
-    mutable MultiDataProxy<A,B,C,D> data;
+    mutable MultiDataProxy<T> data;
 
     // constructors
-    MultiVectorIterator(A& a, B& b, C& c, D& d, size_t n, std::string i) :
-      data(a,b,c,d, n, i) {}
+    MultiVectorIterator(T & v, size_t n, std::string i) :
+      data(v,n,i) {}
     MultiVectorIterator(const MultiVectorIterator & other) :
       data(other.data)
     {
 #ifdef DEBUG_MULTIVEC
       std::cerr << "Copy Iterator " << data.name << "," << data.pos << std::endl;
 #endif
-
     }
 
     size_t pos() const { return data.pos; }
@@ -121,11 +155,7 @@ namespace Dune {
       // std::cerr << "Assign Iterator " << data.name << "," << data.pos
       //           << "\n   from " << other.data.name << "," << other.data.pos << std::endl;
 #endif
-      assert(other.data._a == data._a
-             && other.data._b == data._b
-             && other.data._c == data._c
-             && other.data._d == data._d);
-
+      assert(other.data._vectors == data._vectors);
       data.pos = other.data.pos;
       return *this;
     }
@@ -137,16 +167,8 @@ namespace Dune {
       // std::cerr << "Compare " << data.name << "," << data.pos
       //           << " with " << other.data.name << "," << other.data.pos << "\n";
 #endif
-      assert(other.data._a == data._a
-             && other.data._b == data._b
-             && other.data._c == data._c
-             && other.data._d == data._d);
-
+      assert(other.data._vectors == data._vectors);
       return other.data.pos == data.pos;
-      // && other.data._a == data._a
-      // && other.data._b == data._b
-      // && other.data._c == data._c
-      // && other.data._d == data._d;
     }
     // in-/decrement
     void increment()
@@ -164,7 +186,7 @@ namespace Dune {
       data.pos--;
     }
     // dereference
-    MultiDataProxy<A,B,C,D>& dereference() const
+    MultiDataProxy<T>& dereference() const
     {
 #ifdef DEBUG_MULTIVEC
       std::cerr << "dereference " << data.name << "," << data.pos << std::endl;
@@ -178,22 +200,19 @@ namespace Dune {
   {
     typedef MultiVector<A,B,C,D> vector_type;
 
-    A & _a;
-    B & _b;
-    C & _c;
-    D & _d;
-
-    std::string name;
+    typedef tuple<A&, B&, C&, D&> T;
+    T _vectors;
+    std::string _name;
 
   public:
     //! container interface typedefs
     //! \{
 
     /** \brief Type of the values stored by the container */
-    typedef MultiDataProxy<A,B,C,D> value_type;
+    typedef MultiDataProxy<T> value_type;
 
     /** \brief Type of the const values stored by the container */
-    typedef MultiDataProxy<A,B,C,D> const_value_type;
+    typedef MultiDataProxy<T> const_value_type;
 
     /** \brief Reference to a small block of bits */
     typedef value_type reference;
@@ -214,45 +233,56 @@ namespace Dune {
 
     //! iterators
     //! \{
-    typedef MultiVectorIterator<A,B,C,D> iterator;
-    typedef MultiVectorIterator<const A, const B, const C, const D> const_iterator;
+    typedef MultiVectorIterator<T> iterator;
+    typedef MultiVectorIterator<const T> const_iterator;
     //! \}
 
     MultiVector(A & a, B & b, C & c, D & d, std::string n = "?") :
-      _a(a), _b(b), _c(c), _d(d)
+      _vectors(tie(a,b,c,d))
     {
       assertSize();
-      name = n;
+      _name = n;
     }
 
     iterator begin()
     {
-      return iterator(_a,_b,_c,_d, 0, name);
+      return iterator(_vectors, 0, _name);
     }
 
     iterator end()
     {
       assertSize();
-      return iterator(_a,_b,_c,_d, _a.size(), name);
+      return iterator(_vectors, get<0>().size(), _name);
     }
 
     void erase(iterator front, iterator back)
     {
       assertSize();
-      _a.erase( _a.begin()+front.pos(), _a.begin()+back.pos());
-      _b.erase( _b.begin()+front.pos(), _b.begin()+back.pos());
-      _c.erase( _c.begin()+front.pos(), _c.begin()+back.pos());
-      _d.erase( _d.begin()+front.pos(), _d.begin()+back.pos());
+
+      MultiVectorEraser erase(front.pos(), back.pos());
+      ForEachValue<T> forEach(_vectors);
+      forEach.apply(erase);
     }
     size_t size() const {
       assertSize();
-      return _a.size();
+      return get<0>().size();
+    }
+
+    template <size_t N>
+    typename tuple_element<N,T>::type &
+    get() {
+      return Dune::get<N>(_vectors);
+    }
+    template <size_t N>
+    typename tuple_element<N,T>::type
+    get() const {
+      return Dune::get<N>(_vectors);
     }
   private:
     void assertSize() const {
-      assert(_a.size() == _b.size() &&
-             _a.size() == _c.size() &&
-             _a.size() == _d.size() );
+      MultiVectorAssertSize check(get<0>().size());
+      ForEachValue<const T> forEach(_vectors);
+      forEach.apply(check);
     }
   };
 

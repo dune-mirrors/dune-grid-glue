@@ -110,12 +110,12 @@ int main()
   MV::iterator n = i;
   while (++n != C.end())
   {
-    if (n->a() == i->a())
+    if (n->get<0>() == i->get<0>())
     {
       // merge entries
-      if (i->c() != true && n->c() == true)       // owner
+      if (i->get<2>() != true && n->get<2>() == true)       // owner
       {
-        n->d() = i->d();         // copy entity from current to next
+        n->get<3>() = i->get<3>();         // copy entity from current to next
         *i = *n;
       }
       else
