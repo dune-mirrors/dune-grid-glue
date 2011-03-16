@@ -78,29 +78,29 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
   switch (dim) {
   case 1 : {
 
-    CGALMergeImp<dim,T>::compute1dIntersection(grid1Geometry, grid1ElementCorners, grid1Index,
-                                               grid2Geometry, grid2ElementCorners, grid2Index,
-                                               this->intersections_
-                                               );
+    CGALMergeImp<dim,T,Number_type>::compute1dIntersection(grid1Geometry, grid1ElementCorners, grid1Index,
+                                                           grid2Geometry, grid2ElementCorners, grid2Index,
+                                                           this->intersections_
+                                                           );
 
     break;
   }
 #ifdef HAVE_CGAL
   case 2 : {
 
-    CGALMergeImp<dim,T>::compute2dIntersection(grid1ElementType, grid1Geometry, grid1ElementCorners, grid1Index,
-                                               grid2ElementType, grid2Geometry, grid2ElementCorners, grid2Index,
-                                               this->intersections_
-                                               );
+    CGALMergeImp<dim,T,Number_type>::compute2dIntersection(grid1ElementType, grid1Geometry, grid1ElementCorners, grid1Index,
+                                                           grid2ElementType, grid2Geometry, grid2ElementCorners, grid2Index,
+                                                           this->intersections_
+                                                           );
 
     break;
   }
   case 3 : {
 
-    CGALMergeImp<dim,T>::compute3dIntersection(grid1ElementType, grid1Geometry, grid1ElementCorners, grid1Index, neighborIntersects1,
-                                               grid2ElementType, grid2Geometry, grid2ElementCorners, grid2Index, neighborIntersects2,
-                                               this->intersections_
-                                               );
+    CGALMergeImp<dim,T,Number_type>::compute3dIntersection(grid1ElementType, grid1Geometry, grid1ElementCorners, grid1Index, neighborIntersects1,
+                                                           grid2ElementType, grid2Geometry, grid2ElementCorners, grid2Index, neighborIntersects2,
+                                                           this->intersections_
+                                                           );
 
     break;
   }

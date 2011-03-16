@@ -34,7 +34,7 @@
 // GMP is installed. Use the GMP rational number-type.
   #include <CGAL/Gmpq.h>
 
-typedef CGAL::Gmpq Number_type;
+typedef CGAL::Gmpq Exact_number_type;
 
 #else
 
@@ -42,7 +42,7 @@ typedef CGAL::Gmpq Number_type;
   #include <CGAL/MP_Float.h>
   #include <CGAL/Quotient.h>
 
-typedef CGAL::Quotient<CGAL::MP_Float>                Number_type;
+typedef CGAL::Quotient<CGAL::MP_Float>                Exact_number_type;
 
 #endif
 
@@ -81,13 +81,14 @@ void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container
 }
 
 /** See CGAL manual Section 25.3.7 to see how this works
- * \tparam T The type used by Dune for coordinates
+ * \tparam Dune_number_type The type used by Dune for coordinates
+ * \tparam CGAL_number_type The type used by CGAL for coordinates
  * \tparam dim The element dimension.  It must be 3.
  *         It is a template parameter only to make the code compile
  */
-template <int dim, class T>
-void CGALMergeImp<dim,T>::makeHexahedron(Polyhedron_3& P,
-                                         const std::vector<Dune::FieldVector<T,dim> >& c)
+template <int dim, class Dune_number_type, class CGAL_number_type>
+void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::makeHexahedron(Polyhedron_3& P,
+                                                                         const std::vector<Dune::FieldVector<Dune_number_type,dim> >& c)
 {
   // appends a cube of size [0,1]ˆ3 to the polyhedron P.
   CGAL_precondition( P.is_valid());
@@ -127,15 +128,15 @@ void CGALMergeImp<dim,T>::makeHexahedron(Polyhedron_3& P,
  * because we don't want cgal stuff in cgalmerge.hh at all (because of compile time).
  * I guess the proper solution is a separate implementation class.
  */
-template<int dim, typename T>
-void CGALMergeImp<dim,T>::computeNeighborIntersections(const Dune::GeometryType& elementType,
-                                                       const std::vector<Dune::FieldVector<T,dim> >& elementCorners,
-                                                       const Nef_Polyhedron_3& NQ,
-                                                       const Nef_Polyhedron_3& intersection,
-                                                       std::bitset<(1<<dim)>& neighborIntersects
-                                                       )
+template<int dim, class Dune_number_type, class CGAL_number_type>
+void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::computeNeighborIntersections(const Dune::GeometryType& elementType,
+                                                                                       const std::vector<Dune::FieldVector<Dune_number_type,dim> >& elementCorners,
+                                                                                       const Nef_Polyhedron_3& NQ,
+                                                                                       const Nef_Polyhedron_3& intersection,
+                                                                                       std::bitset<(1<<dim)>& neighborIntersects
+                                                                                       )
 {
-  const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(elementType);
+  const Dune::GenericReferenceElement<Dune_number_type,dim>& refElement = Dune::GenericReferenceElements<Dune_number_type,dim>::general(elementType);
 
   // for each vertex: is it also a vertex of the intersection?
   Dune::BitSetVector<1> isVertexInIntersection(elementCorners.size(),false);
@@ -200,35 +201,35 @@ void CGALMergeImp<dim,T>::computeNeighborIntersections(const Dune::GeometryType&
 }
 
 
-template<int dim, typename T>
-void CGALMergeImp<dim,T>::compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
-                                                const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
-                                                unsigned int grid1Index,
-                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
-                                                const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
-                                                unsigned int grid2Index,
-                                                std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
-                                                )
+template<int dim, class Dune_number_type, class CGAL_number_type>
+void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
+                                                                                const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid1ElementCorners,
+                                                                                unsigned int grid1Index,
+                                                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid2Geometry,
+                                                                                const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid2ElementCorners,
+                                                                                unsigned int grid2Index,
+                                                                                std::vector<RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim> >& intersections
+                                                                                )
 {
   // Check consistent orientation
   // \todo Reverse the orientation if this check fails
   assert(grid1ElementCorners[0][0] <= grid1ElementCorners[1][0]);
   assert(grid2ElementCorners[0][0] <= grid2ElementCorners[1][0]);
 
-  T lowerBound = std::max(grid1ElementCorners[0][0], grid2ElementCorners[0][0]);
-  T upperBound = std::min(grid1ElementCorners[1][0], grid2ElementCorners[1][0]);
+  Dune_number_type lowerBound = std::max(grid1ElementCorners[0][0], grid2ElementCorners[0][0]);
+  Dune_number_type upperBound = std::min(grid1ElementCorners[1][0], grid2ElementCorners[1][0]);
 
   if (lowerBound <= upperBound) {    // Intersection is non-empty
 
-    intersections.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
+    intersections.push_back(RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim>());
 
     // Compute local coordinates in the grid1 element
-    intersections.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-    intersections.back().grid1Local_[1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+    intersections.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<Dune_number_type,dim>(lowerBound));
+    intersections.back().grid1Local_[1] = grid1Geometry.local(Dune::FieldVector<Dune_number_type,dim>(upperBound));
 
     // Compute local coordinates in the grid2 element
-    intersections.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-    intersections.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+    intersections.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<Dune_number_type,dim>(lowerBound));
+    intersections.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<Dune_number_type,dim>(upperBound));
 
     // Set indices
     intersections.back().grid1Entity_ = grid1Index;
@@ -241,19 +242,19 @@ void CGALMergeImp<dim,T>::compute1dIntersection(const Dune::GenericGeometry::Bas
 }
 
 
-template<int dim, typename T>
-void CGALMergeImp<dim,T>::compute2dIntersection(const Dune::GeometryType& grid1ElementType,
-                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
-                                                const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
-                                                unsigned int grid1Index,
-                                                const Dune::GeometryType& grid2ElementType,
-                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
-                                                const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
-                                                unsigned int grid2Index,
-                                                std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
-                                                )
+template<int dim, class Dune_number_type, class CGAL_number_type>
+void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute2dIntersection(const Dune::GeometryType& grid1ElementType,
+                                                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
+                                                                                const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid1ElementCorners,
+                                                                                unsigned int grid1Index,
+                                                                                const Dune::GeometryType& grid2ElementType,
+                                                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid2Geometry,
+                                                                                const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid2ElementCorners,
+                                                                                unsigned int grid2Index,
+                                                                                std::vector<RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim> >& intersections
+                                                                                )
 {
-  typedef CGAL::Cartesian<Number_type>               Kernel;
+  typedef CGAL::Cartesian<CGAL_number_type>               Kernel;
   typedef typename Kernel::Point_2 Point_2;
   typedef CGAL::Polygon_2<Kernel>                    Polygon_2;
   typedef CGAL::Polygon_with_holes_2<Kernel>         Polygon_with_holes_2;
@@ -329,18 +330,18 @@ void CGALMergeImp<dim,T>::compute2dIntersection(const Dune::GeometryType& grid1E
 
       // The following check is there, because we are using CGAL::to_double().
       // If necessary the code can be generalized somewhat.
-      dune_static_assert((Dune::is_same<T,double>::value), "T must be 'double'");
+      dune_static_assert((Dune::is_same<Dune_number_type,double>::value), "Dune_number_type must be 'double'");
 
 
-      Dune::FieldVector<T,dim> anchorFieldVector;
+      Dune::FieldVector<Dune_number_type,dim> anchorFieldVector;
       anchorFieldVector[0] = CGAL::to_double(anchor->x());
       anchorFieldVector[1] = CGAL::to_double(anchor->y());
 
-      Dune::FieldVector<T,dim> nextFieldVector;
+      Dune::FieldVector<Dune_number_type,dim> nextFieldVector;
       nextFieldVector[0] = CGAL::to_double(next->x());
       nextFieldVector[1] = CGAL::to_double(next->y());
 
-      Dune::FieldVector<T,dim> nextNextFieldVector;
+      Dune::FieldVector<Dune_number_type,dim> nextNextFieldVector;
       nextNextFieldVector[0] = CGAL::to_double(nextNext->x());
       nextNextFieldVector[1] = CGAL::to_double(nextNext->y());
 
@@ -348,7 +349,7 @@ void CGALMergeImp<dim,T>::compute2dIntersection(const Dune::GeometryType& grid1E
       // Output the triangle (anchor, next, nextNext)
       // ///////////////////////////////////////////////////
 
-      intersections.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
+      intersections.push_back(RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim>());
 
       // Compute local coordinates in the grid1 element
       intersections.back().grid1Local_[0] = grid1Geometry.local(anchorFieldVector);
@@ -377,24 +378,24 @@ void CGALMergeImp<dim,T>::compute2dIntersection(const Dune::GeometryType& grid1E
 }
 
 
-template<int dim, typename T>
-void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1ElementType,
-                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
-                                                const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
-                                                unsigned int grid1Index,
-                                                std::bitset<(1<<dim)>& neighborIntersects1,
-                                                const Dune::GeometryType& grid2ElementType,
-                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
-                                                const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
-                                                unsigned int grid2Index,
-                                                std::bitset<(1<<dim)>& neighborIntersects2,
-                                                std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
-                                                )
+template<int dim, class Dune_number_type, class CGAL_number_type>
+void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute3dIntersection(const Dune::GeometryType& grid1ElementType,
+                                                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
+                                                                                const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid1ElementCorners,
+                                                                                unsigned int grid1Index,
+                                                                                std::bitset<(1<<dim)>& neighborIntersects1,
+                                                                                const Dune::GeometryType& grid2ElementType,
+                                                                                const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid2Geometry,
+                                                                                const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid2ElementCorners,
+                                                                                unsigned int grid2Index,
+                                                                                std::bitset<(1<<dim)>& neighborIntersects2,
+                                                                                std::vector<RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim> >& intersections
+                                                                                )
 {
-  typedef CGAL::Cartesian<Number_type>   Kernel;
-  typedef typename Kernel::Point_3 Point_3;
-  typedef CGAL::Polyhedron_3<Kernel>     Polyhedron_3;
-  typedef CGAL::Nef_polyhedron_3<Kernel> Nef_Polyhedron_3;
+  /*    typedef CGAL::Cartesian<CGAL_number_type>   Kernel;
+      typedef typename Kernel::Point_3       Point_3;
+      typedef CGAL::Polyhedron_3<Kernel>     Polyhedron_3;
+      typedef CGAL::Nef_polyhedron_3<Kernel> Nef_Polyhedron_3;*/
 
   // Construct the two input polyhedra.
   Polyhedron_3 P;
@@ -406,7 +407,7 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
                        Point_3 (grid1ElementCorners[3][0], grid1ElementCorners[3][1], grid1ElementCorners[3][2]));
   } if (grid1ElementType.isCube()) {
 
-    CGALMergeImp<dim,T>::makeHexahedron(P, grid1ElementCorners);
+    makeHexahedron(P, grid1ElementCorners);
 
   } else
     DUNE_THROW(Dune::GridError, "Type " << grid1ElementType << " not supported by CGALMerge yet");
@@ -423,7 +424,7 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
                        Point_3 (grid2ElementCorners[3][0], grid2ElementCorners[3][1], grid2ElementCorners[3][2]));
   } if (grid2ElementType.isCube()) {
 
-    CGALMergeImp<dim,T>::makeHexahedron(Q, grid2ElementCorners);
+    makeHexahedron(Q, grid2ElementCorners);
 
   } else
     DUNE_THROW(Dune::GridError, "Type " << grid2ElementType << " not supported by CGALMerge yet");
@@ -452,9 +453,9 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
   //  Compute for each face of each element whether it will also intersect
   //////////////////////////////////////////////////////////////////////
 
-  CGALMergeImp<dim,T>::computeNeighborIntersections(grid1ElementType, grid1ElementCorners, NQ, intersection, neighborIntersects1);
+  computeNeighborIntersections(grid1ElementType, grid1ElementCorners, NQ, intersection, neighborIntersects1);
 
-  CGALMergeImp<dim,T>::computeNeighborIntersections(grid2ElementType, grid2ElementCorners, NP, intersection, neighborIntersects2);
+  computeNeighborIntersections(grid2ElementType, grid2ElementCorners, NP, intersection, neighborIntersects2);
 
   //////////////////////////////////////////////////////////////////////
   //  Triangulate the intersection polyhedron.
@@ -473,9 +474,9 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
 
     // The following check is there, because we are using CGAL::to_double().
     // If necessary the code can be generalized somewhat.
-    dune_static_assert((Dune::is_same<T,double>::value), "T must be 'double'");
+    dune_static_assert((Dune::is_same<Dune_number_type,double>::value), "Dune_number_type must be 'double'");
 
-    Dune::array<Dune::FieldVector<T,dim>, 4> duneVertexPos;
+    Dune::array<Dune::FieldVector<Dune_number_type,dim>, 4> duneVertexPos;
 
     typename Polyhedron_3::Point_iterator vIt = intersectionP.points_begin();
 
@@ -489,7 +490,7 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
     // Output the tetrahedron
     // ///////////////////////////////////////////////////
 
-    intersections.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
+    intersections.push_back(RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim>());
 
     // Compute local coordinates in the grid1 and grid2 elements
     for (int i=0; i<4; i++) {
@@ -509,7 +510,7 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
     //   Compute the centroid
     //////////////////////////////////////////////////////////////////
 
-    Dune::FieldVector<T,dim> centroid(0);
+    Dune::FieldVector<Dune_number_type,dim> centroid(0);
 
     for (typename Polyhedron_3::Point_iterator vIt = intersectionP.points_begin();
          vIt != intersectionP.points_end();
@@ -534,7 +535,7 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
       ////////////////////////////////////////////////////////////
       unsigned int nVertices = fIt->facet_degree();
 
-      std::vector<Dune::FieldVector<T,dim> > facetVertices(nVertices);
+      std::vector<Dune::FieldVector<Dune_number_type,dim> > facetVertices(nVertices);
 
       typename Polyhedron_3::Facet::Halfedge_around_facet_circulator fVCirc = fIt->facet_begin();
       assert (fVCirc != 0);        // an empty circulator would be an error
@@ -567,11 +568,11 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
 
         // The following check is there, because we are using CGAL::to_double().
         // If necessary the code can be generalized somewhat.
-        dune_static_assert((Dune::is_same<T,double>::value), "T must be 'double'");
+        dune_static_assert((Dune::is_same<Dune_number_type,double>::value), "Dune_number_type must be 'double'");
 
-        Dune::FieldVector<T,dim> anchorFieldVector;
-        Dune::FieldVector<T,dim> nextFieldVector;
-        Dune::FieldVector<T,dim> nextNextFieldVector;
+        Dune::FieldVector<Dune_number_type,dim> anchorFieldVector;
+        Dune::FieldVector<Dune_number_type,dim> nextFieldVector;
+        Dune::FieldVector<Dune_number_type,dim> nextNextFieldVector;
 
         for (int i=0; i<dim; i++) {
           anchorFieldVector[i]   = CGAL::to_double(anchor->vertex()->point()[i]);
@@ -583,7 +584,7 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
         // Output the tetrahedron (anchor, next, nextNext, centroid)
         // ////////////////////////////////////////////////////////////
 
-        intersections.push_back(RemoteSimplicialIntersection<T,dim,dim,dim>());
+        intersections.push_back(RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim>());
 
         // Compute local coordinates in the grid1 element
         intersections.back().grid1Local_[0] = grid1Geometry.local(anchorFieldVector);
@@ -623,7 +624,10 @@ void CGALMergeImp<dim,T>::compute3dIntersection(const Dune::GeometryType& grid1E
 #else
 #define DECL
 #endif
-template class CGALMergeImp<1,double>;
-template class CGALMergeImp<2,double>;
-template class CGALMergeImp<3,double>;
+/*template class CGALMergeImp<1,double,double>;
+   template class CGALMergeImp<2,double,double>;
+   template class CGALMergeImp<3,double,double>;*/
+template class CGALMergeImp<1,double,Exact_number_type>;
+template class CGALMergeImp<2,double,Exact_number_type>;
+template class CGALMergeImp<3,double,Exact_number_type>;
 #undef DECL

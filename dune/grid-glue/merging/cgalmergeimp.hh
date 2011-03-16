@@ -39,87 +39,68 @@
 #include <CGAL/IO/Nef_polyhedron_iostream_3.h>
 #endif
 
-#ifdef HAVE_CGAL
-
-#ifdef CGAL_USE_GMP
-
-// GMP is installed. Use the GMP rational number-type.
-  #include <CGAL/Gmpq.h>
-
-typedef CGAL::Gmpq Number_type;
-
-#else
-
-// GMP is not installed. Use CGAL's exact rational number-type.
-  #include <CGAL/MP_Float.h>
-  #include <CGAL/Quotient.h>
-
-typedef CGAL::Quotient<CGAL::MP_Float>                Number_type;
-
-#endif
-#endif
-
 
 /** \brief Implementation of the Merger concept using the CGAL library
  *
  * This is a separate implementation class to keep all CGAL stuff out of the cgalmerge.hh header.
 
    \tparam dim Grid dimension of the coupling grids.  The world dimension is assumed to be the same.
-   \tparam T Type used for coordinates
+   \tparam Dune_number_type Type used by Dune for coordinates
+   \tparam CGAL_number_type Type used by CGAL for coordinates
  */
-template<int dim, typename T>
+template<int dim, class Dune_number_type, class CGAL_number_type>
 class CGALMergeImp
 {
 
 public:
-  typedef CGAL::Cartesian<Number_type>   Kernel;
-  typedef Kernel::Point_3 Point_3;
+  typedef CGAL::Cartesian<CGAL_number_type>   Kernel;
+  typedef typename Kernel::Point_3 Point_3;
   typedef CGAL::Polyhedron_3<Kernel>     Polyhedron_3;
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_Polyhedron_3;
 
   static void makeHexahedron(Polyhedron_3& P,
-                             const std::vector<Dune::FieldVector<T,dim> >& c);
+                             const std::vector<Dune::FieldVector<Dune_number_type,dim> >& c);
 
 
   static void computeNeighborIntersections(const Dune::GeometryType& elementType,
-                                           const std::vector<Dune::FieldVector<T,dim> >& elementCorners,
+                                           const std::vector<Dune::FieldVector<Dune_number_type,dim> >& elementCorners,
                                            const Nef_Polyhedron_3& NQ,
                                            const Nef_Polyhedron_3& intersection,
                                            std::bitset<(1<<dim)>& neighborIntersects
                                            );
 
 
-  static void compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
-                                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+  static void compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
+                                    const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid1ElementCorners,
                                     unsigned int grid1Index,
-                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
-                                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid2Geometry,
+                                    const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid2ElementCorners,
                                     unsigned int grid2Index,
-                                    std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                    std::vector<RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim> >& intersections
                                     );
 
   static void compute2dIntersection(const Dune::GeometryType& grid1ElementType,
-                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
-                                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
+                                    const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid1ElementCorners,
                                     unsigned int grid1Index,
                                     const Dune::GeometryType& grid2ElementType,
-                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
-                                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid2Geometry,
+                                    const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid2ElementCorners,
                                     unsigned int grid2Index,
-                                    std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                    std::vector<RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim> >& intersections
                                     );
 
   static void compute3dIntersection(const Dune::GeometryType& grid1ElementType,
-                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid1Geometry,
-                                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
+                                    const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid1ElementCorners,
                                     unsigned int grid1Index,
                                     std::bitset<(1<<dim)>& neighborIntersects1,
                                     const Dune::GeometryType& grid2ElementType,
-                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> >& grid2Geometry,
-                                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                                    const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid2Geometry,
+                                    const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid2ElementCorners,
                                     unsigned int grid2Index,
                                     std::bitset<(1<<dim)>& neighborIntersects2,
-                                    std::vector<RemoteSimplicialIntersection<T,dim,dim,dim> >& intersections
+                                    std::vector<RemoteSimplicialIntersection<Dune_number_type,dim,dim,dim> >& intersections
                                     );
 
 private:
