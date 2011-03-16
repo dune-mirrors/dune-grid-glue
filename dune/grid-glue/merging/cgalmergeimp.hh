@@ -54,6 +54,11 @@ class CGALMergeImp
 
 public:
   typedef CGAL::Cartesian<CGAL_number_type>   Kernel;
+
+  typedef typename Kernel::Point_2 Point_2;
+  typedef CGAL::Polygon_2<Kernel>                    Polygon_2;
+  typedef CGAL::Polygon_with_holes_2<Kernel>         Polygon_with_holes_2;
+
   typedef typename Kernel::Point_3 Point_3;
   typedef CGAL::Polyhedron_3<Kernel>     Polyhedron_3;
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_Polyhedron_3;
