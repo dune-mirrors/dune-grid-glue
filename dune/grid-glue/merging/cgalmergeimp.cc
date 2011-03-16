@@ -619,15 +619,11 @@ void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute3dIntersection(
 
 
 // Explicit instantiation
-#ifdef CGAL_EXTERN
-#define DECL extern
-#else
-#define DECL
-#endif
+#ifndef CGAL_EXTERN
 /*template class CGALMergeImp<1,double,double>;
    template class CGALMergeImp<2,double,double>;
    template class CGALMergeImp<3,double,double>;*/
 template class CGALMergeImp<1,double,Exact_number_type>;
 template class CGALMergeImp<2,double,Exact_number_type>;
 template class CGALMergeImp<3,double,Exact_number_type>;
-#undef DECL
+#endif
