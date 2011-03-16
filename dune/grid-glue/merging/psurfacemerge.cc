@@ -493,40 +493,11 @@ unsigned int PSurfaceMerge<dim, dimworld, T>::OverlapManager::firstTargetParent(
 }
 
 // Explicit instantiation
-#ifdef PSURFACE_EXTERN
-#define DECL extern
-#else
-#define DECL
+#ifndef PSURFACE_EXTERN
+template class PSurfaceMerge<1,1,double>;
+template class PSurfaceMerge<1,2,double>;
+template class PSurfaceMerge<2,2,double>;
+template class PSurfaceMerge<2,3,double>;
 #endif
-#define PSURFACE_INSTANTIATION(D,W,T) \
-  DECL template \
-  void PSurfaceMerge<D,W,T>::build(const std::vector<Dune::FieldVector<T,W> >& domain_coords, \
-                                   const std::vector<unsigned int>& domain_elements, \
-                                   const std::vector<Dune::GeometryType>& domain_element_types, \
-                                   const std::vector<Dune::FieldVector<T,W> >& target_coords, \
-                                   const std::vector<unsigned int>& target_elements, \
-                                   const std::vector<Dune::GeometryType>& target_element_types \
-                                   ); \
-  DECL template \
-  bool PSurfaceMerge<D,W,T>::grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const; \
-  DECL template \
-  bool PSurfaceMerge<D,W,T>::grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const; \
-  DECL template \
-  PSurfaceMerge<D,W,T>::LocalCoords PSurfaceMerge<D,W,T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const; \
-  DECL template \
-  PSurfaceMerge<D,W,T>::LocalCoords PSurfaceMerge<D,W,T>::grid2ParentLocal(unsigned int idx, unsigned int corner) const; \
-  DECL template \
-  void PSurfaceMerge<D,W,T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<D,ctype> >& unordered); \
-  DECL template \
-  unsigned int PSurfaceMerge<D,W,T>::OverlapManager::firstDomainParent(unsigned int parent) const; \
-  DECL template \
-  unsigned int PSurfaceMerge<D,W,T>::OverlapManager::firstTargetParent(unsigned int parent) const; \
-
-PSURFACE_INSTANTIATION(1,1, double);
-PSURFACE_INSTANTIATION(1,2, double);
-PSURFACE_INSTANTIATION(2,2, double);
-PSURFACE_INSTANTIATION(2,3, double);
-
-#undef DECL
 
 #endif // HAVE_PSURFACE

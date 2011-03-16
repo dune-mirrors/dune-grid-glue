@@ -130,30 +130,8 @@ inline bool CGALMerge<dim, T>::grid2SimplexMatched(unsigned int idx) const
 
 
 // Explicit instantiation
-#ifdef CGAL_EXTERN
-#define DECL extern
-#else
-#define DECL
+#ifndef CGAL_EXTERN
+template class CGALMerge<1,double>;
+template class CGALMerge<2,double>;
+template class CGALMerge<3,double>;
 #endif
-#define CGAL_INSTANTIATION(D,T)                                          \
-  DECL template void CGALMerge<D, T>::computeIntersection(const Dune::GeometryType& grid1ElementType, \
-                                                          const std::vector<Dune::FieldVector<T,D> >& grid1ElementCorners, \
-                                                          unsigned int grid1Index, \
-                                                          std::bitset<(1<<D)>& neighborIntersects1, \
-                                                          const Dune::GeometryType& grid2ElementType, \
-                                                          const std::vector<Dune::FieldVector<T,D> >& grid2ElementCorners, \
-                                                          unsigned int grid2Index, \
-                                                          std::bitset<(1<<D)>& neighborIntersects2); \
-\
-  DECL template bool CGALMerge<D, T>::grid1SimplexMatched(unsigned int idx) const; \
-\
-  DECL template bool CGALMerge<D, T>::grid2SimplexMatched(unsigned int idx) const
-
-CGAL_INSTANTIATION(1, double);
-CGAL_INSTANTIATION(2, double);
-CGAL_INSTANTIATION(3, double);
-// CGAL_INSTANTIATION(1, float);
-// CGAL_INSTANTIATION(2, float);
-// CGAL_INSTANTIATION(3, float);
-
-#undef DECL
