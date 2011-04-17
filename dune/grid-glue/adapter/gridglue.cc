@@ -316,7 +316,7 @@ GridGlue<P0, P1>::getIntersectionIndices(const typename GridGlueView<P0,P1,P>::G
   if (warning == 0)
   {
     std::cerr << "Warning: don't use ibegin(Entity&), this method is going to be removed,\n"
-              << "         as it is possible to implement it in an efficient way.\n";
+              << "         as it is impossible to implement it in an efficient way.\n";
     warning = 1;
   }
 
