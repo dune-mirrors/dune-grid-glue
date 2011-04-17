@@ -2,6 +2,13 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include "config.h"
 
+#include <iostream>
+
+#include <dune/common/version.hh>
+
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,1)
+// In versions of dune-grid prior to 2.1 this magic code was needed
+// to make GeometryGrid work.
 namespace Dune
 {
 
@@ -24,8 +31,7 @@ namespace Dune
   }
 
 }
-
-#include <iostream>
+#endif
 
 #include <dune/common/mpihelper.hh>
 #include <dune/common/fvector.hh>
