@@ -100,19 +100,14 @@ class MixedDimTrafo
   double yOffset_;
 public:
   MixedDimTrafo(double yOffset) : yOffset_(yOffset) {}
-  virtual Dune::FieldVector<ctype, dimw> operator()(const Dune::FieldVector<ctype, dim>& c) const
-  {
-    Dune::FieldVector<ctype, dimw> x(yOffset_);
-    x[0] = c[0];
-    for (int i=2; i<dimw ; i++)
-      x[i] = c[i-1];
-    return x;
-  }
 
   //! evaluate method for global mapping
   void evaluate ( const Dune::FieldVector<ctype, dim> &x, Dune::FieldVector<ctype, dimw> &y ) const
   {
-    y = (*this)(x);
+    y = yOffset_;
+    y[0] = x[0];
+    for (int i=2; i<dimw; i++)
+      y[i] = x[i-1];
   }
 };
 
