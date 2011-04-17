@@ -29,8 +29,7 @@
 #include "gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
 
-#define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
-#if DUNE_COMMON_VERSION_NUMBER > 20
+#if DUNE_VERSION_NEWER(DUNE_COMMON,2,1)
   #include <dune/common/parallel/indexset.hh>
   #include <dune/common/parallel/plocalindex.hh>
   #include <dune/common/parallel/remoteindices.hh>

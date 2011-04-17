@@ -21,6 +21,7 @@
 
 #include <dune/common/static_assert.hh>
 #include <dune/common/array.hh>
+#include <dune/common/version.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
 #include <dune/grid/genericgeometry/geometrytraits.hh>
 #include <dune/grid/genericgeometry/cornermapping.hh>
@@ -53,8 +54,7 @@ struct LocalSimplexGeometryTraits
     typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
   };
 
-#define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
-#if DUNE_COMMON_VERSION_NUMBER < 21
+#if ! DUNE_VERSION_NEWER(DUNE_COMMON,2,1)
   // The type used for 1d reference elements
   static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
 #endif
@@ -93,8 +93,7 @@ struct GlobalSimplexGeometryTraits
   };
 
 
-#define DUNE_COMMON_VERSION_NUMBER (DUNE_COMMON_VERSION_MAJOR * 10 + DUNE_COMMON_VERSION_MINOR)
-#if DUNE_COMMON_VERSION_NUMBER < 21
+#if ! DUNE_VERSION_NEWER(DUNE_COMMON,2,1)
   // The type used for 1d reference elements
   static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
 #endif
