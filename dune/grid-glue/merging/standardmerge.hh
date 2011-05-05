@@ -596,7 +596,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
                                                    grid1Coords,grid1_element_types, neighborIntersects1,
                                                    grid2Coords,grid2_element_types, neighborIntersects2);
 
-      for (int i=0; i<neighborIntersects2.size(); i++)
+      for (size_t i=0; i<neighborIntersects2.size(); i++)
         if (neighborIntersects2[i] and elementNeighbors2_[currentCandidate1][i] != -1)
           seeds[elementNeighbors2_[currentCandidate1][i]] = currentCandidate0;
 
