@@ -16,9 +16,7 @@
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
-#if HAVE_CGAL
 #include <dune/grid-glue/merging/cgalmerge.hh>
-#endif
 #include <dune/grid-glue/merging/conformingmerge.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
@@ -286,8 +284,8 @@ int main(int argc, char** argv)
   testSimplexGridsUG(cgalMerge2d, FieldVector<double,2>(0.05));
 
   testHybridGridsUG<2>(cgalMerge2d, FieldVector<double,2>(0.05));
-#endif
-#endif
+#endif // HAVE_CGAL
+#endif // HAVE_UG
 
 
   // //////////////////////////////////////////////////////////
