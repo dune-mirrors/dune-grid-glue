@@ -7,7 +7,7 @@
 #include <dune/grid-glue/merging/cgalmerge.hh>
 #include <dune/grid-glue/merging/cgalmergeimp.hh>
 
-#ifdef HAVE_CGAL  // without CGAL we can still handle 1d problems
+#if HAVE_CGAL  // without CGAL we can still handle 1d problems
 // 2d
 //#include "bso_rational_nt.h"
 #include <CGAL/Cartesian.h>
@@ -22,9 +22,6 @@
 #include <CGAL/Homogeneous.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
 #include <CGAL/IO/Nef_polyhedron_iostream_3.h>
-#endif
-
-#ifdef HAVE_CGAL
 
 #ifdef CGAL_USE_GMP
 
@@ -41,8 +38,10 @@ typedef CGAL::Gmpq Number_type;
 
 typedef CGAL::Quotient<CGAL::MP_Float>                Number_type;
 
-#endif
-#endif
+#endif // CGAL_USE_GMP
+#else
+typedef double Number_type;
+#endif // HAVE_CGAL
 
 /* IMPLEMENTATION */
 
@@ -85,7 +84,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
     break;
   }
-#ifdef HAVE_CGAL
+#if HAVE_CGAL
   case 2 : {
 
     CGALMergeImp<dim,T,Number_type>::compute2dIntersection(grid1ElementType, grid1Geometry, grid1ElementCorners, grid1Index,

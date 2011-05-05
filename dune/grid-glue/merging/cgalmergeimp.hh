@@ -22,7 +22,7 @@
 
 #include <dune/grid-glue/merging/remotesimplicialintersection.hh>
 
-#ifdef HAVE_CGAL  // without CGAL we can still handle 1d problems
+#if HAVE_CGAL  // without CGAL we can still handle 1d problems
 // 2d
 //#include "bso_rational_nt.h"
 #include <CGAL/Cartesian.h>
@@ -37,7 +37,7 @@
 #include <CGAL/Homogeneous.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
 #include <CGAL/IO/Nef_polyhedron_iostream_3.h>
-#endif
+#endif // HAVE_CGAL
 
 
 /** \brief Implementation of the Merger concept using the CGAL library
@@ -53,6 +53,7 @@ class CGALMergeImp
 {
 
 public:
+#if HAVE_CGAL
   typedef CGAL::Cartesian<CGAL_number_type>   Kernel;
 
   typedef typename Kernel::Point_2 Point_2;
@@ -73,7 +74,7 @@ public:
                                            const Nef_Polyhedron_3& intersection,
                                            std::bitset<(1<<dim)>& neighborIntersects
                                            );
-
+#endif // HAVE_CGAL
 
   static void compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
                                     const std::vector<Dune::FieldVector<Dune_number_type,dim> >& grid1ElementCorners,

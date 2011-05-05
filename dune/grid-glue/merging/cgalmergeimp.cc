@@ -10,7 +10,7 @@
 
 
 
-#ifdef HAVE_CGAL  // without CGAL we can still handle 1d problems
+#if HAVE_CGAL  // without CGAL we can still handle 1d problems
 // 2d
 //#include "bso_rational_nt.h"
 #include <CGAL/Cartesian.h>
@@ -25,9 +25,6 @@
 #include <CGAL/Homogeneous.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
 #include <CGAL/IO/Nef_polyhedron_iostream_3.h>
-#endif
-
-#ifdef HAVE_CGAL
 
 #ifdef CGAL_USE_GMP
 
@@ -44,7 +41,7 @@ typedef CGAL::Gmpq Exact_number_type;
 
 typedef CGAL::Quotient<CGAL::MP_Float>                Exact_number_type;
 
-#endif
+#endif // CGAL_USE_GMP
 
 // for debugging: print a CGAL polygon to the screen
 template<class Kernel, class Container>
@@ -118,7 +115,6 @@ void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::makeHexahedron(Polyhed
 
   CGAL_postcondition( P.is_valid());
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //  Compute for each face of each element whether it will also intersect
@@ -200,6 +196,7 @@ void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::computeNeighborInterse
 
 }
 
+#endif // HAVE_CGAL
 
 template<int dim, class Dune_number_type, class CGAL_number_type>
 void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute1dIntersection(const Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<Dune_number_type,dim,dim> >& grid1Geometry,
@@ -241,6 +238,7 @@ void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute1dIntersection(
 
 }
 
+#if HAVE_CGAL
 
 template<int dim, class Dune_number_type, class CGAL_number_type>
 void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute2dIntersection(const Dune::GeometryType& grid1ElementType,
@@ -607,9 +605,10 @@ void CGALMergeImp<dim,Dune_number_type,CGAL_number_type>::compute3dIntersection(
 
 }
 
-
+#endif // HAVE_CGAL
 
 // Explicit instantiation
+#if HAVE_CGAL
 #ifndef CGAL_EXTERN
 /*template class CGALMergeImp<1,double,double>;
    template class CGALMergeImp<2,double,double>;
@@ -618,3 +617,6 @@ template class CGALMergeImp<1,double,Exact_number_type>;
 template class CGALMergeImp<2,double,Exact_number_type>;
 template class CGALMergeImp<3,double,Exact_number_type>;
 #endif
+#else
+template class CGALMergeImp<1,double,double>;
+#endif // HAVE_CGAL
