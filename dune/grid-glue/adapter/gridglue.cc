@@ -251,7 +251,7 @@ void GridGlue<P0, P1>::mergePatches(
   }
 #endif
 
-  // cleanup theh merger
+  // cleanup the merger
   merger_->clear();
 }
 
