@@ -13,7 +13,7 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_COMMON,2,1)
+#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,1,0)
   #include <dune/common/parallel/communicator.hh>
 #else
   #include <dune/istl/communicator.hh>

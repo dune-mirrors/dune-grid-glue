@@ -6,7 +6,7 @@
 
 #include <dune/common/version.hh>
 
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,1)
+#if !DUNE_VERSION_NEWER_REV(DUNE_GRID,2,1,0)
 // In versions of dune-grid prior to 2.1 this magic code was needed
 // to make GeometryGrid work.
 namespace Dune
