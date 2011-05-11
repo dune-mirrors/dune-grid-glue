@@ -122,56 +122,6 @@ void testCoupling(const GlueType& glue)
       testIntersection(rIIt);
     }
   }
-
-  // ///////////////////////////////////////
-  //   Grid0 Entity centric
-  // ///////////////////////////////////////
-
-  typedef typename GlueType::Grid0View::template Codim<0>::Iterator DomainIterator;
-  DomainIterator dit = glue.template gridView<0>().template begin<0>();
-  DomainIterator dend = glue.template gridView<0>().template end<0>();
-  for (; dit != dend; ++dit)
-  {
-    unsigned int icount = 0;
-
-    // intersection iterators
-    typename GlueType::Grid0CellIntersectionIterator rIIt    = glue.template ibegin<0>(*dit);
-    typename GlueType::Grid0CellIntersectionIterator rIEndIt = glue.template iend<0>(*dit);
-    for (; rIIt!=rIEndIt; ++rIIt) {
-      // as we only have a single grid, even when testing the
-      // parallel extractor, this assertion should be true
-      assert (rIIt->inside() == dit);
-      testIntersection(rIIt);
-      icount++;
-    }
-
-    assert(icount == countInside0[view0mapper.map(*dit)]);
-    assert(icount == countOutside0[view0mapper.map(*dit)]);
-  }
-
-  // ///////////////////////////////////////
-  //   Grid1 Entity centric
-  // ///////////////////////////////////////
-
-  typedef typename GlueType::Grid1View::template Codim<0>::Iterator TargetIterator;
-  TargetIterator tit = glue.template gridView<1>().template begin<0>();
-  TargetIterator tend = glue.template gridView<1>().template end<0>();
-  for (; tit != tend; ++tit)
-  {
-    unsigned int icount = 0;
-
-    // intersection iterators
-    typename GlueType::Grid1CellIntersectionIterator rIIt    = glue.template ibegin<1>(*tit);
-    typename GlueType::Grid1CellIntersectionIterator rIEndIt = glue.template iend<1>(*tit);
-    for (; rIIt!=rIEndIt; ++rIIt) {
-      assert (rIIt->inside() == tit);
-      testIntersection(rIIt);
-      icount++;
-    }
-
-    assert(icount == countInside1[view1mapper.map(*tit)]);
-    assert(icount == countOutside1[view1mapper.map(*tit)]);
-  }
 }
 
 #endif // GRIDGLUE_COUPLINGTEST_HH

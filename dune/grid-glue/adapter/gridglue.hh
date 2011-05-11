@@ -306,10 +306,6 @@ protected:
                     std::vector<unsigned int> & faces,
                     std::vector<Dune::GeometryType>& geometryTypes) const;
 
-  /** \deprecated not needed once ibegin(Entity&) is removed */
-  template<int P>
-  bool getIntersectionIndices(const typename GridGlueView<P0,P1,P>::GridElement& e, std::vector<unsigned int> & indices) const;
-
 public:
 
   /*   C O N S T R U C T O R S   A N D   D E S T R U C T O R S   */
@@ -376,31 +372,6 @@ public:
   {
     return typename GridGlueView<P0,P1,I>::IntersectionIterator(this, index__sz);
   }
-
-
-  /**
-   * @brief gets an iterator over the intersections of a given codim 0 entity in grid I
-   *
-   * @tparam I number of the inside grid
-   * @param e codim 0 entity in grid I
-   * @return the iterator
-   */
-  /** \deprecated */
-  template<int I>
-  typename GridGlueView<P0,P1,I>::CellIntersectionIterator
-  ibegin(const typename GridGlueView<P0,P1,I>::GridElement& e) const;
-
-  /**
-   * @brief gets the end iterator for the intersections of a given codim 0 entity in grid I
-   *
-   * @tparam I number of the inside grid
-   * @param e codim 0 entity in grid I
-   * @return the end-iterator
-   */
-  /** \deprecated not needed once ibegin(Entity&) is removed */
-  template<int I>
-  typename GridGlueView<P0,P1,I>::CellIntersectionIterator
-  iend(const typename GridGlueView<P0,P1,I>::GridElement& e) const;
 
 
   /*! \brief Communicate information on the MergedGrid of a GridGlue
