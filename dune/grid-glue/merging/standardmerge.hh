@@ -210,22 +210,6 @@ private:
    */
   unsigned int grid2Parent(unsigned int idx) const;
 
-  /**
-   * @brief get the merged grid simplices refining a given grid1 simplex
-   * @param idx index of grid1 simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  bool grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
-
-  /**
-   * @brief get the merged grid simplices refining a given grid2 simplex
-   * @param idx index of grid2 simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  bool grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
-
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
 
@@ -745,37 +729,6 @@ inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2Parent(uns
 {
   assert(valid);
   return intersections_[idx].grid2Entity_;
-}
-
-template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
-{
-  assert(valid);
-
-#warning stupid linear algorithm!
-  indices.resize(0);
-
-  for (size_t i=0; i<intersections_.size(); i++)
-    if ((unsigned int) intersections_[i].grid1Entity_ == idx)
-      indices.push_back(i);
-
-  return indices.size() > 0;
-}
-
-
-template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
-{
-  assert(valid);
-
-#warning stupid linear algorithm!
-  indices.resize(0);
-
-  for (size_t i=0; i<intersections_.size(); i++)
-    if ((unsigned int) intersections_[i].grid2Entity_ == idx)
-      indices.push_back(i);
-
-  return indices.size() > 0;
 }
 
 

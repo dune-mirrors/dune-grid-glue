@@ -401,22 +401,6 @@ private:
    */
   unsigned int grid2Parent(unsigned int idx) const;
 
-  /**
-   * @brief get the merged grid simplices refining a given grid1 simplex
-   * @param idx index of grid1 simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  bool grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
-
-  /**
-   * @brief get the merged grid simplices refining a given target simplex
-   * @param idx index of target simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  bool grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const;
-
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
 

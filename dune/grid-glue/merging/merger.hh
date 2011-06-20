@@ -44,12 +44,6 @@ namespace {
       return m.grid1ParentLocal(idx, corner);
     }
 
-    static
-    bool simplexRefined(const Parent & m, unsigned int idx, std::vector<unsigned int>& indices)
-    {
-      return m.grid1SimplexRefined(idx, indices);
-    }
-
   };
 
   template <class ctype, int grid1Dim, int grid2Dim, int dimworld>
@@ -76,12 +70,6 @@ namespace {
     GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner)
     {
       return m.grid2ParentLocal(idx, corner);
-    }
-
-    static
-    bool simplexRefined(const Parent & m, unsigned int idx, std::vector<unsigned int>& indices)
-    {
-      return m.grid2SimplexRefined(idx, indices);
     }
 
   };
@@ -254,24 +242,6 @@ private:
    * @return index of the grid2 parent simplex
    */
   virtual unsigned int grid2Parent(unsigned int idx) const = 0;
-
-
-  /**
-   * @brief get the merged grid simplices refining a given grid1 simplex
-   * @param idx index of grid1 simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  virtual bool grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const = 0;
-
-
-  /**
-   * @brief get the merged grid simplices refining a given grid2 simplex
-   * @param idx index of grid2 simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  virtual bool grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const = 0;
 
 
   /**

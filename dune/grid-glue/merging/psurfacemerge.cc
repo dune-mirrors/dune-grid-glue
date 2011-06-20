@@ -304,54 +304,6 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
 
 template<int dim, int dimworld, typename T>
-bool PSurfaceMerge<dim, dimworld, T>::grid1SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
-{
-  unsigned int first = this->olm_.firstDomainParent(idx);
-  unsigned int count = 0;
-  // if the result is an index outside the range abort with error
-  if (first >= this->olm_.nOverlaps())
-  {
-    indices.resize(0);
-    return false;
-  }
-  // in case of a valid index:
-  // ...count the number of simplex overlaps with given domain parent
-  while (first + count < this->olm_.nOverlaps() && static_cast<unsigned int>(this->olm_.domain(first + count).tris[0]) == idx)
-    count++;
-  // ...fill the vector with the indices of the overlaps
-  indices.resize(count);
-  for (unsigned int i = 0; i < count; ++i)
-    indices[i] = first + i;
-  // ...return success
-  return true;
-}
-
-
-template<int dim, int dimworld, typename T>
-bool PSurfaceMerge<dim, dimworld, T>::grid2SimplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
-{
-  unsigned int first = this->olm_.firstTargetParent(idx);
-  unsigned int count = 0;
-  // if the result is an index outside the range abort with error
-  if (first >= this->olm_.nOverlaps())
-  {
-    indices.resize(0);
-    return false;
-  }
-  // in case of a valid index:
-  // ...count the number of simplex overlaps with given domain parent
-  while (first + count < this->olm_.nOverlaps() && static_cast<unsigned int>(this->olm_.target(first + count).tris[1]) == idx)
-    count++;
-  // ...fill the vector with the indices of the overlaps
-  indices.resize(count);
-  for (unsigned int i = 0; i < count; ++i)
-    indices[i] = this->olm_.domainIndex(first + i);     // return the CORRECT INDEX here!!!
-  // ...return success
-  return true;
-}
-
-
-template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
