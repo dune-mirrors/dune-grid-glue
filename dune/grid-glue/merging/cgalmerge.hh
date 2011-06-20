@@ -23,7 +23,6 @@
 
 #include <dune/grid-glue/merging/standardmerge.hh>
 
-
 /** \brief Implementation of the Merger concept using the CGAL library
 
    \tparam dim Grid dimension of the coupling grids.  The world dimension is assumed to be the same.
@@ -33,6 +32,7 @@ template<int dim, typename T = double>
 class CGALMerge
   : public StandardMerge<T,dim,dim,dim>
 {
+
 public:
 
   /*   E X P O R T E D   T Y P E S   A N D   C O N S T A N T S   */
@@ -47,6 +47,8 @@ public:
   typedef Dune::FieldVector<T, dim>  LocalCoords;
 
 private:
+
+  typedef typename StandardMerge<T,dim,dim,dim>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
   /** \brief Compute the intersection between two overlapping elements
 

@@ -25,7 +25,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/merger.hh>
-#include <dune/grid-glue/merging/remotesimplicialintersection.hh>
+
 
 
 /** \brief Common base class for many merger implementations: produce pairs of entities that _may_ intersect
@@ -70,6 +70,21 @@ protected:
   bool valid;
 
   StandardMerge() : valid(false) {}
+
+  struct RemoteSimplicialIntersection
+  {
+    // Local coordinates in the grid1 entity
+    Dune::array<Dune::FieldVector<T,grid1Dim>, dimworld+1> grid1Local_;
+
+    // Local coordinates in the grid1 entity
+    Dune::array<Dune::FieldVector<T,grid2Dim>, dimworld+1> grid2Local_;
+
+    //
+    int grid1Entity_;
+
+    int grid2Entity_;
+
+  };
 
   /** \brief Compute the intersection between two overlapping elements
 
@@ -118,7 +133,7 @@ protected:
   /*   M E M B E R   V A R I A B L E S   */
 
   /** \brief The computed intersections */
-  std::vector<RemoteSimplicialIntersection<T,grid1Dim,grid2Dim,dimworld> > intersections_;
+  std::vector<RemoteSimplicialIntersection> intersections_;
 
   /** \brief Temporary internal data */
   std::vector<std::vector<unsigned int> > grid1ElementCorners_;
