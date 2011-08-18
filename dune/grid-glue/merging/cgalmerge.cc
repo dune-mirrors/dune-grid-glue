@@ -112,6 +112,7 @@ void makeHexahedron(Polyhedron& P,
 }
 #endif
 
+#if HAVE_CGAL
 //////////////////////////////////////////////////////////////////////
 //  Compute for each face of each element whether it will also intersect
 //////////////////////////////////////////////////////////////////////
@@ -197,6 +198,7 @@ void computeNeighborIntersections(const Dune::GeometryType& elementType,
   //std::cout << "neighborIntersects: " << neighborIntersects << std::endl;
 
 }
+#endif  // #if HAVE_CGAL
 
 /* IMPLEMENTATION */
 
