@@ -400,15 +400,15 @@ namespace Dune {
         return IntersectionDataView<P0,P1,O>::localGeometry(*i_);
       }
 
-      /** \brief geometrical information about this intersection in global coordinates in the inside grid.
+      /** \brief geometrical information about this intersection in global coordinates of the inside grid.
           takes local domain intersection coords and maps them to domain grid world coords */
       const Geometry& geometry() const
       {
         return IntersectionDataView<P0,P1,I>::geometry(*i_);
       }
 
-      /** \brief geometrical information about this intersection in global coordinates in the inside grid.
-          takes local domain intersection coords and maps them to domain grid world coords */
+      /** \brief geometrical information about this intersection in global coordinates of the outside grid.
+          takes local domain intersection coords and maps them to target grid world coords */
       const OutsideGeometry& geometryOutside() const // DUNE_DEPRECATED
       {
         return IntersectionDataView<P0,P1,O>::geometry(*i_);
