@@ -135,13 +135,14 @@ void computeNeighborIntersections(const Dune::GeometryType& elementType,
                                   std::bitset<(1<<dim)>& neighborIntersects
                                   )
 {
+  typedef typename std::vector<Dune::FieldVector<T,dim> >::size_type size_type;
   const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(elementType);
 
   // for each vertex: is it also a vertex of the intersection?
   Dune::BitSetVector<1> isVertexInIntersection(elementCorners.size(),false);
   Dune::BitSetVector<1> isContainedInOtherElement(elementCorners.size(),false);
 
-  for (int i=0; i!=elementCorners.size(); ++i) {
+  for (size_type i=0; i!=elementCorners.size(); ++i) {
 
     Point_3 v(elementCorners[i][0], elementCorners[i][1], elementCorners[i][2]);
 
@@ -174,25 +175,23 @@ void computeNeighborIntersections(const Dune::GeometryType& elementType,
       std::cout << "isContainedInOtherElement1: " << isContainedInOtherElement << std::endl;*/
 
   //
-  for (size_t i=0; i<refElement.size(1); i++) {
+  for (size_t i=0; i<(size_t)refElement.size(1); i++) {
 
     // how many vertices of this face are a vertex of the intersection?
     int count = 0;
-    for (size_t j=0; j<refElement.size(i,1,dim); j++)
+    for (size_t j=0; j<(size_t)refElement.size(i,1,dim); j++)
       count += isVertexInIntersection[refElement.subEntity(i,1,j,dim)][0];
 
     if (count != 0 and count != refElement.size(i,1,dim)) {
       neighborIntersects[i] = true;
-    } else {
-
+    }
+    else {
       int countInOther = 0;
-      for (size_t j=0; j<refElement.size(i,1,dim); j++)
+      for (size_t j=0; j<(size_t)refElement.size(i,1,dim); j++)
         countInOther += isContainedInOtherElement[refElement.subEntity(i,1,j,dim)][0];
 
       neighborIntersects[i] = (countInOther == refElement.size(i,1,dim));
-
     }
-
   }
 
   //std::cout << "neighborIntersects: " << neighborIntersects << std::endl;
