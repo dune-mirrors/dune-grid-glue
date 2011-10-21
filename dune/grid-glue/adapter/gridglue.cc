@@ -161,6 +161,10 @@ void GridGlue<P0, P1>::build()
 #if HAVE_MPI
   MPI_Comm_rank(mpicomm, &myrank);
   MPI_Comm_size(mpicomm, &commsize);
+
+  // setup parallel indexset
+  domain_is.beginResize();
+  target_is.beginResize();
 #endif
 
   // merge local patches and add to intersection list
@@ -168,9 +172,6 @@ void GridGlue<P0, P1>::build()
                patch1coords, patch1entities, patch1types, myrank);
 
 #if HAVE_MPI
-  // setup parallel indexset
-  domain_is.beginResize();
-  target_is.beginResize();
 
   // status variables of communication
   int mpi_result;
