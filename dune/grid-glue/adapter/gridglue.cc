@@ -3,6 +3,95 @@
 /*   IMPLEMENTATION OF CLASS   G R I D  G L U E   */
 
 #include "intersection.hh"
+#include <vector>
+#include <dune/common/mpitraits.hh>
+
+#warning Implement MPI Status check with exception handling
+#define CheckMPIStatus(A,B) {}
+
+namespace {
+  template<typename T>
+  struct MPITypeInfo {};
+
+  template<>
+  struct MPITypeInfo< int >
+  {
+    static const unsigned int size = 1;
+    static inline MPI_Datatype getType()
+    {
+      return MPI_INT;
+    }
+    static const int tag = 1234560;
+  };
+
+  template<typename K, int N>
+  struct MPITypeInfo< Dune::FieldVector<K,N> >
+  {
+    static const unsigned int size = N;
+    static inline MPI_Datatype getType()
+    {
+      return Dune::MPITraits<K>::getType();
+    }
+    static const int tag = 1234561;
+  };
+
+  template<>
+  struct MPITypeInfo< unsigned int >
+  {
+    static const unsigned int size = 1;
+    static inline MPI_Datatype getType()
+    {
+      return MPI_UNSIGNED;
+    }
+    static const int tag = 1234562;
+  };
+
+  template<>
+  struct MPITypeInfo< Dune::GeometryType >
+  {
+    static const unsigned int size = 1;
+    static inline MPI_Datatype getType()
+    {
+      return Dune::MPITraits< Dune::GeometryType >::getType();
+    }
+    static const int tag = 1234563;
+  };
+
+  /**
+     Send std::vector<T> in the ring
+
+   * data is sent to rankright
+   * from rankleft tmp is received and swapped with data
+
+   */
+  template<typename T>
+  void MPI_SendVectorInRing(
+    std::vector<T> & data,
+    std::vector<T> & tmp,
+    int sizeleft,
+    int rightrank,
+    int leftrank,
+    MPI_Comm comm
+    )
+  {
+    // mpi status stuff
+    int result;
+    MPI_Status status;
+    typedef MPITypeInfo<T> Info;
+    // alloc buffer
+    tmp.resize(sizeleft);
+    // send data
+    result =
+      MPI_Sendrecv(
+        &(data[0]), Info::size*data.size(), Info::getType(), rightrank, Info::tag,
+        &(tmp[0]),  Info::size*tmp.size(),  Info::getType(), leftrank,  Info::tag,
+        comm, &status);
+    // check result
+    CheckMPIStatus(result, status);
+    // swap buffers
+    data.swap(tmp);
+  }
+}
 
 template<typename P0, typename P1>
 #if HAVE_MPI
@@ -66,14 +155,9 @@ void GridGlue<P0, P1>::build()
   // clear old intersection list
   intersections_.clear();
 
-#if HAVE_MPI
-  // setup parallel indexset
-  domain_is.beginResize();
-  target_is.beginResize();
-#endif
-
   int myrank = 0;
   int commsize = 1;
+
 #if HAVE_MPI
   MPI_Comm_rank(mpicomm, &myrank);
   MPI_Comm_size(mpicomm, &commsize);
@@ -82,6 +166,15 @@ void GridGlue<P0, P1>::build()
   // merge local patches and add to intersection list
   mergePatches(patch0coords, patch0entities, patch0types, myrank,
                patch1coords, patch1entities, patch1types, myrank);
+
+#if HAVE_MPI
+  // setup parallel indexset
+  domain_is.beginResize();
+  target_is.beginResize();
+
+  // status variables of communication
+  int mpi_result;
+  MPI_Status mpi_status;
 
   if (commsize > 1)
   {
@@ -101,7 +194,12 @@ void GridGlue<P0, P1>::build()
     std::vector<Dune::GeometryType> remotePatch1types ( patchEntites_maxSize );
 
     // copy local patches to remote patch buffers
-#warning todo
+    remotePatch0coords.clear();
+    std::copy(patch0coords.begin(), patch0coords.end(), remotePatch0coords.begin());
+    remotePatch0entities.clear();
+    std::copy(patch0entities.begin(), patch0entities.end(), remotePatch0entities.begin());
+    remotePatch0types.clear();
+    std::copy(patch0types.begin(), patch0types.end(), remotePatch0types.begin());
 
     // allocate tmp buffers (maxsize to avoid reallocation)
     std::vector<Dune::FieldVector<ctype, dimworld> > tmpPatchCoords ( patchCoords_maxSize );
@@ -116,52 +214,54 @@ void GridGlue<P0, P1>::build()
       int leftrank   = (myrank - 1) % commsize;
 
       // communicate actual patch sizes
-      int patch0coordsSize;
-      int patch0entitiesSize;
-      int patch1coordsSize;
-      int patch1entitiesSize;
+      int patchSizes[4];       // patch0coords, patch0entities, patch1coords, patch1entities
 
-#warning todo
-      // int MPI_Send( void *buf, int count, MPI_Datatype datatype, int dest,
-      //     int tag, MPI_Comm comm );
+      {
+        patchSizes[0] = remotePatch0coords.size();
+        patchSizes[1] = remotePatch0entities.size();
+        patchSizes[2] = remotePatch1coords.size();
+        patchSizes[3] = remotePatch1entities.size();
+        // send to right neighbor, receive from left neighbor
+        mpi_result =
+          MPI_Sendrecv_replace(
+            patchSizes, 4, MPI_INT,
+            rightrank, MPITypeInfo<int>::tag,
+            leftrank,  MPITypeInfo<int>::tag,
+            mpicomm, &mpi_status);
+        CheckMPIStatus(mpi_result, mpi_status);
+      }
 
-      /* patch0 */
-      tmpPatchCoords.resize(patch0coordsSize);
-      tmpPatchEntities.resize(patch0entitiesSize);
-      tmpPatchTypes.resize(patch0entitiesSize);
+      /* send remote patch to right neighbor and receive from left neighbor */
 
-      // send remote patch to right neighbor
-#warning todo
+      // patch0coords
+      MPI_SendVectorInRing(
+        remotePatch0coords, tmpPatchCoords, patchSizes[0],
+        rightrank, leftrank, mpicomm);
 
-      // receive remote patch from left neighbor
-#warning todo
+      // patch0entities
+      MPI_SendVectorInRing(
+        remotePatch0entities, tmpPatchEntities, patchSizes[1],         // patch0entitiesSize
+        rightrank, leftrank, mpicomm);
 
-      // finish communication
-#warning todo
+      // patch0types
+      MPI_SendVectorInRing(
+        remotePatch0types, tmpPatchTypes, patchSizes[1],         // patch0entitiesSize
+        rightrank, leftrank, mpicomm);
 
-      // swap communcation buffers
-      remotePatch0coords.swap(tmpPatchCoords);
-      remotePatch0entities.swap(tmpPatchEntities);
-      remotePatch0types.swap(tmpPatchTypes);
+      // patch1coords
+      MPI_SendVectorInRing(
+        remotePatch1coords, tmpPatchCoords, patchSizes[2],         // patch1coordsSize
+        rightrank, leftrank, mpicomm);
 
-      /* patch1 */
-      tmpPatchCoords.resize(patch1coordsSize);
-      tmpPatchEntities.resize(patch1entitiesSize);
-      tmpPatchTypes.resize(patch1entitiesSize);
+      // patch1entities
+      MPI_SendVectorInRing(
+        remotePatch1entities, tmpPatchEntities, patchSizes[3],         // patch1entitiesSize
+        rightrank, leftrank, mpicomm);
 
-      // send remote patch to right neighbor
-#warning todo
-
-      // receive remote patch from left neighbor
-#warning todo
-
-      // finish communication
-#warning todo
-
-      // swap communcation buffers
-      remotePatch1coords.swap(tmpPatchCoords);
-      remotePatch1entities.swap(tmpPatchEntities);
-      remotePatch1types.swap(tmpPatchTypes);
+      // patch1types
+      MPI_SendVectorInRing(
+        remotePatch1types, tmpPatchTypes, patchSizes[3],         // patch1entitiesSize
+        rightrank, leftrank, mpicomm);
 
       /* merging */
       // merge local & remote patches
@@ -172,7 +272,6 @@ void GridGlue<P0, P1>::build()
     }
   }
 
-#if HAVE_MPI
   ////// finalize ParallelIndexSet & RemoteIndices
   domain_is.endResize();
   target_is.endResize();
