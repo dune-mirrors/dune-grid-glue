@@ -17,7 +17,7 @@ struct putter :
   putter& operator*() { return *this; }
   putter& operator++() { return *this; }
   putter& operator++(int) { return *this; }
-  mutable std::ostream& o;
+  std::ostream& o;
   const char* delim;
 };
 
