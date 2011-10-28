@@ -9,6 +9,7 @@
 #warning Implement MPI Status check with exception handling
 #define CheckMPIStatus(A,B) {}
 
+#if HAVE_MPI
 namespace {
   template<typename T>
   struct MPITypeInfo {};
@@ -92,6 +93,7 @@ namespace {
     data.swap(tmp);
   }
 }
+#endif HAVE_MPI
 
 template<typename P0, typename P1>
 #if HAVE_MPI
