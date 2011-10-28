@@ -85,17 +85,12 @@ class GridGlueVtkWriter
     typedef typename GridView::ctype ctype;
 
     const int dim = GridView::dimension;
-    const int dimw = Glue::dimworld;
     const int domdimw = GridView::dimensionworld;
 
     // coordinates have to be in R^3 in the VTK format
     std::string coordinatePadding;
     for (int i=domdimw; i<3; i++)
       coordinatePadding += " 0";
-
-    const GridView& gridView = glue.template gridView<side>();
-
-    int overlaps = glue.size();
 
     fgrid << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
 
@@ -229,15 +224,12 @@ class GridGlueVtkWriter
     typedef typename GridView::ctype ctype;
 
     const int dim = GridView::dimension;
-    const int dimw = Glue::dimworld;
     const int domdimw = GridView::dimensionworld;
 
     // coordinates have to be in R^3 in the VTK format
     std::string coordinatePadding;
     for (int i=domdimw; i<3; i++)
       coordinatePadding += " 0";
-
-    const GridView& gridView = glue.template gridView<side>();
 
     int overlaps = glue.size();
 
