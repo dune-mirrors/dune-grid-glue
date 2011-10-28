@@ -116,7 +116,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent domain simplex' index of @c a smaller
    */
-  static bool domainParentSmaller(const IntersectionPrimitive<dim,ctype>& a, const IntersectionPrimitive<dim,ctype>& b)
+  static bool domainParentSmaller(const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& a, const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& b)
   {
     return a.tris[0] < b.tris[0];
   }
@@ -127,7 +127,7 @@ private:
    * @param b second item
    * @return TRUE <=> parent target simplex' index of @c a smaller
    */
-  static bool targetParentSmaller(const IntersectionPrimitive<dim,ctype>* a, const IntersectionPrimitive<dim,ctype>* b)
+  static bool targetParentSmaller(const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>* a, const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>* b)
   {
     return a->tris[1] < b->tris[1];
   }
@@ -151,7 +151,7 @@ private:
      * from the given array
      * @param unordered array containing all overlap simplices
      */
-    void setOverlaps(const std::vector<IntersectionPrimitive<dim,ctype> >& unordered);
+    void setOverlaps(const std::vector<PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype> >& unordered);
 
     /**
      * @brief getter for the number of simplex overlaps in the merged grid
@@ -182,7 +182,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntersectionPrimitive<dim,ctype>& domain(unsigned int idx) const
+    const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& domain(unsigned int idx) const
     {
       return this->domOrder[idx];
     }
@@ -192,7 +192,7 @@ private:
      * @param idx index into the array
      * @return the simplex
      */
-    const IntersectionPrimitive<dim,ctype>& target(unsigned int idx) const
+    const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& target(unsigned int idx) const
     {
       return *this->tarOrder[idx];
     }
@@ -211,14 +211,14 @@ private:
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending domain parent simplex indices (see domi_)
-    std::vector<IntersectionPrimitive<dim,ctype> > domOrder;
+    std::vector<PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype> > domOrder;
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending target parent simplex indices (see tari_)
-    std::vector<IntersectionPrimitive<dim,ctype>*> tarOrder;
+    std::vector<PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>*> tarOrder;
 
     /// @brief used to recompute original index of an overlap in "tarOrder"
-    IntersectionPrimitive<dim,ctype>*         baseptr;
+    PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>*         baseptr;
   };
 
   /** \brief Return a constant direction field for PSurface
@@ -227,11 +227,11 @@ private:
      \tparam dir Value of the last component: either -1 or 1.
    */
   template <int dir>
-  struct ConstantDirection : public AnalyticDirectionFunction<psurfaceDimworld,ctype>
+  struct ConstantDirection : public PSURFACE_NAMESPACE AnalyticDirectionFunction<psurfaceDimworld,ctype>
   {
-    StaticVector<ctype,psurfaceDimworld> operator()(const StaticVector<ctype,psurfaceDimworld>& position) const
+    PSURFACE_NAMESPACE StaticVector<ctype,psurfaceDimworld> operator()(const PSURFACE_NAMESPACE StaticVector<ctype,psurfaceDimworld>& position) const
     {
-      StaticVector<ctype,psurfaceDimworld> result;
+      PSURFACE_NAMESPACE StaticVector<ctype,psurfaceDimworld> result;
       for (size_t i=0; i<psurfaceDimworld-1; i++)
         result[i] = 0;
       result[psurfaceDimworld-1] = dir;
@@ -264,7 +264,7 @@ private:
   /* members associated with the merged grid */
 
   /// @brief make use of psurface contact mapping functionality
-  ContactMapping<dim+1,ctype> cm_;
+  PSURFACE_NAMESPACE ContactMapping<dim+1,ctype> cm_;
 
   /// @brief provides an interface for convenient and efficient
   /// access to the set of computed simplex overlaps in the merged grid
@@ -273,7 +273,7 @@ private:
   /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
    */
-  const DirectionFunction<psurfaceDimworld,ctype>* domainDirections_;
+  const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections_;
 
   /** \brief Vector field on the target surface which prescribes a 'forward'
       direction.
@@ -283,7 +283,7 @@ private:
       (e.g. because it is not properly oriented), they can be given
       explicitly through the targetDirections field.
    */
-  const DirectionFunction<psurfaceDimworld,ctype>* targetDirections_;
+  const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections_;
 
   bool valid;
 
@@ -291,8 +291,8 @@ private:
 
 public:
 
-  PSurfaceMerge(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections = NULL,
-                const DirectionFunction<psurfaceDimworld,ctype>* targetDirections = NULL);
+  PSurfaceMerge(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections = NULL,
+                const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections = NULL);
 
   /*   M O D E L   S P E C I F I C   E X T E N D I N G   F U N C T I O N A L I T Y   */
 
@@ -305,8 +305,8 @@ public:
    * @param value the new function (or NULL to unset the function)
    */
   inline
-  void setSurfaceDirections(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
-                            const DirectionFunction<psurfaceDimworld,ctype>* targetDirections);
+  void setSurfaceDirections(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
+                            const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections);
 
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
 
@@ -429,15 +429,15 @@ private:
 /* IMPLEMENTATION OF CLASS   C O N T A C T  M A P P I N G  S U R F A C E  M E R G E */
 
 template<int dim, int dimworld, typename T>
-PSurfaceMerge<dim, dimworld, T>::PSurfaceMerge(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
-                                               const DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
+PSurfaceMerge<dim, dimworld, T>::PSurfaceMerge(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
+                                               const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
   : domainDirections_(domainDirections), targetDirections_(targetDirections), valid(false)
 {}
 
 
 template<int dim, int dimworld, typename T>
-inline void PSurfaceMerge<dim, dimworld, T>::setSurfaceDirections(const DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
-                                                                  const DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
+inline void PSurfaceMerge<dim, dimworld, T>::setSurfaceDirections(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
+                                                                  const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
 {
   domainDirections_ = domainDirections;
   targetDirections_ = targetDirections;

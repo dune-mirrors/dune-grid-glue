@@ -215,7 +215,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
   std::cout << "Finished building merged grid!" << std::endl;
 
   // get the representation from the contact mapping object
-  std::vector<IntersectionPrimitive<dim,ctype> > overlaps;
+  std::vector<PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype> > overlaps;
   cm_.getOverlaps(overlaps);
 
   // /////////////////////////////////////////////////////////////////////////////
@@ -307,7 +307,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
+  const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
@@ -336,7 +336,7 @@ template<int dim, int dimworld, typename T>
 typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
 {
   // get the simplex overlap
-  const IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
+  const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
 
   // read the local coordinates from the overlap's struct,
   LocalCoords result;
@@ -362,7 +362,7 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 /* IMPLEMENTATION OF   O V E R L A P  M A N A G E R  SUBCLASS */
 
 template<int dim, int dimworld, typename T>
-void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<IntersectionPrimitive<dim,ctype> >& unordered)
+void PSurfaceMerge<dim, dimworld, T>::OverlapManager::setOverlaps(const std::vector<PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype> >& unordered)
 {
   this->domOrder.clear();
   this->tarOrder.clear();
