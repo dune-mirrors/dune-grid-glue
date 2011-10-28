@@ -93,7 +93,7 @@ namespace {
     data.swap(tmp);
   }
 }
-#endif HAVE_MPI
+#endif // HAVE_MPI
 
 template<typename P0, typename P1>
 #if HAVE_MPI
