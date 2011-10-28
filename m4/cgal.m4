@@ -69,6 +69,9 @@ if test "$acx_cgal_found" == yes; then
         AC_DEFINE(HAVE_CGAL, 1, [Define to 1 if the cgal library is found])
 fi
 
+# Tell automake whether cgal has been found
+AM_CONDITIONAL(CGAL, test "$acx_cgal_found" == yes)
+
 # Mention in the module summary that cgal has been found
 DUNE_ADD_SUMMARY_ENTRY([cgal],[$acx_cgal_found])
 
