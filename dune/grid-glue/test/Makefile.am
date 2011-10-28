@@ -38,6 +38,8 @@ endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
+overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
+
 orientedsubfacetest_SOURCES = orientedsubfacetest.cc
 
 include $(top_srcdir)/am/global-rules
