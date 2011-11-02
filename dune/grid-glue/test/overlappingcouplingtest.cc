@@ -18,6 +18,7 @@
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/merging/cgalmerge.hh>
 #include <dune/grid-glue/merging/conformingmerge.hh>
+#include <dune/grid-glue/merging/overlappingmerge.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
 
@@ -250,6 +251,23 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
 int main(int argc, char** argv)
 {
   Dune::MPIHelper::instance(argc, argv);
+
+  // //////////////////////////////////////////////////////////
+  //   Test with the OverlappingMerge implementation
+  // //////////////////////////////////////////////////////////
+#if HAVE_PSURFACE
+  OverlappingMerge<1,double> overlappingMerge1d;
+  OverlappingMerge<2,double> overlappingMerge2d;
+
+  testCubeGrids<1>(overlappingMerge1d, FieldVector<double,1>(0.05));
+  testCubeGrids<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
+
+  testSimplexGrids<1>(overlappingMerge1d, FieldVector<double,1>(0.05));
+#if HAVE_UG
+  testSimplexGridsUG(overlappingMerge2d, FieldVector<double,2>(0.05));
+  testHybridGridsUG<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
+#endif
+#endif
 
   // //////////////////////////////////////////////////////////
   //   Test with the PSurfaceMerge implementation
