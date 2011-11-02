@@ -6,6 +6,8 @@ merging_HEADERS = cgalmerge.hh \
                   cgalmerge.cc \
                   conformingmerge.hh \
                   merger.hh \
+                  overlappingmerge.hh \
+                  overlappingmerge.cc \
                   psurfacemerge.hh \
                   psurfacemerge.cc \
                   standardmerge.hh

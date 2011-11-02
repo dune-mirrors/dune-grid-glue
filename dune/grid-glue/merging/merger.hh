@@ -27,12 +27,6 @@ namespace {
     typedef Dune::FieldVector<ctype, grid1Dim>  GridCoords;
 
     static
-    bool simplexMatched(const Parent & m, unsigned int idx)
-    {
-      return m.grid1SimplexMatched(idx);
-    }
-
-    static
     unsigned int parent(const Parent & m, unsigned int idx)
     {
       return m.grid1Parent(idx);
@@ -53,12 +47,6 @@ namespace {
 
     /// @brief the local coordinate type for the grid2 coordinates
     typedef Dune::FieldVector<ctype, grid2Dim>  GridCoords;
-
-    static
-    bool simplexMatched(const Parent & m, unsigned int idx)
-    {
-      return m.grid2SimplexMatched(idx);
-    }
 
     static
     unsigned int parent(const Parent & m, unsigned int idx)
@@ -138,24 +126,6 @@ public:
   virtual void clear() = 0;
 
   /**
-   * @brief check if given grid-n simplex could be matched in the merged grid
-   *
-   * @tparam n specify which grid
-   *
-   * The result of this member even is positive if a grid-n simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "localToMerged<n>" or "globalToMerged<n>".
-   * @param idx the index of the grid simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  template<int n>
-  bool simplexMatched(unsigned int idx) const
-  {
-    return GridTraits<n>::Policy::simplexMatched(*this, idx);
-  }
-
-  /**
    * @brief get index of grid-n's parent simplex for given merged grid simplex
    * @tparam n specify which grid
    * @param idx index of the merged grid simplex
@@ -202,32 +172,6 @@ public:
 
 
 private:
-  /**
-   * @brief check if given grid1 simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a grid1 simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "grid1LocalToMerged" or "grid1GlobalToMerged".
-   * @param idx the index of the grid1 simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  virtual bool grid1SimplexMatched(unsigned int idx) const = 0;
-
-
-  /**
-   * @brief check if given grid2 simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a grid2 simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "grid2LocalToMerged" or "grid2GlobalToMerged".
-   * @param idx the index of the grid2 simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  virtual bool grid2SimplexMatched(unsigned int idx) const = 0;
-
-
 
   /**
    * @brief get index of grid1 parent simplex for given merged grid simplex

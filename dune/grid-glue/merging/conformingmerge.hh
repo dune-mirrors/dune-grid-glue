@@ -87,33 +87,6 @@ public:
 
 private:
 
-  /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
-
-  /**
-   * @brief check if given grid1 simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a grid1 simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "grid1LocalToMerged" or "grid1GlobalToMerged".
-   * @param idx the index of the grid1 simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  bool grid1SimplexMatched(unsigned int idx) const;
-
-  /**
-   * @brief check if given grid2 simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a grid2 simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "grid2LocalToMerged" or "grid2GlobalToMerged".
-   * @param idx the index of the grid2 simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  bool grid2SimplexMatched(unsigned int idx) const;
-
-
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
 
   /**
@@ -266,23 +239,6 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
   } else
     DUNE_THROW(Dune::GridError, "Unsupported element type");
 
-}
-
-
-
-template<int dim, int dimworld, typename T>
-inline bool ConformingMerge<dim, dimworld, T>::grid1SimplexMatched(unsigned int idx) const
-{
-  // naive: we assume that there is a partner for all grid1 entities
-  return true;
-}
-
-
-template<int dim, int dimworld, typename T>
-inline bool ConformingMerge<dim, dimworld, T>::grid2SimplexMatched(unsigned int idx) const
-{
-  // naive: we assume that there is a partner for all grid2 entities
-  return true;
 }
 
 

@@ -360,30 +360,6 @@ private:
     v.swap(v2);
   }
 
-  /**
-   * @brief check if given grid1 simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a grid1 simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "grid1LocalToMerged" or "grid1GlobalToMerged".
-   * @param idx the index of the grid1 simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  bool grid1SimplexMatched(unsigned int idx) const;
-
-  /**
-   * @brief check if given target simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a target simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "targetLocalToMerged" or "targetGlobalToMerged".
-   * @param idx the index of the target simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  bool grid2SimplexMatched(unsigned int idx) const;
-
 
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
 
@@ -450,24 +426,6 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
 {
   assert(valid);
   return this->olm_.nOverlaps();
-}
-
-
-template<int dim, int dimworld, typename T>
-inline bool PSurfaceMerge<dim, dimworld, T>::grid1SimplexMatched(unsigned int idx) const
-{
-  assert(valid);
-  // if the simplex was matched the result returned by "firstDomainParent" is in the valid range
-  return (this->olm_.firstDomainParent(idx) < this->olm_.nOverlaps());
-}
-
-
-template<int dim, int dimworld, typename T>
-inline bool PSurfaceMerge<dim, dimworld, T>::grid2SimplexMatched(unsigned int idx) const
-{
-  assert(valid);
-  // if the simplex was matched the result returned by "firstTargetParent" is in the valid range
-  return (this->olm_.firstTargetParent(idx) < this->olm_.nOverlaps());
 }
 
 

@@ -626,21 +626,6 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
 }
 
-template<int dim, typename T>
-inline bool CGALMerge<dim, T>::grid1SimplexMatched(unsigned int idx) const
-{
-  // naive: we assume that there is a partner for all grid1 entities
-  return true;
-}
-
-
-template<int dim, typename T>
-inline bool CGALMerge<dim, T>::grid2SimplexMatched(unsigned int idx) const
-{
-  // naive: we assume that there is a partner for all grid2 entities
-  return true;
-}
-
 
 // Explicit instantiation
 #ifndef CGAL_EXTERN

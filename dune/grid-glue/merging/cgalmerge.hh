@@ -63,32 +63,6 @@ private:
                            unsigned int grid2Index,
                            std::bitset<(1<<dim)>& neighborIntersects2);
 
-private:
-
-  /**
-   * @brief check if given grid1 simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a grid1 simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "grid1LocalToMerged" or "grid1GlobalToMerged".
-   * @param idx the index of the grid1 simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  bool grid1SimplexMatched(unsigned int idx) const;
-
-  /**
-   * @brief check if given grid2 simplex could be matched in the merged grid
-   *
-   * The result of this member even is positive if a grid2 simplex only is
-   * partially refined! That means the simplex is not necessarily completely
-   * covered in the merged grid. Whether or not a particular point in the simplex
-   * was mapped can be asked via "grid2LocalToMerged" or "grid2GlobalToMerged".
-   * @param idx the index of the grid2 simplex
-   * @return TRUE <=> refined in merged grid
-   */
-  bool grid2SimplexMatched(unsigned int idx) const;
-
 };
 
 #ifdef CGAL_EXTRA_TYPES
