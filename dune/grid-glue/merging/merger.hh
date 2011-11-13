@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 
 // forward declaration
 template <class ctype, int grid1Dim, int grid2Dim, int dimworld>

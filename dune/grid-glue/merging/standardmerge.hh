@@ -21,7 +21,7 @@
 #include <dune/common/bitsetvector.hh>
 #include <dune/common/timer.hh>
 
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/merger.hh>

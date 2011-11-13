@@ -28,7 +28,7 @@
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
 
 /**
  * @brief Provides codimension-independent methods for grid extraction

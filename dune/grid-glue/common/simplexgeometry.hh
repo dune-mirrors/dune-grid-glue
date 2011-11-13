@@ -14,11 +14,11 @@
 #include <dune/common/static_assert.hh>
 #include <dune/common/array.hh>
 #include <dune/common/version.hh>
-#include <dune/grid/genericgeometry/geometry.hh>
-#include <dune/grid/genericgeometry/geometrytraits.hh>
-#include <dune/grid/genericgeometry/cornermapping.hh>
-#include <dune/grid/genericgeometry/referenceelements.hh>
-#include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometrytraits.hh>
+#include <dune/geometry/genericgeometry/cornermapping.hh>
+#include <dune/geometry/genericgeometry/referenceelements.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 
 namespace Dune {
   namespace GridGlue {
