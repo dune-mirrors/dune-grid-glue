@@ -29,11 +29,6 @@
 
 class VtkSurfaceWriter
 {
-private:
-
-
-
-
 public:
 
 
@@ -124,7 +119,7 @@ protected:
       fos << *current;
       if (dim == 2)
         fos << " " << *(current+1) << " 0 \n" << *current << " " << *(current+1) << " 0.01" << std::endl;
-      else                   // dim == 3
+      else       // dim == 3
         fos << " " << *(current+1) << " "  << *(current+2) << std::endl;
       // move pointer
       current += dim;
@@ -140,25 +135,25 @@ protected:
         fos << "4 " << 2*indices[i] << " " << 2*indices[i+1] << " " << 2*indices[i+1]+1 << " "<< 2*indices[i]+1 << std::endl;
 
       // arbitrary shapes - ignored here!
-      //			int sum = ncorners;
-      //			for (int i = 0; i < ncorners; ++i)
-      //				sum += (corners[i] > 2 ? corners[i] : 3);
+      //                      int sum = ncorners;
+      //                      for (int i = 0; i < ncorners; ++i)
+      //                              sum += (corners[i] > 2 ? corners[i] : 3);
       //
-      //			fos << "POLYGONS " << ncorners << " " << sum << std::endl;
-      //			int index = 0;
-      //			for (int i = 0; i < ncorners; ++i)
-      //			{
-      //				// write the first index twice if it is an egde
-      //				// => triangle instead of edge - paraview can display it then
-      //				if (corners[i] > 2)
-      //					fos << corners[i];
-      //				else
-      //					fos << "3 " << indices[index];
+      //                      fos << "POLYGONS " << ncorners << " " << sum << std::endl;
+      //                      int index = 0;
+      //                      for (int i = 0; i < ncorners; ++i)
+      //                      {
+      //                              // write the first index twice if it is an egde
+      //                              // => triangle instead of edge - paraview can display it then
+      //                              if (corners[i] > 2)
+      //                                      fos << corners[i];
+      //                              else
+      //                                      fos << "3 " << indices[index];
       //
-      //				for (int j = 0; j < corners[i]; ++j)
-      //					fos << " " << indices[index++];
-      //				fos << std::endl;
-      //			}
+      //                              for (int j = 0; j < corners[i]; ++j)
+      //                                      fos << " " << indices[index++];
+      //                              fos << std::endl;
+      //                       }
     }
     else
     {
