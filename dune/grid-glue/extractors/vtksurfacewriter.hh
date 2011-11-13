@@ -16,8 +16,8 @@
  * @brief helper class for graphical output of grids in generic representation
  */
 
-#ifndef VTKSURFACEWRITER_HH_
-#define VTKSURFACEWRITER_HH_
+#ifndef VTKSURFACEWRITER_HH
+#define VTKSURFACEWRITER_HH
 
 #include <fstream>
 #include <iomanip>
@@ -206,4 +206,4 @@ private:
 };
 
 
-#endif // VTKSURFACEWRITER_HH_
+#endif // VTKSURFACEWRITER_HH

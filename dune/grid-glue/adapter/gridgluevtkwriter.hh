@@ -16,8 +16,8 @@
  * @brief Write all remote intersections to a vtk file for debugging
  */
 
-#ifndef GRIDGLUEVTKWRITER_HH_
-#define GRIDGLUEVTKWRITER_HH_
+#ifndef GRIDGLUEVTKWRITER_HH
+#define GRIDGLUEVTKWRITER_HH
 
 
 #include <fstream>
@@ -331,4 +331,4 @@ public:
 
 
 
-#endif // GRIDGLUEVTKWRITER_HH_
+#endif // GRIDGLUEVTKWRITER_HH

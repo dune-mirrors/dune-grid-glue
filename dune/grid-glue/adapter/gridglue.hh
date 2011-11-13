@@ -17,8 +17,8 @@
  */
 
 
-#ifndef GRIDGLUE_HH_
-#define GRIDGLUE_HH_
+#ifndef GRIDGLUE_HH
+#define GRIDGLUE_HH
 
 #include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
@@ -558,4 +558,4 @@ public:
 #include "intersection.hh"
 #include "intersectioniterator.hh"
 
-#endif // GRIDGLUE_HH_
+#endif // GRIDGLUE_HH

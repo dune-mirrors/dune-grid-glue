@@ -453,4 +453,4 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int id
 #undef PSURFACE_EXTERN
 #endif
 
-#endif // PSURFACEMERGE_HH_
+#endif // PSURFACEMERGE_HH

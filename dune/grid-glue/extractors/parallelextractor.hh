@@ -558,4 +558,4 @@ public:
   }
 };
 
-#endif // DUNE_CODIM_1_EXTRACTOR_HH_
+#endif // DUNE_PARALLEL_EXTRACTOR_HH

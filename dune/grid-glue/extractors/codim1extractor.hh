@@ -359,4 +359,4 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
 }
 
-#endif // DUNE_CODIM_1_EXTRACTOR_HH_
+#endif // DUNE_CODIM_1_EXTRACTOR_HH
