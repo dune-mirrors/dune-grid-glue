@@ -25,7 +25,7 @@
 #include <vector>
 #include <list>
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 #include <dune/geometry/genericreferenceelements.hh>
 
 
