@@ -16,10 +16,10 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
 
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
-#include <dune/grid/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
 
 #include <dune/grid-glue/merging/standardmerge.hh>
 

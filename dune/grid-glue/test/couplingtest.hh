@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include <dune/common/fvector.hh>
-#include <dune/grid/common/quadraturerules.hh>
+#include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>

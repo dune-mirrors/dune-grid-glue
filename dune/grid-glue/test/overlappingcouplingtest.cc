@@ -7,7 +7,7 @@
 #include <dune/grid/uggrid.hh>
 #endif
 #include <dune/common/mpihelper.hh>
-#include <dune/grid/common/quadraturerules.hh>
+#include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 

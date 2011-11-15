@@ -26,7 +26,7 @@
 #include <list>
 
 #include <dune/geometry/type.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 
 const char TypeNames[][8] = { "double", "float  ", "int    " };
