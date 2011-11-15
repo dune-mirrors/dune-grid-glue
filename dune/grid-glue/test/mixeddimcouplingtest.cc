@@ -5,34 +5,6 @@
 #include <iostream>
 
 #include <dune/common/version.hh>
-
-#if !DUNE_VERSION_NEWER_REV(DUNE_GRID,2,1,0)
-// In versions of dune-grid prior to 2.1 this magic code was needed
-// to make GeometryGrid work.
-namespace Dune
-{
-
-  // Due to a bug in Dune, you need the following two structs:
-  namespace Capabilities
-  {
-
-    template< class Grid >
-    struct hasHierarchicIndexSet
-    {
-      static const bool v = false;
-    };
-
-    template< class Grid >
-    struct hasHierarchicIndexSet< const Grid >
-    {
-      static const bool v = hasHierarchicIndexSet< Grid >::v;
-    };
-
-  }
-
-}
-#endif
-
 #include <dune/common/mpihelper.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/nullptr.hh>
