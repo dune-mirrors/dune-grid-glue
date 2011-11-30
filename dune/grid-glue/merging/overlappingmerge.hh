@@ -11,10 +11,10 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
 
-#include <dune/geometry/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
-#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/grid/genericgeometry/geometry.hh>
 
 #include <dune/grid-glue/merging/standardmerge.hh>
 
@@ -63,15 +63,52 @@ private:
 
 private:
 
-  void EdgeIntersections( const std::vector<Dune::FieldVector<T,dim> >   X,
-                          const std::vector<Dune::FieldVector<T,dim> >   Y,
-                          std::vector<Dune::FieldVector<T,dim> > & P ) ;
+  //  ROUTINES 2D
 
-  void PointsofXinY( const std::vector<Dune::FieldVector<T,dim> >   X,
-                     const std::vector<Dune::FieldVector<T,dim> >   Y,
-                     std::vector<Dune::FieldVector<T,dim> > & P ) ;
+  void EdgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >   X,
+                            const std::vector<Dune::FieldVector<T,dim> >   Y,
+                            std::vector<Dune::FieldVector<T,dim> > & P ) ;
 
-  void SortAndRemoveDoubles( std::vector<Dune::FieldVector<T,dim> > & P ) ;
+  void PointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
+                       const std::vector<Dune::FieldVector<T,dim> >   Y,
+                       std::vector<Dune::FieldVector<T,dim> > & P ) ;
+
+  void SortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P ) ;
+
+  //  ROUTINES 3D
+
+  void Intersections3D( const std::vector<Dune::FieldVector<T,dim> >   X,
+                        const std::vector<Dune::FieldVector<T,dim> >   Y,
+                        std::vector<std::vector<int> >         & SX,
+                        std::vector<std::vector<int> >         & SY,
+                        std::vector<Dune::FieldVector<T,dim> > & P ) ;
+
+  void Sorting3D( const Dune::FieldVector<T,dim>          centroid,
+                  const std::vector<std::vector<int> >           SX,
+                  const std::vector<std::vector<int> >           SY,
+                  const std::vector<Dune::FieldVector<T,dim> >   P,
+                  std::vector<std::vector<int> >         & H) ;
+
+  bool TriangleLineIntersection3D( const Dune::FieldVector<T,dim>    X0,
+                                   const Dune::FieldVector<T,dim>    X1,
+                                   const Dune::FieldVector<T,dim>    Y0,
+                                   const Dune::FieldVector<T,dim>    Y1,
+                                   const Dune::FieldVector<T,dim>    Y2,
+                                   Dune::FieldVector<T,dim>   & p) ;
+
+  bool PointInTetrahedra3D( const Dune::FieldVector<T,dim>                 X,
+                            const std::vector<Dune::FieldVector<T,dim> >   Y) ;
+
+  int InsertPoint3D( const Dune::FieldVector<T,dim>                  p,
+                     std::vector<Dune::FieldVector<T,dim> > &  P)  ;
+
+  void RemoveDuplicates3D( std::vector<int > &  p) ;
+
+  void OrderPoints3D(const Dune::FieldVector<T,dim>          centroid,
+                     std::vector<int>                      & id,
+                     std::vector<Dune::FieldVector<T,dim> > &  P)  ;
+
+  bool NewFace3D(const std::vector<int> no, const std::vector<std::vector<int> > H) ;
 
 };
 
