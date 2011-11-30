@@ -69,46 +69,46 @@ private:
                             const std::vector<Dune::FieldVector<T,dim> >   Y,
                             std::vector<Dune::FieldVector<T,dim> > & P ) ;
 
-  void PointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
+  void pointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
                        const std::vector<Dune::FieldVector<T,dim> >   Y,
                        std::vector<Dune::FieldVector<T,dim> > & P ) ;
 
-  void SortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P ) ;
+  void sortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P ) ;
 
   //  ROUTINES 3D
 
-  void Intersections3D( const std::vector<Dune::FieldVector<T,dim> >   X,
+  void intersections3D( const std::vector<Dune::FieldVector<T,dim> >   X,
                         const std::vector<Dune::FieldVector<T,dim> >   Y,
                         std::vector<std::vector<int> >         & SX,
                         std::vector<std::vector<int> >         & SY,
                         std::vector<Dune::FieldVector<T,dim> > & P ) ;
 
-  void Sorting3D( const Dune::FieldVector<T,dim>          centroid,
+  void sorting3D( const Dune::FieldVector<T,dim>          centroid,
                   const std::vector<std::vector<int> >           SX,
                   const std::vector<std::vector<int> >           SY,
                   const std::vector<Dune::FieldVector<T,dim> >   P,
                   std::vector<std::vector<int> >         & H) ;
 
-  bool TriangleLineIntersection3D( const Dune::FieldVector<T,dim>    X0,
+  bool triangleLineIntersection3D( const Dune::FieldVector<T,dim>    X0,
                                    const Dune::FieldVector<T,dim>    X1,
                                    const Dune::FieldVector<T,dim>    Y0,
                                    const Dune::FieldVector<T,dim>    Y1,
                                    const Dune::FieldVector<T,dim>    Y2,
                                    Dune::FieldVector<T,dim>   & p) ;
 
-  bool PointInTetrahedra3D( const Dune::FieldVector<T,dim>                 X,
+  bool pointInTetrahedra3D( const Dune::FieldVector<T,dim>                 X,
                             const std::vector<Dune::FieldVector<T,dim> >   Y) ;
 
-  int InsertPoint3D( const Dune::FieldVector<T,dim>                  p,
+  int insertPoint3D( const Dune::FieldVector<T,dim>                  p,
                      std::vector<Dune::FieldVector<T,dim> > &  P)  ;
 
-  void RemoveDuplicates3D( std::vector<int > &  p) ;
+  void removeDuplicates3D( std::vector<int > &  p) ;
 
-  void OrderPoints3D(const Dune::FieldVector<T,dim>          centroid,
+  void orderPoints3D(const Dune::FieldVector<T,dim>          centroid,
                      std::vector<int>                      & id,
                      std::vector<Dune::FieldVector<T,dim> > &  P)  ;
 
-  bool NewFace3D(const std::vector<int> no, const std::vector<std::vector<int> > H) ;
+  bool newFace3D(const std::vector<int> no, const std::vector<std::vector<int> > H) ;
 
 };
 

@@ -64,15 +64,15 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
     std::vector<Dune::FieldVector<T,dim> >  P ;
 
     // find the intersections of any segement of the two triangles.
-    EdgeIntersections2D(grid1ElementCorners,grid2ElementCorners,P) ;
+    edgeIntersections2D(grid1ElementCorners,grid2ElementCorners,P) ;
 
     // add the points of grid1 in grid2 and of grid2 in grid1.
-    PointsofXinY2D(grid1ElementCorners,grid2ElementCorners,P) ;
-    PointsofXinY2D(grid2ElementCorners,grid1ElementCorners,P) ;
+    pointsofXinY2D(grid1ElementCorners,grid2ElementCorners,P) ;
+    pointsofXinY2D(grid2ElementCorners,grid1ElementCorners,P) ;
 
     // sort points counter clock wise and removes duplicates
     if (P.size()>=3)
-      SortAndRemoveDoubles2D(P) ;
+      sortAndRemoveDoubles2D(P) ;
 
     //      TO check if the previous function made a good job, uncomment the next lines.
     //
@@ -111,7 +111,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
     Dune::FieldVector<T,dim>               centroid;
 
     // Compute intersections ( Create SX, SY and P )
-    Intersections3D(grid1ElementCorners,grid2ElementCorners,SX,SY,P) ;
+    intersections3D(grid1ElementCorners,grid2ElementCorners,SX,SY,P) ;
 
     if (P.size()>=4) {
 
@@ -145,7 +145,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
         // Sorte each faces ( Create H )
         H.clear() ;
-        Sorting3D(centroid,SX,SY,P,H) ;
+        sorting3D(centroid,SX,SY,P,H) ;
 
         /*      TO check if the previous routines made a good job, uncomment the next lines.
 
@@ -221,7 +221,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 //  (point coordinates are stored column-wise, in counter clock order) the points P where their edges intersect.
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::EdgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >   X,
+void OverlappingMerge<dim, T>::edgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >   X,
                                                     const std::vector<Dune::FieldVector<T,dim> >   Y,
                                                     std::vector<Dune::FieldVector<T,dim> > & P )
 {
@@ -260,7 +260,7 @@ void OverlappingMerge<dim, T>::EdgeIntersections2D( const std::vector<Dune::Fiel
 // and Y (point coordinates are stored column-wise, in counter clock  order) the corners P of X which lie in the interior of Y.
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::PointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
+void OverlappingMerge<dim, T>::pointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
                                                const std::vector<Dune::FieldVector<T,dim> >   Y,
                                                std::vector<Dune::FieldVector<T,dim> > & P )
 {
@@ -289,7 +289,7 @@ void OverlappingMerge<dim, T>::PointsofXinY2D( const std::vector<Dune::FieldVect
 //  SortAndRemoveDoubles: orders polygon corners in P counter clock wise and removes duplicates
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::SortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P )
+void OverlappingMerge<dim, T>::sortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P )
 {
   Dune::FieldVector<double,dim> c ;
   std::vector< double > ai ;
@@ -337,7 +337,7 @@ void OverlappingMerge<dim, T>::SortAndRemoveDoubles2D( std::vector<Dune::FieldVe
 //  (point coordinates are stored column-wise, in counter clock order) the points P where their edges intersect.
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::Intersections3D( const std::vector<Dune::FieldVector<T,dim> >   X,
+void OverlappingMerge<dim, T>::intersections3D( const std::vector<Dune::FieldVector<T,dim> >   X,
                                                 const std::vector<Dune::FieldVector<T,dim> >   Y,
                                                 std::vector<std::vector<int> >         & SX,
                                                 std::vector<std::vector<int> >         & SY,
@@ -363,9 +363,9 @@ void OverlappingMerge<dim, T>::Intersections3D( const std::vector<Dune::FieldVec
   for (int i=0; i<6; ++i) for (int j=0; j<4; ++j)
     {
       p = 0 ;
-      if (TriangleLineIntersection3D(X[l1[i]],X[l2[i]],Y[j],Y[(j+1)%4],Y[(j+2)%4],p))
+      if (triangleLineIntersection3D(X[l1[i]],X[l2[i]],Y[j],Y[(j+1)%4],Y[(j+2)%4],p))
       {
-        k=InsertPoint3D(p,P) ;
+        k=insertPoint3D(p,P) ;
         SY[j].push_back(k) ;                 // remember to which surfaces
         SX[s1[i]].push_back(k) ;
         SX[s2[i]].push_back(k) ;
@@ -377,9 +377,9 @@ void OverlappingMerge<dim, T>::Intersections3D( const std::vector<Dune::FieldVec
   for (int i=0; i<6; ++i) for (int j=0; j<4; ++j)
     {
       p = 0 ;
-      if (TriangleLineIntersection3D(Y[l1[i]],Y[l2[i]],X[j],X[(j+1)%4],X[(j+2)%4],p))
+      if (triangleLineIntersection3D(Y[l1[i]],Y[l2[i]],X[j],X[(j+1)%4],X[(j+2)%4],p))
       {
-        k=InsertPoint3D(p,P) ;
+        k=insertPoint3D(p,P) ;
         SX[j].push_back(k) ;                // remember to which surfaces
         SY[s1[i]].push_back(k) ;
         SY[s2[i]].push_back(k) ;
@@ -390,9 +390,9 @@ void OverlappingMerge<dim, T>::Intersections3D( const std::vector<Dune::FieldVec
 
   for (int i=0; i<4; ++i)
   {
-    if (PointInTetrahedra3D(X[i],Y))
+    if (pointInTetrahedra3D(X[i],Y))
     {
-      k=InsertPoint3D(X[i],P) ;
+      k=insertPoint3D(X[i],P) ;
       SX[ni[i][0]].push_back(k) ;             // remember to which surfaces
       SX[ni[i][1]].push_back(k) ;
       SX[ni[i][2]].push_back(k) ;
@@ -403,9 +403,9 @@ void OverlappingMerge<dim, T>::Intersections3D( const std::vector<Dune::FieldVec
 
   for (int i=0; i<4; ++i)
   {
-    if (PointInTetrahedra3D(Y[i],X))
+    if (pointInTetrahedra3D(Y[i],X))
     {
-      k=InsertPoint3D(Y[i],P) ;
+      k=insertPoint3D(Y[i],P) ;
       SY[ni[i][0]].push_back(k) ;               // remember to which surfaces
       SY[ni[i][1]].push_back(k) ;
       SY[ni[i][2]].push_back(k) ;
@@ -417,7 +417,7 @@ void OverlappingMerge<dim, T>::Intersections3D( const std::vector<Dune::FieldVec
 // SORTING ROUTINE
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::Sorting3D( const Dune::FieldVector<T,dim>    centroid,
+void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    centroid,
                                           const std::vector<std::vector<int> >           SX,
                                           const std::vector<std::vector<int> >           SY,
                                           const std::vector<Dune::FieldVector<T,dim> >   P,
@@ -435,13 +435,13 @@ void OverlappingMerge<dim, T>::Sorting3D( const Dune::FieldVector<T,dim>    cent
       if (SX[i].size()>0)         // loop on faces of X
       {
         no = SX[i] ;
-        RemoveDuplicates3D(no) ;
+        removeDuplicates3D(no) ;
         m = no.size() ;
-        if ((m>2)&&NewFace3D(no,H))               // don't compute degenerate polygons and check if face is new
+        if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons and check if face is new
         {
           for (int l=0; l<m; ++l)
             p.push_back(P[no[l]]) ;
-          OrderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
+          orderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
           for (int l=0; l<m; ++l)
             temp.push_back(no[id[l]]) ;
           H.push_back(temp) ;
@@ -454,13 +454,13 @@ void OverlappingMerge<dim, T>::Sorting3D( const Dune::FieldVector<T,dim>    cent
       if (SY[i].size()>0)         // loop on faces of Y
       {
         no = SY[i] ;
-        RemoveDuplicates3D(no) ;
+        removeDuplicates3D(no) ;
         m = no.size() ;
-        if ((m>2)&&NewFace3D(no,H))               // don't compute degenerate polygons  and check if face is new
+        if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons  and check if face is new
         {
           m = no.size() ;
           for (int l=0; l<m; ++l) p.push_back(P[no[l]]) ;
-          OrderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
+          orderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
           for (int l=0; l<m; ++l) temp.push_back(no[id[l]]) ;
           H.push_back(temp) ;
           temp.clear(); p.clear() ; id.clear();                 // clean
@@ -477,7 +477,7 @@ void OverlappingMerge<dim, T>::Sorting3D( const Dune::FieldVector<T,dim>    cent
 //   triangle, and otherwise returns p=[];
 
 template<int dim, typename T>
-bool OverlappingMerge<dim, T>::TriangleLineIntersection3D( const Dune::FieldVector<T,dim>    X0,
+bool OverlappingMerge<dim, T>::triangleLineIntersection3D( const Dune::FieldVector<T,dim>    X0,
                                                            const Dune::FieldVector<T,dim>    X1,
                                                            const Dune::FieldVector<T,dim>    Y0,
                                                            const Dune::FieldVector<T,dim>    Y1,
@@ -512,7 +512,7 @@ bool OverlappingMerge<dim, T>::TriangleLineIntersection3D( const Dune::FieldVect
 //   POINTINTETRAHEDRA check if the point X is contained in the tetrahedra Y.
 
 template<int dim, typename T>
-bool OverlappingMerge<dim, T>::PointInTetrahedra3D( const Dune::FieldVector<T,dim>                 X,
+bool OverlappingMerge<dim, T>::pointInTetrahedra3D( const Dune::FieldVector<T,dim>                 X,
                                                     const std::vector<Dune::FieldVector<T,dim> >   Y)
 {
   Dune::FieldMatrix<T,dim+1,dim+1>  D,DD ;
@@ -538,7 +538,7 @@ bool OverlappingMerge<dim, T>::PointInTetrahedra3D( const Dune::FieldVector<T,di
 //  the new point is inserted, and k is its index in the list.
 
 template<int dim, typename T>
-int OverlappingMerge<dim, T>::InsertPoint3D( const Dune::FieldVector<T,dim>  p, std::vector<Dune::FieldVector<T,dim> > &  P)
+int OverlappingMerge<dim, T>::insertPoint3D( const Dune::FieldVector<T,dim>  p, std::vector<Dune::FieldVector<T,dim> > &  P)
 {
   double eps= 1.e-10 ;     // tolerance for identical nodes
   int k=0 ;
@@ -561,7 +561,7 @@ int OverlappingMerge<dim, T>::InsertPoint3D( const Dune::FieldVector<T,dim>  p, 
 // REMOVEDUPLICATES removes duplicate entries from the vector p.
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::RemoveDuplicates3D( std::vector<int> & p)
+void OverlappingMerge<dim, T>::removeDuplicates3D( std::vector<int> & p)
 {
   sort(p.begin(),p.end());
 
@@ -587,7 +587,7 @@ void OverlappingMerge<dim, T>::RemoveDuplicates3D( std::vector<int> & p)
 //   contains the index reordering.
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::OrderPoints3D(const Dune::FieldVector<T,dim>     centroid,
+void OverlappingMerge<dim, T>::orderPoints3D(const Dune::FieldVector<T,dim>     centroid,
                                              std::vector<int> &                      id,
                                              std::vector<Dune::FieldVector<T,dim> >  & P)
 {
@@ -642,7 +642,7 @@ void OverlappingMerge<dim, T>::OrderPoints3D(const Dune::FieldVector<T,dim>     
 // of the vector id is contained in a row of the matrix H.
 
 template<int dim, typename T>
-bool OverlappingMerge<dim, T>::NewFace3D(const std::vector<int> id, const std::vector<std::vector<int> > H)
+bool OverlappingMerge<dim, T>::newFace3D(const std::vector<int> id, const std::vector<std::vector<int> > H)
 {
   int n = H.size() ;
   int m = id.size() ;
