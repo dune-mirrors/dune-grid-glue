@@ -255,7 +255,6 @@ int main(int argc, char** argv)
   // //////////////////////////////////////////////////////////
   //   Test with the OverlappingMerge implementation
   // //////////////////////////////////////////////////////////
-#if HAVE_PSURFACE
   OverlappingMerge<1,double> overlappingMerge1d;
   OverlappingMerge<2,double> overlappingMerge2d;
 
@@ -266,7 +265,6 @@ int main(int argc, char** argv)
 #if HAVE_UG
   testSimplexGridsUG(overlappingMerge2d, FieldVector<double,2>(0.05));
   testHybridGridsUG<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
-#endif
 #endif
 
   // //////////////////////////////////////////////////////////
