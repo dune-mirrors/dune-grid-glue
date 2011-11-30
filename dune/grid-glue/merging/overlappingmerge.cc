@@ -459,11 +459,15 @@ void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    cent
         if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons  and check if face is new
         {
           m = no.size() ;
-          for (int l=0; l<m; ++l) p.push_back(P[no[l]]) ;
+          for (int l=0; l<m; ++l)
+            p.push_back(P[no[l]]) ;
           orderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
-          for (int l=0; l<m; ++l) temp.push_back(no[id[l]]) ;
+          for (int l=0; l<m; ++l)
+            temp.push_back(no[id[l]]) ;
           H.push_back(temp) ;
-          temp.clear(); p.clear() ; id.clear();                 // clean
+          temp.clear();
+          p.clear();
+          id.clear();                 // clean
         }
         no.clear() ;             // clean
       }
