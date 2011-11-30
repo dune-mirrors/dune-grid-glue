@@ -435,7 +435,7 @@ void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    cent
       if (SX[i].size()>0)         // loop on faces of X
       {
         no = SX[i] ;
-        removeDuplicates3D(no) ;
+        removeDuplicates(no) ;
         m = no.size() ;
         if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons and check if face is new
         {
@@ -454,7 +454,7 @@ void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    cent
       if (SY[i].size()>0)         // loop on faces of Y
       {
         no = SY[i] ;
-        removeDuplicates3D(no) ;
+        removeDuplicates(no) ;
         m = no.size() ;
         if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons  and check if face is new
         {
@@ -565,7 +565,7 @@ int OverlappingMerge<dim, T>::insertPoint3D( const Dune::FieldVector<T,dim>  p, 
 // REMOVEDUPLICATES removes duplicate entries from the vector p.
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::removeDuplicates3D( std::vector<int> & p)
+void OverlappingMerge<dim, T>::removeDuplicates( std::vector<int> & p)
 {
   sort(p.begin(),p.end());
 

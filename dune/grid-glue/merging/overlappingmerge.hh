@@ -102,7 +102,7 @@ private:
   int insertPoint3D( const Dune::FieldVector<T,dim>                  p,
                      std::vector<Dune::FieldVector<T,dim> > &  P)  ;
 
-  void removeDuplicates3D( std::vector<int > &  p) ;
+  void removeDuplicates( std::vector<int > & p) ;
 
   void orderPoints3D(const Dune::FieldVector<T,dim>          centroid,
                      std::vector<int>                      & id,
