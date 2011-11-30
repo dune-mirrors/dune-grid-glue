@@ -368,7 +368,6 @@ namespace Dune {
       /** \brief Return true if intersection is conforming */
       bool conforming() const
       {
-#warning
         assert(("not implemented", false));
         // return i_->conforming();
         // template<typename P0, typename P1>
