@@ -568,21 +568,8 @@ template<int dim, typename T>
 void OverlappingMerge<dim, T>::removeDuplicates( std::vector<int> & p)
 {
   sort(p.begin(),p.end());
-
-  int i=0;
-  int j=1;
-
-  while (j<p.size()) {
-    if (p[i]<p[j]) {
-      i++;
-      p[i]=p[j];
-      j++;
-    }
-    else
-      j++;
-  }
-
-  p.resize(i+1) ;
+  std::vector<int>::iterator it = std::unique(p.begin(),p.end());
+  p.erase(it,p.end());
 }
 
 //   ORDERPOINTS order points counterclockwise [p,id]=OrderPoints(p,centroid); orders the points in a plane in 3d
