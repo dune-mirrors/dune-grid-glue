@@ -2,9 +2,7 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 mergingdir = $(includedir)/dune/glue/merging
-merging_HEADERS = cgalmerge.hh \
-                  cgalmerge.cc \
-                  conformingmerge.hh \
+merging_HEADERS = conformingmerge.hh \
                   merger.hh \
                   overlappingmerge.hh \
                   overlappingmerge.cc \
