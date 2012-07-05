@@ -17,7 +17,6 @@
 #include <dune/geometry/genericgeometry/geometry.hh>
 #include <dune/geometry/genericgeometry/geometrytraits.hh>
 #include <dune/geometry/genericgeometry/cornermapping.hh>
-#include <dune/geometry/genericgeometry/referenceelements.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
 namespace Dune {
