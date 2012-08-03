@@ -66,7 +66,7 @@ namespace Dune {
       // This traits class represents a single type only...
       static const bool hybrid = false;
       // ... and this type is 'simplex'.
-      static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< dimworld >::type::id;
+      static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< dim >::type::id;
 
       /**
        * Note:
