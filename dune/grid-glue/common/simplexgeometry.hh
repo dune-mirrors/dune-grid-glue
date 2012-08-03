@@ -47,10 +47,6 @@ namespace Dune {
         typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
       };
 
-#if ! DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,1,0)
-      // The type used for 1d reference elements
-      static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
-#endif
     };
 
 
@@ -85,11 +81,6 @@ namespace Dune {
         typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
       };
 
-
-#if ! DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,1,0)
-      // The type used for 1d reference elements
-      static const Dune::GeometryType::BasicType dunetype = Dune::GeometryType::simplex;
-#endif
     };
 
 
