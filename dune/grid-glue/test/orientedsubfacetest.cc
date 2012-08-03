@@ -37,7 +37,7 @@ void test(const GridType& grid) {
 
   double eps = 1e-6;
 
-  typename GridType::template Codim<0>::EntityPointer element = grid.template leafbegin<0>();
+  typename GridType::template Codim<0>::EntityPointer element(grid.template leafbegin<0>());
 
   typename GridType::template Codim<0>::Entity::LevelIntersectionIterator nIt = element->ilevelbegin();
   typename GridType::template Codim<0>::Entity::LevelIntersectionIterator nEndIt = element->ilevelend();
