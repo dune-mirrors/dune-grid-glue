@@ -23,14 +23,13 @@ namespace Dune {
   namespace GridGlue {
 
     /**
-     * @class LocalSimplexGeometryTraits
      * @brief Geometry traits for simplices passed to GenericGeometry::BasicGeometry
      *
      * This geometry traits class configures BasicGeometry to use only affine mappings
      * for simplicial (i.e. especially non-hybrid) grid structures.
      */
     template<class ctype, int dim, int dimworld, bool is_manifold = false>
-    struct LocalSimplexGeometryTraits
+    struct SimplexGeometryTraits
       : public Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld - static_cast<int>(is_manifold), true>
     {
       typedef typename Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld - static_cast<int>(is_manifold), true> Base;
@@ -51,43 +50,6 @@ namespace Dune {
 
 
     /**
-     * @class SimplexGeometryTraits
-     * @brief Geometry traits for simplex elements passed to Dune::GenericGeometry::BasicGeometry
-     *
-     * This geometry traits class configures BasicGeometry to use only affine mappings
-     * for simplicial (i.e. especially non-hybrid) grid structures.
-     */
-    template<class ctype, int dim, int dimworld>
-    struct GlobalSimplexGeometryTraits
-      : public Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld, true>
-    {
-      typedef typename Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld, true> Base;
-
-      // This traits class represents a single type only...
-      static const bool hybrid = false;
-      // ... and this type is 'simplex'.
-      static const unsigned int topologyId = Dune::GenericGeometry::SimplexTopology< dim >::type::id;
-
-      /**
-       * Note:
-       * In contrast to LocalSimplexGeometryTraits it doesn't matter which one you use,
-       * Base::dimWorld or G::dimensionworld. For reasons of conformance the Traits' class'
-       * constant is used.
-       */
-      template<class Topology>
-      struct Mapping
-      {
-        typedef Dune::GenericGeometry::CoordStorage<typename Base::CoordTraits, Topology, Base::dimWorld>                        CornerStorage;
-        typedef Dune::GenericGeometry::CornerMapping<typename Base::CoordTraits, Topology, Base::dimWorld, CornerStorage, true>  type;
-      };
-
-    };
-
-
-
-
-
-    /**
      * @class SimplexGeometry
      * @brief This class is derived from BasicGeometry using tuned geometry traits.
      *
@@ -96,9 +58,9 @@ namespace Dune {
      * for the case of exclusively simplicial geometries.
      */
     template<int mydim, int coorddim, typename G>
-    class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> >
+    class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> >
     {
-      typedef Dune::GenericGeometry::BasicGeometry<mydim, GlobalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> > Base;
+      typedef Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> > Base;
 
       enum { simplex_corners = mydim+1 };
 
@@ -143,9 +105,9 @@ namespace Dune {
      */
     template<int mydim, int coorddim, typename G>
     class LocalSimplexGeometry
-      : public Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> >
+      : public Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> >
     {
-      typedef Dune::GenericGeometry::BasicGeometry<mydim, LocalSimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
+      typedef Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
 
       enum { simplex_corners = mydim+1 };
 
