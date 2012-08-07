@@ -39,11 +39,11 @@ namespace Dune {
 
       typedef LocalSimplexGeometry<mydim, GridGlue::Grid0View::dimension, typename GridGlue::Grid0View::Grid>
       Grid0LocalGeometry;
-      typedef SimplexGeometry<mydim, GridGlue::Grid0View::dimensionworld, typename GridGlue::Grid0View::Grid>
+      typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimensionworld>
       Grid0Geometry;
       typedef LocalSimplexGeometry<mydim, GridGlue::Grid1View::dimension, typename GridGlue::Grid1View::Grid>
       Grid1LocalGeometry;
-      typedef SimplexGeometry<mydim, GridGlue::Grid1View::dimensionworld, typename GridGlue::Grid1View::Grid>
+      typedef SimplexGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimensionworld>
       Grid1Geometry;
 
       typedef typename GridGlue::Grid0View::IndexSet::IndexType Grid0IndexType;

@@ -57,10 +57,10 @@ namespace Dune {
      * implementation of CornerMapping. Using only affine mappings it is specialized
      * for the case of exclusively simplicial geometries.
      */
-    template<int mydim, int coorddim, typename G>
-    class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> >
+    template<class ctype, int mydim, int coorddim>
+    class SimplexGeometry : public Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<ctype, mydim, coorddim> >
     {
-      typedef Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld> > Base;
+      typedef Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<ctype, mydim, coorddim> > Base;
 
       enum { simplex_corners = mydim+1 };
 
@@ -81,7 +81,7 @@ namespace Dune {
        * @param type the geometry type of this subface, i.e. most likely a simplex in 1D or 2D
        * @param coordinates The corner coordinates in DUNE numbering
        */
-      void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
+      void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<ctype, coorddim>, simplex_corners>& coordinates)
       {
         // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
         Base::operator=(Base(type, coordinates));
