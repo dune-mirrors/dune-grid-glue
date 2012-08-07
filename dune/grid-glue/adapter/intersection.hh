@@ -37,11 +37,11 @@ namespace Dune {
       /** \brief Dimension of the intersection */
       enum { mydim = GridGlue::Grid0View::Grid::dimension - GridGlue::Grid0Patch::codim };
 
-      typedef LocalSimplexGeometry<mydim, GridGlue::Grid0View::dimension, typename GridGlue::Grid0View::Grid>
+      typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
       Grid0LocalGeometry;
       typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimensionworld>
       Grid0Geometry;
-      typedef LocalSimplexGeometry<mydim, GridGlue::Grid1View::dimension, typename GridGlue::Grid1View::Grid>
+      typedef SimplexGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimension>
       Grid1LocalGeometry;
       typedef SimplexGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimensionworld>
       Grid1Geometry;
