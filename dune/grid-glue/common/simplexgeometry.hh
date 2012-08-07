@@ -28,11 +28,11 @@ namespace Dune {
      * This geometry traits class configures BasicGeometry to use only affine mappings
      * for simplicial (i.e. especially non-hybrid) grid structures.
      */
-    template<class ctype, int dim, int dimworld, bool is_manifold = false>
+    template<class ctype, int dim, int dimworld>
     struct SimplexGeometryTraits
-      : public Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld - static_cast<int>(is_manifold), true>
+      : public Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld, true>
     {
-      typedef typename Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld - static_cast<int>(is_manifold), true> Base;
+      typedef typename Dune::GenericGeometry::DefaultGeometryTraits<ctype, dim, dimworld, true> Base;
 
       // This traits class represents a single type only ...
       static const bool hybrid = false;
@@ -83,56 +83,6 @@ namespace Dune {
        */
       void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<ctype, coorddim>, simplex_corners>& coordinates)
       {
-        // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-        Base::operator=(Base(type, coordinates));
-      }
-
-    };
-
-
-
-    /**
-     * @class LocalSimplexGeometry
-     * @brief This class is derived from BasicGeometry using tuned geometry traits.
-     *
-     * The used geometry traits allow for a more efficient compilation of the default
-     * implementation of CornerMapping. Using only affine mappings it is specialized
-     * for the case of exclusively simplicial geometries.
-     * Note:
-     * This class mostly does the same as the SimplexGeometry class. Behaviour only differs
-     * in the case of manifolds. Then the local mapping is 1D->1D resp. 2D->2D here whereas
-     * the global geometry maps to the world coordinate space, i.e. 1D->2D resp. 2D->3D.
-     */
-    template<int mydim, int coorddim, typename G>
-    class LocalSimplexGeometry
-      : public Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> >
-    {
-      typedef Dune::GenericGeometry::BasicGeometry<mydim, SimplexGeometryTraits<typename G::ctype, G::dimension, G::dimensionworld, (coorddim < static_cast<int>(G::dimensionworld))> > Base;
-
-      enum { simplex_corners = mydim+1 };
-
-    public:
-
-      typedef typename Base::Mapping Mapping;
-
-
-      template< class CoordVector>
-      LocalSimplexGeometry(const Dune::GeometryType &type, const CoordVector &coords) : Base(type, coords)
-      {}
-
-
-      LocalSimplexGeometry()
-      {}
-
-
-      /**
-       * @brief Setup method with a geometry type and a set of corners
-       * @param type the geometry type of this subface, i.e. most likely a simplex in 1D or 2D
-       * @param coordinates The corner coordinates in DUNE numbering
-       */
-      void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<typename G::ctype, coorddim>, simplex_corners>& coordinates)
-      {
-        // set up base class
         // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
         Base::operator=(Base(type, coordinates));
       }
