@@ -409,7 +409,7 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
 
   for (size_t i=0; i<grid2_element_types.size(); i++) {
 
-    const Dune::GenericReferenceElement<T,grid2Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid2_element_types[i]);
+    const Dune::GenericReferenceElement<T,grid2Dim>& refElement = Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]);
 
     for (size_t j=0; j<(size_t)refElement.size(1); j++) {
 
