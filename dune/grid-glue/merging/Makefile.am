@@ -4,6 +4,7 @@
 mergingdir = $(includedir)/dune/glue/merging
 merging_HEADERS = conformingmerge.hh \
                   merger.hh \
+                  mixeddimoverlappingmerge.hh \
                   overlappingmerge.hh \
                   overlappingmerge.cc \
                   psurfacemerge.hh \
