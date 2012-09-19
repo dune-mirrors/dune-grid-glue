@@ -2,6 +2,7 @@ Makefile.in
 Makefile
 .deps
 mixeddimcouplingtest
+mixeddimoverlappingtest
 multivectortest
 nonoverlappingcouplingtest
 nonoverlappingcouplingtest_mpi

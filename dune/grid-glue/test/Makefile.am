@@ -2,6 +2,7 @@
 
 TESTPROGS = \
     mixeddimcouplingtest       \
+    mixeddimoverlappingtest    \
     multivectortest            \
     nonoverlappingcouplingtest \
     overlappingcouplingtest
@@ -36,6 +37,7 @@ nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
 nonoverlappingcouplingtest_mpi_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
+mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
