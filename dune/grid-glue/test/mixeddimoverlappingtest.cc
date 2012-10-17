@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 
   // The following code is out-commented, because the test functionality
   // doesn't actually work yet.
-#if 0
+  MixedDimOverlappingMerge<2,1,2> merger;
   GlueType glue(domEx, tarEx, &merger);
 
   glue.build();
@@ -113,5 +113,4 @@ int main(int argc, char** argv)
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#endif
 }
