@@ -27,10 +27,6 @@ namespace Dune {
 
       typedef typename GridGlue::IndexType IndexType;
 
-      dune_static_assert(GridGlue::Grid0View::Grid::dimension - GridGlue::Grid0Patch::codim
-                         == GridGlue::Grid1View::Grid::dimension - GridGlue::Grid1Patch::codim,
-                         "Currently both coupling extracts need to have the same dimension!");
-
       /** \brief Dimension of the world space of the intersection */
       enum { coorddim = GridGlue::dimworld };
 
