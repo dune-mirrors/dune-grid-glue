@@ -6,7 +6,7 @@
 #include <vector>
 #include <dune/common/mpitraits.hh>
 
-#warning Implement MPI Status check with exception handling
+/** \todo Implement MPI Status check with exception handling */
 #define CheckMPIStatus(A,B) {}
 
 #if HAVE_MPI
@@ -299,7 +299,7 @@ void GridGlue<P0, P1>::mergePatches(
   const int patch1rank)
 {
 
-#warning howto handle overlap etc?
+  // howto handle overlap etc?
 
   int myrank = 0;
 #if HAVE_MPI
