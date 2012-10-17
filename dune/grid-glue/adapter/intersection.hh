@@ -30,8 +30,14 @@ namespace Dune {
       /** \brief Dimension of the world space of the intersection */
       enum { coorddim = GridGlue::dimworld };
 
+    private:
+      // intermediate quantities
+      static const int dim1 = GridGlue::Grid0View::Grid::dimension - GridGlue::Grid0Patch::codim;
+      static const int dim2 = GridGlue::Grid1View::Grid::dimension - GridGlue::Grid1Patch::codim;
+
+    public:
       /** \brief Dimension of the intersection */
-      enum { mydim = GridGlue::Grid0View::Grid::dimension - GridGlue::Grid0Patch::codim };
+      enum { mydim = (dim1<dim2) ? dim1 : dim2 };
 
       typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
       Grid0LocalGeometry;
@@ -79,8 +85,10 @@ namespace Dune {
         grid1index_(0)
     {
       typedef typename GridGlue::ctype ctype;
-      typedef Dune::FieldVector<ctype, mydim>      LocalCoordinate;
       typedef Dune::FieldVector<ctype, coorddim>   GlobalCoordinate;
+
+      // Number of corners of the intersection
+      const int nSimplexCorners = mydim + 1;
 
       // if an invalid index is given do not proceed!
       // (happens when the parent GridGlue initializes the "end"-Intersection)
@@ -91,10 +99,8 @@ namespace Dune {
         // compute the coordinates of the subface's corners in codim 0 entity local coordinates
         const int elementdim = GridGlue::Grid0View::template Codim<0>::Geometry::mydimension;
 
-        const int nSimplexCorners = elementdim - GridGlue::Grid0Patch::codim + 1;
-
         // coordinates within the subentity that contains the remote intersection
-        Dune::array<LocalCoordinate, nSimplexCorners> corners_subEntity_local;
+        Dune::array<Dune::FieldVector<ctype, dim1>, nSimplexCorners> corners_subEntity_local;
 
         for (int i = 0; i < nSimplexCorners; ++i)
           corners_subEntity_local[i] = glue.merger_->template parentLocal<0>(mergeindex, i);
@@ -134,10 +140,8 @@ namespace Dune {
         // compute the coordinates of the subface's corners in codim 0 entity local coordinates
         const int elementdim = GridGlue::Grid1View::template Codim<0>::Geometry::mydimension;
 
-        const int nSimplexCorners = elementdim - GridGlue::Grid1Patch::codim + 1;
-
         // coordinates within the subentity that contains the remote intersection
-        Dune::array<LocalCoordinate, nSimplexCorners> corners_subEntity_local;
+        Dune::array<Dune::FieldVector<ctype, dim2>, nSimplexCorners> corners_subEntity_local;
 
         for (int i = 0; i < nSimplexCorners; ++i)
           corners_subEntity_local[i] = glue.merger_->template parentLocal<1>(mergeindex, i);

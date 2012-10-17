@@ -73,11 +73,17 @@ protected:
 
   struct RemoteSimplicialIntersection
   {
-    // Local coordinates in the grid1 entity
-    Dune::array<Dune::FieldVector<T,grid1Dim>, dimworld+1> grid1Local_;
+    /** \brief Dimension of this intersection */
+    enum {intersectionDim = (grid1Dim<grid2Dim) ? grid1Dim : grid2Dim};
+
+    /** \brief Number of vertices of the intersection (it's a simplex) */
+    enum {nVertices = intersectionDim + 1};
 
     // Local coordinates in the grid1 entity
-    Dune::array<Dune::FieldVector<T,grid2Dim>, dimworld+1> grid2Local_;
+    Dune::array<Dune::FieldVector<T,grid1Dim>, nVertices> grid1Local_;
+
+    // Local coordinates in the grid1 entity
+    Dune::array<Dune::FieldVector<T,grid2Dim>, nVertices> grid2Local_;
 
     //
     int grid1Entity_;
