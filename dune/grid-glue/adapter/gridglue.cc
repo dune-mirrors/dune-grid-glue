@@ -72,28 +72,54 @@ namespace {
   void MPI_SendVectorInRing(
     std::vector<T> & data,
     std::vector<T> & tmp,
-    int sizeleft,
+    int leftsize,
     int rightrank,
     int leftrank,
     MPI_Comm comm
     )
   {
     // mpi status stuff
-    int result;
+    int result = 0;
     MPI_Status status;
     typedef MPITypeInfo<T> Info;
     // alloc buffer
-    tmp.resize(sizeleft);
+    unsigned int tmpsize = tmp.size();
+    tmp.resize(leftsize);
     // send data
-    result =
-      MPI_Sendrecv(
-        &(data[0]), Info::size*data.size(), Info::getType(), rightrank, Info::tag,
-        &(tmp[0]),  Info::size*tmp.size(),  Info::getType(), leftrank,  Info::tag,
-        comm, &status);
+    int rank; MPI_Comm_rank(comm, &rank);
+    // std::cout << rank << " send " << data.size() << " to " << rightrank << std::endl;
+    // std::cout << rank << " recv " << tmp.size() << " from " << leftrank << std::endl;
+    if (leftsize > 0 && data.size() > 0)
+    {
+      // send & receive
+      result =
+        MPI_Sendrecv(
+          &(data[0]), Info::size*data.size(), Info::getType(), rightrank, Info::tag,
+          &(tmp[0]),  Info::size*tmp.size(),  Info::getType(), leftrank,  Info::tag,
+          comm, &status);
+    }
+    if (leftsize == 0 && data.size() > 0)
+    {
+      // send
+      result =
+        MPI_Send(
+          &(data[0]), Info::size*data.size(), Info::getType(), rightrank, Info::tag,
+          comm);
+    }
+    if (leftsize > 0 && data.size() == 0)
+    {
+      // receive
+      result =
+        MPI_Recv(
+          &(tmp[0]),  Info::size*tmp.size(),  Info::getType(), leftrank,  Info::tag,
+          comm, &status);
+    }
     // check result
     CheckMPIStatus(result, status);
     // swap buffers
     data.swap(tmp);
+    // resize tmp buffer
+    tmp.resize(tmpsize);
   }
 
   /** \todo Please doc me! */
