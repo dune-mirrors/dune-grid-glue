@@ -92,6 +92,18 @@ namespace {
     // swap buffers
     data.swap(tmp);
   }
+
+  /** \todo Please doc me! */
+  struct MaxPatchSizes
+  {
+    int coords, entities;
+  };
+
+  /** \todo Please doc me! */
+  struct PatchSizes
+  {
+    int patch0coords, patch0entities, patch1coords, patch1entities;
+  };
 }
 #endif // HAVE_MPI
 
@@ -184,16 +196,15 @@ void GridGlue<P0, P1>::build()
     DUNE_THROW(Dune::Exception, "TODO: implement ring comm of patches");
 
     // communicate max patch size
-    int patchCoords_maxSize;
-    int patchEntites_maxSize;
+    MaxPatchSizes maxPatchSizes;
 
     // allocate remote buffers (maxsize to avoid reallocation)
-    std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( patchCoords_maxSize );
-    std::vector<unsigned int> remotePatch0entities ( patchEntites_maxSize );
-    std::vector<Dune::GeometryType> remotePatch0types ( patchEntites_maxSize );
-    std::vector<Dune::FieldVector<ctype,dimworld> > remotePatch1coords ( patchCoords_maxSize );
-    std::vector<unsigned int> remotePatch1entities ( patchEntites_maxSize );
-    std::vector<Dune::GeometryType> remotePatch1types ( patchEntites_maxSize );
+    std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( maxPatchSizes.coords );
+    std::vector<unsigned int> remotePatch0entities ( maxPatchSizes.entities );
+    std::vector<Dune::GeometryType> remotePatch0types ( maxPatchSizes.entities );
+    std::vector<Dune::FieldVector<ctype,dimworld> > remotePatch1coords ( maxPatchSizes.coords );
+    std::vector<unsigned int> remotePatch1entities ( maxPatchSizes.entities );
+    std::vector<Dune::GeometryType> remotePatch1types ( maxPatchSizes.entities );
 
     // copy local patches to remote patch buffers
     remotePatch0coords.clear();
@@ -204,9 +215,9 @@ void GridGlue<P0, P1>::build()
     std::copy(patch0types.begin(), patch0types.end(), remotePatch0types.begin());
 
     // allocate tmp buffers (maxsize to avoid reallocation)
-    std::vector<Dune::FieldVector<ctype, dimworld> > tmpPatchCoords ( patchCoords_maxSize );
-    std::vector<unsigned int> tmpPatchEntities ( patchEntites_maxSize );
-    std::vector<Dune::GeometryType> tmpPatchTypes ( patchEntites_maxSize );
+    std::vector<Dune::FieldVector<ctype, dimworld> > tmpPatchCoords ( maxPatchSizes.coords );
+    std::vector<unsigned int> tmpPatchEntities ( maxPatchSizes.entities );
+    std::vector<Dune::GeometryType> tmpPatchTypes ( maxPatchSizes.entities );
 
     // communicate patches in the ring
     for (int i=0; i<commsize; i++)
@@ -216,13 +227,13 @@ void GridGlue<P0, P1>::build()
       int leftrank   = (myrank - 1) % commsize;
 
       // communicate actual patch sizes
-      int patchSizes[4];       // patch0coords, patch0entities, patch1coords, patch1entities
+      PatchSizes patchSizes;
 
       {
-        patchSizes[0] = remotePatch0coords.size();
-        patchSizes[1] = remotePatch0entities.size();
-        patchSizes[2] = remotePatch1coords.size();
-        patchSizes[3] = remotePatch1entities.size();
+        patchSizes.patch0coords = remotePatch0coords.size();
+        patchSizes.patch0entities = remotePatch0entities.size();
+        patchSizes.patch1coords = remotePatch1coords.size();
+        patchSizes.patch1entities = remotePatch1entities.size();
         // send to right neighbor, receive from left neighbor
         mpi_result =
           MPI_Sendrecv_replace(
@@ -237,36 +248,37 @@ void GridGlue<P0, P1>::build()
 
       // patch0coords
       MPI_SendVectorInRing(
-        remotePatch0coords, tmpPatchCoords, patchSizes[0],
+        remotePatch0coords, tmpPatchCoords, patchSizes.patch0coords,
         rightrank, leftrank, mpicomm);
 
       // patch0entities
       MPI_SendVectorInRing(
-        remotePatch0entities, tmpPatchEntities, patchSizes[1],         // patch0entitiesSize
+        remotePatch0entities, tmpPatchEntities, patchSizes.patch0entities,
         rightrank, leftrank, mpicomm);
 
       // patch0types
       MPI_SendVectorInRing(
-        remotePatch0types, tmpPatchTypes, patchSizes[1],         // patch0entitiesSize
+        remotePatch0types, tmpPatchTypes, patchSizes.patch0entities,
         rightrank, leftrank, mpicomm);
 
       // patch1coords
       MPI_SendVectorInRing(
-        remotePatch1coords, tmpPatchCoords, patchSizes[2],         // patch1coordsSize
+        remotePatch1coords, tmpPatchCoords, patchSizes.patch1coords,
         rightrank, leftrank, mpicomm);
 
       // patch1entities
       MPI_SendVectorInRing(
-        remotePatch1entities, tmpPatchEntities, patchSizes[3],         // patch1entitiesSize
+        remotePatch1entities, tmpPatchEntities, patchSizes.patch1entities,
         rightrank, leftrank, mpicomm);
 
       // patch1types
       MPI_SendVectorInRing(
-        remotePatch1types, tmpPatchTypes, patchSizes[3],         // patch1entitiesSize
+        remotePatch1types, tmpPatchTypes, patchSizes.patch1entities,
         rightrank, leftrank, mpicomm);
 
       /* merging */
       // merge local & remote patches
+      // domain_is and target_is are updated automatically
       mergePatches(patch0coords, patch0entities, patch0types, myrank,
                    remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
       mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, remoterank,
