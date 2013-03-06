@@ -293,7 +293,7 @@ void GridGlue<P0, P1>::build()
 #endif // HAVE_MPI
 
     // communicate patches in the ring
-    for (int i=0; i<commsize; i++)
+    for (int i=1; i<commsize; i++)
     {
       int remoterank = (myrank - i + commsize) % commsize;
       int rightrank  = (myrank + 1 + commsize) % commsize;
@@ -302,19 +302,15 @@ void GridGlue<P0, P1>::build()
       // communicate current patch sizes
       // patchsizes were initialized before
       {
-        // std::cout << myrank << ": before my remote size 0: " << patchSizes.patch0entities << " and "  << patchSizes.patch0types << std::endl;
-        // std::cout << myrank << ": before my remote size 1: " << patchSizes.patch1entities << " and "  << patchSizes.patch1types << std::endl;
         // send to right neighbor, receive from left neighbor
         mpi_result =
           MPI_Sendrecv_replace(
-            &patchSizes, 4, MPI_UNSIGNED,
-            rightrank, MPITypeInfo<int>::tag,
-            leftrank,  MPITypeInfo<int>::tag,
+            &patchSizes, 6, MPI_UNSIGNED,
+            rightrank, MPITypeInfo<unsigned int>::tag,
+            leftrank,  MPITypeInfo<unsigned int>::tag,
             mpicomm, &mpi_status);
         CheckMPIStatus(mpi_result, mpi_status);
       }
-      // std::cout << myrank << ": before my remote size 0: " << patchSizes.patch0entities << " and "  << patchSizes.patch0types << std::endl;
-      // std::cout << myrank << ": before my remote size 1: " << patchSizes.patch1entities << " and "  << patchSizes.patch1types << std::endl;
 
       /* send remote patch to right neighbor and receive from left neighbor */
 
