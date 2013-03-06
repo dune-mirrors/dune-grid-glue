@@ -114,12 +114,12 @@ template<typename P0, typename P1>
 GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger* merger, MPI_Comm m)
 #else
 GridGlue<P0, P1>::GridGlue(const Grid0Patch & gp1, const Grid1Patch & gp2, Merger* merger)
-#endif
+#endif // HAVE_MPI
   :
     patch0_(gp1), patch1_(gp2), merger_(merger)
 #if HAVE_MPI
     , mpicomm(m)
-#endif
+#endif // HAVE_MPI
 {
   std::cout << "GridGlue: Constructor succeeded!" << std::endl;
 }
@@ -180,7 +180,7 @@ void GridGlue<P0, P1>::build()
   // setup parallel indexset
   domain_is.beginResize();
   target_is.beginResize();
-#endif
+#endif // HAVE_MPI
 
   // merge local patches and add to intersection list
   mergePatches(patch0coords, patch0entities, patch0types, myrank,
@@ -325,7 +325,7 @@ void GridGlue<P0, P1>::mergePatches(
   int myrank = 0;
 #if HAVE_MPI
   MPI_Comm_rank(mpicomm, &myrank);
-#endif
+#endif // HAVE_MPI
 
   // which patches are local?
   const bool patch0local = (myrank == patch0rank);
@@ -377,7 +377,7 @@ void GridGlue<P0, P1>::mergePatches(
       target_is.add (gid, LocalIndex(offset+i, ptype) );
     }
   }
-#endif
+#endif // HAVE_MPI
 
   // cleanup the merger
   merger_->clear();

@@ -270,7 +270,7 @@ private:
 
   /// @brief keeps information about which process has which intersection
   Dune::RemoteIndices<PIndexSet> remoteIndices;
-#endif
+#endif // HAVE_MPI
 
   /// \todo
   typedef Dune::GridGlue::IntersectionData<P0,P1> IntersectionData;
@@ -330,8 +330,8 @@ public:
   GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger* merger, MPI_Comm mpicomm = MPI_COMM_WORLD);
 #else
   GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger* merger);
-#endif
-  /*   G E T T E R S   */
+#endif // HAVE_MPI
+       /*   G E T T E R S   */
 
   /** \todo Please doc me! */
   template<int P>
@@ -531,7 +531,7 @@ public:
     // cleanup pointers
     delete[] sendbuffer;
     delete[] receivebuffer;
-#endif
+#endif // HAVE_MPI
   }
 
 #if QUICKHACK_INDEX
