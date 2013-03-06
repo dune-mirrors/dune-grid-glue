@@ -262,6 +262,13 @@ void GridGlue<P0, P1>::build()
     std::vector<unsigned int> tmpPatchEntities ( maxPatchSizes.entities );
     std::vector<Dune::GeometryType> tmpPatchTypes ( maxPatchSizes.entities );
 
+    /** \todo Use the communicator of the respective grid to communite _that_ grid in the ring */
+#if HAVE_MPI
+    // make sure the grids use MPI_COMM_WORLD
+    assert(commsize == gridView<0>().comm().size());
+    assert(commsize == gridView<1>().comm().size());
+#endif // HAVE_MPI
+
     // communicate patches in the ring
     for (int i=0; i<commsize; i++)
     {
