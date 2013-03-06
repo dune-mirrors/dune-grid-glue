@@ -129,27 +129,29 @@ public:
 
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
 
-  /** \brief Grid view of the domain grid */
+  /** \brief Grid view of grid 0 (the domain grid) */
   typedef typename P0::GridView Grid0View;
 
-  /** \brief Domain grid type */
+  /** \brief Grid 0 (domain grid) type */
   typedef typename Grid0View::Grid DomainGridType;
 
   /** \brief Coupling patch of grid 0 */
   typedef P0 Grid0Patch;
 
-  /** \brief Dimension of the domain extractor */
+  /** \brief Dimension of the grid 0 extractor */
   enum {
-    /** \brief Dimension of the domain extractor */
+    /** \brief Dimension of the grid 0 extractor */
     domdim = Grid0Patch::dim,
-    /** \brief WOrld dimension of the domain extractor */
-    domdimworld = Grid0Patch::dimworld
+    grid0dim = Grid0Patch::dim,
+    /** \brief World dimension of the grid 0 extractor */
+    domdimworld = Grid0Patch::dimworld,
+    grid0dimworld = Grid0Patch::dimworld
   };
 
-  /** \brief Grid view of the target grid */
+  /** \brief Grid view of grid 1 (the target grid) */
   typedef typename P1::GridView Grid1View;
 
-  /** \brief Target grid type */
+  /** \brief Gird 1 (target grid) type */
   typedef typename Grid1View::Grid TargetGridType;
 
   /** \brief Coupling patch of grid 1 */
@@ -158,12 +160,14 @@ public:
   /** \todo */
   typedef unsigned int IndexType;
 
-  /** \brief Dimension of the target extractor */
+  /** \brief Dimension of the grid 1 extractor */
   enum {
-    /** \brief Dimension of the target extractor */
+    /** \brief Dimension of the grid 1 extractor */
     tardim = Grid1Patch::dim,
-    /** \brief World dimension of the target extractor */
-    tardimworld = Grid1Patch::dimworld
+    grid1dim = Grid1Patch::dim,
+    /** \brief World dimension of the grid 1 extractor */
+    tardimworld = Grid1Patch::dimworld,
+    grid1dimworld = Grid1Patch::dimworld
   };
 
 
