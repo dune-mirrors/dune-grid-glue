@@ -232,8 +232,9 @@ void GridGlue<P0, P1>::build()
 #endif // HAVE_MPI
 
   // merge local patches and add to intersection list
-  mergePatches(patch0coords, patch0entities, patch0types, myrank,
-               patch1coords, patch1entities, patch1types, myrank);
+  if (patch0entities.size() > 0 && patch1entities.size() > 0)
+    mergePatches(patch0coords, patch0entities, patch0types, myrank,
+                 patch1coords, patch1entities, patch1types, myrank);
 
 #if HAVE_MPI
 
@@ -376,10 +377,16 @@ void GridGlue<P0, P1>::build()
       /* merging */
       // merge local & remote patches
       // domain_is and target_is are updated automatically
-      mergePatches(patch0coords, patch0entities, patch0types, myrank,
-                   remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
-      mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, remoterank,
-                   patch1coords, patch1entities, patch1types, myrank);
+      if (remotePatch1entities.size() > 0 && patch0entities.size() > 0)
+        mergePatches(patch0coords, patch0entities, patch0types, myrank,
+                     remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
+      if (remotePatch0entities.size() > 0 && patch1entities.size() > 0)
+        mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, remoterank,
+                     patch1coords, patch1entities, patch1types, myrank);
+
+      std::cout << "Sync processes" << std::endl;
+      MPI_Barrier(mpicomm);
+      std::cout << "...done" << std::endl;
     }
   }
 
