@@ -197,6 +197,14 @@ void GridGlue<P0, P1>::build()
 
     // communicate max patch size
     MaxPatchSizes maxPatchSizes;
+    {
+      MaxPatchSizes myMaxPatchSizes;
+      myMaxPatchSizes.coords = std::max(patch0coords.size(), patch1coords.size());
+      myMaxPatchSizes.entities = std::max(patch0entities.size(), patch1entities.size());
+      mpi_result = MPI_Allreduce(&myMaxPatchSizes, &maxPatchSizes,
+                                 2, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+      CheckMPIStatus(mpi_result, 0);
+    }
 
     // allocate remote buffers (maxsize to avoid reallocation)
     std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( maxPatchSizes.coords );
