@@ -158,9 +158,8 @@ void GridGlue<P0, P1>::build()
   intersections_.clear();
 
   int myrank = 0;
-  int commsize = 1;
-
 #if HAVE_MPI
+  int commsize = 1;
   MPI_Comm_rank(mpicomm, &myrank);
   MPI_Comm_size(mpicomm, &commsize);
 
