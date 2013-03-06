@@ -192,9 +192,6 @@ void GridGlue<P0, P1>::build()
 
   if (commsize > 1)
   {
-#warning implement ring comm of patches
-    DUNE_THROW(Dune::Exception, "TODO: implement ring comm of patches");
-
     // communicate max patch size
     MaxPatchSizes maxPatchSizes;
     {
@@ -245,7 +242,7 @@ void GridGlue<P0, P1>::build()
         // send to right neighbor, receive from left neighbor
         mpi_result =
           MPI_Sendrecv_replace(
-            patchSizes, 4, MPI_INT,
+            &patchSizes, 4, MPI_INT,
             rightrank, MPITypeInfo<int>::tag,
             leftrank,  MPITypeInfo<int>::tag,
             mpicomm, &mpi_status);
