@@ -364,4 +364,5 @@ int main(int argc, char *argv[]) try
 }
 catch (Exception e) {
   std::cout << e << std::endl;
+  return 1;
 }
