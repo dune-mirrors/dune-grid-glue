@@ -334,8 +334,10 @@ void GridGlue<P0, P1>::mergePatches(
 
 #if HAVE_MPI
   // update remote index sets
+#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,2,1)
   assert(Dune::RESIZE == domain_is.state());
   assert(Dune::RESIZE == target_is.state());
+#endif
   for (unsigned int i = 0; i < merger_->nSimplices(); i++)
   {
     const IntersectionData & it = intersections_[i];
