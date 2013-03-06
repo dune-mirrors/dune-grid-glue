@@ -4,6 +4,7 @@
 
 #include "intersection.hh"
 #include <vector>
+#include <iterator>
 #include <dune/common/mpitraits.hh>
 
 #include "../common/multivector.hh"
@@ -218,11 +219,18 @@ void GridGlue<P0, P1>::build()
 
     // copy local patches to remote patch buffers
     remotePatch0coords.clear();
-    std::copy(patch0coords.begin(), patch0coords.end(), remotePatch0coords.begin());
+    std::copy(patch0coords.begin(), patch0coords.end(), std::back_inserter(remotePatch0coords));
     remotePatch0entities.clear();
-    std::copy(patch0entities.begin(), patch0entities.end(), remotePatch0entities.begin());
+    std::copy(patch0entities.begin(), patch0entities.end(), std::back_inserter(remotePatch0entities));
     remotePatch0types.clear();
-    std::copy(patch0types.begin(), patch0types.end(), remotePatch0types.begin());
+    std::copy(patch0types.begin(), patch0types.end(), std::back_inserter(remotePatch0types));
+
+    remotePatch1coords.clear();
+    std::copy(patch1coords.begin(), patch1coords.end(), std::back_inserter(remotePatch1coords));
+    remotePatch1entities.clear();
+    std::copy(patch1entities.begin(), patch1entities.end(), std::back_inserter(remotePatch1entities));
+    remotePatch1types.clear();
+    std::copy(patch1types.begin(), patch1types.end(), std::back_inserter(remotePatch1types));
 
     // allocate tmp buffers (maxsize to avoid reallocation)
     std::vector<Dune::FieldVector<ctype, dimworld> > tmpPatchCoords ( maxPatchSizes.coords );
