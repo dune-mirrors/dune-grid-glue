@@ -51,7 +51,7 @@ void testIntersection(const IntersectionIt & rIIt)
     // Test whether local target position is consistent with global target position
     assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
 
-    // Here we assume that the two interface match geometrically:
+    // Here we assume that the two interfaces match geometrically:
     if ( (globalDomainPos-globalTargetPos).two_norm() >= 1e-4 )
     {
       std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-4 ) failed\n";
