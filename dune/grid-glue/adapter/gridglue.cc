@@ -6,6 +6,8 @@
 #include <vector>
 #include <dune/common/mpitraits.hh>
 
+#include "../common/multivector.hh"
+
 /** \todo Implement MPI Status check with exception handling */
 #define CheckMPIStatus(A,B) {}
 
@@ -203,6 +205,9 @@ void GridGlue<P0, P1>::build()
       CheckMPIStatus(mpi_result, 0);
     }
 
+    /**
+       \todo Use vector<struct> for message buffer and MultiVector to copy these
+     */
     // allocate remote buffers (maxsize to avoid reallocation)
     std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( maxPatchSizes.coords );
     std::vector<unsigned int> remotePatch0entities ( maxPatchSizes.entities );
