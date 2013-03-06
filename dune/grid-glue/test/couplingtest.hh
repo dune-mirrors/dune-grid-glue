@@ -102,9 +102,12 @@ void testCoupling(const GlueType& glue)
     typename GlueType::Grid0IntersectionIterator rIEndIt = glue.template iend<0>();
     for (; rIIt!=rIEndIt; ++rIIt)
     {
-      countInside0[view0mapper.map(*rIIt->inside())]++;
-      countOutside1[view1mapper.map(*rIIt->outside())]++;
-      testIntersection(rIIt);
+      if (rIIt->self() && rIIt->neighbor())
+      {
+        countInside0[view0mapper.map(*rIIt->inside())]++;
+        countOutside1[view1mapper.map(*rIIt->outside())]++;
+        testIntersection(rIIt);
+      }
     }
   }
 
@@ -117,9 +120,12 @@ void testCoupling(const GlueType& glue)
     typename GlueType::Grid1IntersectionIterator rIEndIt = glue.template iend<1>();
     for (; rIIt!=rIEndIt; ++rIIt)
     {
-      countInside1[view1mapper.map(*rIIt->inside())]++;
-      countOutside0[view0mapper.map(*rIIt->outside())]++;
-      testIntersection(rIIt);
+      if (rIIt->self() && rIIt->neighbor())
+      {
+        countInside1[view1mapper.map(*rIIt->inside())]++;
+        countOutside0[view0mapper.map(*rIIt->outside())]++;
+        testIntersection(rIIt);
+      }
     }
   }
 }
