@@ -401,6 +401,7 @@ void GridGlue<P0, P1>::mergePatches(
 #endif
   for (unsigned int i = 0; i < merger_->nSimplices(); i++)
   {
+#warning only handle the newest intersections / merger info
     const IntersectionData & it = intersections_[i];
     GlobalId gid;
     gid.first.first = patch0rank;
