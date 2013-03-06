@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-
 #include <algorithm>
+#include <dune/common/typetraits.hh>
 
 template<int dim, typename T>
 void OverlappingMerge<dim, T>::
@@ -26,6 +26,9 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
   Geometry grid1Geometry(grid1ElementType, grid1ElementCorners);
   Geometry grid2Geometry(grid2ElementType, grid2ElementCorners);
+
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
 
   switch (dim) {
   case 1 : {
@@ -61,28 +64,28 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
   }
   case 2 : {
 
-    std::vector<Dune::FieldVector<T,dim> >  P ;
+    std::vector<Dune::FieldVector<T,dim> >  P;
 
     // find the intersections of any segement of the two triangles.
-    edgeIntersections2D(grid1ElementCorners,grid2ElementCorners,P) ;
+    edgeIntersections2D(grid1ElementCorners,grid2ElementCorners,P);
 
     // add the points of grid1 in grid2 and of grid2 in grid1.
-    pointsofXinY2D(grid1ElementCorners,grid2ElementCorners,P) ;
-    pointsofXinY2D(grid2ElementCorners,grid1ElementCorners,P) ;
+    pointsofXinY2D(grid1ElementCorners,grid2ElementCorners,P);
+    pointsofXinY2D(grid2ElementCorners,grid1ElementCorners,P);
 
     // sort points counter clock wise and removes duplicates
     if (P.size()>=3)
-      sortAndRemoveDoubles2D(P) ;
+      sortAndRemoveDoubles2D(P);
 
     //      TO check if the previous function made a good job, uncomment the next lines.
     //
-    //        if (P.size()>=3) {   for ( int i=0 ; i < 3 ; ++i) std::cout << " grid1 " << grid1ElementCorners[i] << std::endl ;
-    //                             for ( int i=0 ; i < 3 ; ++i) std::cout << " grid2 " << grid2ElementCorners[i] << std::endl ;
+    //        if (P.size()>=3) {   for ( size_type i=0 ; i < 3 ; ++i) std::cout << " grid1 " << grid1ElementCorners[i] << std::endl ;
+    //                             for ( size_type i=0 ; i < 3 ; ++i) std::cout << " grid2 " << grid2ElementCorners[i] << std::endl ;
     //                             std::cout << " Size E " << P.size() << std::endl ;
-    //                             for ( int i=0 ; i < P.size() ; ++i) std::cout << " P " << P[i] << std::endl ;  }
+    //                             for ( size_type i=0 ; i < P.size() ; ++i) std::cout << " P " << P[i] << std::endl ;  }
 
     if (P.size()>=3)
-      for ( int i=0 ; i < P.size() - 2 ; ++i) {
+      for ( size_type i=0 ; i < P.size() - 2 ; ++i) {
 
         this->intersections_.push_back(RemoteSimplicialIntersection());
 
@@ -106,9 +109,9 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
   }
   case 3 : {
 
-    std::vector<Dune::FieldVector<T,dim> >  P  ;
-    std::vector<std::vector<int> >          H,SX(4),SY(4) ;
-    Dune::FieldVector<T,dim>               centroid;
+    std::vector<Dune::FieldVector<T,dim> >  P;
+    std::vector<std::vector<int> >          H,SX(4),SY(4);
+    Dune::FieldVector<T,dim>                centroid;
 
     // Compute intersections ( Create SX, SY and P )
     intersections3D(grid1ElementCorners,grid2ElementCorners,SX,SY,P) ;
@@ -139,7 +142,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       {
         // Compute the centroid
         centroid=0;
-        for (int i=0; i < P.size(); i++)
+        for (size_type i=0; i < P.size(); i++)
           centroid += P[i] ;
         centroid /= P.size() ;
 
@@ -151,29 +154,29 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
                 std::cout << " ------------------------------------------------------------ " << std::endl ;
 
-                   for ( int i=0 ; i < 4 ; ++i) std::cout << " grid1 " << grid1ElementCorners[i] << std::endl ;
-                   for ( int i=0 ; i < 4 ; ++i) std::cout << " grid2 " << grid2ElementCorners[i] << std::endl ;
+                   for ( size_type i=0 ; i < 4 ; ++i) std::cout << " grid1 " << grid1ElementCorners[i] << std::endl ;
+                   for ( size_type i=0 ; i < 4 ; ++i) std::cout << " grid2 " << grid2ElementCorners[i] << std::endl ;
                    std::cout << " +++ Size P " << P.size() << std::endl ;
-                   for ( int i=0 ; i < P.size() ; ++i) std::cout << " P " << P[i] << std::endl ;
+                   for ( size_type i=0 ; i < P.size() ; ++i) std::cout << " P " << P[i] << std::endl ;
 
                    std::cout << " +++ SX " << std::endl ;
-                   for (int i=0; i < SX.size() ; i++)
-                        { for ( int j=0 ; j < SX[i].size() ; ++j)  {   std::cout  << SX[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
+                   for ( size_type i=0; i < SX.size() ; i++)
+                        { for ( size_type j=0 ; j < SX[i].size() ; ++j)  {   std::cout  << SX[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
 
                    std::cout << " +++ SY " << std::endl ;
-                   for (int i=0; i < SY.size() ; i++)
-                        { for ( int j=0 ; j < SY[i].size() ; ++j)  {   std::cout  << SY[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
+                   for ( size_type i=0; i < SY.size() ; i++)
+                        { for ( size_type j=0 ; j < SY[i].size() ; ++j)  {   std::cout  << SY[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
 
                    std::cout << " +++ H " << std::endl ;
-                   for (int i=0; i < H.size() ; i++)
-                        { for ( int j=0 ; j < H[i].size() ; ++j)   {   std::cout  << H[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
+                   for ( size_type i=0; i < H.size() ; i++)
+                        { for ( size_type j=0 ; j < H[i].size() ; ++j)   {   std::cout  << H[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
          */
 
         //  Loop over all facets
-        for (int i=0; i < H.size() ; i++) {
+        for (size_type i=0; i < H.size() ; i++) {
           //  Loop over all triangles of facets if the face is not degenerated
           if (H[i].size()>=3)
-            for ( int j=0 ; j < H[i].size() - 2 ; ++j) {
+            for ( size_type j=0 ; j < H[i].size() - 2 ; ++j) {
 
               // Output the tetrahedron (anchor, next, nextNext, centroid)
               this->intersections_.push_back(RemoteSimplicialIntersection());
@@ -226,11 +229,14 @@ void OverlappingMerge<dim, T>::edgeIntersections2D( const std::vector<Dune::Fiel
                                                     std::vector<Dune::FieldVector<T,dim> > & P )
 {
 
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
+
   int I,J ;
   Dune::FieldVector<T,dim>  p,B,r ;
   Dune::FieldMatrix<T,dim,dim>  A ;
 
-  for (int i=0; i<3; ++i) for (int j=0; j<3; ++j)
+  for ( size_type i=0; i<3; ++i) for ( size_type j=0; j<3; ++j)
     {
 
       B = Y[j] - X[i] ;
@@ -264,6 +270,9 @@ void OverlappingMerge<dim, T>::pointsofXinY2D( const std::vector<Dune::FieldVect
                                                const std::vector<Dune::FieldVector<T,dim> >   Y,
                                                std::vector<Dune::FieldVector<T,dim> > & P )
 {
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
+
   Dune::FieldMatrix<double,dim,dim> A ;
   Dune::FieldVector<double,dim>  v0 ,v1 ,v2, U, B  ;
 
@@ -275,7 +284,7 @@ void OverlappingMerge<dim, T>::pointsofXinY2D( const std::vector<Dune::FieldVect
   A[1][0] = v1*v0 ;
   A[1][1] = v1*v1 ;
 
-  for (int i=0; i<3; ++i) {
+  for ( size_type i=0; i<3; ++i) {
     v2 = X[i] - Y[0];
     B[0] = v0*v2 ;
     B[1] = v1*v2 ;
@@ -291,22 +300,25 @@ void OverlappingMerge<dim, T>::pointsofXinY2D( const std::vector<Dune::FieldVect
 template<int dim, typename T>
 void OverlappingMerge<dim, T>::sortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P )
 {
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
+
   Dune::FieldVector<double,dim> c ;
   std::vector< double > ai ;
 
   // build barycentre c of all these points
   c = 0 ;
-  for (int i=0; i < P.size(); i++)
+  for ( size_type i=0; i < P.size(); i++)
     c += P[i] ;
   c /= P.size() ;
 
   // definition of angles
-  for (int i=0; i < P.size(); i++)
+  for ( size_type i=0; i < P.size(); i++)
     ai.push_back(atan2(P[i][1]-c[1],P[i][0]-c[0]));
 
   // sort according to increasing angles
-  for (int j=1; j < ai.size(); j++)
-    for (int i=0; i < j; i++) if (ai[j]<ai[i]) {
+  for ( size_type j=1; j < ai.size(); j++)
+    for ( size_type i=0; i < j; i++) if (ai[j]<ai[i]) {
         std::swap<double>(ai[i],ai[j]);
         std::swap<Dune::FieldVector<double,dim> >(P[i],P[j]);
       }
@@ -321,7 +333,7 @@ void OverlappingMerge<dim, T>::sortAndRemoveDoubles2D( std::vector<Dune::FieldVe
   //        std::vector<Dune::FieldVector<double,dim> >   Q = P ;
   //        P.clear() ;
   //        P.push_back(Q[0]) ;
-  //        for (int j=1; j < Q.size(); j++) if ((P[P.size()-1] - Q[j]).infinity_norm()>eps) P.push_back(Q[j]) ;
+  //        for ( size_type j=1; j < Q.size(); j++) if ((P[P.size()-1] - Q[j]).infinity_norm()>eps) P.push_back(Q[j]) ;
 
 }
 
@@ -343,6 +355,9 @@ void OverlappingMerge<dim, T>::intersections3D( const std::vector<Dune::FieldVec
                                                 std::vector<std::vector<int> >         & SY,
                                                 std::vector<Dune::FieldVector<T,dim> > & P )
 {
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
+
   int l1[6],l2[6],s1[6],s2[6],ni[4][3] ;
   Dune::FieldVector<T,dim>  p ;
   int k ;
@@ -360,7 +375,7 @@ void OverlappingMerge<dim, T>::intersections3D( const std::vector<Dune::FieldVec
 
   //  find the intersection of edges of X vs triangles of Y
 
-  for (int i=0; i<6; ++i) for (int j=0; j<4; ++j)
+  for ( size_type i=0; i<6; ++i) for ( size_type j=0; j<4; ++j)
     {
       p = 0 ;
       if (triangleLineIntersection3D(X[l1[i]],X[l2[i]],Y[j],Y[(j+1)%4],Y[(j+2)%4],p))
@@ -374,7 +389,7 @@ void OverlappingMerge<dim, T>::intersections3D( const std::vector<Dune::FieldVec
 
   //  find the intersection of edges of Y vs triangles of X
 
-  for (int i=0; i<6; ++i) for (int j=0; j<4; ++j)
+  for ( size_type i=0; i<6; ++i) for ( size_type j=0; j<4; ++j)
     {
       p = 0 ;
       if (triangleLineIntersection3D(Y[l1[i]],Y[l2[i]],X[j],X[(j+1)%4],X[(j+2)%4],p))
@@ -388,7 +403,7 @@ void OverlappingMerge<dim, T>::intersections3D( const std::vector<Dune::FieldVec
 
   // find the points of X in Y
 
-  for (int i=0; i<4; ++i)
+  for ( size_type i=0; i<4; ++i)
   {
     if (pointInTetrahedra3D(X[i],Y))
     {
@@ -401,7 +416,7 @@ void OverlappingMerge<dim, T>::intersections3D( const std::vector<Dune::FieldVec
 
   // find the points of Y in X
 
-  for (int i=0; i<4; ++i)
+  for ( size_type i=0; i<4; ++i)
   {
     if (pointInTetrahedra3D(Y[i],X))
     {
@@ -423,6 +438,9 @@ void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    cent
                                           const std::vector<Dune::FieldVector<T,dim> >   P,
                                           std::vector<std::vector<int> >               & H)
 {
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
+
   // sorting
   int m ;
   std::vector<int> no,id,temp ;
@@ -430,7 +448,7 @@ void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    cent
 
   if (P.size()>3)
   {
-    for (int i=0; i<4; ++i)
+    for ( size_type i=0; i<4; ++i)
     {
       if (SX[i].size()>0)         // loop on faces of X
       {
@@ -439,10 +457,10 @@ void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    cent
         m = no.size() ;
         if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons and check if face is new
         {
-          for (int l=0; l<m; ++l)
+          for ( size_type l=0; l<m; ++l)
             p.push_back(P[no[l]]) ;
           orderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
-          for (int l=0; l<m; ++l)
+          for ( size_type l=0; l<m; ++l)
             temp.push_back(no[id[l]]) ;
           H.push_back(temp) ;
           temp.clear();
@@ -459,10 +477,10 @@ void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    cent
         if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons  and check if face is new
         {
           m = no.size() ;
-          for (int l=0; l<m; ++l)
+          for ( size_type l=0; l<m; ++l)
             p.push_back(P[no[l]]) ;
           orderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
-          for (int l=0; l<m; ++l)
+          for ( size_type l=0; l<m; ++l)
             temp.push_back(no[id[l]]) ;
           H.push_back(temp) ;
           temp.clear();
@@ -582,6 +600,9 @@ void OverlappingMerge<dim, T>::orderPoints3D(const Dune::FieldVector<T,dim>     
                                              std::vector<int> &                      id,
                                              std::vector<Dune::FieldVector<T,dim> >  & P)
 {
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
+
   Dune::FieldVector<T,dim> c,d1,d2,dr,dn,cross,d ;
   std::vector<T> ai ;
 
@@ -612,15 +633,15 @@ void OverlappingMerge<dim, T>::orderPoints3D(const Dune::FieldVector<T,dim>     
   }
 
   // definition of angles, using projection on the local reference, ie by scalarly multipliying by dr and dn resp.
-  for (int j=1 ; j < P.size() ; j++)
+  for ( size_type j=1 ; j < P.size() ; j++)
   {
     ai.push_back(atan2((P[j]-P[0])*dn,(P[j]-P[0])*dr)) ;
     id.push_back(j) ;
   }
 
   // sort according to increasing angles
-  for (int j=1; j < ai.size(); j++)
-    for (int i=0; i < j; i++)
+  for ( size_type j=1; j < ai.size(); j++)
+    for ( size_type i=0; i < j; i++)
       if (ai[j]<ai[i]) {
         std::swap<T>(ai[i],ai[j]) ;
         std::swap<int>(id[i],id[j]) ;
@@ -635,6 +656,9 @@ void OverlappingMerge<dim, T>::orderPoints3D(const Dune::FieldVector<T,dim>     
 template<int dim, typename T>
 bool OverlappingMerge<dim, T>::newFace3D(const std::vector<int> id, const std::vector<std::vector<int> > H)
 {
+  // get size_type for all the vectors we are using
+  typedef typename std::vector<Dune::Empty>::size_type size_type;
+
   int n = H.size() ;
   int m = id.size() ;
   std::vector<int> A ;
@@ -651,7 +675,7 @@ bool OverlappingMerge<dim, T>::newFace3D(const std::vector<int> id, const std::v
       A=H[i] ;
       sort(A.begin(),A.end());
       tp = 0 ;
-      for (int j=0 ; j < m; j++)
+      for ( size_type j=0 ; j < m; j++)
         tp += std::fabs(A[j]-B[j]) ;
       b = (tp>0) ;
     }
