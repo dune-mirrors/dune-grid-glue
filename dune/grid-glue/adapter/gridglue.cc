@@ -122,16 +122,32 @@ namespace {
     tmp.resize(tmpsize);
   }
 
-  /** \todo Please doc me! */
-  struct MaxPatchSizes
-  {
-    int coords, entities;
-  };
-
-  /** \todo Please doc me! */
+  /** \brief struct to simplify communication of the patch data sizes */
   struct PatchSizes
   {
-    int patch0coords, patch0entities, patch1coords, patch1entities;
+    PatchSizes() :
+      patch0coords(0), patch0entities(0), patch0types(0),
+      patch1coords(0), patch1entities(0), patch1types(0) {}
+
+    //! initialize patch sizes
+    PatchSizes(unsigned int c0, unsigned int e0, unsigned int t0,
+               unsigned int c1, unsigned int e1, unsigned int t1) :
+      patch0coords(c0), patch0entities(e0), patch0types(t0),
+      patch1coords(c1), patch1entities(e1), patch1types(t1) {}
+
+    //! initialize patch sizes using the data containers
+    template<typename C, typename E, typename T>
+    PatchSizes(const C & c0, const E &  e0, const T & t0,
+               const C & c1, const E & e1, const T & t1) :
+      patch0coords(c0.size()), patch0entities(e0.size()), patch0types(t0.size()),
+      patch1coords(c1.size()), patch1entities(e1.size()), patch1types(t1.size()) {}
+
+    unsigned int patch0coords, patch0entities, patch0types,
+                 patch1coords, patch1entities, patch1types;
+
+    unsigned int maxCoords() const { return std::max(patch0coords, patch1coords); }
+    unsigned int maxEntities() const { return std::max(patch0entities, patch1entities); }
+    unsigned int maxTypes() const { return std::max(patch0types, patch1types); }
   };
 }
 #endif // HAVE_MPI
@@ -183,6 +199,13 @@ void GridGlue<P0, P1>::build()
   extractGrid(patch0_, patch0coords, patch0entities, patch0types);
   extractGrid(patch1_, patch1coords, patch1entities, patch1types);
 
+  std::cout << ">>>> rank " << myrank << " coords: "
+            << patch0coords.size() << " and " << patch1coords.size() << std::endl;
+  std::cout << ">>>> rank " << myrank << " entities: "
+            << patch0entities.size() << " and " << patch1entities.size() << std::endl;
+  std::cout << ">>>> rank " << myrank << " types: "
+            << patch0types.size() << " and " << patch1types.size() << std::endl;
+
 #ifdef WRITE_TO_VTK
   const int dimw = Parent::dimworld;
   const char prefix[] = "GridGlue::Builder::build() : ";
@@ -220,27 +243,26 @@ void GridGlue<P0, P1>::build()
 
   if (commsize > 1)
   {
+    // get patch sizes
+    PatchSizes patchSizes (patch0coords, patch0entities, patch0types,
+                           patch1coords, patch1entities, patch1types);
+
     // communicate max patch size
-    MaxPatchSizes maxPatchSizes;
-    {
-      MaxPatchSizes myMaxPatchSizes;
-      myMaxPatchSizes.coords = std::max(patch0coords.size(), patch1coords.size());
-      myMaxPatchSizes.entities = std::max(patch0entities.size(), patch1entities.size());
-      mpi_result = MPI_Allreduce(&myMaxPatchSizes, &maxPatchSizes,
-                                 2, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-      CheckMPIStatus(mpi_result, 0);
-    }
+    PatchSizes maxPatchSizes;
+    mpi_result = MPI_Allreduce(&patchSizes, &maxPatchSizes,
+                               6, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+    CheckMPIStatus(mpi_result, 0);
 
     /**
        \todo Use vector<struct> for message buffer and MultiVector to copy these
      */
     // allocate remote buffers (maxsize to avoid reallocation)
-    std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( maxPatchSizes.coords );
-    std::vector<unsigned int> remotePatch0entities ( maxPatchSizes.entities );
-    std::vector<Dune::GeometryType> remotePatch0types ( maxPatchSizes.entities );
-    std::vector<Dune::FieldVector<ctype,dimworld> > remotePatch1coords ( maxPatchSizes.coords );
-    std::vector<unsigned int> remotePatch1entities ( maxPatchSizes.entities );
-    std::vector<Dune::GeometryType> remotePatch1types ( maxPatchSizes.entities );
+    std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( maxPatchSizes.patch0coords );
+    std::vector<unsigned int> remotePatch0entities ( maxPatchSizes.patch0entities );
+    std::vector<Dune::GeometryType> remotePatch0types ( maxPatchSizes.patch0types );
+    std::vector<Dune::FieldVector<ctype,dimworld> > remotePatch1coords ( maxPatchSizes.patch1coords );
+    std::vector<unsigned int> remotePatch1entities ( maxPatchSizes.patch1entities );
+    std::vector<Dune::GeometryType> remotePatch1types ( maxPatchSizes.patch1types );
 
     // copy local patches to remote patch buffers
     remotePatch0coords.clear();
@@ -258,9 +280,9 @@ void GridGlue<P0, P1>::build()
     std::copy(patch1types.begin(), patch1types.end(), std::back_inserter(remotePatch1types));
 
     // allocate tmp buffers (maxsize to avoid reallocation)
-    std::vector<Dune::FieldVector<ctype, dimworld> > tmpPatchCoords ( maxPatchSizes.coords );
-    std::vector<unsigned int> tmpPatchEntities ( maxPatchSizes.entities );
-    std::vector<Dune::GeometryType> tmpPatchTypes ( maxPatchSizes.entities );
+    std::vector<Dune::FieldVector<ctype, dimworld> > tmpPatchCoords ( maxPatchSizes.maxCoords() );
+    std::vector<unsigned int> tmpPatchEntities ( maxPatchSizes.maxEntities() );
+    std::vector<Dune::GeometryType> tmpPatchTypes ( maxPatchSizes.maxTypes() );
 
     /** \todo Use the communicator of the respective grid to communite _that_ grid in the ring */
 #if HAVE_MPI
@@ -272,29 +294,37 @@ void GridGlue<P0, P1>::build()
     // communicate patches in the ring
     for (int i=0; i<commsize; i++)
     {
-      int remoterank = (myrank - i) % commsize;
-      int rightrank  = (myrank + 1) % commsize;
-      int leftrank   = (myrank - 1) % commsize;
+      int remoterank = (myrank - i + commsize) % commsize;
+      int rightrank  = (myrank + 1 + commsize) % commsize;
+      int leftrank   = (myrank - 1 + commsize) % commsize;
 
-      // communicate actual patch sizes
-      PatchSizes patchSizes;
-
+      // communicate current patch sizes
+      // patchsizes were initialized before
       {
-        patchSizes.patch0coords = remotePatch0coords.size();
-        patchSizes.patch0entities = remotePatch0entities.size();
-        patchSizes.patch1coords = remotePatch1coords.size();
-        patchSizes.patch1entities = remotePatch1entities.size();
+        // std::cout << myrank << ": before my remote size 0: " << patchSizes.patch0entities << " and "  << patchSizes.patch0types << std::endl;
+        // std::cout << myrank << ": before my remote size 1: " << patchSizes.patch1entities << " and "  << patchSizes.patch1types << std::endl;
         // send to right neighbor, receive from left neighbor
         mpi_result =
           MPI_Sendrecv_replace(
-            &patchSizes, 4, MPI_INT,
+            &patchSizes, 4, MPI_UNSIGNED,
             rightrank, MPITypeInfo<int>::tag,
             leftrank,  MPITypeInfo<int>::tag,
             mpicomm, &mpi_status);
         CheckMPIStatus(mpi_result, mpi_status);
       }
+      // std::cout << myrank << ": before my remote size 0: " << patchSizes.patch0entities << " and "  << patchSizes.patch0types << std::endl;
+      // std::cout << myrank << ": before my remote size 1: " << patchSizes.patch1entities << " and "  << patchSizes.patch1types << std::endl;
 
       /* send remote patch to right neighbor and receive from left neighbor */
+
+      // std::cout << myrank
+      //           << ": going to send (to "
+      //           << leftrank << ") 0 Types: " << remotePatch0types.size() << " -> ";
+      // for (size_t i = 0; i < remotePatch0types.size(); i++)
+      //     std::cout << remotePatch0types[i];
+      // for (size_t i = 0; i < remotePatch0entities.size(); i++)
+      //     std::cout << remotePatch0entities[i] << " ";
+      // std::cout << std::endl;
 
       // patch0coords
       MPI_SendVectorInRing(
@@ -308,7 +338,7 @@ void GridGlue<P0, P1>::build()
 
       // patch0types
       MPI_SendVectorInRing(
-        remotePatch0types, tmpPatchTypes, patchSizes.patch0entities,
+        remotePatch0types, tmpPatchTypes, patchSizes.patch0types,
         rightrank, leftrank, mpicomm);
 
       // patch1coords
@@ -318,13 +348,30 @@ void GridGlue<P0, P1>::build()
 
       // patch1entities
       MPI_SendVectorInRing(
-        remotePatch1entities, tmpPatchEntities, patchSizes.patch1entities,
+        remotePatch1entities, tmpPatchEntities, patchSizes.patch1types,
         rightrank, leftrank, mpicomm);
 
       // patch1types
       MPI_SendVectorInRing(
         remotePatch1types, tmpPatchTypes, patchSizes.patch1entities,
         rightrank, leftrank, mpicomm);
+
+      // std::cout << myrank
+      //           << ": remote ("
+      //           << leftrank << ") 0 Types: " << remotePatch0types.size() << " -> ";
+      // for (size_t i = 0; i < remotePatch0types.size(); i++)
+      //     std::cout << remotePatch0types[i];
+      // for (size_t i = 0; i < remotePatch0entities.size(); i++)
+      //     std::cout << remotePatch0entities[i] << " ";
+      // std::cout << std::endl;
+      // std::cout << myrank
+      //           << ": remote ("
+      //           << leftrank << ") 1 Types: " << remotePatch1types.size() << " -> ";
+      // for (size_t i = 0; i < remotePatch1types.size(); i++)
+      //     std::cout << remotePatch1types[i];
+      // for (size_t i = 0; i < remotePatch1entities.size(); i++)
+      //     std::cout << remotePatch1entities[i] << " ";
+      // std::cout << std::endl;
 
       /* merging */
       // merge local & remote patches
