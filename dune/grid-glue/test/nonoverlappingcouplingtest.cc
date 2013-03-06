@@ -245,7 +245,11 @@ public:
       shift = 1.0;
     }
 
-    HostGridType * hostgridp = new HostGridType(size, elements, periodic, overlap);
+    HostGridType * hostgridp = new HostGridType(
+#if HAVE_MPI
+      MPI_COMM_WORLD,
+#endif // HAVE_MPI
+      size, elements, periodic, overlap);
     ShiftTrafo<dim,double> * trafop = new ShiftTrafo<dim,double>(shift);
     GridType * gridp = new GridType(*hostgridp, *trafop);
     return *gridp;
