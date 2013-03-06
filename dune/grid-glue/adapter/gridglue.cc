@@ -154,6 +154,13 @@ GridGlue<P0, P1>::GridGlue(const Grid0Patch & gp1, const Grid1Patch & gp2, Merge
 template<typename P0, typename P1>
 void GridGlue<P0, P1>::build()
 {
+  int myrank = 0;
+#if HAVE_MPI
+  int commsize = 1;
+  MPI_Comm_rank(mpicomm, &myrank);
+  MPI_Comm_size(mpicomm, &commsize);
+#endif // HAVE_MPI
+
   // clear the contents from the current intersections array
   {
     std::vector<IntersectionData> dummy;
@@ -195,15 +202,7 @@ void GridGlue<P0, P1>::build()
   std::cout << prefix << "Done writing patch1 surface!\n";
 #endif // WRITE_TO_VTK
 
-  // clear old intersection list
-  intersections_.clear();
-
-  int myrank = 0;
 #if HAVE_MPI
-  int commsize = 1;
-  MPI_Comm_rank(mpicomm, &myrank);
-  MPI_Comm_size(mpicomm, &commsize);
-
   // setup parallel indexset
   domain_is.beginResize();
   target_is.beginResize();
