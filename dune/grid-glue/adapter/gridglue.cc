@@ -345,12 +345,12 @@ void GridGlue<P0, P1>::build()
 
       // patch1entities
       MPI_SendVectorInRing(
-        remotePatch1entities, tmpPatchEntities, patchSizes.patch1types,
+        remotePatch1entities, tmpPatchEntities, patchSizes.patch1entities,
         rightrank, leftrank, mpicomm);
 
       // patch1types
       MPI_SendVectorInRing(
-        remotePatch1types, tmpPatchTypes, patchSizes.patch1entities,
+        remotePatch1types, tmpPatchTypes, patchSizes.patch1types,
         rightrank, leftrank, mpicomm);
 
       // std::cout << myrank
