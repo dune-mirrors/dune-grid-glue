@@ -333,6 +333,9 @@ void GridGlue<P0, P1>::mergePatches(
   << "The number of remote intersections is " << intersections_.size()-1 << std::endl;
 
 #if HAVE_MPI
+  // update remote index sets
+  assert(Dune::RESIZE == domain_is.state());
+  assert(Dune::RESIZE == target_is.state());
   for (unsigned int i = 0; i < merger_->nSimplices(); i++)
   {
     const IntersectionData & it = intersections_[i];
