@@ -106,6 +106,8 @@ struct GridGlueView<P0,P1,1>
  *
  * @tparam P0 patch (extractor) to use for grid 0
  * @tparam P1 patch (extractor) to use for grid 1
+ *
+ * \todo adapt member names according to style guide
  */
 template<typename P0, typename P1>
 class GridGlue
@@ -205,7 +207,7 @@ public:
   /** \brief Pointer type to target grid vertices */
   typedef typename Grid1View::Traits::template Codim<TargetGridType::dimension>::EntityPointer TargetVertexPtr;
 
-  /** \todo Please doc me! */
+  /** \brief Instance of a Merger */
   typedef ::Merger<typename DomainGridType::ctype,
       DomainGridType::dimension - Grid0Patch::codim,
       TargetGridType::dimension - Grid1Patch::codim,
@@ -327,6 +329,7 @@ public:
 #endif
   /*   G E T T E R S   */
 
+  /** \todo Please doc me! */
   template<int P>
   const typename GridGlueView<P0,P1,P>::Patch & patch() const
   {
@@ -382,7 +385,6 @@ public:
      \param iftype Interface for which the Communication should take place
      \param dir Communication direction (Forward means Domain to Target, Backward is the reverse)
    */
-
   template<class DataHandleImp, class DataTypeImp>
   void communicate (Dune::GridGlue::CommDataHandle<DataHandleImp,DataTypeImp> & data,
                     Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
