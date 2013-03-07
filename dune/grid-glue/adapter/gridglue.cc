@@ -91,6 +91,8 @@ namespace {
     // std::cout << rank << " recv " << tmp.size() << " from " << leftrank << std::endl;
     if (leftsize > 0 && data.size() > 0)
     {
+      std::cout << rank << " send/receive "
+                << Info::size*data.size() << "/" << Info::size*tmp.size() << std::endl;
       // send & receive
       result =
         MPI_Sendrecv(
@@ -100,6 +102,8 @@ namespace {
     }
     if (leftsize == 0 && data.size() > 0)
     {
+      std::cout << rank << " send "
+                << Info::size*data.size() << std::endl;
       // send
       result =
         MPI_Send(
@@ -108,6 +112,8 @@ namespace {
     }
     if (leftsize > 0 && data.size() == 0)
     {
+      std::cout << rank << " receive "
+                << Info::size*tmp.size() << std::endl;
       // receive
       result =
         MPI_Recv(
@@ -120,6 +126,8 @@ namespace {
     data.swap(tmp);
     // resize tmp buffer
     tmp.resize(tmpsize);
+
+    MPI_Barrier(comm);
   }
 
   /** \brief struct to simplify communication of the patch data sizes */
@@ -324,31 +332,37 @@ void GridGlue<P0, P1>::build()
       // std::cout << std::endl;
 
       // patch0coords
+      std::cout << myrank << " patch0coords" << std::endl;
       MPI_SendVectorInRing(
         remotePatch0coords, tmpPatchCoords, patchSizes.patch0coords,
         rightrank, leftrank, mpicomm);
 
       // patch0entities
+      std::cout << myrank << " patch0entities" << std::endl;
       MPI_SendVectorInRing(
         remotePatch0entities, tmpPatchEntities, patchSizes.patch0entities,
         rightrank, leftrank, mpicomm);
 
       // patch0types
+      std::cout << myrank << " patch0types" << std::endl;
       MPI_SendVectorInRing(
         remotePatch0types, tmpPatchTypes, patchSizes.patch0types,
         rightrank, leftrank, mpicomm);
 
       // patch1coords
+      std::cout << myrank << " patch1coords" << std::endl;
       MPI_SendVectorInRing(
         remotePatch1coords, tmpPatchCoords, patchSizes.patch1coords,
         rightrank, leftrank, mpicomm);
 
       // patch1entities
+      std::cout << myrank << " patch1entities" << std::endl;
       MPI_SendVectorInRing(
         remotePatch1entities, tmpPatchEntities, patchSizes.patch1entities,
         rightrank, leftrank, mpicomm);
 
       // patch1types
+      std::cout << myrank << " patch1types" << std::endl;
       MPI_SendVectorInRing(
         remotePatch1types, tmpPatchTypes, patchSizes.patch1types,
         rightrank, leftrank, mpicomm);
@@ -424,6 +438,9 @@ void GridGlue<P0, P1>::mergePatches(
   // remember the number of previous remote intersections
   const unsigned int offset = intersections_.size();
 
+  std::cout << myrank
+            << " GridGlue::mergePatches : rank " << patch0rank << " / " << patch1rank << std::endl;
+
   // start the actual build process
   merger_->build(patch0coords, patch0entities, patch0types,
                  patch1coords, patch1entities, patch1types);
@@ -439,9 +456,9 @@ void GridGlue<P0, P1>::mergePatches(
 
   index__sz = intersections_.size() - 1;
 
-  std::cout
-  << "GridGlue::mergePatches : "
-  << "The number of remote intersections is " << intersections_.size()-1 << std::endl;
+  std::cout << myrank
+            << " GridGlue::mergePatches : "
+            << "The number of remote intersections is " << intersections_.size()-1 << std::endl;
 
 #if HAVE_MPI
   // update remote index sets
