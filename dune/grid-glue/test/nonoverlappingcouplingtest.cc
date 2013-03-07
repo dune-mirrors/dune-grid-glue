@@ -312,22 +312,36 @@ void testParallelCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-  testCommunication(glue);
+#warning not (yet) testing the communication...
+  //    testCommunication(glue);
 #else
     #warning Not testing, because psurface backend is not available.
 #endif
 }
 
+#if HAVE_MPI
+void eh( MPI_Comm *comm, int *err, ... )
+{
+  DUNE_THROW(Dune::Exception, "MPI ERROR");
+}
+#endif // HAVE_MPI
 
 int main(int argc, char *argv[]) try
 {
   Dune::MPIHelper::instance(argc, argv);
+
+#if HAVE_MPI
+  MPI_Errhandler errhandler;
+  MPI_Comm_create_errhandler(eh, &errhandler);
+  MPI_Comm_set_errhandler(MPI_COMM_WORLD, errhandler);
+#endif
 
   // 2d Tests
   typedef MeshGenerator<2,false>  Seq;
   typedef MeshGenerator<2,true>   Par;
 
   // Test two unit squares
+#if ! HAVE_MPI
   std::cout << "==== 2D hybrid =============================================\n";
   testMatchingCubeGrids<2>();
   std::cout << "============================================================\n";
@@ -339,6 +353,7 @@ int main(int argc, char *argv[]) try
   std::cout << "============================================================\n";
   testParallelCubeGrids<2,Seq,Par>();
   std::cout << "============================================================\n";
+#endif // HAVE_MPI
   testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
@@ -347,6 +362,7 @@ int main(int argc, char *argv[]) try
   typedef MeshGenerator<3,true>   Par3d;
 
   // Test two unit cubes
+#if ! HAVE_MPI
   std::cout << "==== 3D hybrid =============================================\n";
   testMatchingCubeGrids<3>();
   std::cout << "============================================================\n";
@@ -358,11 +374,14 @@ int main(int argc, char *argv[]) try
   std::cout << "============================================================\n";
   testParallelCubeGrids<3,Seq3d,Par3d>();
   std::cout << "============================================================\n";
+#endif // HAVE_MPI
   testParallelCubeGrids<3,Par3d,Par3d>();
   std::cout << "============================================================\n";
 
+  return 0;
 }
 catch (Exception e) {
-  std::cout << e << std::endl;
+  int i = 0; char** c = 0;
+  std::cout << Dune::MPIHelper::instance(i,c).rank() << ": " << e << std::endl;
   return 1;
 }
