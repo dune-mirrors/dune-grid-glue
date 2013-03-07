@@ -433,7 +433,7 @@ void GridGlue<P0, P1>::mergePatches(
   for (unsigned int i = 0; i < merger_->nSimplices(); ++i)
   {
     // currently we only support local merging!
-    IntersectionData data(*this, offset+i, patch0local, patch1local);
+    IntersectionData data(*this, i, offset, patch0local, patch1local);
     intersections_[offset+i] = data;
   }
 

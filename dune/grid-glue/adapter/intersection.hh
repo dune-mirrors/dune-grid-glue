@@ -52,7 +52,7 @@ namespace Dune {
       typedef typename GridGlue::Grid1View::IndexSet::IndexType Grid1IndexType;
 
       /** \brief Constructor the n'th IntersectionData of a given GridGlue */
-      IntersectionData(const GridGlue& glue, unsigned int mergeindex, bool grid0local, bool grid1local);
+      IntersectionData(const GridGlue& glue, unsigned int mergeindex, unsigned int offset, bool grid0local, bool grid1local);
 
       /** \brief Default Constructor */
       IntersectionData() : grid0local_(false), grid1local_(false) {}
@@ -76,9 +76,9 @@ namespace Dune {
 
     //! \todo move this functionality to GridGlue
     template<typename P0, typename P1>
-    IntersectionData<P0, P1>::IntersectionData(const GridGlue& glue, unsigned int mergeindex,
+    IntersectionData<P0, P1>::IntersectionData(const GridGlue& glue, unsigned int mergeindex, unsigned int offset,
                                                bool grid0local, bool grid1local)
-      : index_(mergeindex),
+      : index_(mergeindex+offset),
         grid0local_(grid0local),
         grid0index_(0),
         grid1local_(grid1local),
@@ -113,7 +113,7 @@ namespace Dune {
 
         if (grid0local)
         {
-          grid0index_ = glue.merger_->template parent<0>(index_);
+          grid0index_ = glue.merger_->template parent<0>(mergeindex);
           typename GridGlue::Grid0Patch::Geometry
           domainWorldGeometry = glue.template patch<0>().geometry(grid0index_);
           typename GridGlue::Grid0Patch::LocalGeometry
@@ -154,7 +154,7 @@ namespace Dune {
 
         if (grid1local)
         {
-          grid1index_ = glue.merger_->template parent<1>(index_);
+          grid1index_ = glue.merger_->template parent<1>(mergeindex);
           typename GridGlue::Grid1Patch::Geometry
           targetWorldGeometry = glue.template patch<1>().geometry(grid1index_);
           typename GridGlue::Grid1Patch::LocalGeometry
