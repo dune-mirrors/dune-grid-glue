@@ -32,8 +32,8 @@
 
 #include <tr1/array>
 #if HAVE_PSURFACE
-#include <psurface/ContactMapping.h>
 #include <psurface/DirectionFunction.h>
+#include <psurface/IntersectionPrimitive.h>
 #else
 // forward declaration of PSurface classes
 template <int dim, typename ctype> class DirectionFunction;
@@ -207,7 +207,23 @@ private:
       return (this->tarOrder[idx] - this->baseptr);
     }
 
+    /** @brief clear the internal state
+     */
+    void clear()
+    {
+      purge(domOrder);
+      purge(tarOrder);
+    }
+
   private:
+
+    template<typename V>
+    static void purge(V & v)
+    {
+      v.clear();
+      V v2(v);
+      v.swap(v2);
+    }
 
     /// @brief the computed merged grid simplices sorted after
     /// ascending domain parent simplex indices (see domi_)
@@ -262,9 +278,6 @@ private:
 
 
   /* members associated with the merged grid */
-
-  /// @brief make use of psurface contact mapping functionality
-  PSURFACE_NAMESPACE ContactMapping<dim+1,ctype> cm_;
 
   /// @brief provides an interface for convenient and efficient
   /// access to the set of computed simplex overlaps in the merged grid
@@ -337,6 +350,7 @@ public:
   /// The indices are then in 0..nSimplices()-1
   unsigned int nSimplices() const;
 
+  /// @brief clear the internal state, so that we can run a new merging process
   void clear()
   {
 #ifdef HAVE_PSURFACE
@@ -345,6 +359,8 @@ public:
     purge(tari_);
     purge(domc_);
     purge(domi_);
+
+    olm_.clear();
 
     valid = false;
 #endif

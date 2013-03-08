@@ -5,6 +5,7 @@
 #endif
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
+#include <psurface/ContactMapping.h>
 
 #if HAVE_PSURFACE
 
@@ -17,6 +18,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
                                             const std::vector<Dune::GeometryType>& target_element_types
                                             )
 {
+  PSURFACE_NAMESPACE ContactMapping<dim+1,ctype> cm;
+
   // //////////////////////////////////////////
   //   check input data for consistency
   // //////////////////////////////////////////
@@ -202,13 +205,13 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
     ConstantDirection<-1> negativeDirection;
 
     // compute the merged grid using the psurface library
-    cm_.build(domc_, domi_,tarc_, tari_,
-              &positiveDirection, &negativeDirection);
+    cm.build(domc_, domi_,tarc_, tari_,
+             &positiveDirection, &negativeDirection);
   } else {
 
     // compute the merged grid using the psurface library
-    cm_.build(domc_, domi_,tarc_, tari_,
-              domainDirections_, targetDirections_);
+    cm.build(domc_, domi_,tarc_, tari_,
+             domainDirections_, targetDirections_);
 
   }
 
@@ -216,7 +219,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
   // get the representation from the contact mapping object
   std::vector<PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype> > overlaps;
-  cm_.getOverlaps(overlaps);
+  cm.getOverlaps(overlaps);
 
   // /////////////////////////////////////////////////////////////////////////////
   //  If overlaps refer to triangular elements that have been created
