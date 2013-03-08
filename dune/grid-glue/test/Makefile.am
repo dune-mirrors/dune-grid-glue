@@ -1,6 +1,7 @@
 # -*- tab-width: 4; indent-tabs-mode: nil -*-
 
 TESTPROGS = \
+    callmergertwicetest        \
     mixeddimcouplingtest       \
     mixeddimoverlappingtest    \
     multivectortest            \
@@ -30,6 +31,7 @@ AM_LDFLAGS  += $(UG_LDFLAGS)
 LDADD       += $(UG_LIBS)
 
 # define the programs
+callmergertwicetest_SOURCES = callmergertwicetest.cc
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
 if MPI
 nonoverlappingcouplingtest_mpi_SOURCES = nonoverlappingcouplingtest.cc
