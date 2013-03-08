@@ -111,18 +111,14 @@ protected:
   template<typename K>
   void writePoints(const std::vector<K>& coords, int dim, std::ofstream& fos)
   {
-    int coord_count = coords.size() / dim;
-    fos << "DATASET POLYDATA\nPOINTS " << coord_count*(dim == 2 ? 2 : 1) << " " << TypeNames[Nametraits<K>::nameidx] << std::endl;
-    const K* current = &coords[0];
-    for (int i = 0; i < coord_count; ++i)
+    fos << "DATASET POLYDATA\nPOINTS " << coords.size() << " " << TypeNames[Nametraits<K>::nameidx] << std::endl;
+    for (unsigned int i = 0; i < coords.size(); ++i)
     {
-      fos << *current;
+      fos << coords[i][0];
       if (dim == 2)
-        fos << " " << *(current+1) << " 0 \n" << *current << " " << *(current+1) << " 0.01" << std::endl;
+        fos << " " << coords[i][1] << " 0 \n" << coords[i][0] << " " << coords[i][1] << " 0.01" << std::endl;
       else       // dim == 3
-        fos << " " << *(current+1) << " "  << *(current+2) << std::endl;
-      // move pointer
-      current += dim;
+        fos << " " << coords[i][1] << " "  << coords[i][2] << std::endl;
     }
   }
 
