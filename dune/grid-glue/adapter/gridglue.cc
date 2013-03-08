@@ -238,6 +238,12 @@ void GridGlue<P0, P1>::build()
     mergePatches(patch0coords, patch0entities, patch0types, myrank,
                  patch1coords, patch1entities, patch1types, myrank);
 
+#ifdef CALL_MERGER_TWICE
+  if (patch0entities.size() > 0 && patch1entities.size() > 0)
+    mergePatches(patch0coords, patch0entities, patch0types, myrank,
+                 patch1coords, patch1entities, patch1types, myrank);
+#endif
+
 #if HAVE_MPI
 
   // status variables of communication
