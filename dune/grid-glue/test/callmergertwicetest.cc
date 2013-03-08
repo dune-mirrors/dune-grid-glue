@@ -151,37 +151,23 @@ void callMergerTwice(Merger<ctype, dim, dim, dimworld> * merger)
   setupGrid<dim>::fill(grid1_coords, grid1_elements, grid1_element_types,
                        grid2_coords, grid2_elements, grid2_element_types);
 
-  //////////////////////////////////////////////////////////
-  // start the actual build process
+  for (int i=0; i<2; i++)
+  {
 
-  merger->build(grid1_coords, grid1_elements, grid1_element_types,
-                grid2_coords, grid2_elements, grid2_element_types);
+    //////////////////////////////////////////////////////////
+    // start the actual build process
 
-  std::cout << "created intersections: " << merger->nSimplices() << std::endl;
+    merger->build(grid1_coords, grid1_elements, grid1_element_types,
+                  grid2_coords, grid2_elements, grid2_element_types);
 
-  merger->clear();
+    std::cout << "created intersections: " << merger->nSimplices() << std::endl;
 
+    //////////////////////////////////////////////////////////
+    // verify data
 
-  //////////////////////////////////////////////////////////
-  // start the actual build process
+    merger->clear();
+  }
 
-  merger->build(grid1_coords, grid1_elements, grid1_element_types,
-                grid2_coords, grid2_elements, grid2_element_types);
-
-  std::cout << "created intersections: " << merger->nSimplices() << std::endl;
-
-  //////////////////////////////////////////////////////////
-  // start the actual build process
-
-  merger->build(grid1_coords, grid1_elements, grid1_element_types,
-                grid2_coords, grid2_elements, grid2_element_types);
-
-  std::cout << "created intersections: " << merger->nSimplices() << std::endl;
-
-  //////////////////////////////////////////////////////////
-  // verify data
-
-  merger->clear();
 }
 
 int main ()
