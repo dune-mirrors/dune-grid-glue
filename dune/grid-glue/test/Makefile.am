@@ -33,7 +33,7 @@ LDADD       += $(UG_LIBS)
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
 if MPI
 nonoverlappingcouplingtest_mpi_SOURCES = nonoverlappingcouplingtest.cc
-nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
+nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -DWRITE_TO_VTK
 nonoverlappingcouplingtest_mpi_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
@@ -41,7 +41,6 @@ mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
-
 orientedsubfacetest_SOURCES = orientedsubfacetest.cc
 
 include $(top_srcdir)/am/global-rules
