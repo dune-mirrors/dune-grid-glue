@@ -13,7 +13,6 @@
 
 #include <dune/common/static_assert.hh>
 #include <dune/common/array.hh>
-#include <dune/common/version.hh>
 #include <dune/geometry/genericgeometry/geometry.hh>
 #include <dune/geometry/genericgeometry/geometrytraits.hh>
 #include <dune/geometry/genericgeometry/cornermapping.hh>
