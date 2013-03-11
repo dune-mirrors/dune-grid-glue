@@ -5,7 +5,7 @@
 #include "intersection.hh"
 #include <vector>
 #include <iterator>
-#include <dune/common/mpitraits.hh>
+#include "gridglue.hh"
 
 #include "../common/multivector.hh"
 #include "../extractors/vtksurfacewriter.hh"
