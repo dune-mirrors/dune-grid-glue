@@ -411,8 +411,8 @@ void GridGlue<P0, P1>::mergePatches(
   // howto handle overlap etc?
 
   int myrank = 0;
-  int commsize = 1;
 #if HAVE_MPI
+  int commsize = 1;
   MPI_Comm_rank(mpicomm_, &myrank);
   MPI_Comm_size(mpicomm_, &commsize);
 #endif // HAVE_MPI
