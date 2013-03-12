@@ -80,9 +80,6 @@ void testCoupling(const GlueType& glue)
 {
   typedef typename GlueType::ctype ctype;
 
-  int dim = GlueType::domdim;
-  dim = GlueType::tardim;
-
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, CellLayout > View0Mapper;
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, CellLayout > View1Mapper;
   View0Mapper view0mapper(glue.template gridView<0>());
