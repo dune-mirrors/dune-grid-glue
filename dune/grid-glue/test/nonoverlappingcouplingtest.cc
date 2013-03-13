@@ -318,8 +318,7 @@ void testParallelCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#warning not (yet) testing the communication...
-  //    testCommunication(glue);
+  testCommunication(glue);
 #else
     #warning Not testing, because psurface backend is not available.
 #endif
