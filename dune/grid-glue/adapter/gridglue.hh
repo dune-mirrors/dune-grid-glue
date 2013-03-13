@@ -448,6 +448,7 @@ public:
       // setup communication info (class needed to tunnel all info to the operator)
       typedef Dune::GridGlue::CommInfo<GridGlue,DataHandleImp,DataTypeImp> CommInfo;
       CommInfo commInfo;
+      commInfo.dir = dir;
       commInfo.gridglue = this;
       commInfo.data = &data;
 
