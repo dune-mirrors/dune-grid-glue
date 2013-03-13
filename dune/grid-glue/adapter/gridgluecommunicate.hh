@@ -183,14 +183,14 @@ namespace Dune {
           if (dir == Dune::ForwardCommunication)
           {
             // read from domain
-            assert(ris.self());
-            commInfo.data->gather(commInfo.mbuffer, ris.inside(), ris);
+            if(ris.self())
+              commInfo.data->gather(commInfo.mbuffer, ris.inside(), ris);
           }
           else   // (dir == Dune::BackwardCommunication)
           {
             // read from target
-            assert(ris.neighbor());
-            commInfo.data->gather(commInfo.mbuffer, ris.outside(), ris);
+            if(ris.neighbor())
+              commInfo.data->gather(commInfo.mbuffer, ris.outside(), ris);
           }
         }
 
@@ -222,14 +222,14 @@ namespace Dune {
           if (dir == Dune::ForwardCommunication)
           {
             // write to target
-            assert(ris.neighbor());
-            commInfo.data->scatter(commInfo.mbuffer, ris.outside(), ris, commInfo.currentsize);
+            if(ris.neighbor())
+              commInfo.data->scatter(commInfo.mbuffer, ris.outside(), ris, commInfo.currentsize);
           }
           else   // (dir == Dune::BackwardCommunication)
           {
             // write to domain
-            assert(ris.self());
-            commInfo.data->scatter(commInfo.mbuffer, ris.inside(), ris, commInfo.currentsize);
+            if(ris.self())
+              commInfo.data->scatter(commInfo.mbuffer, ris.inside(), ris, commInfo.currentsize);
           }
           assert(commInfo.mbuffer.j <= commInfo.currentsize);
         }
