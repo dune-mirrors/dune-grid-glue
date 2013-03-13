@@ -483,7 +483,7 @@ namespace Dune {
 
       IndexType index() const
       {
-        return i_->index();
+        return i_->index_;
       }
 
 #endif
