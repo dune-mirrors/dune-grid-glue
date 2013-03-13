@@ -6,6 +6,7 @@
  * @author Oliver Sander
  * @author Gerrit Buse
  * @brief contains customized geometry implementations for simplices
+ * \deprecated For use with Dune 2.2 and older.
  */
 
 #ifndef SIMPLEXGEOMETRY_HH

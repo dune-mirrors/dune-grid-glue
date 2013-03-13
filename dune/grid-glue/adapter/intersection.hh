@@ -9,7 +9,13 @@
 #ifndef DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
 #define DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
 
+#include <dune/common/version.hh>
+
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+#include <dune/geometry/affinegeometry.hh>
+#else
 #include <dune/grid-glue/common/simplexgeometry.hh>
+#endif
 #include <dune/grid-glue/adapter/gridglue.hh>
 
 #define ONLY_SIMPLEX_INTERSECTIONS
@@ -39,6 +45,16 @@ namespace Dune {
       /** \brief Dimension of the intersection */
       enum { mydim = (dim1<dim2) ? dim1 : dim2 };
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+      typedef AffineGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
+      Grid0LocalGeometry;
+      typedef AffineGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimensionworld>
+      Grid0Geometry;
+      typedef AffineGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimension>
+      Grid1LocalGeometry;
+      typedef AffineGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimensionworld>
+      Grid1Geometry;
+#else
       typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
       Grid0LocalGeometry;
       typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimensionworld>
@@ -47,6 +63,7 @@ namespace Dune {
       Grid1LocalGeometry;
       typedef SimplexGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimensionworld>
       Grid1Geometry;
+#endif
 
       typedef typename GridGlue::Grid0View::IndexSet::IndexType Grid0IndexType;
       typedef typename GridGlue::Grid1View::IndexSet::IndexType Grid1IndexType;
@@ -67,10 +84,10 @@ namespace Dune {
       bool grid1local_;              //!< true if the associated grid1 entity is local
       Grid1IndexType grid1index_;    //!< index of the associated local grid1 entity
 
-      Grid0LocalGeometry grid0localgeom_;
-      Grid0Geometry grid0geom_;
-      Grid1LocalGeometry grid1localgeom_;
-      Grid1Geometry grid1geom_;
+      shared_ptr<Grid0LocalGeometry>  grid0localgeom_;
+      shared_ptr<Grid0Geometry>       grid0geom_;
+      shared_ptr<Grid1LocalGeometry>  grid1localgeom_;
+      shared_ptr<Grid1Geometry>       grid1geom_;
 
     };
 
@@ -130,8 +147,8 @@ namespace Dune {
 #else
 #error Not Implemented
 #endif
-          grid0localgeom_.setup(type, corners_element_local);
-          grid0geom_.setup(type, corners_global);
+          grid0localgeom_ = make_shared<Grid0LocalGeometry>(type, corners_element_local);
+          grid0geom_      = make_shared<Grid0Geometry>(type, corners_global);
         }
       }
 
@@ -171,8 +188,8 @@ namespace Dune {
 #else
 #error Not Implemented
 #endif
-          grid1localgeom_.setup(type, corners_element_local);
-          grid1geom_.setup(type, corners_global);
+          grid1localgeom_ = make_shared<Grid1LocalGeometry>(type, corners_element_local);
+          grid1geom_      = make_shared<Grid1Geometry>(type, corners_global);
         }
       }
     }
@@ -192,11 +209,11 @@ namespace Dune {
       typedef const typename IntersectionData<P0,P1>::Grid0IndexType IndexType;
       static LocalGeometry& localGeometry(const IntersectionData<P0,P1> & i)
       {
-        return i.grid0localgeom_;
+        return *i.grid0localgeom_;
       }
       static Geometry& geometry(const IntersectionData<P0,P1> & i)
       {
-        return i.grid0geom_;
+        return *i.grid0geom_;
       }
       static bool local(const IntersectionData<P0,P1> & i)
       {
@@ -216,11 +233,11 @@ namespace Dune {
       typedef const typename IntersectionData<P0,P1>::Grid1IndexType IndexType;
       static LocalGeometry& localGeometry(const IntersectionData<P0,P1> & i)
       {
-        return i.grid1localgeom_;
+        return *i.grid1localgeom_;
       }
       static Geometry& geometry(const IntersectionData<P0,P1> & i)
       {
-        return i.grid1geom_;
+        return *i.grid1geom_;
       }
       static IndexType local(const IntersectionData<P0,P1> & i)
       {
