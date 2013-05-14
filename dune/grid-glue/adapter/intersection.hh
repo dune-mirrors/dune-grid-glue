@@ -386,20 +386,6 @@ namespace Dune {
       bool conforming() const
       {
         assert(("not implemented", false));
-        // return i_->conforming();
-        // template<typename P0, typename P1>
-        // bool AbsoluteIntersection<P0, P1>::conforming() const
-        // {
-        //     std::vector<unsigned int> results;
-        //     // first check the domain side
-        //     bool is_conforming =
-        //         glue_->merger_->template simplexRefined<0>(glue_->merger_->template parent<0>(mergeindex_), results) && results.size() == 1;
-        //     results.resize(0);
-        //     // now check the target side
-        //     if (is_conforming)
-        //         return glue_->merger_->template simplexRefined<1>(glue_->merger_->template parent<1>(mergeindex_), results) && results.size() == 1;
-        //     return false;
-        // }
       }
 
       /** \brief geometrical information about this intersection in local coordinates of the inside() entity.
