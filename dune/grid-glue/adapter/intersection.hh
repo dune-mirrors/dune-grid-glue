@@ -459,7 +459,33 @@ namespace Dune {
       /** \brief Return an outer normal (length not necessarily 1) */
       GlobalCoordinate outerNormal(const Dune::FieldVector<ctype, mydim> &local) const
       {
-        DUNE_THROW(Dune::NotImplemented, "Remote intersections don't implement the 'outerNormal' method yet");
+        Dune::FieldVector<ctype, coorddim> normal;
+
+        // Codimension with respect to the world(!)
+        int codimension = coorddim - mydim;
+
+        if (codimension == 0)
+
+          DUNE_THROW(Dune::Exception, "There is no normal vector to a full-dimensional intersection");
+
+        else if (codimension == 1) {
+
+          /** \todo Implement the general n-ary cross product here */
+          FieldMatrix<ctype, mydim,coorddim> jacobianTransposed = geometry().jacobianTransposed(local);
+          if (mydim==1) {
+            normal[0] = - jacobianTransposed[0][1];
+            normal[1] =   jacobianTransposed[0][0];
+          } else if (mydim==2) {
+            normal[0] =   (jacobianTransposed[0][1] * jacobianTransposed[1][2] - jacobianTransposed[0][2] * jacobianTransposed[1][1]);
+            normal[1] = - (jacobianTransposed[0][0] * jacobianTransposed[1][2] - jacobianTransposed[0][2] * jacobianTransposed[1][0]);
+            normal[2] =   (jacobianTransposed[0][0] * jacobianTransposed[1][1] - jacobianTransposed[0][1] * jacobianTransposed[1][0]);
+          } else
+            DUNE_THROW(Dune::NotImplemented, "Remote intersections don't implement the 'outerNormal' method for " << mydim << "-dimensional intersections yet");
+
+        } else
+          DUNE_THROW(Dune::NotImplemented, "Remote intersections don't implement the 'outerNormal' method for intersections with codim >= 2 yet");
+
+        return normal;
       }
 
       /** \brief Return a unit outer normal of the target intersection */
