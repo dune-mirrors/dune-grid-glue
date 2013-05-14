@@ -65,23 +65,14 @@ void testIntersection(const IntersectionIt & rIIt)
   }
 }
 
-template<int dim>
-struct CellLayout
-{
-  bool contains (Dune::GeometryType gt)
-  {
-    return gt.dim()==dim;
-  }
-};
-
 
 template <class GlueType>
 void testCoupling(const GlueType& glue)
 {
   typedef typename GlueType::ctype ctype;
 
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, CellLayout > View0Mapper;
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, CellLayout > View1Mapper;
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, Dune::MCMGElementLayout > View0Mapper;
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, Dune::MCMGElementLayout > View1Mapper;
   View0Mapper view0mapper(glue.template gridView<0>());
   View1Mapper view1mapper(glue.template gridView<1>());
 
