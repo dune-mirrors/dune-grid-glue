@@ -62,6 +62,11 @@ void testIntersection(const IntersectionIt & rIIt)
     }
     //assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
 
+    // Test the normal vector methods.  At least test whether they don't crash
+    rIIt->outerNormal(quadPos);
+    rIIt->unitOuterNormal(quadPos);
+    rIIt->integrationOuterNormal(quadPos);
+    rIIt->centerUnitOuterNormal();
   }
 }
 
