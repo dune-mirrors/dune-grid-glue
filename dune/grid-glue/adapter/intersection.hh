@@ -490,9 +490,13 @@ namespace Dune {
         return (unitOuterNormal(local) *= geometry().integrationElement(local));
       }
 
+      /** \brief Unit outer normal at the center of the intersection
+       *
+       * Used for some grids that do not implement element geometries
+       */
       GlobalCoordinate centerUnitOuterNormal () const
       {
-        assert(("Not Implemented", false));
+        return unitOuterNormal(ReferenceElements<ctype,mydim>::general(type()).position(0,0));
       }
 
 #ifdef QUICKHACK_INDEX
