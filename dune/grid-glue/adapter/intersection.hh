@@ -473,7 +473,7 @@ namespace Dune {
       /** \brief Return an outer normal (length not necessarily 1) */
       GlobalCoordinate outerNormal(const Dune::FieldVector<ctype, mydim> &local) const
       {
-        return geometry().outerNormal(local);
+        DUNE_THROW(Dune::NotImplemented, "Remote intersections don't implement the 'outerNormal' method yet");
       }
 
       /** \brief Return a unit outer normal of the target intersection */
