@@ -508,7 +508,11 @@ namespace Dune {
        */
       GlobalCoordinate centerUnitOuterNormal () const
       {
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
         return unitOuterNormal(ReferenceElements<ctype,mydim>::general(type()).position(0,0));
+#else
+        return unitOuterNormal(GenericReferenceElements<ctype,mydim>::general(type()).position(0,0));
+#endif
       }
 
 #ifdef QUICKHACK_INDEX
