@@ -365,8 +365,8 @@ namespace Dune {
 
       /*   F U N C T I O N A L I T Y   */
 
-      /** \brief return EntityPointer to the Entity on the inside of this intersection.
-              That is the Entity where we started this. */
+      /** \brief Return EntityPointer to the Entity on the inside of this intersection.
+       */
       InsideEntityPointer inside() const
       {
         assert(self());
@@ -374,7 +374,8 @@ namespace Dune {
                  IntersectionDataView<P0,P1,I>::index(*i_));
       }
 
-      /** \brief return EntityPointer to the Entity on the outside of this intersection. That is the neighboring Entity. */
+      /** \brief Return EntityPointer to the Entity on the outside of this intersection.
+       */
       OutsideEntityPointer outside() const
       {
         assert(neighbor());
@@ -388,35 +389,35 @@ namespace Dune {
         assert(("not implemented", false));
       }
 
-      /** \brief geometrical information about this intersection in local coordinates of the inside() entity.
-          takes local domain intersection coords and maps them to domain parent element local coords */
+      /** \brief Geometric information about this intersection in local coordinates of the inside() entity.
+       */
       const InsideLocalGeometry& geometryInInside() const
       {
         return IntersectionDataView<P0,P1,I>::localGeometry(*i_);
       }
 
-      /** \brief geometrical information about this intersection in local coordinates of the outside() entity.
-          takes local target intersection coords and maps them to target parent element local coords */
+      /** \brief Geometric information about this intersection in local coordinates of the outside() entity.
+       */
       const OutsideLocalGeometry& geometryInOutside() const
       {
         return IntersectionDataView<P0,P1,O>::localGeometry(*i_);
       }
 
-      /** \brief geometrical information about this intersection in global coordinates of the inside grid.
-          takes local domain intersection coords and maps them to domain grid world coords */
+      /** \brief Geometric information about this intersection as part of the inside grid.
+       */
       const Geometry& geometry() const
       {
         return IntersectionDataView<P0,P1,I>::geometry(*i_);
       }
 
-      /** \brief geometrical information about this intersection in global coordinates of the outside grid.
-          takes local domain intersection coords and maps them to target grid world coords */
+      /** \brief Geometric information about this intersection as part of the outside grid.
+       */
       const OutsideGeometry& geometryOutside() const // DUNE_DEPRECATED
       {
         return IntersectionDataView<P0,P1,O>::geometry(*i_);
       }
 
-      /** \brief obtain the type of reference element for this intersection */
+      /** \brief Type of reference element for this intersection */
       Dune::GeometryType type() const
       {
         #ifdef ONLY_SIMPLEX_INTERSECTIONS
@@ -428,13 +429,13 @@ namespace Dune {
       }
 
 
-      /** \brief return true if inside() entity exists locally */
+      /** \brief For parallel computations: Return true if inside() entity exists locally */
       bool self() const
       {
         return IntersectionDataView<P0,P1,I>::local(*i_);
       }
 
-      /** \brief return true if outside() entity exists locally */
+      /** \brief For parallel computations: Return true if outside() entity exists locally */
       bool neighbor() const
       {
         return IntersectionDataView<P0,P1,O>::local(*i_);
@@ -488,7 +489,7 @@ namespace Dune {
         return normal;
       }
 
-      /** \brief Return a unit outer normal of the target intersection */
+      /** \brief Return a unit outer normal */
       GlobalCoordinate unitOuterNormal(const Dune::FieldVector<ctype, mydim> &local) const
       {
         Dune::FieldVector<ctype, coorddim> normal = outerNormal(local);
@@ -496,7 +497,7 @@ namespace Dune {
         return normal;
       }
 
-      /** \brief Return an outer normal (length not necessarily 1) */
+      /** \brief Return an outer normal with the length of the integration element */
       GlobalCoordinate integrationOuterNormal(const Dune::FieldVector<ctype, mydim> &local) const
       {
         return (unitOuterNormal(local) *= geometry().integrationElement(local));
