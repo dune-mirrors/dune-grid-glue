@@ -65,8 +65,8 @@ private:
 
   //  ROUTINES 2D
 
-  static void edgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >   X,
-                                   const std::vector<Dune::FieldVector<T,dim> >   Y,
+  static void edgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >&  X,
+                                   const std::vector<Dune::FieldVector<T,dim> >&  Y,
                                    std::vector<Dune::FieldVector<T,dim> > & P ) ;
 
   static void pointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
