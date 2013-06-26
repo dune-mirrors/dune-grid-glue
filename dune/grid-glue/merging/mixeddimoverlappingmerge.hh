@@ -18,6 +18,8 @@
 
 #include <dune/grid-glue/merging/standardmerge.hh>
 
+namespace Dune {
+
 /** \brief Computing overlapping grid intersections for grids of different dimensions
 
    \tparam dim1 Grid dimension of grid 1
@@ -74,5 +76,7 @@ private:
   }
 
 };
+
+}  // namespace Dune
 
 #endif // DUNE_GRID_GLUE_MIXED_DIM_OVERLAPPING_MERGE_HH
