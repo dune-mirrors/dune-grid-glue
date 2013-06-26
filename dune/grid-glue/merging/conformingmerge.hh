@@ -183,15 +183,12 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
   /** \todo Currently the RemoteIntersections have to be simplices */
   if (grid1ElementType.isSimplex()) {
 
-    this->intersections_.push_back(RemoteSimplicialIntersection());
+    this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
     for (int i=0; i<refElement.size(dim); i++) {
       this->intersections_.back().grid1Local_[i] = refElement.position(i,dim);
       this->intersections_.back().grid2Local_[i] = refElement.position(other[i],dim);
     }
-
-    this->intersections_.back().grid1Entity_ = grid1Index;
-    this->intersections_.back().grid2Entity_ = grid2Index;
 
   } else if (grid1ElementType.isQuadrilateral()) {
 
@@ -200,15 +197,12 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
 
     for (int i=0; i<2; i++) {
 
-      RemoteSimplicialIntersection newSimplicialIntersection;
+      RemoteSimplicialIntersection newSimplicialIntersection(grid1Index, grid2Index);
 
       for (int j=0; j<dim+1; j++) {
         newSimplicialIntersection.grid1Local_[j] = refElement.position(subVertices[i][j],dim);
         newSimplicialIntersection.grid2Local_[j] = refElement.position(subVertices[i][other[j]],dim);
       }
-
-      newSimplicialIntersection.grid1Entity_ = grid1Index;
-      newSimplicialIntersection.grid2Entity_ = grid2Index;
 
       this->intersections_.push_back(newSimplicialIntersection);
 
@@ -222,15 +216,12 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
 
     for (int i=0; i<5; i++) {
 
-      RemoteSimplicialIntersection newSimplicialIntersection;
+      RemoteSimplicialIntersection newSimplicialIntersection(grid1Index, grid2Index);
 
       for (int j=0; j<dim+1; j++) {
         newSimplicialIntersection.grid1Local_[j] = refElement.position(subVertices[i][j],dim);
         newSimplicialIntersection.grid2Local_[j] = refElement.position(subVertices[i][other[j]],dim);
       }
-
-      newSimplicialIntersection.grid1Entity_ = grid1Index;
-      newSimplicialIntersection.grid2Entity_ = grid2Index;
 
       this->intersections_.push_back(newSimplicialIntersection);
 

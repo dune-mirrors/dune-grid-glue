@@ -43,7 +43,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
     if (lowerBound <= upperBound) {      // Intersection is non-empty
 
-      this->intersections_.push_back(RemoteSimplicialIntersection());
+      this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
       // Compute local coordinates in the grid1 element
       this->intersections_.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
@@ -52,10 +52,6 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       // Compute local coordinates in the grid2 element
       this->intersections_.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
       this->intersections_.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
-
-      // Set indices
-      this->intersections_.back().grid1Entity_ = grid1Index;
-      this->intersections_.back().grid2Entity_ = grid2Index;
 
       //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
 
@@ -87,7 +83,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
     if (P.size()>=3)
       for ( size_type i=0 ; i < P.size() - 2 ; ++i) {
 
-        this->intersections_.push_back(RemoteSimplicialIntersection());
+        this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
         this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[0]);
@@ -98,10 +94,6 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[0]);
         this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[i+1]);
         this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[i+2]);
-
-        // Set indices
-        this->intersections_.back().grid1Entity_ = grid1Index;
-        this->intersections_.back().grid2Entity_ = grid2Index;
 
       }
 
@@ -120,7 +112,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
       if (P.size()==4) {         // if the intersection is one tetrahedron, no need to go further
 
-        this->intersections_.push_back(RemoteSimplicialIntersection());
+        this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
         this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[0]);
@@ -133,10 +125,6 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[1]);
         this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[2]);
         this->intersections_.back().grid2Local_[3] = grid2Geometry.local(P[3]);
-
-        // Set indices
-        this->intersections_.back().grid1Entity_ = grid1Index;
-        this->intersections_.back().grid2Entity_ = grid2Index;
       }
       else
       {
@@ -179,7 +167,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
             for ( size_type j=0 ; j < H[i].size() - 2 ; ++j) {
 
               // Output the tetrahedron (anchor, next, nextNext, centroid)
-              this->intersections_.push_back(RemoteSimplicialIntersection());
+              this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
               // Compute local coordinates in the grid1 element
               this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[H[i][0]]);
@@ -192,11 +180,6 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
               this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[H[i][j+1]]);
               this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[H[i][j+2]]);
               this->intersections_.back().grid2Local_[3] = grid2Geometry.local(centroid);
-
-              // Set indices
-              this->intersections_.back().grid1Entity_ = grid1Index;
-              this->intersections_.back().grid2Entity_ = grid2Index;
-
             }
         }
       }

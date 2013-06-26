@@ -79,6 +79,15 @@ protected:
     /** \brief Number of vertices of the intersection (it's a simplex) */
     enum {nVertices = intersectionDim + 1};
 
+    /** \brief Default constructor */
+    RemoteSimplicialIntersection()
+    {}
+
+    /** \brief Constructor for two given entity indices */
+    RemoteSimplicialIntersection(int grid1Entity, int grid2Entity)
+    : grid1Entity_(grid1Entity), grid2Entity_(grid2Entity)
+    {}
+
     // Local coordinates in the grid1 entity
     Dune::array<Dune::FieldVector<T,grid1Dim>, nVertices> grid1Local_;
 
