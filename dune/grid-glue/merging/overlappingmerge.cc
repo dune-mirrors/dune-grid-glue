@@ -66,7 +66,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
     std::vector<Dune::FieldVector<T,dim> >  P;
 
-    // find the intersections of any segement of the two triangles.
+    // find the intersections of any segment of the two triangles.
     edgeIntersections2D(grid1ElementCorners,grid2ElementCorners,P);
 
     // add the points of grid1 in grid2 and of grid2 in grid1.
@@ -220,29 +220,29 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 // -------------------------------------------------------------------------------------------------------------
 
 
-//  EDGEINTERSECTIONS computes edge intersections of two triangles for the two given triangles X and Y
+//  Computes edge intersections of two triangles for the two given triangles X and Y
 //  (point coordinates are stored column-wise, in counter clock order) the points P where their edges intersect.
 
 template<int dim, typename T>
-void OverlappingMerge<dim, T>::edgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >   X,
-                                                    const std::vector<Dune::FieldVector<T,dim> >   Y,
+void OverlappingMerge<dim, T>::edgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >& X,
+                                                    const std::vector<Dune::FieldVector<T,dim> >& Y,
                                                     std::vector<Dune::FieldVector<T,dim> > & P )
 {
 
   // get size_type for all the vectors we are using
   typedef typename std::vector<Dune::Empty>::size_type size_type;
 
-  int I,J ;
-  Dune::FieldVector<T,dim>  p,B,r ;
+  Dune::FieldVector<T,dim>  p,r ;
   Dune::FieldMatrix<T,dim,dim>  A ;
 
-  for ( size_type i=0; i<3; ++i) for ( size_type j=0; j<3; ++j)
+  for ( size_type i=0; i<3; ++i)
+    for ( size_type j=0; j<3; ++j)
     {
 
-      B = Y[j] - X[i] ;
+      Dune::FieldVector<T,dim> B = Y[j] - X[i] ;
 
-      I = (i+1)%3 ;
-      J = (j+1)%3 ;
+      int I = (i+1)%3 ;
+      int J = (j+1)%3 ;
 
       A[0][0] =  X[I][0] - X[i][0] ;  A[1][0] =  X[I][1] - X[i][1] ;
       A[0][1] =  Y[j][0] - Y[J][0] ;  A[1][1] =  Y[j][1] - Y[J][1] ;
