@@ -32,6 +32,7 @@
 
 #include <dune/grid-glue/merging/standardmerge.hh>
 
+namespace Dune {
 
 /** \brief Implementation of the Merger concept for conforming interfaces
 
@@ -260,5 +261,7 @@ typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dim
 {
   return this->intersections_[idx].grid2Local_[corner];
 }
+
+}  // namespace Dune
 
 #endif // CONFORMING_MERGE_HH
