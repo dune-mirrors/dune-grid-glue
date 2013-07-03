@@ -1,6 +1,9 @@
 Makefile.in
 Makefile
 .deps
+*.o
+
+callmergertwicetest
 mixeddimcouplingtest
 mixeddimoverlappingtest
 multivectortest
