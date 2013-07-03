@@ -113,22 +113,23 @@ private:
       for (size_t i=0; i<2; i++)
         inTriangle[i] = Dune::GenericReferenceElements<T,dim2>::general(grid2ElementType).checkInside(grid2Geometry.local(grid1ElementCorners[i]));
 
+      // Everything is easy if both segment endpoints are contained in the 2d element
+      if (inTriangle[0] and inTriangle[1])
+      {
+        this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+
+        // Compute local coordinates in the grid1 element
+        this->intersections_.back().grid1Local_[0] = 0;
+        this->intersections_.back().grid1Local_[1] = 1;
+
+        // Compute local coordinates in the grid2 element
+        this->intersections_.back().grid2Local_[0] = grid2Geometry.local(grid1ElementCorners[0]);
+        this->intersections_.back().grid2Local_[1] = grid2Geometry.local(grid1ElementCorners[1]);
+
+        return;
+      }
+
       switch (intersections.size()) {
-
-          case 0:
-            if (inTriangle[0] and inTriangle[1])
-            {
-              this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
-
-              // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = 0;
-              this->intersections_.back().grid1Local_[1] = 1;
-
-              // Compute local coordinates in the grid2 element
-              this->intersections_.back().grid2Local_[0] = grid2Geometry.local(grid1ElementCorners[0]);
-              this->intersections_.back().grid2Local_[1] = grid2Geometry.local(grid1ElementCorners[1]);
-            }
-            return;
 
           case 1:
           {
@@ -159,8 +160,6 @@ private:
             }
 
             return;
-
-
           }
 
 
@@ -204,22 +203,23 @@ private:
       for (size_t i=0; i<2; i++)
         inTriangle[i] = Dune::GenericReferenceElements<T,dim1>::general(grid1ElementType).checkInside(grid1Geometry.local(grid2ElementCorners[i]));
 
+      // Everything is easy if both segment endpoints are contained in the 2d element
+      if (inTriangle[0] and inTriangle[1])
+      {
+        this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+
+        // Compute local coordinates in the grid1 element
+        this->intersections_.back().grid1Local_[0] = grid1Geometry.local(grid2ElementCorners[0]);
+        this->intersections_.back().grid1Local_[1] = grid1Geometry.local(grid2ElementCorners[1]);
+
+        // Compute local coordinates in the grid2 element
+        this->intersections_.back().grid2Local_[0] = 0;
+        this->intersections_.back().grid2Local_[1] = 1;
+
+        return;
+      }
+
       switch (intersections.size()) {
-
-          case 0:
-            if (inTriangle[0] and inTriangle[1])
-            {
-              this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
-
-              // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = grid1Geometry.local(grid2ElementCorners[0]);
-              this->intersections_.back().grid1Local_[1] = grid1Geometry.local(grid2ElementCorners[1]);
-
-              // Compute local coordinates in the grid2 element
-              this->intersections_.back().grid2Local_[0] = 0;
-              this->intersections_.back().grid2Local_[1] = 1;
-            }
-            return;
 
           case 1:
           {
