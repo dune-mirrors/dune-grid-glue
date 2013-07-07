@@ -21,6 +21,8 @@
 
 namespace Dune {
 
+  namespace GridGlue {
+
 /** \brief Computing overlapping grid intersections for grids of different dimensions
 
    \tparam dim1 Grid dimension of grid 1
@@ -324,6 +326,7 @@ void MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::segmentSegmentIntersecti
 
 }
 
+}  // namespace GridGlue
 
 }  // namespace Dune
 

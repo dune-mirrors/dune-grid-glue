@@ -28,6 +28,10 @@
 
 #include <dune/grid-glue/common/orientedsubface.hh>
 
+namespace Dune {
+
+  namespace GridGlue {
+
 template<typename GV>
 class Codim1Extractor : public Extractor<GV,1>
 {
@@ -358,5 +362,9 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
   }
 
 }
+
+}  // namespace GridGlue
+
+}  // namespace Dune
 
 #endif // DUNE_CODIM_1_EXTRACTOR_HH

@@ -26,6 +26,10 @@
 #include "extractor.hh"
 #include "extractorpredicate.hh"
 
+namespace Dune {
+
+  namespace GridGlue {
+
 template<typename GV>
 class Codim0Extractor : public Extractor<GV,0>
 {
@@ -224,5 +228,9 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
   }
 
 }
+
+}  // namespace GridGlue
+
+}  // namespace Dune
 
 #endif // DUNE_CODIM_0_EXTRACTOR_HH

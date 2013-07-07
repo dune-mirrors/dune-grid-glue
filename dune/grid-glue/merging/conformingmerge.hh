@@ -34,6 +34,8 @@
 
 namespace Dune {
 
+  namespace GridGlue {
+
 /** \brief Implementation of the Merger concept for conforming interfaces
 
    \tparam dim Grid dimension of the coupling grids.  Must be the same for both sides
@@ -261,6 +263,8 @@ typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dim
 {
   return this->intersections_[idx].grid2Local_[corner];
 }
+
+}  // namespace GridGlue
 
 }  // namespace Dune
 

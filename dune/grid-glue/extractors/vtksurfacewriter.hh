@@ -26,6 +26,9 @@
 
 #include "../adapter/gridgluevtkwriter.hh"
 
+namespace Dune {
+
+  namespace GridGlue {
 
 class VtkSurfaceWriter
 {
@@ -201,5 +204,8 @@ private:
   const char*  filename_;
 };
 
+}  // namespace GridGlue
+
+}  // namespace Dune
 
 #endif // VTKSURFACEWRITER_HH

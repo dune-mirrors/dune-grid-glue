@@ -17,6 +17,7 @@
 #include <dune/grid-glue/test/couplingtest.hh>
 
 using namespace Dune;
+using namespace Dune::GridGlue;
 
 /** \brief Returns always true */
 template <class GridView>

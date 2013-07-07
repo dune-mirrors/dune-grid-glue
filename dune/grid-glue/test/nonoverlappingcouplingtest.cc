@@ -27,7 +27,7 @@
 #include <dune/grid-glue/test/communicationtest.hh>
 
 using namespace Dune;
-
+using namespace Dune::GridGlue;
 
 template <class GridView>
 class VerticalFaceDescriptor

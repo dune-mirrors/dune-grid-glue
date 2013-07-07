@@ -22,6 +22,7 @@
 #include <dune/grid-glue/test/couplingtest.hh>
 
 using namespace Dune;
+using namespace Dune::GridGlue;
 
 template <class GridView>
 class HorizontalFaceDescriptor

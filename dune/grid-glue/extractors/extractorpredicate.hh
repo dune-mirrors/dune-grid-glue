@@ -19,6 +19,11 @@
 #ifndef EXTRACTOR_PREDICATES_HH
 #define EXTRACTOR_PREDICATES_HH
 
+namespace Dune {
+
+  namespace GridGlue {
+
+
 /** \brief Base class for subentity-selecting predicates
     \tparam GV GridView that the subentities are extracted from
  */
@@ -36,5 +41,9 @@ public:
   /** \brief Dummy virtual destructor */
   virtual ~ExtractorPredicate() {}
 };
+
+}  // namespace GridGlue
+
+}  // namespace Dune
 
 #endif // EXTRACTOR_PREDICATES_HH

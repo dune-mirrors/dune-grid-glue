@@ -30,6 +30,10 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/geometry/genericgeometry/geometry.hh>
 
+namespace Dune {
+
+  namespace GridGlue {
+
 /**
  * @brief Provides codimension-independent methods for grid extraction
  *
@@ -442,5 +446,9 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
 
   return LocalGeometry(facetype, corners);
 }
+
+}  // namespace GridGlue
+
+}  // namespace Dune
 
 #endif // DUNE_EXTRACTOR_HH

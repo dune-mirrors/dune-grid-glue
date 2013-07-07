@@ -39,6 +39,10 @@
 #include <dune/common/mpicollectivecommunication.hh>
 #endif
 
+namespace Dune {
+
+  namespace GridGlue {
+
 template <typename COMM>
 class CommHelper
 {
@@ -558,5 +562,9 @@ public:
     return lx_.positiveNormalDirection();
   }
 };
+
+}  // namespace GridGlue
+
+}  // namespace Dune
 
 #endif // DUNE_PARALLEL_EXTRACTOR_HH
