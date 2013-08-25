@@ -234,8 +234,8 @@ public:
   friend class Dune::GridGlue::IntersectionIterator<P0,P1,1,0>;
   friend class Dune::GridGlue::CellIntersectionIterator<P0,P1,0,1>;
   friend class Dune::GridGlue::CellIntersectionIterator<P0,P1,1,0>;
-  friend class GridGlueView<P0,P1,0>;
-  friend class GridGlueView<P0,P1,1>;
+  friend struct GridGlueView<P0,P1,0>;
+  friend struct GridGlueView<P0,P1,1>;
 
   /** \brief Type of the iterator that iterates over remove intersections */
 
