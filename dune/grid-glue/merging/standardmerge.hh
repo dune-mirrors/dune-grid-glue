@@ -22,6 +22,7 @@
 #include <dune/common/timer.hh>
 
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/merger.hh>
