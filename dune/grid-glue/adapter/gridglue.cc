@@ -8,7 +8,6 @@
 #include "gridglue.hh"
 
 #include "../common/multivector.hh"
-#include "../extractors/vtksurfacewriter.hh"
 
 /** \todo Implement MPI Status check with exception handling */
 #define CheckMPIStatus(A,B) {}
