@@ -27,9 +27,13 @@
 template <int dim>
 int orientedSubface(const Dune::GeometryType& type, int face, int vertex)
 {
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+  const Dune::ReferenceElement<double,dim>& refElement =
+    Dune::ReferenceElements<double, dim>::general(type);
+#else
   const Dune::GenericReferenceElement<double,dim>& refElement =
     Dune::GenericReferenceElements<double, dim>::general(type);
-
+#endif
   // Triangle
   if (type.isTriangle() && face==1)
   {

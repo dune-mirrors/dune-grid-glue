@@ -162,8 +162,11 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
         for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
         {
           // get the corner count of this face
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+          const int face_corners = Dune::ReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
+#else
           const int face_corners = Dune::GenericReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
-
+#endif
 
           // now we only have to care about the 3D case, i.e. a triangle face can be
           // inserted directly whereas a quadrilateral face has to be divided into two triangles

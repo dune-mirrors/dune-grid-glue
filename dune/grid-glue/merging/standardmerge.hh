@@ -20,9 +20,9 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/bitsetvector.hh>
 #include <dune/common/timer.hh>
+#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericreferenceelements.hh>
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/merger.hh>
@@ -376,11 +376,19 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
   elementNeighbors1_.resize(grid1_element_types.size());
 
   for (size_t i=0; i<grid1_element_types.size(); i++)
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    elementNeighbors1_[i].resize(Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1), -1);
+#else
     elementNeighbors1_[i].resize(Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1), -1);
+#endif
 
   for (size_t i=0; i<grid1_element_types.size(); i++) {
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    const Dune::ReferenceElement<T,grid1Dim>& refElement = Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
+#else
     const Dune::GenericReferenceElement<T,grid1Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
+#endif
 
     for (size_t j=0; j<(size_t)refElement.size(1); j++) {
 
@@ -421,11 +429,19 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
   elementNeighbors2_.resize(grid2_element_types.size());
 
   for (size_t i=0; i<grid2_element_types.size(); i++)
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    elementNeighbors2_[i].resize(Dune::ReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(1), -1);
+#else
     elementNeighbors2_[i].resize(Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(1), -1);
+#endif
 
   for (size_t i=0; i<grid2_element_types.size(); i++) {
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    const Dune::ReferenceElement<T,grid2Dim>& refElement = Dune::ReferenceElements<T,grid2Dim>::general(grid2_element_types[i]);
+#else
     const Dune::GenericReferenceElement<T,grid2Dim>& refElement = Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]);
+#endif
 
     for (size_t j=0; j<(size_t)refElement.size(1); j++) {
 
@@ -498,7 +514,11 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   for (std::size_t i=0; i<grid1_element_types.size(); i++) {
 
     // Select vertices of the grid1 element
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    int numVertices = Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(grid1Dim);
+#else
     int numVertices = Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(grid1Dim);
+#endif
     grid1ElementCorners_[i].resize(numVertices);
     for (int j=0; j<numVertices; j++)
       grid1ElementCorners_[i][j] = grid1_elements[grid1CornerCounter++];
@@ -513,7 +533,11 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   for (std::size_t i=0; i<grid2_element_types.size(); i++) {
 
     // Select vertices of the grid2 element
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    int numVertices = Dune::ReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(grid2Dim);
+#else
     int numVertices = Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(grid2Dim);
+#endif
     grid2ElementCorners_[i].resize(numVertices);
     for (int j=0; j<numVertices; j++)
       grid2ElementCorners_[i][j] = grid2_elements[grid2CornerCounter++];

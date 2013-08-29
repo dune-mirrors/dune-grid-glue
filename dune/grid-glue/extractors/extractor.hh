@@ -168,7 +168,11 @@ protected:
 
     unsigned int nCorners() const
     {
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+      return Dune::ReferenceElements<ctype, dim-codim>::general(geometryType_).size(dim-codim);
+#else
       return Dune::GenericReferenceElements<ctype, dim-codim>::general(geometryType_).size(dim-codim);
+#endif
     }
 
     /// @brief the index of the parent element (from index set)
@@ -438,9 +442,13 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
 
   // get reference element
   Dune::GeometryType celltype = elmtInfo_.find(face.parent)->second->p->type();
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+  const Dune::ReferenceElement<ctype, dim> & re =
+    Dune::ReferenceElements<ctype, dim>::general(celltype);
+#else
   const Dune::GenericReferenceElement<ctype, dim> & re =
     Dune::GenericReferenceElements<ctype, dim>::general(celltype);
-
+#endif
   for (unsigned int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = re.position(face.corners[i].num,dim);
 
