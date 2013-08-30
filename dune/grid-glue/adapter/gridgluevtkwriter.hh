@@ -25,37 +25,9 @@
 #include <vector>
 #include <list>
 
+#include <dune/common/classname.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
-
-
-const char TypeNames[][8] = { "double", "float  ", "int    " };
-
-// double is default
-template<typename T>
-struct Nametraits
-{
-  enum { nameidx = 0 };
-};
-
-
-template<>
-struct Nametraits<double>
-{
-  enum { nameidx = 0 };
-};
-
-template<>
-struct Nametraits<float>
-{
-  enum { nameidx = 1 };
-};
-
-template<>
-struct Nametraits<int>
-{
-  enum { nameidx = 2 };
-};
 
 
 /** \brief Write remote intersections to a vtk file for debugging purposes
@@ -101,7 +73,7 @@ class GridGlueVtkWriter
     glue.template patch<side>().getCoords(coords);
 
     fgrid << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
-    fgrid << "POINTS " << coords.size() << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fgrid << "POINTS " << coords.size() << " " << Dune::className<ctype>() << std::endl;
 
     for (size_t i=0; i<coords.size(); i++)
       fgrid << coords[i] << coordinatePadding << std::endl;
@@ -187,7 +159,7 @@ class GridGlueVtkWriter
     ctype accum = 0.0, delta = 1.0 / (ctype) (gridSubEntityData.size()-1);
 
     fgrid << "CELL_DATA " << gridSubEntityData.size() << std::endl;
-    fgrid << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+    fgrid << "SCALARS property_coding " << Dune::className<ctype>() << " 1" << std::endl;
     fgrid << "LOOKUP_TABLE default" << std::endl;
 
     for (typename GridSubEntityData::const_iterator sEIt = gridSubEntityData.begin();
@@ -242,7 +214,7 @@ class GridGlueVtkWriter
     // the merged grid (i.e. the set of remote intersections
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
     fmerged << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
-    fmerged << "POINTS " << overlaps*(dim+1) << " " << TypeNames[Nametraits<ctype>::nameidx] << std::endl;
+    fmerged << "POINTS " << overlaps*(dim+1) << " " << Dune::className<ctype>() << std::endl;
 
     for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
          isIt != glue.template iend<side>();
@@ -291,7 +263,7 @@ class GridGlueVtkWriter
     ctype accum = 0.0, delta = 1.0 / (ctype) (gridSubEntityData.size()-1);
 
     fmerged << "CELL_DATA " << overlaps << std::endl;
-    fmerged << "SCALARS property_coding " << TypeNames[Nametraits<ctype>::nameidx] << " 1" << std::endl;
+    fmerged << "SCALARS property_coding " << Dune::className<ctype>() << " 1" << std::endl;
     fmerged << "LOOKUP_TABLE default" << std::endl;
 
     for (typename GridSubEntityData::const_iterator sEIt = gridSubEntityData.begin();
