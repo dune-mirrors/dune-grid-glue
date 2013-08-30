@@ -28,7 +28,11 @@
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+#include <dune/geometry/multilineargeometry.hh>
+#else
 #include <dune/geometry/genericgeometry/geometry.hh>
+#endif
 
 namespace Dune {
 
@@ -85,8 +89,14 @@ public:
 public:
 
   // transformations
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+  // We don't need the caching, but the uncached MultiLinearGeometry is not defined at all vertices
+  typedef Dune::CachedMultiLinearGeometry<ctype, dim-codim, dimworld> Geometry;
+  typedef Dune::CachedMultiLinearGeometry<ctype, dim-codim, dim>      LocalGeometry;
+#else
   typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dimworld> > Geometry;
   typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dim> > LocalGeometry;
+#endif
 
 protected:
   /************************** PRIVATE SUBCLASSES **********************/
