@@ -516,6 +516,11 @@ namespace Dune {
 #endif
       }
 
+      Intersection<P0,P1,O,I> flip() const
+      {
+        return Intersection<P0,P1,O,I>(glue_,i_);
+      }
+
 #ifdef QUICKHACK_INDEX
       typedef typename GridGlue::IndexType IndexType;
 
