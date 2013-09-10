@@ -385,7 +385,7 @@ namespace Dune {
       /** \brief Return true if intersection is conforming */
       bool conforming() const
       {
-        assert(("not implemented", false));
+        assert(false && "not implemented");
       }
 
       /** \brief Geometric information about this intersection in local coordinates of the inside() entity.
