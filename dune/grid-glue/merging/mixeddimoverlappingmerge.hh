@@ -100,12 +100,13 @@ private:
       assert(grid1ElementCorners.size() == 2);  // line segment
 
       // Compute intersections of segment with all edges of the 2d element
-      std::vector<Dune::FieldVector<T,2> > intersections;
+      std::vector<Dune::FieldVector<T,dimworld> > intersections;
       for (int i=0; i<refElement2.size(1); i++)
       {
-        Dune::array<Dune::FieldVector<T,2>, 2> edge;
-        edge[0] = grid2ElementCorners[refElement2.subEntity(i,1,0,2)];
-        edge[1] = grid2ElementCorners[refElement2.subEntity(i,1,1,2)];
+        Dune::array<Dune::FieldVector<T,dimworld>, 2> edge;
+        edge[0] = grid2ElementCorners[refElement2.subEntity(i,dim2-1,0,dim2)];
+        edge[1] = grid2ElementCorners[refElement2.subEntity(i,dim2-1,1,dim2)];
+
         segmentSegmentIntersection2D(grid1ElementCorners,edge,intersections);
       }
 
@@ -190,13 +191,23 @@ private:
       assert(grid2ElementCorners.size() == 2);  // line segment
 
       // Compute intersections of segment with all edges of the 2d element
-      std::vector<Dune::FieldVector<T,2> > intersections;
+      std::vector<Dune::FieldVector<T,dimworld> > intersections;
       for (int i=0; i<refElement1.size(1); i++)
       {
-        Dune::array<Dune::FieldVector<T,2>, 2> edge;
-        edge[0] = grid1ElementCorners[refElement1.subEntity(i,1,0,2)];
-        edge[1] = grid1ElementCorners[refElement1.subEntity(i,1,1,2)];
+        Dune::array<Dune::FieldVector<T,dimworld>, 2> edge;
+        edge[0] = grid1ElementCorners[refElement1.subEntity(i,dim1-1,0,dim1)];
+        edge[1] = grid1ElementCorners[refElement1.subEntity(i,dim1-1,1,dim1)];
+        std::cout << " X[0] " << grid1ElementCorners[0] << std::endl;
+        std::cout << " X[1] " << grid1ElementCorners[1] << std::endl;
+
+        std::cout << " Y[0] " << edge[0] << std::endl;
+        std::cout << " Y[1] " << edge[1] << std::endl;
+
         segmentSegmentIntersection2D(grid2ElementCorners,edge,intersections);
+        //std::cout << " intersections[0] " << intersections[0,0] << std::endl;
+        //std::cout << " intersections[1] " << intersections[0,1] << std::endl;
+
+
       }
 
       // Compute whether the segment endpoints are contained in the triangle
@@ -298,6 +309,8 @@ void MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::segmentSegmentIntersecti
   // get size_type for all the vectors we are using
   typedef typename std::vector<Dune::Empty>::size_type size_type;
 
+
+
   Dune::FieldVector<T,dimworld>  p,r ;
   Dune::FieldMatrix<T,dimworld,dimworld>  A ;
 
@@ -309,18 +322,32 @@ void MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::segmentSegmentIntersecti
       int I = (i+1)%3 ;
       int J = (j+1)%3 ;
 
+      std::cout << "i " << i << " j " << j << std::endl;
+      std::cout << "I " << I << " J " << J << std::endl;
+
       A[0][0] =  X[I][0] - X[i][0] ;  A[1][0] =  X[I][1] - X[i][1] ;
       A[0][1] =  Y[j][0] - Y[J][0] ;  A[1][1] =  Y[j][1] - Y[J][1] ;
+
+
+      std::cout << "A[0][0] " << A [0][0]  << " A[0][1] " << A[0][1] << std::endl;
+      std::cout << "A[1][0] " << A [1][0]  << " A[1][1] " << A[1][1] << std::endl;
 
       if (A.determinant()!=0) {
 
         A.solve(r,B) ;
+        std::cout << "r " << r << std::endl;
+
 
         if ((r[0]>=0)&&(r[0]<=1)&&(r[1]>=0)&&(r[1]<=1)) {
           p = X[I] - X[i] ;
+          std::cout << "p " << p << std::endl;
           p *= r[0] ;
+          std::cout << "p " << p << std::endl;
           p += X[i] ;
+          std::cout << "p " << p << std::endl;
           P.push_back(p);
+          std::cout << " P " << P[0] << std::endl;
+
         }
       }
 

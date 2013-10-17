@@ -28,6 +28,7 @@
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
+#include <dune/common/version.hh>
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
 #include <dune/geometry/multilineargeometry.hh>
 #else
