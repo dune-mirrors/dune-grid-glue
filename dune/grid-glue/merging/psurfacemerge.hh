@@ -37,6 +37,8 @@
 #else
 // forward declaration of PSurface classes
 template <int dim, typename ctype> class DirectionFunction;
+// switch off the macro that contains (in certain versions) the psurface namespace prefix
+#define PSURFACE_NAMESPACE
 #endif
 
 
