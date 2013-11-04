@@ -102,7 +102,6 @@ namespace Dune {
         grid1index_(0)
     {
       typedef typename GridGlue::ctype ctype;
-      typedef Dune::FieldVector<ctype, coorddim>   GlobalCoordinate;
 
       // Number of corners of the intersection
       const int nSimplexCorners = mydim + 1;
