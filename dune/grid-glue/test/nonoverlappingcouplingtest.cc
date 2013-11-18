@@ -42,7 +42,11 @@ public:
                         unsigned int face) const
   {
     const int dim = GridView::dimension;
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(eptr->type());
+#else
     const Dune::GenericReferenceElement<double,dim>& refElement = Dune::GenericReferenceElements<double, dim>::general(eptr->type());
+#endif
 
     int numVertices = refElement.size(face, 1, dim);
 
@@ -239,23 +243,36 @@ public:
 
   GridType & generate()
   {
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    Dune::array<int,dim> elements;
+    std::fill(elements.begin(), elements.end(), 2);
+#else
     FieldVector<int, dim> elements(2);
+#endif
     FieldVector<double,dim> size(1);
-    FieldVector<bool,dim> periodic(false);
-    int overlap = 1;
     double shift = 0.0;
 
     if (tar)
     {
-      elements = 4;
+      std::fill(elements.begin(), elements.end(), 4);
       shift = 1.0;
     }
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    HostGridType * hostgridp = new HostGridType(
+#if HAVE_MPI
+      MPI_COMM_WORLD,
+#endif // HAVE_MPI
+      size, elements);
+#else
+    FieldVector<bool,dim> periodic(false);
+    int overlap = 1;
     HostGridType * hostgridp = new HostGridType(
 #if HAVE_MPI
       MPI_COMM_WORLD,
 #endif // HAVE_MPI
       size, elements, periodic, overlap);
+#endif
     ShiftTrafo<dim,double> * trafop = new ShiftTrafo<dim,double>(shift);
     GridType * gridp = new GridType(*hostgridp, *trafop);
     return *gridp;
