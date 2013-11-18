@@ -5,9 +5,11 @@
 #endif
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
-#include <psurface/ContactMapping.h>
 
 #if HAVE_PSURFACE
+
+#include <psurface/ContactMapping.h>
+
 
 template<int dim, int dimworld, typename T>
 void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
