@@ -19,6 +19,7 @@
 #ifndef ORIENTED_SUBFACE_HH
 #define ORIENTED_SUBFACE_HH
 
+#include <dune/common/version.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
 
