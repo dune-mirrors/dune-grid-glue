@@ -76,8 +76,8 @@ class Merger
 {
 
   // the policy class get's access to the Merger
-  friend class MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 0>;
-  friend class MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 1>;
+  friend struct MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 0>;
+  friend struct MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 1>;
 
 public:
 
