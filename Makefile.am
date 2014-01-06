@@ -2,11 +2,9 @@
 # we need the module file to be able to build via dunecontrol
 EXTRA_DIST=dune.module \
   CMakeLists.txt \
-  config.h.cmake \
-  dune-grid-glue-config.cmake.in \
-  dune-grid-glue-version.cmake.in
+  config.h.cmake
 
-SUBDIRS = m4 cmake dune doc lib
+SUBDIRS = m4 dune doc lib
 
 # don't follow the full GNU-standard
 # we need automake 1.9 or newer
