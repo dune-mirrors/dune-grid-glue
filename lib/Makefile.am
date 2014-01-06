@@ -11,4 +11,6 @@ libdunegridglue_la_LIBADD = $(DUNE_LIBS) $(PSURFACE_LIBS) $(AMIRAMESH_LIBS)
 
 #  ../dune/grid-glue/merging/conformingmerge.cc
 
+EXTRA_DIST = CMakeLists.txt
+
 include $(top_srcdir)/am/global-rules

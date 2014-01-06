@@ -46,4 +46,6 @@ overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
 orientedsubfacetest_SOURCES = orientedsubfacetest.cc
 
+EXTRA_DIST = CMakeLists.txt
+
 include $(top_srcdir)/am/global-rules

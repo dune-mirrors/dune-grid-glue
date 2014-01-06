@@ -1,5 +1,6 @@
 Makefile
 Makefile.in
+build-cmake/
 config.*
 configure
 dependencies.m4
