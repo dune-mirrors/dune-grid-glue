@@ -4,6 +4,8 @@
 #include "config.h"
 #endif
 
+#include <dune/common/version.hh>
+
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 
 #if HAVE_PSURFACE
@@ -36,8 +38,11 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
       DUNE_THROW(Dune::GridError, "You cannot hand a " << domain_element_types[i]
                                                        << " to a " << dim << "-dimensional PSurfaceMerge!");
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    expectedCorners += Dune::ReferenceElements<ctype,dim>::general(domain_element_types[i]).size(dim);
+#else
     expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(domain_element_types[i]).size(dim);
-
+#endif
   }
 
   if (domain_elements.size() != expectedCorners)
@@ -54,8 +59,11 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
       DUNE_THROW(Dune::GridError, "You cannot hand a " << target_element_types[i]
                                                        << " to a " << dim << "-dimensional PSurfaceMerge!");
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    expectedCorners += Dune::ReferenceElements<ctype,dim>::general(target_element_types[i]).size(dim);
+#else
     expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(target_element_types[i]).size(dim);
-
+#endif
   }
 
   if (target_elements.size() != expectedCorners)
