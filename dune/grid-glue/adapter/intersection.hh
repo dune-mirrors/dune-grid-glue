@@ -27,8 +27,9 @@ namespace Dune {
        @brief storage class for Dune::GridGlue::Intersection related data
      */
     template<typename P0, typename P1>
-    struct IntersectionData
+    class IntersectionData
     {
+    public:
       typedef ::GridGlue<P0, P1> GridGlue;
 
       typedef typename GridGlue::IndexType IndexType;

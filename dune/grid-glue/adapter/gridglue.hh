@@ -64,7 +64,7 @@ namespace Dune {
   namespace GridGlue {
 
     template<typename P0, typename P1>
-    struct IntersectionData;
+    class IntersectionData;
 
     template<typename P0, typename P1, int inside, int outside>
     class Intersection;
