@@ -215,15 +215,15 @@ void GridGlue<P0, P1>::build()
   char patch1surf[256];
   sprintf(patch1surf, "/tmp/vtk-patch1-test-%i", myrank);
 
-  std::cout << prefix << "Writing patch0 surface to '" << patch0surf << ".vtk'...\n";
-  VtkSurfaceWriter vtksw(patch0surf);
-  vtksw.writeSurface(patch0coords, patch0entities, grid0dim, dimworld);
-  std::cout << prefix << "Done writing patch0 surface!\n";
+  // std::cout << prefix << "Writing patch0 surface to '" << patch0surf << ".vtk'...\n";
+  // VtkSurfaceWriter vtksw(patch0surf);
+  // vtksw.writeSurface(patch0coords, patch0entities, grid0dim, dimworld);
+  // std::cout << prefix << "Done writing patch0 surface!\n";
 
-  std::cout << prefix << "Writing patch1 surface to '" << patch1surf << ".vtk'...\n";
-  vtksw.setFilename(patch1surf);
-  vtksw.writeSurface(patch1coords, patch1entities, grid1dim, dimworld);
-  std::cout << prefix << "Done writing patch1 surface!\n";
+  // std::cout << prefix << "Writing patch1 surface to '" << patch1surf << ".vtk'...\n";
+  // vtksw.setFilename(patch1surf);
+  // vtksw.writeSurface(patch1coords, patch1entities, grid1dim, dimworld);
+  // std::cout << prefix << "Done writing patch1 surface!\n";
 #endif // WRITE_TO_VTK
 
 #if HAVE_MPI
