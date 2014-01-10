@@ -243,13 +243,16 @@ public:
 
   GridType & generate()
   {
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
     Dune::array<int,dim> elements;
     std::fill(elements.begin(), elements.end(), 2);
+    std::bitset<dim> periodic(0);
 #else
     FieldVector<int, dim> elements(2);
+    FieldVector<bool,dim> periodic(false);
 #endif
     FieldVector<double,dim> size(1);
+    int overlap = 1;
     double shift = 0.0;
 
     if (tar)
@@ -258,21 +261,11 @@ public:
       shift = 1.0;
     }
 
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    HostGridType * hostgridp = new HostGridType(
-#if HAVE_MPI
-      MPI_COMM_WORLD,
-#endif // HAVE_MPI
-      size, elements);
-#else
-    FieldVector<bool,dim> periodic(false);
-    int overlap = 1;
     HostGridType * hostgridp = new HostGridType(
 #if HAVE_MPI
       MPI_COMM_WORLD,
 #endif // HAVE_MPI
       size, elements, periodic, overlap);
-#endif
     ShiftTrafo<dim,double> * trafop = new ShiftTrafo<dim,double>(shift);
     GridType * gridp = new GridType(*hostgridp, *trafop);
     return *gridp;
