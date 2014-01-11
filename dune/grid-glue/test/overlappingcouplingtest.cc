@@ -248,7 +248,7 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
 #endif
 
 
-int main(int argc, char** argv)
+int main(int argc, char** argv) try
 {
   Dune::MPIHelper::instance(argc, argv);
 
@@ -302,4 +302,6 @@ int main(int argc, char** argv)
 
   testHybridGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
+} catch (Exception e) {
+    std::cout << e << std::endl;
 }
