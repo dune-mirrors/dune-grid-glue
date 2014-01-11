@@ -19,8 +19,13 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
   this->counter++;
 
   // A few consistency checks
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+  assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
+  assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
+#else
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
+#endif
 
   // Make generic geometries representing the grid1- and grid2 element.
   // this eases computation of local coordinates.
