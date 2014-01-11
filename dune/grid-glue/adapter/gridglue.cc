@@ -355,7 +355,7 @@ void GridGlue<P0, P1>::build()
 
       /* merging */
       // merge local & remote patches
-      // domain_is_ and target__is are updated automatically
+      // domain_is_ and target_is_ are updated automatically
       if (remotePatch1entities.size() > 0 && patch0entities.size() > 0)
         mergePatches(patch0coords, patch0entities, patch0types, myrank,
                      remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
