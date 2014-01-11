@@ -20,8 +20,7 @@ void testIntersection(const IntersectionIt & rIIt)
   const int dim = Intersection::mydim;
 
   // Dimension of world coordinates
-  // not needed atm
-  // const int coorddim = Intersection::coorddim;
+  const int coorddim = Intersection::coorddim;
 
   // Create a set of test points
   const Dune::QuadratureRule<double, dim>& quad = Dune::QuadratureRules<double, dim>::rule(rIIt->type(), 3);
@@ -63,10 +62,13 @@ void testIntersection(const IntersectionIt & rIIt)
     //assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
 
     // Test the normal vector methods.  At least test whether they don't crash
-    rIIt->outerNormal(quadPos);
-    rIIt->unitOuterNormal(quadPos);
-    rIIt->integrationOuterNormal(quadPos);
-    rIIt->centerUnitOuterNormal();
+    if (coorddim - dim == 1) // only test for codim 1
+    {
+      rIIt->outerNormal(quadPos);
+      rIIt->unitOuterNormal(quadPos);
+      rIIt->integrationOuterNormal(quadPos);
+      rIIt->centerUnitOuterNormal();
+    }
   }
 }
 
