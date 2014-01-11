@@ -33,7 +33,7 @@ LDADD       += $(UG_LIBS)
 # define the programs
 callmergertwicetest_SOURCES = callmergertwicetest.cc
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
-nonoverlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -DCALL_MERGER_TWICE
+nonoverlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) # -DCALL_MERGER_TWICE
 if MPI
 nonoverlappingcouplingtest_mpi_SOURCES = nonoverlappingcouplingtest.cc
 nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -DWRITE_TO_VTK
