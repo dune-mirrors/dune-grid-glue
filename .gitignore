@@ -16,4 +16,6 @@ semantic.cache
 stamp-h1
 ltmain.sh
 am
+compile
+test-driver
 .libs
