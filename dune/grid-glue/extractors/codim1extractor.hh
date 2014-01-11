@@ -57,9 +57,10 @@ public:
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
-
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
-  typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
+
+  static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
+  typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
 
   typedef typename GV::IntersectionIterator IsIter;
 
@@ -130,8 +131,9 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
     // information can be stored at first
     std::deque<SubEntityInfo> temp_faces;
 
-    // iterate over all codim 0 elements on the grid
-    for (ElementIter elit = this->gv_.template begin<0>(); elit != this->gv_.template end<0>(); ++elit)
+    // iterate over interior codim 0 elements on the grid
+    for (ElementIter elit = this->gv_.template begin<0, PType>();
+         elit != this->gv_.template end<0, PType>(); ++elit)
     {
       ElementPtr eptr(elit);
       Dune::GeometryType gt = elit->type();
