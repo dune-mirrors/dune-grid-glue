@@ -181,7 +181,7 @@ void GridGlue<P0, P1>::build()
 
   // clear the contents from the current intersections array
   {
-    std::vector<IntersectionData> dummy;
+    std::vector<IntersectionData> dummy(1); // we need size 1, as we always store data for the end-intersection
     intersections_.swap(dummy);
   }
 
@@ -421,7 +421,7 @@ void GridGlue<P0, P1>::mergePatches(
   const bool patch1local = (myrank == patch1rank);
 
   // remember the number of previous remote intersections
-  const unsigned int offset = intersections_.size();
+  const unsigned int offset = intersections_.size()-1;
 
   std::cout << myrank
             << " GridGlue::mergePatches : rank " << patch0rank << " / " << patch1rank << std::endl;
