@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <dune/common/typetraits.hh>
 
+#include <dune/geometry/multilineargeometry.hh>
+
 template<int dim, typename T>
 void OverlappingMerge<dim, T>::
 computeIntersection(const Dune::GeometryType& grid1ElementType,
@@ -22,7 +24,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
 
   // Make generic geometries representing the grid1- and grid2 element.
   // this eases computation of local coordinates.
-  typedef Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> > Geometry;
+  typedef Dune::CachedMultiLinearGeometry<T,dim,dim> Geometry;
 
   Geometry grid1Geometry(grid1ElementType, grid1ElementCorners);
   Geometry grid2Geometry(grid2ElementType, grid2ElementCorners);
