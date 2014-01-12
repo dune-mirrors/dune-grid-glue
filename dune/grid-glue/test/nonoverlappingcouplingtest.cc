@@ -134,8 +134,6 @@ void testMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
 }
 
@@ -197,8 +195,6 @@ void testNonMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
 }
 
@@ -329,8 +325,6 @@ void testParallelCubeGrids()
 
   testCoupling(glue);
   testCommunication(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
 }
 
@@ -343,6 +337,11 @@ void eh( MPI_Comm *comm, int *err, ... )
 
 int main(int argc, char *argv[]) try
 {
+
+#if !HAVE_PSURFACE
+  exit 77; // Test is skipped, if PSurface is not present
+#endif
+
   Dune::MPIHelper::instance(argc, argv);
 
 #if HAVE_MPI
