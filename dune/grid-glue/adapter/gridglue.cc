@@ -230,8 +230,8 @@ void GridGlue<P0, P1>::build()
   if (commsize > 1)
   {
     // setup parallel indexset
-    domain_is_.beginResize();
-    target_is_.beginResize();
+    patch0_is_.beginResize();
+    patch1_is_.beginResize();
   }
 #endif // HAVE_MPI
 
@@ -355,7 +355,7 @@ void GridGlue<P0, P1>::build()
 
       /* merging */
       // merge local & remote patches
-      // domain_is_ and target_is_ are updated automatically
+      // patch0_is_ and patch1_is_ are updated automatically
       if (remotePatch1entities.size() > 0 && patch0entities.size() > 0)
         mergePatches(patch0coords, patch0entities, patch0types, myrank,
                      remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
@@ -372,12 +372,12 @@ void GridGlue<P0, P1>::build()
   if (commsize > 1)
   {
     // finalize ParallelIndexSet & RemoteIndices
-    domain_is_.endResize();
-    target_is_.endResize();
+    patch0_is_.endResize();
+    patch1_is_.endResize();
 
     // setup remote index information
     remoteIndices_.setIncludeSelf(false);
-    remoteIndices_.setIndexSets(domain_is_, target_is_, mpicomm_) ;
+    remoteIndices_.setIndexSets(patch0_is_, patch1_is_, mpicomm_) ;
     remoteIndices_.rebuild<true>();
   }
 #endif
@@ -456,8 +456,8 @@ void GridGlue<P0, P1>::mergePatches(
   {
     // update remote index sets
 #if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,2,1)
-    assert(Dune::RESIZE == domain_is_.state());
-    assert(Dune::RESIZE == target_is_.state());
+    assert(Dune::RESIZE == patch0_is_.state());
+    assert(Dune::RESIZE == patch1_is_.state());
 #endif
     for (unsigned int i = 0; i < merger_->nSimplices(); i++)
     {
@@ -470,12 +470,12 @@ void GridGlue<P0, P1>::mergePatches(
       if (it.grid0local_)
       {
         Dune::PartitionType ptype = patch0_.element(it.grid0index_)->partitionType();
-        domain_is_.add (gid, LocalIndex(offset+i, ptype) );
+        patch0_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
       if (it.grid1local_)
       {
         Dune::PartitionType ptype = patch1_.element(it.grid1index_)->partitionType();
-        target_is_.add (gid, LocalIndex(offset+i, ptype) );
+        patch1_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
     }
   }

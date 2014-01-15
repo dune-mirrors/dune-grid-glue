@@ -270,10 +270,10 @@ private:
   MPI_Comm mpicomm_;
 
   /// @brief parallel indexSet for the intersections with a local domain entity
-  PIndexSet domain_is_;
+  PIndexSet patch0_is_;
 
   /// @brief parallel indexSet for the intersections with a local target entity
-  PIndexSet target_is_;
+  PIndexSet patch1_is_;
 
   /// @brief keeps information about which process has which intersection
   Dune::RemoteIndices<PIndexSet> remoteIndices_;
