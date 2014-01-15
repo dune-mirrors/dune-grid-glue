@@ -25,15 +25,31 @@ namespace Dune {
     typedef std::pair<int, int> RankPair;
     struct GlobalId : public std::pair<RankPair, unsigned int>
     {
+      /** default constructor, required for dune-common RemoteIndices
+          \internal
+       */
       GlobalId() {
         this->first.first = 0;
         this->first.second = 0;
         this->second = 0;
       }
+      /** constructor from int, required for dune-common RemoteIndices
+          \internal
+       */
       GlobalId(int i) {
         this->first.first = i;
         this->first.second = i;
         this->second = 0;
+      }
+      /** constructor
+          \param i rank of processor 1
+          \param j rank of processor 2
+          \param n local intersection index
+      */
+      GlobalId(int i, int j, unsigned int n) {
+        this->first.first = std::min(i,j);
+        this->first.second = std::max(i,j);
+        this->second = n;
       }
     };
 

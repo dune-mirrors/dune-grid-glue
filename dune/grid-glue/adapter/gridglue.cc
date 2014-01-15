@@ -463,10 +463,7 @@ void GridGlue<P0, P1>::mergePatches(
     {
 #warning only handle the newest intersections / merger info
       const IntersectionData & it = intersections_[i];
-      GlobalId gid;
-      gid.first.first = patch0rank;
-      gid.first.second = patch1rank;
-      gid.second = offset+i;
+      GlobalId gid(patch0rank, patch1rank, i);
       if (it.grid0local_)
       {
         Dune::PartitionType ptype = patch0_.element(it.grid0index_)->partitionType();
