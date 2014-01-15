@@ -53,6 +53,14 @@ namespace Dune {
       }
     };
 
+    inline std::ostream& operator<<(std::ostream& os, const GlobalId & id)
+    {
+      os << "("
+         << id.first.first << "," << id.first.second << ","
+         << id.second << ")";
+      return os;
+    }
+
     /**
        \brief describes the features of a data handle for
        communication in parallel runs using the GridGlue::communicate methods.
