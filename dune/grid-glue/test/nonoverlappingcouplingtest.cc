@@ -324,7 +324,7 @@ void testParallelCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-  // testCommunication(glue);
+  testCommunication(glue);
 #endif
 }
 
@@ -349,7 +349,7 @@ int main(int argc, char *argv[]) try
 
   Dune::MPIHelper::instance(argc, argv);
 
-#if 0 // HAVE_MPI
+#if HAVE_MPI
   MPI_Errhandler errhandler;
   MPI_Comm_create_errhandler(eh, &errhandler);
   MPI_Comm_set_errhandler(MPI_COMM_WORLD, errhandler);
@@ -372,7 +372,7 @@ int main(int argc, char *argv[]) try
   std::cout << "============================================================\n";
   testParallelCubeGrids<2,Seq,Par>();
   std::cout << "============================================================\n";
-#endif // HAVE_MPI
+#endif
   testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
