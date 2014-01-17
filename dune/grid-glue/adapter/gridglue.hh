@@ -418,6 +418,7 @@ public:
       typedef Dune::EnumItem <Dune::PartitionType, Dune::OverlapEntity>  OverlapFlags;
       typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::GhostEntity>  AllFlags;
       Dune::Interface interface;
+      assert(remoteIndices_.isSynced());
       switch (iftype)
       {
       case Dune::InteriorBorder_InteriorBorder_Interface :
