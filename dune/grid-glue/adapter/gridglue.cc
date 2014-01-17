@@ -252,17 +252,28 @@ void GridGlue<P0, P1>::build()
   int mpi_result;
   MPI_Status mpi_status;
 
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+  std::cout << myrank << " Comm Size" << commsize << std::endl;
+#endif
+
   if (commsize > 1)
   {
     // get patch sizes
     PatchSizes patchSizes (patch0coords, patch0entities, patch0types,
                            patch1coords, patch1entities, patch1types);
 
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+    std::cout << myrank << " Start Communication" << std::endl;
+#endif
+
     // communicate max patch size
     PatchSizes maxPatchSizes;
     mpi_result = MPI_Allreduce(&patchSizes, &maxPatchSizes,
                                6, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
     CheckMPIStatus(mpi_result, 0);
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+    std::cout << myrank << " maxPatchSizes " << "done" << std::endl;
+#endif
 
     /**
        \todo Use vector<struct> for message buffer and MultiVector to copy these
@@ -315,40 +326,56 @@ void GridGlue<P0, P1>::build()
         CheckMPIStatus(mpi_result, mpi_status);
       }
 
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patchSizes " <<  "done" << std::endl;
+#endif
+
       /* send remote patch to right neighbor and receive from left neighbor */
 
       // patch0coords
-      // std::cout << myrank << " patch0coords" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch0coords" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch0coords, tmpPatchCoords, patchSizes.patch0coords,
         rightrank, leftrank, mpicomm_);
 
       // patch0entities
-      // std::cout << myrank << " patch0entities" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch0entities" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch0entities, tmpPatchEntities, patchSizes.patch0entities,
         rightrank, leftrank, mpicomm_);
 
       // patch0types
-      // std::cout << myrank << " patch0types" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch0types" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch0types, tmpPatchTypes, patchSizes.patch0types,
         rightrank, leftrank, mpicomm_);
 
       // patch1coords
-      // std::cout << myrank << " patch1coords" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch1coords" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch1coords, tmpPatchCoords, patchSizes.patch1coords,
         rightrank, leftrank, mpicomm_);
 
       // patch1entities
-      // std::cout << myrank << " patch1entities" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch1entities" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch1entities, tmpPatchEntities, patchSizes.patch1entities,
         rightrank, leftrank, mpicomm_);
 
       // patch1types
-      // std::cout << myrank << " patch1types" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch1types" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch1types, tmpPatchTypes, patchSizes.patch1types,
         rightrank, leftrank, mpicomm_);
@@ -376,9 +403,22 @@ void GridGlue<P0, P1>::build()
     patch1_is_.endResize();
 
     // setup remote index information
-    remoteIndices_.setIncludeSelf(false);
+    remoteIndices_.setIncludeSelf(true);
+#warning add list of neighbors ...
     remoteIndices_.setIndexSets(patch0_is_, patch1_is_, mpicomm_) ;
-    remoteIndices_.rebuild<true>();
+    remoteIndices_.rebuild<true/* all indices are public */>();
+
+    // DEBUG Print all remote indices
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+    for (auto it = remoteIndices_.begin(); it != remoteIndices_.end(); it++)
+    {
+      std::cout << myrank << "\tri-list\t" << it->first << std::endl;
+      for (auto xit = it->second.first->begin(); xit != it->second.first->end(); ++xit)
+        std::cout << myrank << "\tri-list 1 \t" << it->first << "\t" << *xit << std::endl;
+      for (auto xit = it->second.second->begin(); xit != it->second.second->end(); ++xit)
+        std::cout << myrank << "\tri-list 2 \t" << it->first << "\t" << *xit << std::endl;
+    }
+#endif
   }
 #endif
 
