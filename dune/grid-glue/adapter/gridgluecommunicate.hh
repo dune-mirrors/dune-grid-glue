@@ -322,15 +322,6 @@ namespace Dune {
       typedef typename Type::GridGlue::Intersection Intersection;
       Intersection ris(commInfo.gridglue->getIntersection(i));
 
-      if (commInfo.dir == Dune::ForwardCommunication)
-      {
-        if (!ris.self()) return 0;
-      }
-      else
-      {
-        if (!ris.neighbor()) return 0;
-      }
-
       // ask data handle for size
       return commInfo.data->size(ris);
     }
