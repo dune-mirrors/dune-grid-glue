@@ -27,8 +27,7 @@ public:
   template<class RISType>
   size_t size (RISType& i) const
   {
-    assert(hasSender(i));
-    if (forward)
+    if (i.self())
       return i.geometry().corners();
     else
       return i.geometryOutside().corners();
@@ -38,10 +37,10 @@ public:
   void gather (MessageBuffer& buff, const EntityType& e, const RISType & i) const
   {
     assert(hasSender(i));
-    if (forward)
+    if (forward) // we send from the inside domain
       for (size_t n=0; n<size(i); n++)
         buff.write(i.geometry().corner(n));
-    else
+    else         // we send from the outside domain
       for (size_t n=0; n<size(i); n++)
         buff.write(i.geometryOutside().corner(n));
   }
@@ -55,10 +54,10 @@ public:
     {
       Dune::FieldVector<ctype,dimw> x;
       buff.read(x);
-      if (forward)
-        assert( (x - i.geometry().corner(n)).two_norm() < 1e-6 );
-      else
+      if (forward) // we receive at the outside domain
         assert( (x - i.geometryOutside().corner(n)).two_norm() < 1e-6 );
+      else         // we receive at the inside domain
+        assert( (x - i.geometry().corner(n)).two_norm() < 1e-6 );
     }
   }
 };
