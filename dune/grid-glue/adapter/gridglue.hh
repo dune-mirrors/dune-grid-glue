@@ -136,11 +136,16 @@ public:
 
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
 
-  /** \brief Grid view of grid 0 (the domain grid) */
+  /** \brief GridView of grid 0 (aka domain grid) */
   typedef typename P0::GridView Grid0View;
 
-  /** \brief Grid 0 (domain grid) type */
-  typedef typename Grid0View::Grid DomainGridType;
+  /** \brief Grid 0 type */
+  typedef typename Grid0View::Grid Grid0;
+
+  /** \brief Grid 0 type
+      \deprecated please use typede Grid0
+   */
+  typedef typename Grid0 DomainGridType DUNE_DEPRECATED;
 
   /** \brief Coupling patch of grid 0 */
   typedef P0 Grid0Patch;
@@ -148,18 +153,23 @@ public:
   /** \brief Dimension of the grid 0 extractor */
   enum {
     /** \brief Dimension of the grid 0 extractor */
-    domdim = Grid0Patch::dim,
     grid0dim = Grid0Patch::dim,
+    domdim = Grid0Patch::dim,
     /** \brief World dimension of the grid 0 extractor */
-    domdimworld = Grid0Patch::dimworld,
-    grid0dimworld = Grid0Patch::dimworld
+    grid0dimworld = Grid0Patch::dimworld,
+    domdimworld = Grid0Patch::dimworld
   };
 
-  /** \brief Grid view of grid 1 (the target grid) */
+  /** \brief GridView of grid 1 (aka target grid) */
   typedef typename P1::GridView Grid1View;
 
-  /** \brief Gird 1 (target grid) type */
-  typedef typename Grid1View::Grid TargetGridType;
+  /** \brief Grid 1 type */
+  typedef typename Grid1View::Grid Grid1;
+
+  /** \brief Grid 1 type
+      \deprecated please use typede Grid0
+   */
+  typedef typename Grid1 TargetGridType DUNE_DEPRECATED;
 
   /** \brief Coupling patch of grid 1 */
   typedef P1 Grid1Patch;
@@ -187,42 +197,82 @@ public:
   };
 
   /** \brief The type used for coordinates
-      \todo maybe use traits class to decide which has more precision (DomainGridType::ctype or TargetGridType::ctype) and then take this one
+      \todo maybe use traits class to decide which has more precision (Grid0View::ctype or Grid1View::ctype) and then take this one
    */
-  typedef typename DomainGridType::ctype ctype;
+  typedef typename Grid0View::ctype ctype;
 
   /** \brief The type used for coordinate vectors */
   typedef Dune::FieldVector<ctype, dimworld>                   Coords;
 
-  /** \brief The type of the domain grid elements */
-  typedef typename Grid0View::Traits::template Codim<0>::Entity DomainElement;
+  /** \brief The type of the Grid0 elements */
+  typedef typename Grid0View::Traits::template Codim<0>::Entity Grid0Element;
 
-  /** \brief Pointer type to domain grid elements */
-  typedef typename Grid0View::Traits::template Codim<0>::EntityPointer DomainElementPtr;
+  /** \brief The type of the Grid0 elements
+      \deprecated please use Grid0Element
+   */
+  typedef typename Grid0View::Traits::template Codim<0>::Entity DomainElement DUNE_DEPRECATED;
 
-  /** \brief The type of the domain grid vertices */
-  typedef typename Grid0View::Traits::template Codim<DomainGridType::dimension>::Entity DomainVertex;
+  /** \brief Pointer type to Grid0 elements */
+  typedef typename Grid0View::Traits::template Codim<0>::EntityPointer Grid0ElementPtr;
 
-  /** \brief Pointer type to domain grid vertices */
-  typedef typename Grid0View::Traits::template Codim<DomainGridType::dimension>::EntityPointer DomainVertexPtr;
+  /** \brief Pointer type to Grid0 elements
+      \deprecated please use Grid0ElementPtr
+   */
+  typedef typename Grid0View::Traits::template Codim<0>::EntityPointer DomainElementPtr DUNE_DEPRECATED;
 
-  /** \brief The type of the target grid elements */
-  typedef typename Grid1View::Traits::template Codim<0>::Entity TargetElement;
+  /** \brief The type of the Grid0 vertices */
+  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::Entity Grid0Vertex;
 
-  /** \brief Pointer type to target grid elements */
-  typedef typename Grid1View::Traits::template Codim<0>::EntityPointer TargetElementPtr;
+  /** \brief The type of the Grid0 vertices
+      \deprecated please use Grid0ElementPtr
+   */
+  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::Entity DomainVertex DUNE_DEPRECATED;
 
-  /** \brief The type of the target grid vertices */
-  typedef typename Grid1View::Traits::template Codim<TargetGridType::dimension>::Entity TargetVertex;
+  /** \brief Pointer type to Grid0 vertices */
+  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::EntityPointer Grid0VertexPtr;
 
-  /** \brief Pointer type to target grid vertices */
-  typedef typename Grid1View::Traits::template Codim<TargetGridType::dimension>::EntityPointer TargetVertexPtr;
+  /** \brief Pointer type to Grid0 vertices
+      \deprecated please use Grid0VertexPtr
+   */
+  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::EntityPointer DomainVertexPtr DUNE_DEPRECATED;
+
+  /** \brief The type of the Grid1 elements */
+  typedef typename Grid1View::Traits::template Codim<0>::Entity Grid1Element;
+
+  /** \brief The type of the Grid1 elements
+      \deprecated please use Grid1Element
+   */
+  typedef typename Grid1View::Traits::template Codim<0>::Entity TargetElement DUNE_DEPRECATED;
+
+  /** \brief Pointer type to Grid1 elements */
+  typedef typename Grid1View::Traits::template Codim<0>::EntityPointer Grid1ElementPtr;
+
+  /** \brief Pointer type to Grid1 elements
+      \deprecated please use Grid1ElementPtr
+   */
+  typedef typename Grid1View::Traits::template Codim<0>::EntityPointer TargetElementPtr DUNE_DEPRECATED;
+
+  /** \brief The type of the Grid1 vertices */
+  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::Entity Grid1Vertex;
+
+  /** \brief The type of the Grid1 vertices
+      \deprecated please use Grid1Vertex
+   */
+  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::Entity TargetVertex DUNE_DEPRECATED;
+
+  /** \brief Pointer type to Grid1 vertices */
+  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::EntityPointer Grid1VertexPtr;
+
+  /** \brief Pointer type to Grid1 vertices
+      \deprecated please use Grid1VertexPtr
+   */
+  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::EntityPointer TargetVertexPtr DUNE_DEPRECATED;
 
   /** \brief Instance of a Merger */
-  typedef ::Merger<typename DomainGridType::ctype,
-      DomainGridType::dimension - Grid0Patch::codim,
-      TargetGridType::dimension - Grid1Patch::codim,
-      dimworld>                         Merger;
+  typedef ::Merger<ctype,
+      Grid0::dimension - Grid0Patch::codim,
+      Grid1::dimension - Grid1Patch::codim,
+      dimworld> Merger;
 
   /** \brief Type of remote intersection objects */
   typedef Dune::GridGlue::Intersection<P0,P1,0,1> Intersection;
@@ -253,10 +303,10 @@ private:
 
   /*   M E M B E R   V A R I A B L E S   */
 
-  /// @brief the domain surface extractor
+  /// @brief the patch0 description
   const Grid0Patch&       patch0_;
 
-  /// @brief the target surface extractor
+  /// @brief the patch1 description
   const Grid1Patch&       patch1_;
 
   /// @brief the surface merging utility
@@ -269,10 +319,10 @@ private:
   /// @brief MPI_Comm which this GridGlue is working on
   MPI_Comm mpicomm_;
 
-  /// @brief parallel indexSet for the intersections with a local domain entity
+  /// @brief parallel indexSet for the intersections with a local grid0 entity
   PIndexSet patch0_is_;
 
-  /// @brief parallel indexSet for the intersections with a local target entity
+  /// @brief parallel indexSet for the intersections with a local grid1 entity
   PIndexSet patch1_is_;
 
   /// @brief keeps information about which process has which intersection
@@ -328,12 +378,12 @@ public:
    *
    * Initializes components but does not "glue" the surfaces. The surfaces
    * are extracted from the grids here though.
-   * @param gv1 the domain grid view
-   * @param gv2 the target grid view
+   * @param gp0 the grid0 patch
+   * @param gp1 the grid1 patch
    * @param matcher The matcher object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
-  GridGlue(const Grid0Patch& gp1, const Grid1Patch& gp2, Merger* merger);
+  GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger);
   /*   G E T T E R S   */
 
   /** \todo Please doc me! */
@@ -361,7 +411,8 @@ public:
   /*   I N T E R S E C T I O N S   A N D   I N T E R S E C T I O N   I T E R A T O R S   */
 
   /**
-   * @brief gets an iterator over all remote intersections in the merged grid between domain and target
+   * @brief gets an iterator over all remote intersections in the merged grid between grid0 and grid1
+   * @tparam I select inside grid I=0 or I=1
    *
    * @return the iterator
    */
@@ -373,7 +424,8 @@ public:
 
 
   /**
-   * @brief gets the (general) end-iterator for iterations over domain codim 0 entities' faces
+   * @brief gets the (general) end-iterator for grid glue iterations
+   * @tparam I select inside grid I=0 or I=1
    *
    * @return the iterator
    */
@@ -390,7 +442,7 @@ public:
 
      \param data GridGlueDataHandle
      \param iftype Interface for which the Communication should take place
-     \param dir Communication direction (Forward means Domain to Target, Backward is the reverse)
+     \param dir Communication direction (Forward means grid0 to grid1, Backward is the reverse)
 
      \todo seq->seq use commSeq
      \todo seq->par use commSeq
@@ -493,7 +545,7 @@ public:
         if (dir == Dune::ForwardCommunication)
         {
           /*
-             dir : Forward (domain -> target)
+             dir : Forward (grid0 -> grid1)
            */
           if (rit->self())
           {
@@ -503,7 +555,7 @@ public:
         else         // (dir == Dune::BackwardCommunication)
         {
           /*
-             dir : Backward (target -> domain)
+             dir : Backward (grid1 -> grid0)
            */
           if (rit->neighbor())
           {
@@ -526,7 +578,7 @@ public:
         if (dir == Dune::ForwardCommunication)
         {
           /*
-             dir : Forward (domain -> target)
+             dir : Forward (grid0 -> grid1)
            */
           if (rit->neighbor())
             data.scatter(scatterbuffer, rit->outside(), *rit,
@@ -535,7 +587,7 @@ public:
         else         // (dir == Dune::BackwardCommunication)
         {
           /*
-             dir : Backward (target -> domain)
+             dir : Backward (grid1 -> grid0)
            */
           if (rit->self())
             data.scatter(scatterbuffer, rit->inside(), *rit,

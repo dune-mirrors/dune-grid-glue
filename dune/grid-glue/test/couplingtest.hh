@@ -29,37 +29,36 @@ void testIntersection(const IntersectionIt & rIIt)
 
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
-    // Test whether local domain position is consistent with global domain position
-    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> localDomainPos =
+    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> localGrid0Pos =
       rIIt->inside()->geometry().global(rIIt->geometryInInside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> globalDomainPos =
+    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> globalGrid0Pos =
       rIIt->geometry().global(quadPos);
 
-    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> localTargetPos =
+    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> localGrid1Pos =
       rIIt->outside()->geometry().global(rIIt->geometryInOutside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> globalTargetPos =
+    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> globalGrid1Pos =
       rIIt->geometryOutside().global(quadPos);
 
-    // Test whether local domain position is consistent with global domain position
-    assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
+    // Test whether local grid0 position is consistent with global grid0 position
+    assert( (localGrid0Pos-globalGrid0Pos).two_norm() < 1e-6 );
 
-    // Test whether local target position is consistent with global target position
-    assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
+    // Test whether local grid1 position is consistent with global grid1 position
+    assert( (localGrid1Pos-globalGrid1Pos).two_norm() < 1e-6 );
 
     // Here we assume that the two interfaces match geometrically:
-    if ( (globalDomainPos-globalTargetPos).two_norm() >= 1e-4 )
+    if ( (globalGrid0Pos-globalGrid1Pos).two_norm() >= 1e-4 )
     {
-      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-4 ) failed\n";
-      std::cerr << "localDomainPos  = " << localDomainPos << "\n";
-      std::cerr << "globalDomainPos = " << globalDomainPos << "\n";
-      std::cerr << "localTargetPos  = " << localTargetPos << "\n";
-      std::cerr << "globalTargetPos = " << globalTargetPos << "\n";
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalGrid0Pos-globalGrid1Pos).two_norm() < 1e-4 ) failed\n";
+      std::cerr << "localGrid0Pos  = " << localGrid0Pos << "\n";
+      std::cerr << "globalGrid0Pos = " << globalGrid0Pos << "\n";
+      std::cerr << "localGrid1Pos  = " << localGrid1Pos << "\n";
+      std::cerr << "globalGrid1Pos = " << globalGrid1Pos << "\n";
     }
-    //assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
+    //assert( (globalGrid0Pos-globalGrid1Pos).two_norm() < 1e-6 );
 
     // Test the normal vector methods.  At least test whether they don't crash
     if (coorddim - dim == 1) // only test for codim 1

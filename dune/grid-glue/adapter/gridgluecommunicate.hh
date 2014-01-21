@@ -206,13 +206,13 @@ namespace Dune {
           commInfo.mbuffer.clear();
           if (dir == Dune::ForwardCommunication)
           {
-            // read from domain
+            // read from grid0
             if(ris.self())
               commInfo.data->gather(commInfo.mbuffer, ris.inside(), ris);
           }
           else   // (dir == Dune::BackwardCommunication)
           {
-            // read from target
+            // read from grid1
             if(ris.neighbor())
               commInfo.data->gather(commInfo.mbuffer, ris.outside(), ris);
           }
@@ -245,13 +245,13 @@ namespace Dune {
         {
           if (dir == Dune::ForwardCommunication)
           {
-            // write to target
+            // write to grid1
             if(ris.neighbor())
               commInfo.data->scatter(commInfo.mbuffer, ris.outside(), ris, commInfo.currentsize);
           }
           else   // (dir == Dune::BackwardCommunication)
           {
-            // write to domain
+            // write to grid0
             if(ris.self())
               commInfo.data->scatter(commInfo.mbuffer, ris.inside(), ris, commInfo.currentsize);
           }

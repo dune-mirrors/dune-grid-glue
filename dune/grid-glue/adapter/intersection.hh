@@ -111,7 +111,7 @@ namespace Dune {
       // (happens when the parent GridGlue initializes the "end"-Intersection)
       assert (0 <= mergeindex || mergeindex < glue.index__sz);
 
-      // initialize the local and the global geometry of the domain
+      // initialize the local and the global geometry of grid0
       {
         // compute the coordinates of the subface's corners in codim 0 entity local coordinates
         const int elementdim = GridGlue::Grid0View::template Codim<0>::Geometry::mydimension;
@@ -132,13 +132,13 @@ namespace Dune {
         {
           grid0index_ = glue.merger_->template parent<0>(mergeindex);
           typename GridGlue::Grid0Patch::Geometry
-          domainWorldGeometry = glue.template patch<0>().geometry(grid0index_);
+          grid0WorldGeometry = glue.template patch<0>().geometry(grid0index_);
           typename GridGlue::Grid0Patch::LocalGeometry
-          domainLocalGeometry = glue.template patch<0>().geometryLocal(grid0index_);
+          grid0LocalGeometry = glue.template patch<0>().geometryLocal(grid0index_);
 
           for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
-            corners_element_local[i] = domainLocalGeometry.global(corners_subEntity_local[i]);
-            corners_global[i]        = domainWorldGeometry.global(corners_subEntity_local[i]);
+            corners_element_local[i] = grid0LocalGeometry.global(corners_subEntity_local[i]);
+            corners_global[i]        = grid0WorldGeometry.global(corners_subEntity_local[i]);
           }
 
           // set the corners of the geometries
@@ -152,7 +152,7 @@ namespace Dune {
         }
       }
 
-      // do the same for the local and the global geometry of the target
+      // do the same for the local and the global geometry of grid1
       {
         // compute the coordinates of the subface's corners in codim 0 entity local coordinates
         const int elementdim = GridGlue::Grid1View::template Codim<0>::Geometry::mydimension;
@@ -173,13 +173,13 @@ namespace Dune {
         {
           grid1index_ = glue.merger_->template parent<1>(mergeindex);
           typename GridGlue::Grid1Patch::Geometry
-          targetWorldGeometry = glue.template patch<1>().geometry(grid1index_);
+          grid1WorldGeometry = glue.template patch<1>().geometry(grid1index_);
           typename GridGlue::Grid1Patch::LocalGeometry
-          targetLocalGeometry = glue.template patch<1>().geometryLocal(grid1index_);
+          grid1LocalGeometry = glue.template patch<1>().geometryLocal(grid1index_);
 
           for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
-            corners_element_local[i] = targetLocalGeometry.global(corners_subEntity_local[i]);
-            corners_global[i]        = targetWorldGeometry.global(corners_subEntity_local[i]);
+            corners_element_local[i] = grid1LocalGeometry.global(corners_subEntity_local[i]);
+            corners_global[i]        = grid1WorldGeometry.global(corners_subEntity_local[i]);
           }
 
           // set the corners of the geometries
@@ -348,7 +348,7 @@ namespace Dune {
         coorddim = Traits::coorddim,
         /** \brief Dimension of the intersection */
         mydim = Traits::mydim,
-        /** \brief document the inside & outside domain */
+        /** \brief document the inside & outside patch */
         //! @{
         insidePatch = Traits::insidePatch,
         outsidePatch = Traits::outsidePatch

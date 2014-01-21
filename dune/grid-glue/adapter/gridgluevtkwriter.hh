@@ -236,14 +236,14 @@ class GridGlueVtkWriter
     for (size_t i=0; i<faces.size(); i++)
       faceCornerCount += faces[i].size();
 
-    int domainSimplexCorners = dim-Glue::Grid0Patch::codim+1;
+    int grid0SimplexCorners = dim-Glue::Grid0Patch::codim+1;
     fmerged << ((dim==3) ? "CELLS " : "POLYGONS ")
-            << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
+            << overlaps << " " << (grid0SimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {
-      fmerged << domainSimplexCorners;
-      for (int j=0; j<domainSimplexCorners; j++)
-        fmerged << " " << domainSimplexCorners*i+j;
+      fmerged << grid0SimplexCorners;
+      for (int j=0; j<grid0SimplexCorners; j++)
+        fmerged << " " << grid0SimplexCorners*i+j;
       fmerged << std::endl;
     }
 
@@ -285,17 +285,17 @@ public:
 
     // Write extracted grid and remote intersection on the grid0-side
     writeExtractedPart<Glue,0>(glue,
-                               filenameTrunk + "-domain.vtk");
+                               filenameTrunk + "-grid0.vtk");
 
     writeIntersections<Glue,0>(glue,
-                               filenameTrunk + "-intersections-domain.vtk");
+                               filenameTrunk + "-intersections-grid0.vtk");
 
     // Write extracted grid and remote intersection on the grid1-side
     writeExtractedPart<Glue,1>(glue,
-                               filenameTrunk + "-target.vtk");
+                               filenameTrunk + "-grid1.vtk");
 
     writeIntersections<Glue,1>(glue,
-                               filenameTrunk + "-intersections-target.vtk");
+                               filenameTrunk + "-intersections-grid1.vtk");
 
   }
 

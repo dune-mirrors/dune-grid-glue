@@ -126,7 +126,7 @@ struct setupGrid<2> {
 };
 
 /*
-   we split the domain and target side into different subdomains and
+   we split the grid0 and grid1 side into different subdomains and
    call the merger multiple times. This should ensure that the
    resulting merged grid is the same.
 
