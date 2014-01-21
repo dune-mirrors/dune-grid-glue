@@ -271,9 +271,6 @@ void test1d2dCoupling(double slice=0.0)
 
   GlueType glue(domEx, tarEx, &merger);
 
-  // MixedDimTrafo<dim-1,dim,double> trafo(slice); // transform dim-1 to dim
-  // glue.setTargetTransformation(&trafo);
-
   glue.build();
 
   std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
@@ -283,7 +280,7 @@ void test1d2dCoupling(double slice=0.0)
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue);   // , (CoordinateTransformation<dim,dim,double>*)nullptr, &trafo);
+  testCoupling(glue);
 #else
     #warning Not testing, because psurface backend is not available.
 #endif
