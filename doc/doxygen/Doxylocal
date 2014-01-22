@@ -1,5 +1,4 @@
-INPUT                  += @srcdir@/mainpage \
-                         @srcdir@/modules \
+INPUT                  += @top_srcdir@/dune/grid-glue/gridglue.hh \
                          @top_srcdir@/dune/grid-glue/adapter \
                          @top_srcdir@/dune/grid-glue/common \
                          @top_srcdir@/dune/grid-glue/extractors \
@@ -9,7 +8,6 @@ EXAMPLE_PATH           +=
 EXAMPLE_PATTERNS       += *.dgf
 IMAGE_PATH             +=
 PREDEFINED             += DOXYGEN \
-                         ENABLE_ALUGRID \
                          HAVE_MPI:=1 \
-                         HAVE_ALBERTA:=1 \
+                         HAVE_PSURFACE:=1 \
                          "DUNE_DEPRECATED:=/** \deprecated */"
