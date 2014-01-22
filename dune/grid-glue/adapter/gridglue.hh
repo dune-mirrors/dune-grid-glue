@@ -444,11 +444,7 @@ public:
      \param iftype Interface for which the Communication should take place
      \param dir Communication direction (Forward means grid0 to grid1, Backward is the reverse)
 
-     \todo seq->seq use commSeq
-     \todo seq->par use commSeq
-     \todo par->seq use commPar
-     \todo par->par use commPar
-
+     \todo fix mixed communication: seq->par use commSeq, par->seq use commPar
      \todo add directed version communicate<FROM,TO, DH,DT>(data,iftype,dir)
    */
   template<class DataHandleImp, class DataTypeImp>
