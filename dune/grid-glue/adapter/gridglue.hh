@@ -1,19 +1,9 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-/*
- *  Filename:    GridGlue.hh
- *  Version:     1.0
- *  Created on:  Feb 2, 2009
- *  Author:      Gerrit Buse, Christian Engwer
- *  ---------------------------------
- *  Project:     dune-grid-glue
- *  Description: Central component of the module implementing the coupling of two grids.
- *  subversion:  $Id$
- *
- */
 /**
  * @file
  * @brief Central component of the module implementing the coupling of two grids.
+ * @author Gerrit Buse, Christian Engwer
  */
 
 
