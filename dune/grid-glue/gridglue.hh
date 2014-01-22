@@ -62,9 +62,6 @@ class Intersection;
 template<typename P0, typename P1, int inside, int outside>
 class IntersectionIterator;
 
-template<typename P0, typename P1, int inside, int outside>
-class CellIntersectionIterator;
-
 template<typename P0, typename P1, int P>
 struct GridGlueView;
 
@@ -72,7 +69,6 @@ template<typename P0, typename P1>
 struct GridGlueView<P0,P1,0>
 {
   typedef P0 Patch;
-  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,0,1> CellIntersectionIterator;
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> IntersectionIterator;
   typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
   static const P0& patch(const GridGlue<P0,P1>& g)
@@ -85,7 +81,6 @@ template<typename P0, typename P1>
 struct GridGlueView<P0,P1,1>
 {
   typedef P1 Patch;
-  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,1,0> CellIntersectionIterator;
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,1,0> IntersectionIterator;
   typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
   static const P1& patch(const GridGlue<P0,P1>& g)
@@ -269,8 +264,6 @@ public:
   friend class Dune::GridGlue::Intersection<P0,P1,1,0>;
   friend class Dune::GridGlue::IntersectionIterator<P0,P1,0,1>;
   friend class Dune::GridGlue::IntersectionIterator<P0,P1,1,0>;
-  friend class Dune::GridGlue::CellIntersectionIterator<P0,P1,0,1>;
-  friend class Dune::GridGlue::CellIntersectionIterator<P0,P1,1,0>;
   friend struct GridGlueView<P0,P1,0>;
   friend struct GridGlueView<P0,P1,1>;
 
@@ -280,11 +273,6 @@ public:
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> Grid0IntersectionIterator;
   /** \todo Please doc me! */
   typedef Dune::GridGlue::IntersectionIterator<P0,P1,1,0> Grid1IntersectionIterator;
-
-  /** \todo Please doc me! */
-  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,0,1> Grid0CellIntersectionIterator;
-  /** \todo Please doc me! */
-  typedef Dune::GridGlue::CellIntersectionIterator<P0,P1,1,0> Grid1CellIntersectionIterator;
 
 private:
 
