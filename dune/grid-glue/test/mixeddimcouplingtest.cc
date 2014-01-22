@@ -251,8 +251,6 @@ void test1d2dCoupling(double slice=0.0)
   // typedef typename GridType1d::LevelGridView TarGridView;
   typedef typename LiftedGridType::LevelGridView TarGridView;
 
-  // typedef DefaultExtractionTraits<DomGridView,1, par> DomTraits;
-  // typedef DefaultExtractionTraits<TarGridView,0, par> TarTraits;
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
@@ -323,8 +321,6 @@ void test2d1dCoupling(double slice=0.0)
   typedef typename LiftedGridType::LevelGridView DomGridView;
   typedef typename GridType2d::LevelGridView TarGridView;
 
-  // typedef DefaultExtractionTraits<DomGridView,0, par> DomTraits;
-  // typedef DefaultExtractionTraits<TarGridView,1, par> TarTraits;
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
