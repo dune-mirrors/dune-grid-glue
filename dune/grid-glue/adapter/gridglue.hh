@@ -466,6 +466,7 @@ public:
        * P A R A L L E L   V E R S I O N
        */
       // setup communication interfaces
+      Dune::dinfo << "GridGlue: parallel communication" << std::endl;
       typedef Dune::EnumItem <Dune::PartitionType, Dune::InteriorEntity> InteriorFlags;
       typedef Dune::EnumItem <Dune::PartitionType, Dune::OverlapEntity>  OverlapFlags;
       typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::GhostEntity>  AllFlags;
@@ -522,6 +523,7 @@ public:
       /*
        * S E Q U E N T I A L   V E R S I O N
        */
+      Dune::dinfo << "GridGlue: sequential fallback communication" << std::endl;
 
       // get comm buffer size
       int ssz = indexSet_size() * 10;       // times data per intersection

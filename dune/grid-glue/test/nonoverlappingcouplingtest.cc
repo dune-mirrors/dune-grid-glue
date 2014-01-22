@@ -350,6 +350,7 @@ int main(int argc, char *argv[]) try
 #endif
 
   Dune::MPIHelper::instance(argc, argv);
+  Dune::dinfo.attach(std::cout);
 
 #if HAVE_MPI
   MPI_Errhandler errhandler;
@@ -363,7 +364,6 @@ int main(int argc, char *argv[]) try
 
   // Test two unit squares
   std::cout << "==== 2D hybrid =============================================\n";
-#if ! HAVE_MPI
   testMatchingCubeGrids<2>();
   std::cout << "============================================================\n";
   testNonMatchingCubeGrids<2>();
@@ -374,7 +374,6 @@ int main(int argc, char *argv[]) try
   std::cout << "============================================================\n";
   testParallelCubeGrids<2,Seq,Par>();
   std::cout << "============================================================\n";
-#endif
   testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
