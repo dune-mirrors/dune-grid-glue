@@ -1,33 +1,23 @@
-- Von DefaultExtractionTraits bitte die Templateparameter dokumentieren!
-./ Die IteratorFacades verwenden
-- Test: Gibt numberInDomainEntity() bei Codim0-Kopplungen immer Null zurück?
+- Test: does indexInInside for codim0-coupling always return 0?
 - orientedSubface für Subentities beliebiger Kodimension verallgemeinern
 - GridGlueVTKWriter doesn't seem to work
 - GridGlueVTKWriter crashes when started on an empty GridGlue
-- use hybrid geometries instead of simplex geometries (this will allow
-  construction of different geometry types)
-- make index_ of NULL_INTERSECTION intersections_.size()
-  * avoids if's in iterator-increment
-  * allows to use size_t for _index
 
 For the upcoming paper:
-- remove target/domain naming
+./ remove target/domain naming
 ./ remove extractortraits
 - rename Extractor to Patch
 ./ Extractor/Patch should get the predicate
 ./ remove remoteintersection(iterator)impl CRTP magic
 ./ remove coordinate transformation, use GeometryGrid instead
-- implement _new_ parallel merging (see article.tex)
-- implement 3d cgal backend
+(./) implement _new_ parallel merging (see article.tex)
 - Put everything into the namespace Dune::GridGlue
-- move gridglue/adapter/gridglue.hh to gridglue/gridglue.hh
+./ move gridglue/adapter/gridglue.hh to gridglue/gridglue.hh
 - add GridGlue::DirectionFunction and remove dependencies on
   PSurface::DirectionFunction in the interface
-- RemoteIntersections sollen sich wie echte Intersections verhalten
-  (Inside/Outside)
-- beim Iterieren gibt man an, von wo nach wo man koppeln will (0->1 / 1->0)
-  davon hängt die Definition von Inside/Outside ab
-- Beim Kommunizieren sollte auch die Kopplungsrichtung berücksichtigt werden
+- add directed version communicate<FROM,TO, DH,DT>(data,iftype,dir)
+   ... or similar
+- implement IndexSet
 
 Interface changes:
 - Merger gets (CoordType, dimG1, dimG2, dimworld, mergedDim) template parameters
