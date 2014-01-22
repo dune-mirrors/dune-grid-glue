@@ -10,7 +10,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 
 template <class IntersectionIt>
 void testIntersection(const IntersectionIt & rIIt)

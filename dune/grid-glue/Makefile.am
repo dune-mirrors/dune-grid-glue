@@ -1,4 +1,6 @@
 gluedir = $(includedir)/glue
+glue_HEADERS = \
+	gridglue.hh
 
 SUBDIRS = adapter merging common extractors test
 EXTRA_DIST = CMakeLists.txt

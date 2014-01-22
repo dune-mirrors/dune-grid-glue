@@ -21,7 +21,7 @@
 #include <dune/grid-glue/extractors/codim1extractor.hh>
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
 #include <dune/grid-glue/test/communicationtest.hh>

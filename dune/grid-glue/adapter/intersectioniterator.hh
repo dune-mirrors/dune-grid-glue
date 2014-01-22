@@ -10,7 +10,7 @@
 #ifndef DUNE_GRIDGLUE_REMOTEINTERSECTIONITERATOR_HH
 #define DUNE_GRIDGLUE_REMOTEINTERSECTIONITERATOR_HH
 
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 
 namespace Dune {
   namespace GridGlue {

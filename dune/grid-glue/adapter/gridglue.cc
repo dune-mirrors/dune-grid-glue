@@ -5,7 +5,7 @@
 #include "intersection.hh"
 #include <vector>
 #include <iterator>
-#include "gridglue.hh"
+#include "../gridglue.hh"
 
 #include "../common/multivector.hh"
 

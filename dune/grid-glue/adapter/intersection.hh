@@ -16,7 +16,7 @@
 #else
 #include <dune/grid-glue/common/simplexgeometry.hh>
 #endif
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 
 #define ONLY_SIMPLEX_INTERSECTIONS
 

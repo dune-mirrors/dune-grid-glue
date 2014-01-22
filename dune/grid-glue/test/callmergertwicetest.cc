@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 
 template <class ctype, int dimworld>

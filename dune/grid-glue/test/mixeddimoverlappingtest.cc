@@ -11,7 +11,7 @@
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim0extractor.hh>
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/merging/mixeddimoverlappingmerge.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
