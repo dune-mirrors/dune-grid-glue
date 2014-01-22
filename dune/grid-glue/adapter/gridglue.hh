@@ -145,7 +145,7 @@ public:
   /** \brief Grid 0 type
       \deprecated please use typede Grid0
    */
-  typedef typename Grid0 DomainGridType DUNE_DEPRECATED;
+  typedef Grid0 DomainGridType DUNE_DEPRECATED;
 
   /** \brief Coupling patch of grid 0 */
   typedef P0 Grid0Patch;
@@ -169,7 +169,7 @@ public:
   /** \brief Grid 1 type
       \deprecated please use typede Grid0
    */
-  typedef typename Grid1 TargetGridType DUNE_DEPRECATED;
+  typedef Grid1 TargetGridType DUNE_DEPRECATED;
 
   /** \brief Coupling patch of grid 1 */
   typedef P1 Grid1Patch;
