@@ -134,6 +134,7 @@ void testMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
+  testCommunication(glue);
 #endif
 }
 
@@ -195,6 +196,7 @@ void testNonMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
+  testCommunication(glue);
 #endif
 }
 
