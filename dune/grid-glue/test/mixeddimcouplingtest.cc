@@ -15,7 +15,6 @@
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/extractors/codim1extractor.hh>
-// #include <dune/grid-glue/extractors/parallelextractor.hh>
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/gridglue.hh>
 
