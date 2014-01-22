@@ -214,7 +214,7 @@ namespace Dune {
           {
             // read from grid1
             if(ris.neighbor())
-              commInfo.data->gather(commInfo.mbuffer, ris.outside(), ris);
+              commInfo.data->gather(commInfo.mbuffer, ris.outside(), ris.flip());
           }
         }
 
@@ -247,7 +247,7 @@ namespace Dune {
           {
             // write to grid1
             if(ris.neighbor())
-              commInfo.data->scatter(commInfo.mbuffer, ris.outside(), ris, commInfo.currentsize);
+              commInfo.data->scatter(commInfo.mbuffer, ris.outside(), ris.flip(), commInfo.currentsize);
           }
           else   // (dir == Dune::BackwardCommunication)
           {

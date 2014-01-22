@@ -559,7 +559,7 @@ public:
            */
           if (rit->neighbor())
           {
-            data.gather(gatherbuffer, rit->outside(), *rit);
+            data.gather(gatherbuffer, rit->outside(), rit->flip());
           }
         }
       }
@@ -581,7 +581,7 @@ public:
              dir : Forward (grid0 -> grid1)
            */
           if (rit->neighbor())
-            data.scatter(scatterbuffer, rit->outside(), *rit,
+            data.scatter(scatterbuffer, rit->outside(), rit->flip(),
                          data.size(*rit));
         }
         else         // (dir == Dune::BackwardCommunication)
