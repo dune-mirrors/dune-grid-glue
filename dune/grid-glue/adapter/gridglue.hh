@@ -5,4 +5,6 @@
 
 #include <dune/grid-glue/gridglue.hh>
 
+using Dune::GridGlue::GridGlue;
+
 #endif

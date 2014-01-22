@@ -40,33 +40,30 @@
   #include <dune/istl/interface.hh>
 #endif
 
+namespace Dune {
+namespace GridGlue {
+
 /** Document the relation between the old grid names and the new numbering */
 enum GridOrdering {
   Domain = 0,
   Target = 1
 };
 
-// forward declaration
+// forward declarations
 template<typename P0, typename P1>
 class GridGlue;
 
-namespace Dune {
-  namespace GridGlue {
+template<typename P0, typename P1>
+class IntersectionData;
 
-    template<typename P0, typename P1>
-    class IntersectionData;
+template<typename P0, typename P1, int inside, int outside>
+class Intersection;
 
-    template<typename P0, typename P1, int inside, int outside>
-    class Intersection;
+template<typename P0, typename P1, int inside, int outside>
+class IntersectionIterator;
 
-    template<typename P0, typename P1, int inside, int outside>
-    class IntersectionIterator;
-
-    template<typename P0, typename P1, int inside, int outside>
-    class CellIntersectionIterator;
-
-  }
-}
+template<typename P0, typename P1, int inside, int outside>
+class CellIntersectionIterator;
 
 template<typename P0, typename P1, int P>
 struct GridGlueView;
@@ -114,7 +111,7 @@ private:
   /*   P R I V A T E   T Y P E S   */
 
   /** \brief GlobalId type of an intersection (used for communication) */
-  typedef Dune::GridGlue::GlobalId GlobalId;
+  typedef ::Dune::GridGlue::GlobalId GlobalId;
 
   /** \brief LocalIndex type of an intersection (used for communication) */
   typedef Dune::ParallelLocalIndex <Dune::PartitionType> LocalIndex;
@@ -370,7 +367,7 @@ public:
    * are extracted from the grids here though.
    * @param gp0 the grid0 patch
    * @param gp1 the grid1 patch
-   * @param matcher The matcher object that is used to compute the merged grid. This class has
+   * @param merger The merger object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
   GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger);
@@ -613,6 +610,9 @@ public:
   }
 
 };
+
+} // end namespace GridGlue
+} // end namespace Dune
 
 #include "adapter/gridglue.cc"
 

@@ -154,6 +154,9 @@ namespace {
 }
 #endif // HAVE_MPI
 
+namespace Dune {
+namespace GridGlue {
+
 template<typename P0, typename P1>
 GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger) :
   patch0_(gp0), patch1_(gp1), merger_(merger)
@@ -556,3 +559,6 @@ void GridGlue<P0, P1>::extractGrid (const Extractor & extractor,
   extractor.getGeometryTypes(geometryTypes);
 
 }
+
+} // end namespace GridGlue
+} // end namespace Dune
