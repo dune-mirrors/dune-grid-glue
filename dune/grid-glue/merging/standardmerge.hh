@@ -163,21 +163,12 @@ public:
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
 
   /**
-   * @brief builds the merged grid
-   *
-   * Note that the indices are used consequently throughout the whole class interface just like they are
-   * introduced here.
-   *
-   * @param grid1_coords the grid1 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param grid1_simplices array with all grid1 simplices represented as corner indices into @c grid1_coords;
-   * the simplices are just written to this array one after another
-   * @param grid2_coords the grid2 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param grid2_simplices just like with the grid1_simplices and grid1_coords
+   * @copydoc Merger<T,grid1Dim,grid2Dim,dimworld>::build
    */
-  void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
+  void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1_coords,
              const std::vector<unsigned int>& grid1_elements,
              const std::vector<Dune::GeometryType>& grid1_element_types,
-             const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
+             const std::vector<Dune::FieldVector<T,dimworld> >& grid2_coords,
              const std::vector<unsigned int>& grid2_elements,
              const std::vector<Dune::GeometryType>& grid2_element_types
              );

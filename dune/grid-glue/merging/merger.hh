@@ -106,10 +106,11 @@ public:
    * introduced here.
    *
    * @param grid1_coords the grid1 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param grid1_simplices array with all grid1 simplices represented as corner indices into @c grid1_coords;
-   * the simplices are just written to this array one after another
+   * @param grid1_elements array with all grid1 elements represented as corner indices into @c grid1_coords
+   * @param grid1_element_types array with the GeometryType of the elements listed grid1_elements
    * @param grid2_coords the grid2 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param grid2_simplices just like with the grid1_simplices and grid1_coords
+   * @param grid2_elements just like with the grid1_elements and grid1_coords
+   * @param grid2_element_types array with the GeometryType of the elements listed grid2_elements
    */
   virtual void build(const std::vector<Dune::FieldVector<ctype,dimworld> >& grid1_coords,
                      const std::vector<unsigned int>& grid1_elements,

@@ -317,7 +317,8 @@ public:
    * The matching of the geometries offers the possibility to specify a function for
    * the exact evaluation of domain surface normals. If no such function is specified
    * (default) normals are interpolated.
-   * @param value the new function (or NULL to unset the function)
+   * @param domainDirections the new function for the outer normal of grid0 (domain) (or NULL to unset the function)
+   * @param targetDirections the new function for the outer normal of grid1 (domain) (or NULL to unset the function)
    */
   inline
   void setSurfaceDirections(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
@@ -326,24 +327,14 @@ public:
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
 
   /**
-   * @brief builds the merged grid
-   *
-   * Note that the indices are used consequently throughout the whole class interface just like they are
-   * introduced here.
-   *
-   * @param domain_coords the domain vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param domain_elements array with all domain simplices represented as corner indices into @c domain_coords;
-   * the simplices are just written to this array one after another
-   * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param target_elements just like with the domain_elements and domain_coords
+   * @copydoc Merger<T,dim,dim,dimworld>::build
    */
-  void build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
-             const std::vector<unsigned int>& domain_elements,
-             const std::vector<Dune::GeometryType>& domain_element_types,
-             const std::vector<Dune::FieldVector<T,dimworld> >& target_coords,
-             const std::vector<unsigned int>& target_elements,
-             const std::vector<Dune::GeometryType>& target_element_types
-             );
+  void build(const std::vector<Dune::FieldVector<ctype,dimworld> >& grid1_coords,
+             const std::vector<unsigned int>& grid1_elements,
+             const std::vector<Dune::GeometryType>& grid1_element_types,
+             const std::vector<Dune::FieldVector<ctype,dimworld> >& grid2_coords,
+             const std::vector<unsigned int>& grid2_elements,
+             const std::vector<Dune::GeometryType>& grid2_element_types);
 
 
   /*   Q U E S T I O N I N G   T H E   M E R G E D   G R I D   */
