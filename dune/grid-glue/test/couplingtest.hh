@@ -47,10 +47,22 @@ bool testIntersection(const IntersectionIt & rIIt)
       rIIt->geometryOutside().global(quadPos);
 
     // Test whether local grid0 position is consistent with global grid0 position
-    assert( (localGrid0Pos-globalGrid0Pos).two_norm() < 1e-6 );
+    if ( (localGrid0Pos-globalGrid0Pos).two_norm() >= 1e-6 )
+    {
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid0Pos-globalGrid0Pos).two_norm() < 1e-6 ) failed\n";
+      std::cerr << "localGrid0Pos  = " << localGrid0Pos << "\n";
+      std::cerr << "globalGrid0Pos = " << globalGrid0Pos << "\n";
+      success = false;
+    }
 
     // Test whether local grid1 position is consistent with global grid1 position
-    assert( (localGrid1Pos-globalGrid1Pos).two_norm() < 1e-6 );
+    if ( (localGrid1Pos-globalGrid1Pos).two_norm() >= 1e-6 )
+    {
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid1Pos-globalGrid1Pos).two_norm() < 1e-6 ) failed\n";
+      std::cerr << "localGrid1Pos  = " << localGrid1Pos << "\n";
+      std::cerr << "globalGrid1Pos = " << globalGrid1Pos << "\n";
+      success = false;
+    }
 
     // Here we assume that the two interfaces match geometrically:
     if ( (globalGrid0Pos-globalGrid1Pos).two_norm() >= 1e-4 )
@@ -62,7 +74,6 @@ bool testIntersection(const IntersectionIt & rIIt)
       std::cerr << "globalGrid1Pos = " << globalGrid1Pos << "\n";
       success = false;
     }
-    //assert( (globalGrid0Pos-globalGrid1Pos).two_norm() < 1e-6 );
 
     // Test the normal vector methods.  At least test whether they don't crash
     if (coorddim - dim == 1) // only test for codim 1
