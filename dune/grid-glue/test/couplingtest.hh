@@ -14,8 +14,10 @@
 #include <dune/grid-glue/gridglue.hh>
 
 template <class IntersectionIt>
-void testIntersection(const IntersectionIt & rIIt)
+bool testIntersection(const IntersectionIt & rIIt)
 {
+  bool success = true;
+
   typedef typename IntersectionIt::value_type Intersection;
   // Dimension of the intersection
   const int dim = Intersection::mydim;
@@ -58,6 +60,7 @@ void testIntersection(const IntersectionIt & rIIt)
       std::cerr << "globalGrid0Pos = " << globalGrid0Pos << "\n";
       std::cerr << "localGrid1Pos  = " << localGrid1Pos << "\n";
       std::cerr << "globalGrid1Pos = " << globalGrid1Pos << "\n";
+      success = false;
     }
     //assert( (globalGrid0Pos-globalGrid1Pos).two_norm() < 1e-6 );
 
@@ -70,12 +73,15 @@ void testIntersection(const IntersectionIt & rIIt)
       rIIt->centerUnitOuterNormal();
     }
   }
+
+  return success;
 }
 
 
 template <class GlueType>
 void testCoupling(const GlueType& glue)
 {
+  bool success = true;
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, Dune::MCMGElementLayout > View0Mapper;
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, Dune::MCMGElementLayout > View1Mapper;
   View0Mapper view0mapper(glue.template gridView<0>());
@@ -136,7 +142,7 @@ void testCoupling(const GlueType& glue)
       {
         countInside0[view0mapper.map(*rIIt->inside())]++;
         countOutside1[view1mapper.map(*rIIt->outside())]++;
-        testIntersection(rIIt);
+        success = success && testIntersection(rIIt);
       }
     }
   }
@@ -154,10 +160,13 @@ void testCoupling(const GlueType& glue)
       {
         countInside1[view1mapper.map(*rIIt->inside())]++;
         countOutside0[view0mapper.map(*rIIt->outside())]++;
-        testIntersection(rIIt);
+        success = success && testIntersection(rIIt);
       }
     }
   }
+
+  if (! success)
+    DUNE_THROW(Dune::Exception, "Test failed, seed above for details.");
 }
 
 #endif // GRIDGLUE_COUPLINGTEST_HH
