@@ -308,5 +308,6 @@ int main(int argc, char** argv) try
   testHybridGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
 } catch (Exception e) {
-    std::cout << e << std::endl;
+  std::cout << e << std::endl;
+  return 1;
 }
