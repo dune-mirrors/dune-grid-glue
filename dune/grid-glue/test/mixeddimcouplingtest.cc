@@ -146,8 +146,6 @@ void test1d2dCouplingMatchingDimworld()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
 }
 
@@ -211,8 +209,6 @@ void test2d1dCouplingMatchingDimworld()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
 }
 
@@ -282,8 +278,6 @@ void test1d2dCoupling(double slice=0.0)
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
 }
 
@@ -352,13 +346,15 @@ void test2d1dCoupling(double slice=0.0)
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
 }
 
 int main(int argc, char *argv[]) try
 {
+#if !HAVE_PSURFACE
+  exit 77; // Test is skipped, if PSurface is not present
+#endif
+
   Dune::MPIHelper::instance(argc, argv);
 
   // /////////////////////////////////////////////////////////////

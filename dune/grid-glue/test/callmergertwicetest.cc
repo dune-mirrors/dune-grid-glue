@@ -198,7 +198,7 @@ int main ()
     callMergerTwice(&merger);
   }
 #else
-    #warning Not testing, because psurface backend is not available.
+  exit 77; // Test is skipped, if PSurface is not present
 #endif
 
 }
