@@ -99,7 +99,7 @@ namespace Dune {
       /** @brief pack data from user to message buffer
           @param buff message buffer provided by the grid
           @param e entity for which date should be packed to buffer
-          @param i Intersection for which date should be packed to buffer
+          @param i Intersection for which data should be packed to buffer
        */
       template<class MessageBufferImp, class EntityType, class RISType>
       void gather (MessageBufferImp& buff, const EntityType& e, const RISType & i) const
@@ -112,6 +112,7 @@ namespace Dune {
          n is the number of objects sent by the sender
          @param buff message buffer provided by the grid
          @param e entity for which date should be unpacked from buffer
+         @param i Intersection for which data is received
          @param n number of data written to buffer for this entity before
        */
       template<class MessageBufferImp, class EntityType, class RISType>
