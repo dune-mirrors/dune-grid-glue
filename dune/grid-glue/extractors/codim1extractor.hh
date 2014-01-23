@@ -78,6 +78,7 @@ public:
   /**
    * @brief Constructor
    * @param gv the grid view object to work with
+   * @param descr a predicate to mark entities for extraction (unary functor returning bool)
    */
   Codim1Extractor(const GV& gv, const ExtractorPredicate<GV,1>& descr)
     :  Extractor<GV,1>(gv)
