@@ -7,6 +7,7 @@ adapter_HEADERS = \
     gridgluecommunicate.hh \
 	gridgluevtkwriter.hh\
 	intersection.hh\
+	intersectionindexset.hh\
 	intersectioniterator.hh
 
 EXTRA_DIST = CMakeLists.txt

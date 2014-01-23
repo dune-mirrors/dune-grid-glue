@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/exceptions.hh>
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
@@ -84,6 +85,43 @@ void testCoupling(const GlueType& glue)
   std::vector<unsigned int> countOutside1(view1mapper.size());
   std::vector<unsigned int> countInside1(view1mapper.size(), 0);
   std::vector<unsigned int> countOutside0(view0mapper.size(), 0);
+
+  // ///////////////////////////////////////
+  //   IndexSet
+  // ///////////////////////////////////////
+
+  {
+    size_t count = 0;
+    typename GlueType::Grid0IntersectionIterator rIIt    = glue.template ibegin<0>();
+    typename GlueType::Grid0IntersectionIterator rIEndIt = glue.template iend<0>();
+    for (; rIIt!=rIEndIt; ++rIIt) count ++;
+    typename GlueType::IndexSet is = glue.indexSet();
+    if(is.size() != glue.size())
+      DUNE_THROW(Dune::Exception,
+        "Inconsistent size information: indexSet.size() " << is.size() << " != GridGlue.size() " << glue.size());
+    if(is.size() != count)
+      DUNE_THROW(Dune::Exception,
+        "Inconsistent size information: indexSet.size() " << is.size() << " != iterator count " << count);
+    std::vector<bool> visited(count, false);
+    for (rIIt = glue.template ibegin<0>(); rIIt!=rIEndIt; ++rIIt) {
+      size_t idx = is.index(*rIIt);
+      if(idx >= count)
+        DUNE_THROW(Dune::Exception,
+          "Inconsistent IndexSet: index " << idx << " out of range, size is " << count);
+      if(visited[idx] != false)
+        DUNE_THROW(Dune::Exception,
+          "Inconsistent IndexSet: visited index " << idx << " twice");
+      visited[idx] = true;
+    }
+    // make sure that we have a consecutive zero starting index set
+    for (size_t i = 0; i<count; i++)
+    {
+      if (visited[i] != true)
+        DUNE_THROW(Dune::Exception,
+          "Non-consective IndexSet: " << i << " missing.");
+    }
+  }
+
 
   // ///////////////////////////////////////
   //   MergedGrid centric Grid0->Grid1

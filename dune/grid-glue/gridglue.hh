@@ -14,8 +14,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
 
-#define QUICKHACK_INDEX 1
-
 #include "adapter/gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
 
@@ -62,6 +60,9 @@ class Intersection;
 template<typename P0, typename P1, int inside, int outside>
 class IntersectionIterator;
 
+template<typename P0, typename P1>
+class IntersectionIndexSet;
+
 template<typename P0, typename P1, int P>
 struct GridGlueView;
 
@@ -102,6 +103,17 @@ template<typename P0, typename P1>
 class GridGlue
 {
 private:
+
+  /*   F R I E N D S   */
+
+  friend class IntersectionData<P0,P1>;
+  friend class Intersection<P0,P1,0,1>;
+  friend class Intersection<P0,P1,1,0>;
+  friend class IntersectionIterator<P0,P1,0,1>;
+  friend class IntersectionIterator<P0,P1,1,0>;
+  friend class IntersectionIndexSet<P0,P1>;
+  friend struct GridGlueView<P0,P1,0>;
+  friend struct GridGlueView<P0,P1,1>;
 
   /*   P R I V A T E   T Y P E S   */
 
@@ -259,13 +271,8 @@ public:
   /** \brief Type of remote intersection objects */
   typedef Dune::GridGlue::Intersection<P0,P1,0,1> Intersection;
 
-  friend class Dune::GridGlue::IntersectionData<P0,P1>;
-  friend class Dune::GridGlue::Intersection<P0,P1,0,1>;
-  friend class Dune::GridGlue::Intersection<P0,P1,1,0>;
-  friend class Dune::GridGlue::IntersectionIterator<P0,P1,0,1>;
-  friend class Dune::GridGlue::IntersectionIterator<P0,P1,1,0>;
-  friend struct GridGlueView<P0,P1,0>;
-  friend struct GridGlueView<P0,P1,1>;
+  /** \brief Type of remote intersection indexSet */
+  typedef Dune::GridGlue::IntersectionIndexSet<P0,P1> IndexSet;
 
   /** \brief Type of the iterator that iterates over remove intersections */
 
@@ -497,8 +504,8 @@ public:
       Dune::dinfo << "GridGlue: sequential fallback communication" << std::endl;
 
       // get comm buffer size
-      int ssz = indexSet_size() * 10;       // times data per intersection
-      int rsz = indexSet_size() * 10;
+      int ssz = size() * 10;       // times data per intersection
+      int rsz = size() * 10;
 
       // allocate send/receive buffer
       DataType* sendbuffer = new DataType[ssz];
@@ -574,11 +581,15 @@ public:
     }
   }
 
-#if QUICKHACK_INDEX
   /*
    * @brief return an IndexSet mapping from Intersection to IndexType
    */
+  IndexSet indexSet() const
+  {
+    return IndexSet(this);
+  }
 
+#if QUICKHACK_INDEX
   // indexset size
   size_t indexSet_size() const
   {
@@ -606,5 +617,6 @@ public:
 
 #include "adapter/intersection.hh"
 #include "adapter/intersectioniterator.hh"
+#include "adapter/intersectionindexset.hh"
 
 #endif // GRIDGLUE_HH

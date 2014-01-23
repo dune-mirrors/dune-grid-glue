@@ -23,6 +23,10 @@
 namespace Dune {
   namespace GridGlue {
 
+    // forward declaration
+    template<typename P0, typename P1>
+    class IntersectionIndexSet;
+
     /**
        @brief storage class for Dune::GridGlue::Intersection related data
      */
@@ -532,6 +536,8 @@ namespace Dune {
 #endif
 
     private:
+
+      friend class IntersectionIndexSet<P0,P1>;
 
       /*   M E M B E R   V A R  I A B L E S   */
 
