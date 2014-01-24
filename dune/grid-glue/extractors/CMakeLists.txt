@@ -4,6 +4,5 @@ install(FILES
   codim1extractor.hh
   extractor.hh
   extractorpredicate.hh
-  parallelextractor.hh
   vtksurfacewriter.hh
   DESTINATION include/dune/grid_glue/extractors)
