@@ -3,7 +3,6 @@
 extractorsdir = $(includedir)/dune/glue/extractors
 extractors_HEADERS = codim0extractor.hh codim1extractor.hh extractor.hh \
 	extractorpredicate.hh\
-    parallelextractor.hh \
 	vtksurfacewriter.hh
 
 EXTRA_DIST = CMakeLists.txt
