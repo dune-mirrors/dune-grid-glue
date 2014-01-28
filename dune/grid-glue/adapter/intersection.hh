@@ -34,7 +34,7 @@ namespace Dune {
     class IntersectionData
     {
     public:
-      typedef GridGlue<P0, P1> GridGlue;
+      typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
 
       typedef typename GridGlue::IndexType IndexType;
 
@@ -263,7 +263,7 @@ namespace Dune {
     template<typename P0, typename P1>
     struct IntersectionTraits<P0,P1,0,1>
     {
-      typedef GridGlue<P0, P1> GridGlue;
+      typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
       typedef IntersectionData<P0,P1> IntersectionData;
 
       typedef typename GridGlue::Grid0View InsideGridView;
@@ -289,7 +289,7 @@ namespace Dune {
     template<typename P0, typename P1>
     struct IntersectionTraits<P0,P1,1,0>
     {
-      typedef GridGlue<P0, P1> GridGlue;
+      typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
       typedef IntersectionData<P0,P1> IntersectionData;
 
       typedef typename GridGlue::Grid1View InsideGridView;

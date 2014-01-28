@@ -23,8 +23,8 @@ namespace Dune {
     {
     public:
 
-      typedef GridGlue<P0, P1> GridGlue;
-      typedef Intersection<P0,P1,inside,outside> Intersection;
+      typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
+      typedef ::Dune::GridGlue::Intersection<P0,P1,inside,outside> Intersection;
 
       IntersectionIterator(const GridGlue * glue, unsigned int i)
         : glue_(glue),

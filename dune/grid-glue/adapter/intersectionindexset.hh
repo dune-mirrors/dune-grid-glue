@@ -16,8 +16,8 @@ namespace Dune {
         template<typename P0, typename P1>
         class IntersectionIndexSet
         {
-            friend class GridGlue<P0,P1>;
-            typedef GridGlue<P0,P1> GridGlue;
+            friend class ::Dune::GridGlue::GridGlue<P0,P1>;
+            typedef ::Dune::GridGlue::GridGlue<P0,P1> GridGlue;
 
         public:
 
