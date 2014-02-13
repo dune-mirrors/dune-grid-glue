@@ -119,7 +119,7 @@ void testMatchingCubeGrids()
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
@@ -181,7 +181,7 @@ void testNonMatchingCubeGrids()
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
@@ -311,7 +311,7 @@ void testParallelCubeGrids()
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);

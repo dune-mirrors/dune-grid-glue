@@ -80,7 +80,7 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
   DomExtractor domEx(grid0.leafView(), domdesc);
   TarExtractor tarEx(grid1.leafView(), tardesc);
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   GlueType glue(domEx, tarEx, &merger);
 
@@ -136,7 +136,7 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
   DomExtractor domEx(grid0.leafView(), domdesc);
   TarExtractor tarEx(grid1.leafView(), tardesc);
 
-  ::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
+  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
 
   glue.build();
 
@@ -190,7 +190,7 @@ void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<do
   DomExtractor domEx(grid0->leafView(), domdesc);
   TarExtractor tarEx(grid1->leafView(), tardesc);
 
-  ::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
+  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
 
   glue.build();
 
@@ -236,7 +236,7 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
   DomExtractor domEx(grid0->leafView(), domdesc);
   TarExtractor tarEx(grid1->leafView(), tardesc);
 
-  ::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
+  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
 
   glue.build();
 

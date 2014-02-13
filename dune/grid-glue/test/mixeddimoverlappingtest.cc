@@ -101,7 +101,7 @@ int main(int argc, char** argv)
   DomExtractor domEx(grid0.leafView(), domdesc);
   TarExtractor tarEx(grid1.leafView(), tardesc);
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // The following code is out-commented, because the test functionality
   // doesn't actually work yet.

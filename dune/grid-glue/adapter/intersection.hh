@@ -264,7 +264,7 @@ namespace Dune {
     struct IntersectionTraits<P0,P1,0,1>
     {
       typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
-      typedef IntersectionData<P0,P1> IntersectionData;
+      typedef Dune::GridGlue::IntersectionData<P0,P1> IntersectionData;
 
       typedef typename GridGlue::Grid0View InsideGridView;
       typedef typename GridGlue::Grid1View OutsideGridView;
@@ -290,7 +290,7 @@ namespace Dune {
     struct IntersectionTraits<P0,P1,1,0>
     {
       typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
-      typedef IntersectionData<P0,P1> IntersectionData;
+      typedef Dune::GridGlue::IntersectionData<P0,P1> IntersectionData;
 
       typedef typename GridGlue::Grid1View InsideGridView;
       typedef typename GridGlue::Grid0View OutsideGridView;

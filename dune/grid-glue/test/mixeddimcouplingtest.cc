@@ -129,7 +129,7 @@ void test1d2dCouplingMatchingDimworld()
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
   tarEx.positiveNormalDirection() = (slice == 0.0);
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
 #if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
@@ -192,7 +192,7 @@ void test2d1dCouplingMatchingDimworld()
   domEx.positiveNormalDirection() = (slice == 0.0);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
 #if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
@@ -261,7 +261,7 @@ void test1d2dCoupling(double slice=0.0)
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
   tarEx.positiveNormalDirection() = (slice == 0.0);
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
 #if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
@@ -329,7 +329,7 @@ void test2d1dCoupling(double slice=0.0)
   domEx.positiveNormalDirection() = (slice == 0.0);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
 #if HAVE_PSURFACE
   PSurfaceMerge<dim-1,dim,double> merger;
