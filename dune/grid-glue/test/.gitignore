@@ -2,6 +2,8 @@ Makefile.in
 Makefile
 .deps
 *.o
+*.log
+*.trs
 
 callmergertwicetest
 mixeddimcouplingtest
