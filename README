@@ -71,21 +71,3 @@ for further options.
 
 
 The full build-system is described in the dune-common/doc/buildsystem (SVN version) or under share/doc/dune-common/buildsystem if you installed DUNE!
-
-
-dune-grid-glue prerequisites
-----------------------------
-
-For ContactMappingSurfaceMerge to work the module needs libpsurface.
-Specify the path to this library with the configure flag in an options file (--with-psurface="...")
-
-The module currently works with dune 1.2.
-Since various modules are required and at the time of development some of them were also undergoing changes a working setup
-is described here. If you check out the following revisions of the modules dune-grid-glue should be working.
-dune-common, dune-grid, dune-istl : dune 1.2 release versions are ok
-
-You are free to try more up-to-date revisions but they have not been tested...
-
-Before running make you should execute "runfirst.sh" which will create a "dune" directory with symbolic links.
-It is necessary to have the inlcudes in the project working.
-
