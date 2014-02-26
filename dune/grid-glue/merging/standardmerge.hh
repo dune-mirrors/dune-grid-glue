@@ -564,8 +564,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //   Data structures for the advancing-front algorithm
   ////////////////////////////////////////////////////////////////////////
 
-  std::stack<unsigned int> candidates0;
   std::stack<unsigned int> candidates1;
+  std::stack<unsigned int> candidates2;
 
   std::vector<int> seeds(grid2_element_types.size(), -1);
 
@@ -579,7 +579,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     int seed = bruteForceSearch(j,grid1Coords,grid1_element_types,grid2Coords,grid2_element_types);
 
     if (seed >=0) {
-      candidates1.push(j);        // the candidate and a seed for the candidate
+      candidates2.push(j);        // the candidate and a seed for the candidate
       seeds[j] = seed;
       break;
     }
@@ -590,60 +590,60 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //   Main loop
   // /////////////////////////////////////////////////////////////////////
 
-  std::set<unsigned int> isHandled0;
-  Dune::BitSetVector<1> isHandled1(grid2_element_types.size());
+  std::set<unsigned int> isHandled1;
+  Dune::BitSetVector<1> isHandled2(grid2_element_types.size());
 
-  std::set<unsigned int> isCandidate0;
-  Dune::BitSetVector<1> isCandidate1(grid2_element_types.size());
+  std::set<unsigned int> isCandidate1;
+  Dune::BitSetVector<1> isCandidate2(grid2_element_types.size());
 
-  while (!candidates1.empty()) {
+  while (!candidates2.empty()) {
 
     // Get the next element on the grid2 side
-    unsigned int currentCandidate1 = candidates1.top();
-    unsigned int seed = seeds[currentCandidate1];
+    unsigned int currentCandidate2 = candidates2.top();
+    unsigned int seed = seeds[currentCandidate2];
     assert(seed >= 0);
 
-    candidates1.pop();
-    isHandled1[currentCandidate1] = true;
+    candidates2.pop();
+    isHandled2[currentCandidate2] = true;
 
     // Start advancing front algorithm on the grid1 side from the 'seed' element that
     // we stored along with the current grid2 element
-    candidates0.push(seed);
+    candidates1.push(seed);
 
-    isHandled0.clear();
-    isCandidate0.clear();
+    isHandled1.clear();
+    isCandidate1.clear();
 
-    while (!candidates0.empty()) {
+    while (!candidates1.empty()) {
 
-      unsigned int currentCandidate0 = candidates0.top();
-      candidates0.pop();
-      isHandled0.insert(currentCandidate0);
+      unsigned int currentCandidate1 = candidates1.top();
+      candidates1.pop();
+      isHandled1.insert(currentCandidate1);
 
       // Test whether there is an intersection between currentCandidate0 and currentCandidate1
       std::bitset<(1<<grid1Dim)> neighborIntersects1;
       std::bitset<(1<<grid2Dim)> neighborIntersects2;
-      bool intersectionFound = computeIntersection(currentCandidate0, currentCandidate1,
+      bool intersectionFound = computeIntersection(currentCandidate1, currentCandidate2,
                                                    grid1Coords,grid1_element_types, neighborIntersects1,
                                                    grid2Coords,grid2_element_types, neighborIntersects2);
 
       for (size_t i=0; i<neighborIntersects2.size(); i++)
-        if (neighborIntersects2[i] and elementNeighbors2_[currentCandidate1][i] != -1)
-          seeds[elementNeighbors2_[currentCandidate1][i]] = currentCandidate0;
+        if (neighborIntersects2[i] and elementNeighbors2_[currentCandidate2][i] != -1)
+          seeds[elementNeighbors2_[currentCandidate2][i]] = currentCandidate1;
 
       // add neighbors of candidate0 to the list of elements to be checked
       if (intersectionFound) {
 
-        for (size_t i=0; i<elementNeighbors1_[currentCandidate0].size(); i++) {
+        for (size_t i=0; i<elementNeighbors1_[currentCandidate1].size(); i++) {
 
-          int neighbor = elementNeighbors1_[currentCandidate0][i];
+          int neighbor = elementNeighbors1_[currentCandidate1][i];
 
           if (neighbor == -1)            // do nothing at the grid boundary
             continue;
 
-          if (isHandled0.find(neighbor) == isHandled0.end()
-              && isCandidate0.find(neighbor) == isCandidate0.end()) {
-            candidates0.push(neighbor);
-            isCandidate0.insert(neighbor);
+          if (isHandled1.find(neighbor) == isHandled1.end()
+              && isCandidate1.find(neighbor) == isCandidate1.end()) {
+            candidates1.push(neighbor);
+            isCandidate1.insert(neighbor);
           }
 
         }
@@ -658,15 +658,15 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
     // Do we have an unhandled neighbor with a seed?
     bool seedFound = false;
-    for (size_t i=0; i<elementNeighbors2_[currentCandidate1].size(); i++) {
+    for (size_t i=0; i<elementNeighbors2_[currentCandidate2].size(); i++) {
 
-      int neighbor = elementNeighbors2_[currentCandidate1][i];
+      int neighbor = elementNeighbors2_[currentCandidate2][i];
 
       if (neighbor == -1)         // do nothing at the grid boundary
         continue;
 
-      if (!isHandled1[neighbor][0] && !isCandidate1[neighbor][0] and seeds[neighbor]>0) {
-        candidates1.push(neighbor);
+      if (!isHandled2[neighbor][0] && !isCandidate2[neighbor][0] and seeds[neighbor]>0) {
+        candidates2.push(neighbor);
         seedFound = true;
         break;
       }
@@ -678,22 +678,22 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
     // There is no neighbor with a seed, so we need to be a bit more aggressive...
     // get all neighbors of currentCandidate1, but not currentCandidate1 itself
-    for (size_t i=0; i<elementNeighbors2_[currentCandidate1].size(); i++) {
+    for (size_t i=0; i<elementNeighbors2_[currentCandidate2].size(); i++) {
 
-      int neighbor = elementNeighbors2_[currentCandidate1][i];
+      int neighbor = elementNeighbors2_[currentCandidate2][i];
 
       if (neighbor == -1)         // do nothing at the grid boundary
         continue;
 
-      if (!isHandled1[neighbor][0] && !isCandidate1[neighbor][0]) {
+      if (!isHandled2[neighbor][0] && !isCandidate2[neighbor][0]) {
 
         // Get a seed element for the new grid2 element
         // Look for an element on the grid1 side that intersects the new grid2 element.
         int seed = -1;
 
         // Look among the ones that have been tested during the last iteration.
-        for (typename std::set<unsigned int>::iterator seedIt = isHandled0.begin();
-             seedIt != isHandled0.end(); ++seedIt) {
+        for (typename std::set<unsigned int>::iterator seedIt = isHandled1.begin();
+             seedIt != isHandled1.end(); ++seedIt) {
 
           std::bitset<(1<<grid1Dim)> neighborIntersects1;
           std::bitset<(1<<grid2Dim)> neighborIntersects2;
@@ -719,14 +719,14 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         }
 
         // We have tried all we could: the candidate is 'handled' now
-        isCandidate1[neighbor] = true;
+        isCandidate2[neighbor] = true;
 
         if (seed < 0)
           // still no seed?  Then the new grid2 candidate isn't overlapped by anything
           continue;
 
         // we have a seed now
-        candidates1.push(neighbor);
+        candidates2.push(neighbor);
         seeds[neighbor] = seed;
 
       }
