@@ -540,23 +540,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   ////////////////////////////////////////////////////////////////////////
 
   computeNeighborsPerElement(grid1_element_types, grid2_element_types);
-#if 0
-  std::cout << "   --- grid 1 --- " << std::endl;
-  for (int i=0; i<elementNeighbors1_.size(); i++) {
-    std::cout << "neighbors of element " << i << ":   ";
-    for (int j=0; j<elementNeighbors1_[i].size(); j++)
-      std::cout << elementNeighbors1_[i][j] << "  ";
-    std::cout << std::endl;
-  }
-
-  std::cout << "   --- grid 2 --- " << std::endl;
-  for (int i=0; i<elementNeighbors2_.size(); i++) {
-    std::cout << "neighbors of element " << i << ":   ";
-    for (int j=0; j<elementNeighbors2_[i].size(); j++)
-      std::cout << elementNeighbors2_[i][j] << "  ";
-    std::cout << std::endl;
-  }
-#endif
 
   std::cout << "setup took " << watch.elapsed() << " seconds." << std::endl;
 
