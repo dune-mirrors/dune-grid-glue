@@ -635,8 +635,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
     }
 
-    // We have now found all intersections of elements in the grid1 side with currentCandidate1
-    // Now we add all neighbors of currentCandidate1 that have not been treated yet as new
+    // We have now found all intersections of elements in the grid1 side with currentCandidate2
+    // Now we add all neighbors of currentCandidate2 that have not been treated yet as new
     // candidates.
 
     // Do we have an unhandled neighbor with a seed?
@@ -660,7 +660,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
       continue;
 
     // There is no neighbor with a seed, so we need to be a bit more aggressive...
-    // get all neighbors of currentCandidate1, but not currentCandidate1 itself
+    // get all neighbors of currentCandidate2, but not currentCandidate2 itself
     for (size_t i=0; i<elementNeighbors2_[currentCandidate2].size(); i++) {
 
       int neighbor = elementNeighbors2_[currentCandidate2][i];
