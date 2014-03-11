@@ -165,7 +165,7 @@ public:
   /**
    * @copydoc Merger<T,grid1Dim,grid2Dim,dimworld>::build
    */
-  void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
+  virtual void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
              const std::vector<unsigned int>& grid1_elements,
              const std::vector<Dune::GeometryType>& grid1_element_types,
              const std::vector<Dune::FieldVector<T,dimworld> >& grid2_coords,
