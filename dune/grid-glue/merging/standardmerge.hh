@@ -165,7 +165,7 @@ public:
   /**
    * @copydoc Merger<T,grid1Dim,grid2Dim,dimworld>::build
    */
-  void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1_coords,
+  void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
              const std::vector<unsigned int>& grid1_elements,
              const std::vector<Dune::GeometryType>& grid1_element_types,
              const std::vector<Dune::FieldVector<T,dimworld> >& grid2_coords,
@@ -557,6 +557,12 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //   to start the advancing-front type algorithm with.
   // /////////////////////////////////////////////////////////////////////
 
+  // Set flag if element has been handled
+  Dune::BitSetVector<1> isHandled2(grid2_element_types.size());
+
+  // Set flag if the element has been entered in the queue
+  Dune::BitSetVector<1> isCandidate2(grid2_element_types.size());
+
   for (std::size_t j=0; j<grid2_element_types.size(); j++) {
 
     int seed = bruteForceSearch(j,grid1Coords,grid1_element_types,grid2Coords,grid2_element_types);
@@ -565,7 +571,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
       candidates2.push(j);        // the candidate and a seed for the candidate
       seeds[j] = seed;
       break;
-    }
+    } else // If the brute force search did not find any intersection we can skip this element
+        isHandled2[j] = true;
 
   }
 
@@ -574,10 +581,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   // /////////////////////////////////////////////////////////////////////
 
   std::set<unsigned int> isHandled1;
-  Dune::BitSetVector<1> isHandled2(grid2_element_types.size());
 
   std::set<unsigned int> isCandidate1;
-  Dune::BitSetVector<1> isCandidate2(grid2_element_types.size());
 
   while (!candidates2.empty()) {
 
@@ -648,10 +653,12 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
       if (neighbor == -1)         // do nothing at the grid boundary
         continue;
 
-      if (!isHandled2[neighbor][0] && !isCandidate2[neighbor][0] and seeds[neighbor]>0) {
+      // Add all unhandled intersecting neighbors to the queue
+      if (!isHandled2[neighbor][0] && !isCandidate2[neighbor][0] and seeds[neighbor]>-1) {
+
+        isCandidate2[neighbor][0] = true;
         candidates2.push(neighbor);
         seedFound = true;
-        break;
       }
 
     }
