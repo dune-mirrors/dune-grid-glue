@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <dune/common/classname.hh>
+#include <dune/common/typetraits.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
 
@@ -46,12 +47,12 @@ class GridGlueVtkWriter
 
     fgrid.open(filename.c_str());
 
-    typedef typename Dune::SelectType<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::Type GridView;
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
     typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
     typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
-    typedef typename Dune::SelectType<(side==0),
+    typedef typename Dune::conditional<(side==0),
         typename Glue::Grid0IntersectionIterator,
-        typename Glue::Grid1IntersectionIterator>::Type RemoteIntersectionIterator;
+        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
 
     typedef typename GridView::ctype ctype;
 
@@ -185,12 +186,12 @@ class GridGlueVtkWriter
 
     fmerged.open(filename.c_str());
 
-    typedef typename Dune::SelectType<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::Type GridView;
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
     typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
     typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
-    typedef typename Dune::SelectType<(side==0),
+    typedef typename Dune::conditional<(side==0),
         typename Glue::Grid0IntersectionIterator,
-        typename Glue::Grid1IntersectionIterator>::Type RemoteIntersectionIterator;
+        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
 
     typedef typename GridView::ctype ctype;
 
