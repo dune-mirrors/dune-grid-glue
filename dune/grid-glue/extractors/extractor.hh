@@ -51,15 +51,6 @@ class Extractor
 
 public:
 
-  template<int dim>
-  struct CellLayout
-  {
-    bool contains (Dune::GeometryType gt)
-    {
-      return gt.dim()==dim;
-    }
-  };
-
   enum {dimworld = GV::dimensionworld};
   enum {dim      = GV::dimension};
   enum {codim    = cd};
@@ -84,7 +75,7 @@ public:
 
   typedef std::vector<unsigned int>                                VertexVector;
 
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, CellLayout> CellMapper;
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> CellMapper;
   // typedef typename CellMapper::IndexType                               IndexType;
   typedef int IndexType;
 public:
