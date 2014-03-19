@@ -23,7 +23,6 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
-#include <list>
 
 #include <dune/common/classname.hh>
 #include <dune/geometry/type.hh>
