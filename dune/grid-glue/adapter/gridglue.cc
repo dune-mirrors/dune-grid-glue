@@ -498,10 +498,9 @@ void GridGlue<P0, P1>::mergePatches(
   if (commsize > 1)
   {
     // update remote index sets
-#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,2,1)
     assert(Dune::RESIZE == patch0_is_.state());
     assert(Dune::RESIZE == patch1_is_.state());
-#endif
+
     for (unsigned int i = 0; i < merger_->nSimplices(); i++)
     {
 #warning only handle the newest intersections / merger info

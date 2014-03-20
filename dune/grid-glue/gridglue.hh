@@ -24,19 +24,11 @@
 #include <dune/common/mpitraits.hh>
 #include <dune/common/mpicollectivecommunication.hh>
 #endif
-#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,1,0)
-  #include <dune/common/parallel/indexset.hh>
-  #include <dune/common/parallel/plocalindex.hh>
-  #include <dune/common/parallel/remoteindices.hh>
-  #include <dune/common/parallel/communicator.hh>
-  #include <dune/common/parallel/interface.hh>
-#else
-  #include <dune/istl/indexset.hh>
-  #include <dune/istl/plocalindex.hh>
-  #include <dune/istl/remoteindices.hh>
-  #include <dune/istl/communicator.hh>
-  #include <dune/istl/interface.hh>
-#endif
+#include <dune/common/parallel/indexset.hh>
+#include <dune/common/parallel/plocalindex.hh>
+#include <dune/common/parallel/remoteindices.hh>
+#include <dune/common/parallel/communicator.hh>
+#include <dune/common/parallel/interface.hh>
 
 namespace Dune {
 namespace GridGlue {
