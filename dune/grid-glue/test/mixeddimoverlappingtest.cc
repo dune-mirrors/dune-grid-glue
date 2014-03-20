@@ -98,9 +98,13 @@ int main(int argc, char** argv)
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+  DomExtractor domEx(grid0.leafGridView(), domdesc);
+  TarExtractor tarEx(grid1.leafGridView(), tardesc);
+#else
   DomExtractor domEx(grid0.leafView(), domdesc);
   TarExtractor tarEx(grid1.leafView(), tardesc);
-
+#endif
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // The following code is out-commented, because the test functionality

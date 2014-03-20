@@ -113,7 +113,11 @@ private:
       std::bitset<2> inTriangle("00");
 
       for (size_t i=0; i<2; i++)
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+        inTriangle[i] = ReferenceElements<T,dim2>::general(grid2ElementType).checkInside(grid2Geometry.local(grid1ElementCorners[i]));
+#else
         inTriangle[i] = Dune::GenericReferenceElements<T,dim2>::general(grid2ElementType).checkInside(grid2Geometry.local(grid1ElementCorners[i]));
+#endif
 
       // Everything is easy if both segment endpoints are contained in the 2d element
       if (inTriangle[0] and inTriangle[1])
@@ -203,7 +207,11 @@ private:
       std::bitset<2> inTriangle("00");
 
       for (size_t i=0; i<2; i++)
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+        inTriangle[i] = ReferenceElements<T,dim1>::general(grid1ElementType).checkInside(grid1Geometry.local(grid2ElementCorners[i]));
+#else
         inTriangle[i] = Dune::GenericReferenceElements<T,dim1>::general(grid1ElementType).checkInside(grid1Geometry.local(grid2ElementCorners[i]));
+#endif
 
       // Everything is easy if both segment endpoints are contained in the 2d element
       if (inTriangle[0] and inTriangle[1])
