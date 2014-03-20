@@ -552,7 +552,7 @@ bool MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::pointInTriangle3D(const 
     v1*=t;
     r = Y0 + v0 + v1 - X;
 
-    return (s >= 0 && t >= 0 && (s+t)<= 1 && (r.infinity_norm()/X.infinity_norm()) < eps);
+    return (s >= 0 && t >= 0 && (s+t)<= 1 && r.infinity_norm() < eps);
 
 }
 
@@ -592,7 +592,7 @@ int MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::insertPoint3D( const Dune
 
     if (P.size()>0) {
 
-        while ((k<P.size())&&(((p - P[k]).infinity_norm()/p.infinity_norm())>eps))
+        while ((k<P.size())&&((p - P[k]).infinity_norm()>eps))
             k++ ;
 
         if (k>=P.size())
