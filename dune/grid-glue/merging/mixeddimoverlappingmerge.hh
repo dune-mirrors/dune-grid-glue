@@ -358,6 +358,12 @@ private:
                                                const std::vector<Dune::FieldVector<T,dimworld> >   Y,
                                                std::vector<Dune::FieldVector<T,dimworld> > & P );
 
+  static bool segmentSegmentIntersection3D( const Dune::FieldVector<T,dimworld>    X0,
+                                      const Dune::FieldVector<T,dimworld>    X1,
+                                      const Dune::FieldVector<T,dimworld>    Y0,
+                                      const Dune::FieldVector<T,dimworld>    Y1,
+                                      Dune::FieldVector<T,dimworld>   & p);
+
   static bool triangleLineIntersection3D( const Dune::FieldVector<T,dimworld>    X0,
                                           const Dune::FieldVector<T,dimworld>    X1,
                                           const Dune::FieldVector<T,dimworld>    Y0,
@@ -365,7 +371,9 @@ private:
                                           const Dune::FieldVector<T,dimworld>    Y2,
                                           Dune::FieldVector<T,dimworld>   & p);
 
-  static int insertPoint3D( const Dune::FieldVector<T,dimworld>  p, std::vector<Dune::FieldVector<T,dimworld> > &  P);
+  static bool pointOnSegment3D(const Dune::FieldVector<T,dimworld> X,
+                               const Dune::FieldVector<T,dimworld> Y0,
+                               const Dune::FieldVector<T,dimworld> Y1);
 
   static bool pointInTriangle3D(const Dune::FieldVector<T,dimworld> X,
                                 const Dune::FieldVector<T,dimworld> Y1,
@@ -374,6 +382,8 @@ private:
 
   static bool pointInTetrahedra3D( const Dune::FieldVector<T,dimworld> X,
                                                       const std::vector<Dune::FieldVector<T,dimworld> >   Y);
+
+  static int insertPoint3D( const Dune::FieldVector<T,dimworld>  p, std::vector<Dune::FieldVector<T,dimworld> > &  P);
 
   static void orderPoints3D(const Dune::FieldVector<T,dimworld>     centroid,
                             std::vector<int> &                      id,
@@ -448,6 +458,45 @@ void MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::intersections3D( const s
     l1[0]= 0 ; l1[1]= 1 ; l1[2]= 2 ; l1[3]= 3 ; l1[4]= 0 ; l1[5]= 1 ;   //  enumeration of lines
     l2[0]= 1 ; l2[1]= 2 ; l2[2]= 3 ; l2[3]= 0 ; l2[4]= 2 ; l2[5]= 3 ;
 
+    // find the points of Y in X
+    for ( size_type i=0; i<3; ++i)
+    {
+        if (pointInTetrahedra3D(Y[i],X))
+            k=insertPoint3D(Y[i],P) ;
+    }
+
+    // find the points of X in Y (simplex face aligns with hypersurface grid element
+    for ( size_type i=0; i<4; ++i)
+    {
+        if (pointInTriangle3D(X[i],Y[0],Y[1],Y[2])) {
+            k=insertPoint3D(X[i],P);
+
+            std::cout << "point " << X[i]  << " in triangle " << Y[0] << ", " << Y[1] << ", " << Y[2] << std::endl;
+
+        }
+    }
+
+    // find points of X on edge of Y
+    for ( size_type i=0; i<4; ++i) for ( size_type j=0; j<3; ++j) {
+        if (pointOnSegment3D(X[i],Y[i],Y[(i+1)%3]))
+            k=insertPoint3D(X[i],P);
+    }
+
+
+    // find points of Y on edge of X
+    for ( size_type i=0; i<3; ++i) for ( size_type j=0; j<6; ++j) {
+        if (pointOnSegment3D(Y[i],X[l1[j]],X[l2[j]]))
+            k=insertPoint3D(Y[i],P);
+    }
+
+    // find intersection points on element segments
+    for ( size_type i=0; i<6; ++i) for ( size_type j=0; j<3; ++j)
+    {
+        if (segmentSegmentIntersection3D(X[l1[i]],X[l2[i]],Y[j],Y[(j+1)%3],p))
+             k=insertPoint3D(p,P);
+
+    }
+
     //  find the intersection of edges of X vs triangle Y
 
     for ( size_type i=0; i<6; ++i)
@@ -466,27 +515,47 @@ void MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::intersections3D( const s
             k=insertPoint3D(p,P) ;
     }
 
-    // find the points of Y in X
-    for ( size_type i=0; i<3; ++i)
-    {
-        if (pointInTetrahedra3D(Y[i],X))
-            k=insertPoint3D(Y[i],P) ;
-    }
-
-    // find the points of X in Y (simplex face aligns with hypersurface grid element
-    for ( size_type i=0; i<4; ++i)
-    {
-        if (pointInTriangle3D(X[i],Y[0],Y[1],Y[2])) {
-            k=insertPoint3D(X[i],P);
-
-            std::cout << "point " << X[i]  << " in triangle " << Y[0] << ", " << Y[1] << ", " << Y[2] << std::endl;
-
-        }
-
-    }
-
-
 }
+
+
+// SEGMENTSEGMENTINTERSECTOPM check if segment with nodes X0 and X1 intersects with segment
+// with nodes Y0 and Y1 and compute the intersection point.
+template<int dim1, int dim2, int dimworld, typename T>
+bool MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::segmentSegmentIntersection3D( const Dune::FieldVector<T,dimworld>    X0,
+                                    const Dune::FieldVector<T,dimworld>    X1,
+                                    const Dune::FieldVector<T,dimworld>    Y0,
+                                    const Dune::FieldVector<T,dimworld>    Y1,
+                                    Dune::FieldVector<T,dimworld>   & p) {
+
+    Dune::FieldVector<T,dimworld>  dX, dY, dZ, cXY, cYZ;
+
+    dX = X1-X0;
+    dY = Y1-Y0;
+    dZ = Y0-X0;
+
+    cXY[0] = dX[1]* dY[2] - dX[2]* dY[1];
+    cXY[1] = dX[2]* dY[0] - dX[0]* dY[2];
+    cXY[2] = dX[0]* dY[1] - dX[1]* dY[0];
+
+    if (dZ.dot(cXY)!= 0)
+        return false;
+
+    cYZ[0] = dY[1]* dZ[2] - dY[2]* dZ[1];
+    cYZ[1] = dY[2]* dZ[0] - dY[0]* dZ[2];
+    cYZ[2] = dY[0]* dZ[1] - dY[1]* dZ[0];
+
+    T s = cYZ.dot(cXY) / cXY.two_norm();
+
+    if (s >= 0 && s <= 1) {
+        p = dX;
+        p*= s;
+        p+= X0;
+        return true;
+    }
+
+    return false;
+}
+
 
 //   TRIANGLELINEINTERSECTION intersection of a line and a triangle TriangeLineIntersection(X,Y,P);
 //   computes for a given line X in 3d,  and a triangle Y in 3d, the point p of intersection in the
@@ -524,6 +593,32 @@ bool MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::triangleLineIntersection
     }
     return found ;
 }
+
+// POINTONSEGMENT check if the point X is contained in the line segment with nodes Y0 and Y1
+template<int dim1, int dim2, int dimworld, typename T>
+bool MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::pointOnSegment3D(const Dune::FieldVector<T,dimworld> X,
+                              const Dune::FieldVector<T,dimworld> Y0,
+                              const Dune::FieldVector<T,dimworld> Y1) {
+
+    T eps = 1e-10;
+
+    Dune::FieldVector<T,dimworld> u,v;
+
+    u = Y0 - X;
+    v = Y1 - Y0;
+
+    T d = sqrt((u.dot(u) * v.dot(v) - (u.dot(v)*u.dot(v))) / (v.dot(v)));
+
+    if (fabs(d) < eps) {
+        Dune::FieldVector<T,dimworld> w = X - Y0;
+        T t = w.dot(v) / v.dot(v);
+
+        return (t >=0 && t <= 1);
+    }
+
+    return false;
+}
+
 
 // POINTINTRIANGLE check if the point X is contained in the triangle with nodes (Y0,Y1,Y2).
 template<int dim1, int dim2, int dimworld, typename T>
