@@ -3,8 +3,8 @@
 
 #include <dune/grid-glue/common/projectionhelper.hh>
 
-template<int dim, int dimworld, typename T>
-void ContactMerge<dim, dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
+template<int dimworld, typename T>
+void ContactMerge<dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                                    unsigned int grid1Index,
                                    std::bitset<(1<<dim)>& neighborIntersects1,
@@ -213,8 +213,8 @@ void ContactMerge<dim, dimworld, T>::computeIntersection(const Dune::GeometryTyp
     }
 }
 
-template<int dim, int dimworld, typename T>
-void ContactMerge<dim, dimworld, T>::computeCyclicOrder(const std::vector<Dune::array<LocalCoords,2> >& polytopeCorners,
+template<int dimworld, typename T>
+void ContactMerge<dimworld, T>::computeCyclicOrder(const std::vector<Dune::array<LocalCoords,2> >& polytopeCorners,
                         const LocalCoords& center, std::vector<int>& ordering) const
 {
     ordering.resize(polytopeCorners.size());
@@ -268,8 +268,8 @@ void ContactMerge<dim, dimworld, T>::computeCyclicOrder(const std::vector<Dune::
     }
 }
 
-template<int dim, int dimworld, typename T>
-void ContactMerge<dim, dimworld, T>::setupNodalDirections(const std::vector<WorldCoords>& coords1,
+template<int dimworld, typename T>
+void ContactMerge<dimworld, T>::setupNodalDirections(const std::vector<WorldCoords>& coords1,
                               const std::vector<unsigned int>& elements1,
                               const std::vector<Dune::GeometryType>& elementTypes1,
                               const std::vector<WorldCoords>& coords2,
@@ -295,8 +295,8 @@ void ContactMerge<dim, dimworld, T>::setupNodalDirections(const std::vector<Worl
         computeOuterNormalField(coords2,elements2,elementTypes2, nodalTargetDirections_);
 }
 
-template<int dim, int dimworld, typename T>
-void ContactMerge<dim, dimworld, T>::computeOuterNormalField(const std::vector<WorldCoords>& coords,
+template<int dimworld, typename T>
+void ContactMerge<dimworld, T>::computeOuterNormalField(const std::vector<WorldCoords>& coords,
                                 const std::vector<unsigned int>& elements,
                                 const std::vector<Dune::GeometryType>& elementTypes,
                                 std::vector<WorldCoords>& normals)
@@ -334,8 +334,8 @@ void ContactMerge<dim, dimworld, T>::computeOuterNormalField(const std::vector<W
         normals[i] /= normals[i].two_norm();
 }
 
-template<int dim, int dimworld, typename T>
-void ContactMerge<dim, dimworld, T>::removeDoubles(std::vector<Dune::array<LocalCoords,2> >& polytopeCorners)
+template<int dimworld, typename T>
+void ContactMerge<dimworld, T>::removeDoubles(std::vector<Dune::array<LocalCoords,2> >& polytopeCorners)
 {
 
     size_t counter(1);

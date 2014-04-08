@@ -27,21 +27,19 @@
 #include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 
-/** \brief Merge two grid boundary surfaces that may be a positive distance apart
+/** \brief Merge two codimension-1 surfaces that may be a positive distance apart
 
-  \tparam dim Grid dimension of the coupling grids.  Must be the same for both sides
-  \tparam dimworld  Dimension of the world coordinates.  Must be equal to dim or to dim+1
+  \tparam dimworld  Dimension of the world coordinates.
   \tparam T Type used for coordinates
  */
-template<int dim, int dimworld, typename T = double>
+template<int dimworld, typename T = double>
 class ContactMerge
-: public StandardMerge<T,dim,dim,dimworld>
+: public StandardMerge<T,dimworld-1,dimworld-1,dimworld>
 {
+    enum {dim = dimworld-1};
+
     dune_static_assert( dim==1 || dim==2,
             "ContactMerge yet only handles the cases dim==1 and dim==2!");
-
-    dune_static_assert( dim==dimworld || dim+1==dimworld,
-            "ContactMerge yet only handles the cases dim==dimworld and dim+1==dimworld!");
 
     typedef StandardMerge<T,dim,dim,dimworld> Base;
 public:

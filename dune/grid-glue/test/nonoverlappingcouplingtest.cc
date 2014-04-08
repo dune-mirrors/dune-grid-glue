@@ -145,7 +145,7 @@ void testMatchingCubeGrids()
 #endif
 
   // Testing with ContactMerge
-  typedef ContactMerge<dim-1,dim,double> ContactMergeImpl;
+  typedef ContactMerge<dim,double> ContactMergeImpl;
 
   ContactMergeImpl contactMerger(0.01);
   GlueType contactGlue(domEx, tarEx, &contactMerger);
@@ -230,7 +230,7 @@ void testNonMatchingCubeGrids()
 #endif
 
   // Testing with ContactMerge
-  typedef ContactMerge<dim-1,dim,double> ContactMergeImpl;
+  typedef ContactMerge<dim,double> ContactMergeImpl;
 
   ContactMergeImpl contactMerger(0.01);
   GlueType contactGlue(domEx, tarEx, &contactMerger);
@@ -382,7 +382,7 @@ void testParallelCubeGrids()
   testCommunication(glue);
 #endif
   // Testing with ContactMerge
-  typedef ContactMerge<dim-1,dim,double> ContactMergeImpl;
+  typedef ContactMerge<dim,double> ContactMergeImpl;
 
   ContactMergeImpl contactMerger(0.01);
   GlueType contactGlue(domEx, tarEx, &contactMerger);
