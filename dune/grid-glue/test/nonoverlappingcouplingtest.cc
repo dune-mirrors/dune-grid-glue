@@ -113,8 +113,13 @@ void testMatchingCubeGrids()
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
 
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
@@ -175,8 +180,13 @@ void testNonMatchingCubeGrids()
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
 
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
@@ -302,8 +312,13 @@ void testParallelCubeGrids()
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
