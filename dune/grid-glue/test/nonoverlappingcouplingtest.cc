@@ -21,6 +21,7 @@
 #include <dune/grid-glue/extractors/codim1extractor.hh>
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
+#include <dune/grid-glue/merging/contactmerge.hh>
 #include <dune/grid-glue/gridglue.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
@@ -121,10 +122,11 @@ void testMatchingCubeGrids()
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
 #endif
 
-#if HAVE_PSURFACE
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+#if HAVE_PSURFACE
+  // Testing with PSurfaceMerge
+  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
@@ -141,6 +143,24 @@ void testMatchingCubeGrids()
   testCoupling(glue);
   testCommunication(glue);
 #endif
+
+  // Testing with ContactMerge
+  typedef ContactMerge<dim-1,dim,double> ContactMergeImpl;
+
+  ContactMergeImpl contactMerger(0.01);
+  GlueType contactGlue(domEx, tarEx, &contactMerger);
+
+  contactGlue.build();
+
+  std::cout << "Gluing successful, " << contactGlue.size() << " remote intersections found!" << std::endl;
+  assert(contactGlue.size() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(contactGlue);
+  testCommunication(contactGlue);
 }
 
 
@@ -208,6 +228,24 @@ void testNonMatchingCubeGrids()
   testCoupling(glue);
   testCommunication(glue);
 #endif
+
+  // Testing with ContactMerge
+  typedef ContactMerge<dim-1,dim,double> ContactMergeImpl;
+
+  ContactMergeImpl contactMerger(0.01);
+  GlueType contactGlue(domEx, tarEx, &contactMerger);
+
+  contactGlue.build();
+
+  std::cout << "Gluing successful, " << contactGlue.size() << " remote intersections found!" << std::endl;
+  assert(contactGlue.size() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(contactGlue);
+  testCommunication(contactGlue);
 }
 
 
@@ -323,10 +361,12 @@ void testParallelCubeGrids()
   // ////////////////////////////////////////
   //   Set up coupling at their interface
   // ////////////////////////////////////////
-#if HAVE_PSURFACE
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+#if HAVE_PSURFACE
+  // Test using PSurfaceMerge
+  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
@@ -343,6 +383,23 @@ void testParallelCubeGrids()
   testCoupling(glue);
   testCommunication(glue);
 #endif
+  // Testing with ContactMerge
+  typedef ContactMerge<dim-1,dim,double> ContactMergeImpl;
+
+  ContactMergeImpl contactMerger(0.01);
+  GlueType contactGlue(domEx, tarEx, &contactMerger);
+
+  contactGlue.build();
+
+  std::cout << "Gluing successful, " << contactGlue.size() << " remote intersections found!" << std::endl;
+  assert(contactGlue.size() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(contactGlue);
+  testCommunication(contactGlue);
 }
 
 #if HAVE_MPI
@@ -359,11 +416,6 @@ void eh( MPI_Comm *comm, int *err, ... )
 
 int main(int argc, char *argv[]) try
 {
-
-#if !HAVE_PSURFACE
-  exit 77; // Test is skipped, if PSurface is not present
-#endif
-
   Dune::MPIHelper::instance(argc, argv);
   Dune::dinfo.attach(std::cout);
 
