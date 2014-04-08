@@ -24,7 +24,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/standardmerge.hh>
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 
 /** \brief Merge two grid boundary surfaces that may be a positive distance apart
