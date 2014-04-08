@@ -177,7 +177,7 @@ void testCoupling(const GlueType& glue)
   }
 
   if (! success)
-    DUNE_THROW(Dune::Exception, "Test failed, seed above for details.");
+    DUNE_THROW(Dune::Exception, "Test failed, see above for details.");
 }
 
 #endif // GRIDGLUE_COUPLINGTEST_HH
