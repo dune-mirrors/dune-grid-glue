@@ -258,7 +258,7 @@ public:
 
   typedef SGrid<dim,dim> GridType;
 
-  GridType & generate()
+  std::shared_ptr<GridType> generate()
   {
     FieldVector<int, dim> elements(2);
     FieldVector<double,dim> lower(0);
@@ -271,8 +271,7 @@ public:
       upper[0] += 1;
     }
 
-    GridType * gridp = new GridType(elements, lower, upper);
-    return *gridp;
+    return std::make_shared<GridType>(elements, lower, upper);
   }
 };
 
@@ -287,7 +286,7 @@ public:
   typedef YaspGrid<dim> HostGridType;
   typedef GeometryGrid<HostGridType, ShiftTrafo<dim,double> > GridType;
 
-  GridType & generate()
+  std::shared_ptr<GridType> generate()
   {
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
     Dune::array<int,dim> elements;
@@ -313,8 +312,7 @@ public:
 #endif // HAVE_MPI
       size, elements, periodic, overlap);
     ShiftTrafo<dim,double> * trafop = new ShiftTrafo<dim,double>(shift);
-    GridType * gridp = new GridType(*hostgridp, *trafop);
-    return *gridp;
+    return std::make_shared<GridType>(*hostgridp, *trafop);
   }
 };
 
@@ -334,8 +332,8 @@ void testParallelCubeGrids()
 
   double slice = 1.0;
 
-  GridType0 & cubeGrid0 = domGen.generate();
-  GridType1 & cubeGrid1 = tarGen.generate();
+  std::shared_ptr<GridType0> cubeGrid0 = domGen.generate();
+  std::shared_ptr<GridType1> cubeGrid1 = tarGen.generate();
 
   // ////////////////////////////////////////
   //   Set up Traits
@@ -351,11 +349,11 @@ void testParallelCubeGrids()
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
-  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+  DomExtractor domEx(cubeGrid0->levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1->levelGridView(0), tardesc);
 #else
-  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+  DomExtractor domEx(cubeGrid0->levelView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1->levelView(0), tardesc);
 #endif
 
   // ////////////////////////////////////////
