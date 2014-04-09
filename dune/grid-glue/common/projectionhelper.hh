@@ -1,3 +1,5 @@
+// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=4 sw=2 sts=2:
 #ifndef PROJECTION_HELPER_HH
 #define PROJECTION_HELPER_HH
 
@@ -5,8 +7,12 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 
+/**
+ *  \brief This namespace contains helper functions for the projection of two triangular surface on each other.
+ */
 namespace Projection
 {
+    //! Helper class that provides a static method for the computation of the cross product.
     template <class T,int dim>
         class CrossProductHelper
         {
@@ -35,6 +41,7 @@ namespace Projection
                 }
         };
 
+    //! Compute the cross product of two vectors
     template <class T, int dim>
         static Dune::FieldVector<T,dim> crossProduct(const Dune::FieldVector<T,dim>& a,
                 const Dune::FieldVector<T,dim>& b)
@@ -42,6 +49,7 @@ namespace Projection
             return CrossProductHelper<T,dim>::crossProduct(a,b);
         }
 
+    //! Helper class that provides static methods to compute the projection and inverse projection of a point along some given directions
     template <int dim, int dimworld, class T=double>
         class ProjectionHelper
         {
@@ -49,6 +57,17 @@ namespace Projection
             typedef Dune::FieldVector<T,dim> LocalCoords;
 
             public:
+
+            /**  \brief Compute the inverse projection of a point onto some surface element where the projection is done across directions which are associated to corners of an surface element.
+             *
+             *  \param corners The coordinates of the corners.
+             *  \param directions The directions along which the projection is done.
+             *  \param target The point whose inverse projection is computed.
+             *  \param preImage The pre-image of the target point in local coordinates of the surface element.
+             *  \param overlap The amount of overlap that is allowed, i.e. projection among the opposite direction is valid if the scaling is smaller than overlap.
+             *
+             *  \return Returns true if the computed pre-image is within the convex hull of the corner points.
+             */
             static bool inverseProjection(const std::vector<WorldCoords>& corners,
                     const std::vector<WorldCoords>& directions,
                     const WorldCoords& target, LocalCoords& preImage, const T overlap=1e-1) {
@@ -58,6 +77,16 @@ namespace Projection
                 return false;
             }
 
+            /**  \brief Compute the projection of a point along a given direction into the convex hull of some target points.
+             *
+             *  \param corner The coordinates of the point that is projected.
+             *  \param direction The direction along which an intersection with the target surface element is searched.
+             *  \param targetCorners The corner coordinates of the target surface element.
+             *  \param image The projected corner in local coordinates of the target surface element.
+             *  \param overlap The amount of overlap that is allowed, i.e. projection among the opposite direction is valid if the scaling is smaller than overlap.
+             *
+             *  \return Returns true if the computed image is within the convex hull of the target corner points.
+             */
             static bool projection(const WorldCoords& corner, const WorldCoords& direction,
                     const std::vector<WorldCoords>& targetCorners,
                     LocalCoords& image, const T overlap=1e-1) {
@@ -386,11 +415,18 @@ namespace Projection
 
 
                 //std::cout<<"Direct solution failed, use Newton method\n";
+                // In some cases the direct solution of the cubic equation is unstable, in this case we use
+                // Newton's method to compute at least one solution
 
                 // Some problems have two solutions and the Newton converges to the wrong one
                 return inexactInverseProjection(corners,directions, target, preImage,overlap);
             }
 
+            /**
+             *  \brief Compute the inverse projection using Newton's method.
+             *         This is more stable but as the problem to solve is cubic we only compute one solution
+             *         which might not be the one we are looking for, i.e. the one in the surface element.
+             */
             static bool inexactInverseProjection(const std::vector<WorldCoords>& corners,
                     const std::vector<WorldCoords>& directions,
                     const WorldCoords& target, LocalCoords& preImage, const T overlap=1e-1)
@@ -567,6 +603,17 @@ namespace Projection
 
             }
         };
+    /**
+     *  \brief Compute the projection of a point along a given direction into the convex hull of some target points.
+     *
+     *  \param corner The coordinates of the point that is projected.
+     *  \param direction The direction along which an intersection with the target surface element is searched.
+     *  \param targetCorners The corner coordinates of the target surface element.
+     *  \param image The projected corner in local coordinates of the target surface element.
+     *  \param overlap The amount of overlap that is allowed, i.e. projection among the opposite direction is valid if the scaling is smaller than overlap.
+     *
+     *  \return Returns true if the computed image is within the convex hull of the target corner points.
+     */
 
     template <int dim, int dimworld, class T>
         static bool projection(const Dune::FieldVector<T,dimworld>& corner, const Dune::FieldVector<T,dimworld>& direction,
@@ -577,6 +624,17 @@ namespace Projection
                     targetCorners,image,overlap);
         }
 
+    /**
+     *  \brief Compute the inverse projection of a point onto some surface element where the projection is done across directions which are associated to corners of an surface element.
+     *
+     *  \param corners The coordinates of the corners.
+     *  \param directions The directions along which the projection is done.
+     *  \param target The point whose inverse projection is computed.
+     *  \param preImage The pre-image of the target point in local coordinates of the surface element.
+     *  \param overlap The amount of overlap that is allowed, i.e. projection among the opposite direction is valid if the scaling is smaller than overlap.
+     *
+     *  \return Returns true if the computed pre-image is within the convex hull of the corner points.
+     */
     template <int dim, int dimworld, class T>
         static bool inverseProjection(const std::vector<Dune::FieldVector<T,dimworld> >& corners,
                 const std::vector<Dune::FieldVector<T,dimworld> >& directions,
@@ -586,7 +644,7 @@ namespace Projection
             return ProjectionHelper<dim,dimworld,T>::inverseProjection(corners,directions,
                     target, preImage, overlap);
         }
-
+    /** \brief Helper class that provides static methods for the computation of the intersection of surface element edges projected onto each other. */
     template <int dim, int dimworld, class T>
         class EdgeIntersectionHelper
         {
@@ -595,12 +653,27 @@ namespace Projection
             typedef Dune::FieldVector<T,dim> LocalCoords;
 
             public:
+            /**
+             * \brief Compute the projection along given directions of surface element edges onto target edges.
+             *
+             *  \param corners1 The coordinates of the surface element corners whose edges are projected.
+             *  \param corners2 The coordinates of the surface element corners on which is projected.
+             *  \param directions1 The directions along which the projection is done.
+             *  \param gt1 The geometry type of the projected surface element.
+             *  \param gt2 The geometry type of the target surface element.
+             *  \param polygonCorners If intersection points are found their local coordinates are added to this vector.
+             *  \param hitCorners Vector containing information on which surface element corners are projected on each other.
+            *  \param neighborIntersects1 If two edges intersect then the corresponding surface element neighbors also intersect. This information for the projected surface element is stored in the bitfield.
+            *  \param neighborIntersects2 If two edges intersect then the corresponding surface element neighbors also intersect. This information for the surface element on which is projected is stored in the bitfield.
+             *  \param overlap The amount of overlap that is allowed, i.e. projection among the opposite direction is valid if the scaling is smaller than overlap.
+             */
             static void addEdgeIntersections(const std::vector<WorldCoords>& corners1,
                     const std::vector<WorldCoords>& corners2,
                     const std::vector<WorldCoords>& directions1,
                     const Dune::GeometryType& gt1, Dune::GeometryType& gt2,
                     std::vector<Dune::array<LocalCoords,2> >& polygonCorners,
-                    const std::vector<int>& hitCorners, const T overlap=1e-1)
+                    const std::vector<int>& hitCorners, std::bitset<(1<<dim)>& neighborIntersects1,
+                    std::bitset<(1<<dim)>& neighborIntersects2, const T overlap = 1e-1)
             {
                 DUNE_THROW(Dune::NotImplemented, "addEdgeIntersections is not implemented for dimworld=="<<dimworld
                         <<" and dim=="<<dim);
@@ -615,7 +688,7 @@ namespace Projection
             typedef Dune::FieldVector<T,1> LocalCoords;
 
             public:
-            // Don't do anything in the 1D case
+            //! For 1D surfaces there are no edges.
             static void addEdgeIntersections(const std::vector<WorldCoords>& corners1,
                     const std::vector<WorldCoords>& corners2,
                     const std::vector<WorldCoords>& directions1,
@@ -692,6 +765,20 @@ namespace Projection
             }
 
             private:
+            /**
+             * \brief Compute the projection along given directions of a surface element edge onto another edge.
+             *
+             *  \param corner1 The coordinates of the first edge corner whose edge is projected.
+             *  \param corner2 The coordinates of the second edge corner whose edge is projected.
+             *  \param target1 The coordinates of the first edge corner on whose edge is projected.
+             *  \param target2 The coordinates of the second edge corner on whose edge is projected.
+             *  \param direction1 The direction corresponding to the first edge corner along which is projected.
+             *  \param direction2 The direction corresponding to the second edge corner along which is projected.
+             *  \param intersection If an intersection points is found its local coordinates stored in this vector.
+             *  \param overlap The amount of overlap that is allowed, i.e. projection among the opposite direction is valid if the scaling is smaller than overlap.
+             *
+             *  \returns Returns true if an intersection point is found.
+             */
             static bool edgeIntersection(const WorldCoords& corner1, const WorldCoords& corner2,
                     const WorldCoords& target1, const WorldCoords& target2,
                     const WorldCoords& direction1, const WorldCoords& direction2,
@@ -870,7 +957,20 @@ namespace Projection
             }
         };
 
-
+    /**
+     * \brief Compute the projection along given directions of surface element edges onto target edges.
+     *
+     *  \param corners1 The coordinates of the surface element corners whose edges are projected.
+     *  \param corners2 The coordinates of the surface element corners on which is projected.
+     *  \param directions1 The directions along which the projection is done.
+     *  \param gt1 The geometry type of the projected surface element.
+     *  \param gt2 The geometry type of the target surface element.
+     *  \param polygonCorners If intersection points are found their local coordinates are added to this vector.
+     *  \param hitCorners Vector containing information on which surface element corners are projected on each other.
+     *  \param neighborIntersects1 If two edges intersect then the corresponding surface element neighbors also intersect. This information for the projected surface element is stored in the bitfield.
+     *  \param neighborIntersects2 If two edges intersect then the corresponding surface element neighbors also intersect. This information for the surface element on which is projected is stored in the bitfield.
+     *  \param overlap The amount of overlap that is allowed, i.e. projection among the opposite direction is valid if the scaling is smaller than overlap.
+     */
     template <int dim, int dimworld, class T=double>
         static void addEdgeIntersections(const std::vector<Dune::FieldVector<T,dimworld> >& corners1,
                 const std::vector<Dune::FieldVector<T,dimworld> >& corners2,
