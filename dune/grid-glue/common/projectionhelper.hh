@@ -12,41 +12,20 @@
  */
 namespace Projection
 {
-    //! Helper class that provides a static method for the computation of the cross product.
-    template <class T,int dim>
-        class CrossProductHelper
-        {
-            public:
-                static Dune::FieldVector<T,dim> crossProduct(const Dune::FieldVector<T,dim>& a,
-                        const Dune::FieldVector<T,dim>& b)
-                {
-                    DUNE_THROW(Dune::NotImplemented, "crossProduct does not work for dimension "<<dim);
-                }
-
-        };
-
-    template <class T>
-        class CrossProductHelper<T,3>
-        {
-            public:
-                static Dune::FieldVector<T,3> crossProduct(const Dune::FieldVector<T,3>& a,
-                        const Dune::FieldVector<T,3>& b)
-                {
-                    Dune::FieldVector<T,3> c;
-                    c[0] = a[1]*b[2] - a[2]*b[1];
-                    c[1] = a[2]*b[0] - a[0]*b[2];
-                    c[2] = a[0]*b[1] - a[1]*b[0];
-
-                    return c;
-                }
-        };
-
     //! Compute the cross product of two vectors
     template <class T, int dim>
         static Dune::FieldVector<T,dim> crossProduct(const Dune::FieldVector<T,dim>& a,
                 const Dune::FieldVector<T,dim>& b)
         {
-            return CrossProductHelper<T,dim>::crossProduct(a,b);
+            if (dim!=3)
+              DUNE_THROW(Dune::NotImplemented, "crossProduct does not work for dimension " << dim);
+
+            Dune::FieldVector<T,dim> c;
+            c[0] = a[1]*b[2] - a[2]*b[1];
+            c[1] = a[2]*b[0] - a[0]*b[2];
+            c[2] = a[0]*b[1] - a[1]*b[0];
+
+            return c;
         }
 
     //! Helper class that provides static methods to compute the projection and inverse projection of a point along some given directions
