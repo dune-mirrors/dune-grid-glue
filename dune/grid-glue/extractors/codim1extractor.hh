@@ -153,18 +153,20 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
           if (!is->boundary() or !descr.contains(eptr, is->indexInInside()))
             continue;
 
-          // get the corner count of this face
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-          const int face_corners = Dune::ReferenceElements<ctype, dim>::general(gt).size(is->indexInInside(), 1, dim);
+          const Dune::ReferenceElement<ctype, dim>& refElement = Dune::ReferenceElements<ctype, dim>::general(gt);
 #else
-          const int face_corners = Dune::GenericReferenceElements<ctype, dim>::general(gt).size(is->indexInInside(), 1, dim);
+          const Dune::GenericReferenceElement<ctype, dim>& refElement = Dune::GenericReferenceElements<ctype, dim>::general(gt);
 #endif
+          // get the corner count of this face
+          const int face_corners = refElement.size(is->indexInInside(), 1, dim);
 
           // now we only have to care about the 3D case, i.e. a triangle face can be
           // inserted directly whereas a quadrilateral face has to be divided into two triangles
           switch (face_corners)
           {
           case 2 :
+          {
             assert(dim == 2);
             // we have a line here
 
@@ -175,14 +177,18 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
 
+            Dune::array<FieldVector<ctype,dimworld>, 2> cornerCoords;
+
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < face_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              int vertex_number = orientedSubface<2>(gt, is->indexInInside(), i);
+              int vertex_number = refElement.subEntity(is->indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
+              cornerCoords[i] = vptr->geometry().corner(0);
+
               IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
@@ -207,9 +213,26 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
               }
             }
 
+            // Now we have the correct vertices in the last entries of temp_faces, but they may
+            // have the wrong orientation.  We want them to be oriented such that all boundary edges
+            // point in the counterclockwise direction.  Therefore, we check the orientation of the
+            // new face and possibly switch the two vertices.
+            FieldVector<ctype,dimworld> realNormal = is->centerUnitOuterNormal();
+
+            // Compute segment normal
+            FieldVector<ctype,dimworld> reconstructedNormal;
+            reconstructedNormal[0] =  cornerCoords[1][1] - cornerCoords[0][1];
+            reconstructedNormal[1] =  cornerCoords[0][0] - cornerCoords[1][0];
+
+            reconstructedNormal /= reconstructedNormal.two_norm();
+
+            if (realNormal * reconstructedNormal < 0.0)
+              std::swap(temp_faces.back().corners[0], temp_faces.back().corners[1]);
+
             // now increase the current face index
             simplex_index++;
             break;
+          }
           case 3 :
             assert(dim == 3);
             // we have a triangle here
