@@ -25,6 +25,7 @@
 #include <deque>
 
 #include <dune/grid-glue/common/orientedsubface.hh>
+#include <dune/grid-glue/common/projectionhelper.hh>
 
 namespace Dune {
 
@@ -234,6 +235,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             break;
           }
           case 3 :
+          {
             assert(dim == 3);
             // we have a triangle here
 
@@ -244,14 +246,18 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
 
+            Dune::array<FieldVector<ctype,dimworld>, 3> cornerCoords;
+
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < simplex_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              int vertex_number = orientedSubface<dim>(gt, is->indexInInside(), i);
+              int vertex_number = refElement.subEntity(is->indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
+              cornerCoords[i] = vptr->geometry().corner(0);
+
               IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
 
               // remember the vertex' number in parent element's vertices
@@ -276,9 +282,25 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
               }
             }
 
+            // Now we have the correct vertices in the last entries of temp_faces, but they may
+            // have the wrong orientation.  We want the triangle vertices on counterclockwise order,
+            // when viewed from the outside of the grid. Therefore, we check the orientation of the
+            // new face and possibly switch two vertices.
+            FieldVector<ctype,dimworld> realNormal = is->centerUnitOuterNormal();
+
+            // Compute segment normal
+            FieldVector<ctype,dimworld> segment1 = cornerCoords[1] - cornerCoords[0];
+            FieldVector<ctype,dimworld> segment2 = cornerCoords[2] - cornerCoords[0];
+            FieldVector<ctype,dimworld> reconstructedNormal = Projection::crossProduct(segment1, segment2);
+            reconstructedNormal /= reconstructedNormal.two_norm();
+
+            if (realNormal * reconstructedNormal < 0.0)
+              std::swap(temp_faces.back().corners[0], temp_faces.back().corners[1]);
+
             // now increase the current face index
             simplex_index++;
             break;
+          }
           case 4 :
             assert(dim == 3);
             // we have a quadrilateral here
