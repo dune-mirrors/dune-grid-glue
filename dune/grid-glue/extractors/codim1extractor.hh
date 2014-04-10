@@ -19,8 +19,6 @@
 #ifndef DUNE_CODIM_1_EXTRACTOR_HH
 #define DUNE_CODIM_1_EXTRACTOR_HH
 
-#include <set>
-
 #include "extractor.hh"
 #include "extractorpredicate.hh"
 
@@ -139,21 +137,8 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
       ElementPtr eptr(elit);
       Dune::GeometryType gt = elit->type();
 
-      // remember the indices of the faces that shall become
-      // part of the surface
-      std::set<int> boundary_faces;
-
-      // iterate over all intersections of codim 1 and test if the
-      // boundary intersections are to be added to the surface
-      for (IsIter is = this->gv_.ibegin(*elit); is != this->gv_.iend(*elit); ++is)
-      {
-        // only look at boundary faces
-        if (is->boundary() && descr.contains(eptr, is->indexInInside()))
-          boundary_faces.insert(is->indexInInside());
-      }
-
       // if some face is part of the surface add it!
-      if (boundary_faces.size() != 0)
+      if (elit->hasBoundaryIntersections())
       {
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
@@ -162,13 +147,17 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
-        for (typename std::set<int>::const_iterator sit = boundary_faces.begin(); sit != boundary_faces.end(); ++sit)
+        for (IsIter is = this->gv_.ibegin(*elit); is != this->gv_.iend(*elit); ++is)
         {
+          // Stop only at selected boundary faces
+          if (!is->boundary() or !descr.contains(eptr, is->indexInInside()))
+            continue;
+
           // get the corner count of this face
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-          const int face_corners = Dune::ReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
+          const int face_corners = Dune::ReferenceElements<ctype, dim>::general(gt).size(is->indexInInside(), 1, dim);
 #else
-          const int face_corners = Dune::GenericReferenceElements<ctype, dim>::general(gt).size(*sit, 1, dim);
+          const int face_corners = Dune::GenericReferenceElements<ctype, dim>::general(gt).size(is->indexInInside(), 1, dim);
 #endif
 
           // now we only have to care about the 3D case, i.e. a triangle face can be
@@ -183,14 +172,14 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             this->elmtInfo_[eindex]->faces++;
 
             // add a new face to the temporary collection
-            temp_faces.push_back(SubEntityInfo(eindex, *sit,
+            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
 
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < face_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              int vertex_number = orientedSubface<2>(gt, *sit, i);
+              int vertex_number = orientedSubface<2>(gt, is->indexInInside(), i);
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
@@ -229,14 +218,14 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             this->elmtInfo_[eindex]->faces++;
 
             // add a new face to the temporary collection
-            temp_faces.push_back(SubEntityInfo(eindex, *sit,
+            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
 
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < simplex_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              int vertex_number = orientedSubface<dim>(gt, *sit, i);
+              int vertex_number = orientedSubface<dim>(gt, is->indexInInside(), i);
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
@@ -281,7 +270,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             for (int i = 0; i < cube_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              vertex_numbers[i] = orientedSubface<dim>(gt, *sit, i);
+              vertex_numbers[i] = orientedSubface<dim>(gt, is->indexInInside(), i);
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
@@ -311,7 +300,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
 
             // add a new face to the temporary collection for the first tri
-            temp_faces.push_back(SubEntityInfo(eindex, *sit,
+            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
             temp_faces.back().corners[0].idx = vertex_indices[0];
             temp_faces.back().corners[1].idx = vertex_indices[1];
@@ -322,7 +311,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             temp_faces.back().corners[2].num = vertex_numbers[2];
 
             // add a new face to the temporary collection for the second tri
-            temp_faces.push_back(SubEntityInfo(eindex, *sit,
+            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
             temp_faces.back().corners[0].idx = vertex_indices[3];
             temp_faces.back().corners[1].idx = vertex_indices[2];
