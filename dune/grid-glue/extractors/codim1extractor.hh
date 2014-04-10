@@ -166,9 +166,9 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
           switch (face_corners)
           {
           case 2 :
+          case 3:
           {
-            assert(dim == 2);
-            // we have a line here
+            // we have a simplex here
 
             // register the additional face(s)
             this->elmtInfo_[eindex]->faces++;
@@ -177,7 +177,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
 
-            Dune::array<FieldVector<ctype,dimworld>, 2> cornerCoords;
+            std::vector<FieldVector<ctype,dimworld> > cornerCoords(face_corners);
 
             // try for each of the faces vertices whether it is already inserted or not
             for (int i = 0; i < face_corners; ++i)
@@ -221,76 +221,15 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
             // Compute segment normal
             FieldVector<ctype,dimworld> reconstructedNormal;
-            reconstructedNormal[0] =  cornerCoords[1][1] - cornerCoords[0][1];
-            reconstructedNormal[1] =  cornerCoords[0][0] - cornerCoords[1][0];
-
-            reconstructedNormal /= reconstructedNormal.two_norm();
-
-            if (realNormal * reconstructedNormal < 0.0)
-              std::swap(temp_faces.back().corners[0], temp_faces.back().corners[1]);
-
-            // now increase the current face index
-            simplex_index++;
-            break;
-          }
-          case 3 :
-          {
-            assert(dim == 3);
-            // we have a triangle here
-
-            // register the additional face(s)
-            this->elmtInfo_[eindex]->faces++;
-
-            // add a new face to the temporary collection
-            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
-                                               Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
-
-            Dune::array<FieldVector<ctype,dimworld>, 3> cornerCoords;
-
-            // try for each of the faces vertices whether it is already inserted or not
-            for (int i = 0; i < simplex_corners; ++i)
+            if (dim==2)  // boundary face is a line segment
             {
-              // get the number of the vertex in the parent element
-              int vertex_number = refElement.subEntity(is->indexInInside(), 1, i, dim);
-
-              // get the vertex pointer and the index from the index set
-              VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
-              cornerCoords[i] = vptr->geometry().corner(0);
-
-              IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
-
-              // remember the vertex' number in parent element's vertices
-              temp_faces.back().corners[i].num = vertex_number;
-
-              // if the vertex is not yet inserted in the vertex info map
-              // it is a new one -> it will be inserted now!
-              typename VertexInfoMap::iterator vimit = this->vtxInfo_.find(vindex);
-              if (vimit == this->vtxInfo_.end())
-              {
-                // insert into the map
-                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
-                // remember the vertex as a corner of the current face in temp_faces
-                temp_faces.back().corners[i].idx = vertex_index;
-                // increase the current index
-                vertex_index++;
-              }
-              else
-              {
-                // only insert the index into the simplices array
-                temp_faces.back().corners[i].idx = vimit->second->idx;
-              }
+              reconstructedNormal[0] =  cornerCoords[1][1] - cornerCoords[0][1];
+              reconstructedNormal[1] =  cornerCoords[0][0] - cornerCoords[1][0];
+            } else {    // boundary face is a triangle
+              FieldVector<ctype,dimworld> segment1 = cornerCoords[1] - cornerCoords[0];
+              FieldVector<ctype,dimworld> segment2 = cornerCoords[2] - cornerCoords[0];
+              reconstructedNormal = Projection::crossProduct(segment1, segment2);
             }
-
-            // Now we have the correct vertices in the last entries of temp_faces, but they may
-            // have the wrong orientation.  We want the triangle vertices on counterclockwise order,
-            // when viewed from the outside of the grid. Therefore, we check the orientation of the
-            // new face and possibly switch two vertices.
-            FieldVector<ctype,dimworld> realNormal = is->centerUnitOuterNormal();
-
-            // Compute segment normal
-            FieldVector<ctype,dimworld> segment1 = cornerCoords[1] - cornerCoords[0];
-            FieldVector<ctype,dimworld> segment2 = cornerCoords[2] - cornerCoords[0];
-            FieldVector<ctype,dimworld> reconstructedNormal = Projection::crossProduct(segment1, segment2);
             reconstructedNormal /= reconstructedNormal.two_norm();
 
             if (realNormal * reconstructedNormal < 0.0)
