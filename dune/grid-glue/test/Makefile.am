@@ -12,10 +12,6 @@ if MPI
 TESTPROGS += nonoverlappingcouplingtest_mpi
 endif
 
-if UG
-TESTPROGS += orientedsubfacetest
-endif
-
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTPROGS)
 
@@ -44,7 +40,6 @@ mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
-orientedsubfacetest_SOURCES = orientedsubfacetest.cc
 
 EXTRA_DIST = CMakeLists.txt
 

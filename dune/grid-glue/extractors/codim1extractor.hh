@@ -24,7 +24,6 @@
 
 #include <deque>
 
-#include <dune/grid-glue/common/orientedsubface.hh>
 #include <dune/grid-glue/common/projectionhelper.hh>
 
 namespace Dune {

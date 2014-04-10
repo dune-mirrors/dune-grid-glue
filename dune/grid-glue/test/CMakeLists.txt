@@ -1,7 +1,3 @@
-if(UG_FOUND)
-  set(UG_PROGRAMS orientedsubfacetest)
-endif(UG_FOUND)
-
 if(MPI_C_FOUND)
   set(MPI_PROGRAMS nonoverlappingcouplingtest_mpi)
 endif(MPI_C_FOUND)
@@ -14,7 +10,6 @@ set(TESTS
  multivectortest
  nonoverlappingcouplingtest
  overlappingcouplingtest
- ${UG_PROGRAMS}
  ${MPI_PROGRAMS})
 
 add_executable(callmergertwicetest callmergertwicetest.cc)
@@ -27,11 +22,6 @@ set_property(TARGET nonoverlappingcouplingtest
 add_executable(overlappingcouplingtest overlappingcouplingtest.cc)
 set_property(TARGET overlappingcouplingtest
   APPEND PROPERTY COMPILE_FLAGS "-frounding-math")
-
-if(UG_FOUND)
-  add_executable(orientedsubfacetest orientedsubfacetest.cc)
-  add_dune_ug_flags(orientedsubfacetest)
-endif(UG_FOUND)
 
 if(MPI_C_FOUND)
   add_executable(nonoverlappingcouplingtest_mpi nonoverlappingcouplingtest.cc)
@@ -59,5 +49,4 @@ set(SOURCES
   mixeddimoverlappingtest.cc
   multivectortest.cc
   nonoverlappingcouplingtest.cc
-  orientedsubfacetest.cc
   overlappingcouplingtest.cc)

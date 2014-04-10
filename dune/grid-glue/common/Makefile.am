@@ -4,7 +4,6 @@ commondir = $(includedir)/dune/grid-glue/common
 
 common_HEADERS = \
                  multivector.hh \
-                 orientedsubface.hh \
                  projectionhelper.hh \
                  simplexgeometry.hh
 
