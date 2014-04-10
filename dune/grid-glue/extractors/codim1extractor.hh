@@ -302,6 +302,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             break;
           }
           case 4 :
+          {
             assert(dim == 3);
             // we have a quadrilateral here
             unsigned int vertex_indices[4];
@@ -310,15 +311,19 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             // register the additional face(s) (2 simplices)
             this->elmtInfo_[eindex]->faces += 2;
 
+            Dune::array<FieldVector<ctype,dimworld>, 4> cornerCoords;
+
             // get the vertex pointers for the quadrilateral's corner vertices
             // and try for each of them whether it is already inserted or not
             for (int i = 0; i < cube_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              vertex_numbers[i] = orientedSubface<dim>(gt, is->indexInInside(), i);
+              vertex_numbers[i] = refElement.subEntity(is->indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
               VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
+              cornerCoords[i] = vptr->geometry().corner(0);
+
               IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
 
               // if the vertex is not yet inserted in the vertex info map
@@ -355,6 +360,21 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             temp_faces.back().corners[1].num = vertex_numbers[1];
             temp_faces.back().corners[2].num = vertex_numbers[2];
 
+            // Now we have the correct vertices in the last entries of temp_faces, but they may
+            // have the wrong orientation.  We want the triangle vertices on counterclockwise order,
+            // when viewed from the outside of the grid. Therefore, we check the orientation of the
+            // new face and possibly switch two vertices.
+            FieldVector<ctype,dimworld> realNormal = is->centerUnitOuterNormal();
+
+            // Compute segment normal
+            FieldVector<ctype,dimworld> reconstructedNormal = Projection::crossProduct(cornerCoords[1] - cornerCoords[0],
+                                                                                       cornerCoords[2] - cornerCoords[0]);
+            reconstructedNormal /= reconstructedNormal.two_norm();
+
+            if (realNormal * reconstructedNormal < 0.0)
+              std::swap(temp_faces.back().corners[0], temp_faces.back().corners[1]);
+
+
             // add a new face to the temporary collection for the second tri
             temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
@@ -366,8 +386,21 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             temp_faces.back().corners[1].num = vertex_numbers[2];
             temp_faces.back().corners[2].num = vertex_numbers[1];
 
+            // Now we have the correct vertices in the last entries of temp_faces, but they may
+            // have the wrong orientation.  We want the triangle vertices on counterclockwise order,
+            // when viewed from the outside of the grid. Therefore, we check the orientation of the
+            // new face and possibly switch two vertices.
+            // Compute segment normal
+            reconstructedNormal = Projection::crossProduct(cornerCoords[2] - cornerCoords[3],
+                                                           cornerCoords[1] - cornerCoords[3]);
+            reconstructedNormal /= reconstructedNormal.two_norm();
+
+            if (realNormal * reconstructedNormal < 0.0)
+              std::swap(temp_faces.back().corners[0], temp_faces.back().corners[1]);
+
             simplex_index+=2;
             break;
+          }
           default :
             DUNE_THROW(Dune::NotImplemented, "the extractor does only work for triangle and quadrilateral faces (" << face_corners << " corners)");
             break;
