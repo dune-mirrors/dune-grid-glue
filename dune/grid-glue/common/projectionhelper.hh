@@ -695,8 +695,13 @@ namespace Projection
                     const std::vector<int>& hitCorners, std::bitset<4>& neighborIntersects1,
                     std::bitset<4>& neighborIntersects2, const T overlap=1e-1)
             {
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
                 const Dune::ReferenceElement<T,2>& ref1 = Dune::ReferenceElements<T,2>::general(gt1);
                 const Dune::ReferenceElement<T,2>& ref2 = Dune::ReferenceElements<T,2>::general(gt2);
+#else
+                const Dune::GenericReferenceElement<T,2>& ref1 = Dune::GenericReferenceElements<T,2>::general(gt1);
+                const Dune::GenericReferenceElement<T,2>& ref2 = Dune::GenericReferenceElements<T,2>::general(gt2);
+#endif
 
                 //loop  over edges
                 Dune::array<Dune::FieldVector<T,1>,2> intersection;
