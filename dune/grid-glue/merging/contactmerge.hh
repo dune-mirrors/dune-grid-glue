@@ -79,6 +79,11 @@ public:
             this->valid = false;
     }
 
+    //! Set the allowed overlap of the surfaces.
+    void setOverlap(T overlap)
+    {
+        overlap_ = overlap;
+    }
 
 private:
     /** \brief Vector field on the domain surface which prescribes the direction
@@ -99,7 +104,7 @@ private:
     std::vector<WorldCoords> nodalTargetDirections_;
 
     //! Allow some overlap, i.e. also look in the negative projection directions
-    const T overlap_;
+    T overlap_;
 
     /** \brief Compute the intersection between two overlapping elements
      *
