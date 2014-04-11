@@ -62,6 +62,24 @@ public:
           overlap_(allowedOverlap)
     {}
 
+    /**
+     * @brief Set surface direction functions
+     *
+     * The matching of the geometries offers the possibility to specify a function for
+     * the exact evaluation of domain surface normals. If no such function is specified
+     * (default) normals are interpolated.
+     * @param value the new function (or NULL to unset the function)
+     */
+    inline
+    void setSurfaceDirections(const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections,
+                              const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections)
+    {
+            domainDirections_ = domainDirections;
+            targetDirections_ = targetDirections;
+            this->valid = false;
+    }
+
+
 private:
     /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
@@ -82,23 +100,6 @@ private:
 
     //! Allow some overlap, i.e. also look in the negative projection directions
     const T overlap_;
-
-    /**
-     * @brief Set surface direction functions
-     *
-     * The matching of the geometries offers the possibility to specify a function for
-     * the exact evaluation of domain surface normals. If no such function is specified
-     * (default) normals are interpolated.
-     * @param value the new function (or NULL to unset the function)
-     */
-    inline
-    void setSurfaceDirections(const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections,
-                              const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections)
-    {
-            domainDirections_ = domainDirections;
-            targetDirections_ = targetDirections;
-            this->valid = false;
-    }
 
     /** \brief Compute the intersection between two overlapping elements
      *
