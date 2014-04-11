@@ -55,6 +55,8 @@ public:
     /// @brief the coordinate type used in this interface
     typedef Dune::FieldVector<T, dim>  LocalCoords;
 
+    ContactMerge() {}
+
     ContactMerge(const T allowedOverlap,
             const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections = NULL,
             const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections = NULL)
