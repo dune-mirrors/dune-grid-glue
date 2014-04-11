@@ -487,8 +487,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //  Compute the face neighbors for each element
   ////////////////////////////////////////////////////////////////////////
 
-  computeNeighborsPerElement(grid1_element_types, grid1ElementCorners_, elementNeighbors1_);
-  computeNeighborsPerElement(grid2_element_types, grid2ElementCorners_, elementNeighbors2_);
+  computeNeighborsPerElement<grid1Dim>(grid1_element_types, grid1ElementCorners_, elementNeighbors1_);
+  computeNeighborsPerElement<grid2Dim>(grid2_element_types, grid2ElementCorners_, elementNeighbors2_);
 
   std::cout << "setup took " << watch.elapsed() << " seconds." << std::endl;
 
