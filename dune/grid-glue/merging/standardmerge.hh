@@ -143,8 +143,10 @@ protected:
                        const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
                        const std::vector<Dune::GeometryType>& grid2_element_types);
 
-  void computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_types,
-                                  const std::vector<Dune::GeometryType>& grid2_element_types);
+  template <int gridDim>
+  void computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTypes,
+                                  const std::vector<std::vector<unsigned int> >& gridElementCorners,
+                                  std::vector<std::vector<int> >& elementNeighbors);
 
   /*   M E M B E R   V A R I A B L E S   */
 
@@ -352,10 +354,11 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::bruteForceSearch(int candidate1
 
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+template<int gridDim>
 void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::
-computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_types,
-                           const std::vector<Dune::GeometryType>& grid2_element_types
-                           )
+computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTypes,
+                           const std::vector<std::vector<unsigned int> >& gridElementCorners,
+                           std::vector<std::vector<int> >& elementNeighbors)
 {
   typedef std::vector<unsigned int> FaceType;
   typedef std::map<FaceType, std::pair<unsigned int, unsigned int> > FaceSetType;
@@ -364,29 +367,29 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
   //  First: grid 1
   ///////////////////////////////////////////////////////////////////////////////////////
   FaceSetType faces;
-  elementNeighbors1_.resize(grid1_element_types.size());
+  elementNeighbors.resize(gridElementTypes.size());
 
-  for (size_t i=0; i<grid1_element_types.size(); i++)
+  for (size_t i=0; i<gridElementTypes.size(); i++)
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    elementNeighbors1_[i].resize(Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1), -1);
+    elementNeighbors[i].resize(Dune::ReferenceElements<T,gridDim>::general(gridElementTypes[i]).size(1), -1);
 #else
-    elementNeighbors1_[i].resize(Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1), -1);
+    elementNeighbors[i].resize(Dune::GenericReferenceElements<T,gridDim>::general(gridElementTypes[i]).size(1), -1);
 #endif
 
-  for (size_t i=0; i<grid1_element_types.size(); i++) {
+  for (size_t i=0; i<gridElementTypes.size(); i++) {
 
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    const Dune::ReferenceElement<T,grid1Dim>& refElement = Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
+    const Dune::ReferenceElement<T,gridDim>& refElement = Dune::ReferenceElements<T,gridDim>::general(gridElementTypes[i]);
 #else
-    const Dune::GenericReferenceElement<T,grid1Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
+    const Dune::GenericReferenceElement<T,gridDim>& refElement = Dune::GenericReferenceElements<T,gridDim>::general(gridElementTypes[i]);
 #endif
 
     for (size_t j=0; j<(size_t)refElement.size(1); j++) {
 
       FaceType face;
       // extract element face
-      for (size_t k=0; k<(size_t)refElement.size(j,1,grid1Dim); k++)
-        face.push_back(grid1ElementCorners_[i][refElement.subEntity(j,1,k,grid1Dim)]);
+      for (size_t k=0; k<(size_t)refElement.size(j,1,gridDim); k++)
+        face.push_back(gridElementCorners[i][refElement.subEntity(j,1,k,gridDim)]);
 
       // sort the face vertices to get rid of twists and other permutations
       std::sort(face.begin(), face.end());
@@ -401,8 +404,8 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
       } else {
 
         // face has been visited before: store the mutual neighbor information
-        elementNeighbors1_[i][j] = faceHandle->second.first;
-        elementNeighbors1_[faceHandle->second.first][faceHandle->second.second] = i;
+        elementNeighbors[i][j] = faceHandle->second.first;
+        elementNeighbors[faceHandle->second.first][faceHandle->second.second] = i;
 
         faces.erase(faceHandle);
 
@@ -411,61 +414,6 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
     }
 
   }
-
-  ///////////////////////////////////////////////////////////////////////////////////////
-  //  Next: grid 2
-  ///////////////////////////////////////////////////////////////////////////////////////
-
-  faces.clear();
-  elementNeighbors2_.resize(grid2_element_types.size());
-
-  for (size_t i=0; i<grid2_element_types.size(); i++)
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    elementNeighbors2_[i].resize(Dune::ReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(1), -1);
-#else
-    elementNeighbors2_[i].resize(Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(1), -1);
-#endif
-
-  for (size_t i=0; i<grid2_element_types.size(); i++) {
-
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    const Dune::ReferenceElement<T,grid2Dim>& refElement = Dune::ReferenceElements<T,grid2Dim>::general(grid2_element_types[i]);
-#else
-    const Dune::GenericReferenceElement<T,grid2Dim>& refElement = Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]);
-#endif
-
-    for (size_t j=0; j<(size_t)refElement.size(1); j++) {
-
-      FaceType face;
-      // extract element face
-      for (size_t k=0; k<(size_t)refElement.size(j,1,grid2Dim); k++)
-        face.push_back(grid2ElementCorners_[i][refElement.subEntity(j,1,k,grid2Dim)]);
-
-      // sort the face vertices to get rid of twists and other permutations
-      std::sort(face.begin(), face.end());
-
-      typename FaceSetType::iterator faceHandle = faces.find(face);
-
-      if (faceHandle == faces.end()) {
-
-        // face has not been visited before
-        faces.insert(std::make_pair(face, std::make_pair(i,j)));
-
-      } else {
-
-        // face has been visited before: store the mutual neighbor information
-        elementNeighbors2_[i][j] = faceHandle->second.first;
-        elementNeighbors2_[faceHandle->second.first][faceHandle->second.second] = i;
-
-        faces.erase(faceHandle);
-
-      }
-
-    }
-
-  }
-
-
 }
 
 // /////////////////////////////////////////////////////////////////////
@@ -539,7 +487,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   //  Compute the face neighbors for each element
   ////////////////////////////////////////////////////////////////////////
 
-  computeNeighborsPerElement(grid1_element_types, grid2_element_types);
+  computeNeighborsPerElement(grid1_element_types, grid1ElementCorners_, elementNeighbors1_);
+  computeNeighborsPerElement(grid2_element_types, grid2ElementCorners_, elementNeighbors2_);
 
   std::cout << "setup took " << watch.elapsed() << " seconds." << std::endl;
 
