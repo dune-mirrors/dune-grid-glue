@@ -257,8 +257,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
         Dune::FieldVector<double,dim> ref = barycentricToReference(barycentric);
 
         // this is the actual transformation.  (0,0) becomes (1,1), (1,0) becomes (0,1),  (0,1) becomes (1,0)
-        ref *= -1;
-        ref +=  1;
+        ref *= -1.0;
+        ref +=  1.0;
 
         // back to barycentric
         barycentric = referenceToBarycentric(ref);
@@ -286,8 +286,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
         Dune::FieldVector<double,dim> ref = barycentricToReference(barycentric);
 
         // this is the actual transformation.  (0,0) becomes (1,1), (1,0) becomes (0,1),  (0,1) becomes (1,0)
-        ref *= -1;
-        ref +=  1;
+        ref *= -1.0;
+        ref +=  1.0;
 
         // back to barycentric
         barycentric = referenceToBarycentric(ref);
