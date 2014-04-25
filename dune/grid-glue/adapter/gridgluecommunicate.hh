@@ -151,7 +151,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
+        dune_static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         a[i++] = data;
       }
 
@@ -159,7 +159,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
+        dune_static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         data = a[j++];
       }
 
