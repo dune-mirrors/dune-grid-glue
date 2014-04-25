@@ -38,7 +38,7 @@ class ContactMerge
 {
     enum {dim = dimworld-1};
 
-    dune_static_assert( dim==1 || dim==2,
+    static_assert( dim==1 || dim==2,
             "ContactMerge yet only handles the cases dim==1 and dim==2!");
 
     typedef StandardMerge<T,dim,dim,dimworld> Base;

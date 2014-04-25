@@ -72,7 +72,7 @@ template<int dim, int dimw, class ctype>
 class MixedDimTrafo
   : public AnalyticalCoordFunction< ctype, dim, dimw, MixedDimTrafo<dim,dimw,ctype> >
 {
-  dune_static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
+  static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
   double yOffset_;
 public:
   MixedDimTrafo(double yOffset) : yOffset_(yOffset) {}

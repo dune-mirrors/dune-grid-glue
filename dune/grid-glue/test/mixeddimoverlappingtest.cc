@@ -40,8 +40,8 @@ template<int dim, int dimw, class ctype>
 class MixedDimTrafo
   : public AnalyticalCoordFunction< ctype, dim, dimw, MixedDimTrafo<dim,dimw,ctype> >
 {
-  dune_static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
-  dune_static_assert(dim==1, "MixedDimTrafo currently assumes dim==1");
+  static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
+  static_assert(dim==1, "MixedDimTrafo currently assumes dim==1");
 public:
 
   //! evaluate method for global mapping
