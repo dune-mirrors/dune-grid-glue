@@ -41,7 +41,7 @@ class GridGlueVtkWriter
   template <class Glue, int side>
   static void writeExtractedPart(const Glue& glue, const std::string& filename)
   {
-    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
     std::ofstream fgrid;
 
@@ -180,7 +180,7 @@ class GridGlueVtkWriter
   template <class Glue, int side>
   static void writeIntersections(const Glue& glue, const std::string& filename)
   {
-    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
     std::ofstream fmerged;
 
