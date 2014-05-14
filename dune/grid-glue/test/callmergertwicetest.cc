@@ -198,7 +198,7 @@ int main ()
     callMergerTwice(&merger);
   }
 #else
-  exit 77; // Test is skipped, if PSurface is not present
+  exit(77); // Test is skipped, if PSurface is not present
 #endif
 
 }

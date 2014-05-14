@@ -208,10 +208,10 @@ void testNonMatchingCubeGrids()
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
 #endif
 
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
+
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
