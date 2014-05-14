@@ -139,7 +139,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         centroid=0;
         for (size_type i=0; i < P.size(); i++)
           centroid += P[i] ;
-        centroid /= P.size() ;
+        centroid /= static_cast<T>(P.size()) ;
 
         // Sorte each faces ( Create H )
         H.clear() ;
@@ -300,7 +300,7 @@ void OverlappingMerge<dim, T>::sortAndRemoveDoubles2D( std::vector<Dune::FieldVe
   c = 0 ;
   for ( size_type i=0; i < P.size(); i++)
     c += P[i] ;
-  c /= P.size() ;
+  c /= static_cast<T>(P.size()) ;
 
   // definition of angles
   for ( size_type i=0; i < P.size(); i++)
