@@ -86,19 +86,24 @@ protected:
 
     /** \brief Constructor for two given entity indices */
     RemoteSimplicialIntersection(int grid1Entity, int grid2Entity)
-    : grid1Entity_(grid1Entity), grid2Entity_(grid2Entity)
-    {}
+    {
+        grid1Entities_.resize(1);
+        grid2Entities_.resize(1);
+
+        grid1Entities_[0] = grid1Entity;
+        grid2Entities_[0] = grid2Entity;
+    }
 
     // Local coordinates in the grid1 entity
-    Dune::array<Dune::FieldVector<T,grid1Dim>, nVertices> grid1Local_;
+    std::vector<Dune::array<Dune::FieldVector<T,grid1Dim>, nVertices> > grid1Local_;
 
     // Local coordinates in the grid1 entity
-    Dune::array<Dune::FieldVector<T,grid2Dim>, nVertices> grid2Local_;
+    std::vector<Dune::array<Dune::FieldVector<T,grid2Dim>, nVertices> > grid2Local_;
 
     //
-    int grid1Entity_;
+    std::vector<int> grid1Entities_;
 
-    int grid2Entity_;
+    std::vector<int> grid2Entities_;
 
   };
 
