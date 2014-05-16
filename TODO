@@ -11,13 +11,14 @@ For the upcoming paper:
 ./ remove remoteintersection(iterator)impl CRTP magic
 ./ remove coordinate transformation, use GeometryGrid instead
 (./) implement _new_ parallel merging (see article.tex)
-- Put everything into the namespace Dune::GridGlue
+./ Put adapter/* into the namespace Dune::GridGlue
+- Put merger/* into the namespace Dune::GridGlue
 ./ move gridglue/adapter/gridglue.hh to gridglue/gridglue.hh
 - add GridGlue::DirectionFunction and remove dependencies on
   PSurface::DirectionFunction in the interface
 - add directed version communicate<FROM,TO, DH,DT>(data,iftype,dir)
    ... or similar
-- implement IndexSet
+./ implement IndexSet
 
 Interface changes:
 - Merger gets (CoordType, dimG1, dimG2, dimworld, mergedDim) template parameters
