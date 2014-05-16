@@ -125,12 +125,12 @@ private:
         this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0] = 0;
-        this->intersections_.back().grid1Local_[1] = 1;
+        this->intersections_.back().grid1Local_[0][0] = 0;
+        this->intersections_.back().grid1Local_[0][1] = 1;
 
         // Compute local coordinates in the grid2 element
-        this->intersections_.back().grid2Local_[0] = grid2Geometry.local(grid1ElementCorners[0]);
-        this->intersections_.back().grid2Local_[1] = grid2Geometry.local(grid1ElementCorners[1]);
+        this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(grid1ElementCorners[0]);
+        this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(grid1ElementCorners[1]);
 
         return;
       }
@@ -144,24 +144,24 @@ private:
               this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = 0;
-              this->intersections_.back().grid1Local_[1] = grid1Geometry.local(intersections[0]);
+              this->intersections_.back().grid1Local_[0][0] = 0;
+              this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(intersections[0]);
 
               // Compute local coordinates in the grid2 element
-              this->intersections_.back().grid2Local_[0] = grid2Geometry.local(grid1ElementCorners[0]);
-              this->intersections_.back().grid2Local_[1] = grid2Geometry.local(intersections[0]);
+              this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(grid1ElementCorners[0]);
+              this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(intersections[0]);
 
             } else if (inTriangle[1])
             {
               this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = grid1Geometry.local(intersections[0]);
-              this->intersections_.back().grid1Local_[1] = 1;
+              this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(intersections[0]);
+              this->intersections_.back().grid1Local_[0][1] = 1;
 
               // Compute local coordinates in the grid2 element
-              this->intersections_.back().grid2Local_[0] = grid2Geometry.local(intersections[0]);
-              this->intersections_.back().grid2Local_[1] = grid2Geometry.local(grid1ElementCorners[1]);
+              this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(intersections[0]);
+              this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(grid1ElementCorners[1]);
 
             }
 
@@ -175,12 +175,12 @@ private:
             this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
             // Compute local coordinates in the grid1 element
-            this->intersections_.back().grid1Local_[0] = grid1Geometry.local(intersections[0]);
-            this->intersections_.back().grid1Local_[1] = grid1Geometry.local(intersections[1]);
+            this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(intersections[0]);
+            this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(intersections[1]);
 
             // Compute local coordinates in the grid2 element
-            this->intersections_.back().grid2Local_[0] = grid2Geometry.local(intersections[0]);
-            this->intersections_.back().grid2Local_[1] = grid2Geometry.local(intersections[1]);
+            this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(intersections[0]);
+            this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(intersections[1]);
 
             return;
 
@@ -219,12 +219,12 @@ private:
         this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0] = grid1Geometry.local(grid2ElementCorners[0]);
-        this->intersections_.back().grid1Local_[1] = grid1Geometry.local(grid2ElementCorners[1]);
+        this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(grid2ElementCorners[0]);
+        this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(grid2ElementCorners[1]);
 
         // Compute local coordinates in the grid2 element
-        this->intersections_.back().grid2Local_[0] = 0;
-        this->intersections_.back().grid2Local_[1] = 1;
+        this->intersections_.back().grid2Local_[0][0] = 0;
+        this->intersections_.back().grid2Local_[0][1] = 1;
 
         return;
       }
@@ -238,24 +238,24 @@ private:
               this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = grid1Geometry.local(grid2ElementCorners[0]);
-              this->intersections_.back().grid1Local_[1] = grid1Geometry.local(intersections[0]);
+              this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(grid2ElementCorners[0]);
+              this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(intersections[0]);
 
               // Compute local coordinates in the grid2 element
-              this->intersections_.back().grid2Local_[0] = 0;
-              this->intersections_.back().grid2Local_[1] = grid2Geometry.local(intersections[0]);
+              this->intersections_.back().grid2Local_[0][0] = 0;
+              this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(intersections[0]);
 
             } else if (inTriangle[1])
             {
               this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = grid1Geometry.local(intersections[0]);
-              this->intersections_.back().grid1Local_[1] = grid1Geometry.local(grid2ElementCorners[1]);
+              this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(intersections[0]);
+              this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(grid2ElementCorners[1]);
 
               // Compute local coordinates in the grid2 element
-              this->intersections_.back().grid2Local_[0] = grid2Geometry.local(intersections[0]);
-              this->intersections_.back().grid2Local_[1] = 1;
+              this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(intersections[0]);
+              this->intersections_.back().grid2Local_[0][1] = 1;
 
             }
 
@@ -271,12 +271,12 @@ private:
             this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
             // Compute local coordinates in the grid1 element
-            this->intersections_.back().grid1Local_[0] = grid1Geometry.local(intersections[0]);
-            this->intersections_.back().grid1Local_[1] = grid1Geometry.local(intersections[1]);
+            this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(intersections[0]);
+            this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(intersections[1]);
 
             // Compute local coordinates in the grid2 element
-            this->intersections_.back().grid2Local_[0] = grid2Geometry.local(intersections[0]);
-            this->intersections_.back().grid2Local_[1] = grid2Geometry.local(intersections[1]);
+            this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(intersections[0]);
+            this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(intersections[1]);
 
             return;
 
@@ -305,14 +305,14 @@ private:
             this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
             // Compute local coordinates in the grid1 element
-            this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[0]);
-            this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[1]);
-            this->intersections_.back().grid1Local_[2] = grid1Geometry.local(P[2]);
+            this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[0]);
+            this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[1]);
+            this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[2]);
 
             // Compute local coordinates in the grid1 element
-            this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[0]);
-            this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[1]);
-            this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[2]);
+            this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[0]);
+            this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[1]);
+            this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[2]);
 
         } else if (P.size() > 3) {
             Dune::FieldVector<T,dimworld> centroid(0.0);
@@ -329,14 +329,14 @@ private:
                 this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
                 // Compute local coordinates in the grid1 element
-                this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[no[i]]);
-                this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[no[(i+1)%(P.size())]]);
-                this->intersections_.back().grid1Local_[2] = grid1Geometry.local(centroid);
+                this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[no[i]]);
+                this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[no[(i+1)%(P.size())]]);
+                this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(centroid);
 
                 // Compute local coordinates in the grid2 element
-                this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[no[i]]);
-                this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[no[(i+1)%(P.size())]]);
-                this->intersections_.back().grid2Local_[2] = grid2Geometry.local(centroid);
+                this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[no[i]]);
+                this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[no[(i+1)%(P.size())]]);
+                this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(centroid);
 
             }
         }

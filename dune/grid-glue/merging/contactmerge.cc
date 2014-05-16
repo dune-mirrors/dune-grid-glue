@@ -160,12 +160,12 @@ void ContactMerge<dimworld, T>::computeIntersection(const Dune::GeometryType& gr
 
      //   std::cout<<"Add intersection: 1\n";
         typename Base::RemoteSimplicialIntersection intersect;
-        intersect.grid1Entity_ = grid1Index;
-        intersect.grid2Entity_ = grid2Index;
+        intersect.grid1Entities_[0] = grid1Index;
+        intersect.grid2Entities_[0] = grid2Index;
 
         for (int j=0;j<dim+1; j++) {
-            intersect.grid1Local_[j]=polytopeCorners[j][0];
-            intersect.grid2Local_[j]=polytopeCorners[j][1];
+            intersect.grid1Local_[0][j]=polytopeCorners[j][0];
+            intersect.grid2Local_[0][j]=polytopeCorners[j][1];
         }
         this->intersections_.push_back(intersect);
 
@@ -197,17 +197,17 @@ void ContactMerge<dimworld, T>::computeIntersection(const Dune::GeometryType& gr
     for (size_t i=0; i<polytopeCorners.size(); i++) {
 
         typename Base::RemoteSimplicialIntersection intersect;
-        intersect.grid1Entity_ = grid1Index;
-        intersect.grid2Entity_ = grid2Index;
+        intersect.grid1Entities_[0] = grid1Index;
+        intersect.grid2Entities_[0] = grid2Index;
 
         for (int j=0;j<dim; j++) {
-            intersect.grid1Local_[j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][0];
-            intersect.grid2Local_[j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][1];
+            intersect.grid1Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][0];
+            intersect.grid2Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][1];
         }
 
         // last corner is the center for all intersections
-        intersect.grid1Local_[dim]=center[0];
-        intersect.grid2Local_[dim]=center[1];
+        intersect.grid1Local_[0][dim]=center[0];
+        intersect.grid2Local_[0][dim]=center[1];
 
         this->intersections_.push_back(intersect);
     }

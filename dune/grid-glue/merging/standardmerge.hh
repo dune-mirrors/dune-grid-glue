@@ -82,13 +82,20 @@ protected:
 
     /** \brief Default constructor */
     RemoteSimplicialIntersection()
-    {}
+    {
+        grid1Entities_.resize(1);
+        grid2Entities_.resize(1);
+        grid1Local_.resize(1);
+        grid2Local_.resize(1);
+    }
 
     /** \brief Constructor for two given entity indices */
     RemoteSimplicialIntersection(int grid1Entity, int grid2Entity)
     {
         grid1Entities_.resize(1);
         grid2Entities_.resize(1);
+        grid1Local_.resize(1);
+        grid2Local_.resize(1);
 
         grid1Entities_[0] = grid1Entity;
         grid2Entities_[0] = grid2Entity;
@@ -695,7 +702,7 @@ template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parent(unsigned int idx, unsigned int parId) const
 {
   assert(valid);
-  return intersections_[idx].grid1Entity_;
+  return intersections_[idx].grid1Entities_[parId];
 }
 
 
@@ -703,7 +710,7 @@ template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2Parent(unsigned int idx, unsigned int parId) const
 {
   assert(valid);
-  return intersections_[idx].grid2Entity_;
+  return intersections_[idx].grid2Entities_[parId];
 }
 
 
@@ -711,7 +718,7 @@ template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid1Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   assert(valid);
-  return intersections_[idx].grid1Local_[corner];
+  return intersections_[idx].grid1Local_[parId][corner];
 }
 
 
@@ -719,7 +726,7 @@ template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid2Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   assert(valid);
-  return intersections_[idx].grid2Local_[corner];
+  return intersections_[idx].grid2Local_[parId][corner];
 }
 
 #define DECL extern

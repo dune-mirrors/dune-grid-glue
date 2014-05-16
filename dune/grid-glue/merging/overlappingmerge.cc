@@ -53,12 +53,12 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
       // Compute local coordinates in the grid1 element
-      this->intersections_.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid1Local_[1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+      this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
 
       // Compute local coordinates in the grid2 element
-      this->intersections_.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+      this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
 
       //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
 
@@ -93,14 +93,14 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[0]);
-        this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[i+1]);
-        this->intersections_.back().grid1Local_[2] = grid1Geometry.local(P[i+2]);
+        this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[0]);
+        this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[i+1]);
+        this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[i+2]);
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[0]);
-        this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[i+1]);
-        this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[i+2]);
+        this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[0]);
+        this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[i+1]);
+        this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[i+2]);
 
       }
 
@@ -122,16 +122,16 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[0]);
-        this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[1]);
-        this->intersections_.back().grid1Local_[2] = grid1Geometry.local(P[2]);
-        this->intersections_.back().grid1Local_[3] = grid1Geometry.local(P[3]);
+        this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[0]);
+        this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[1]);
+        this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[2]);
+        this->intersections_.back().grid1Local_[0][3] = grid1Geometry.local(P[3]);
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[0]);
-        this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[1]);
-        this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[2]);
-        this->intersections_.back().grid2Local_[3] = grid2Geometry.local(P[3]);
+        this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[0]);
+        this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[1]);
+        this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[2]);
+        this->intersections_.back().grid2Local_[0][3] = grid2Geometry.local(P[3]);
       }
       else
       {
@@ -177,16 +177,16 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
               this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[H[i][0]]);
-              this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[H[i][j+1]]);
-              this->intersections_.back().grid1Local_[2] = grid1Geometry.local(P[H[i][j+2]]);
-              this->intersections_.back().grid1Local_[3] = grid1Geometry.local(centroid);
+              this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[H[i][0]]);
+              this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[H[i][j+1]]);
+              this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[H[i][j+2]]);
+              this->intersections_.back().grid1Local_[0][3] = grid1Geometry.local(centroid);
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[H[i][0]]);
-              this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[H[i][j+1]]);
-              this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[H[i][j+2]]);
-              this->intersections_.back().grid2Local_[3] = grid2Geometry.local(centroid);
+              this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[H[i][0]]);
+              this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[H[i][j+1]]);
+              this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[H[i][j+2]]);
+              this->intersections_.back().grid2Local_[0][3] = grid2Geometry.local(centroid);
             }
         }
       }
