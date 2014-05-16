@@ -27,15 +27,15 @@ namespace {
     typedef Dune::FieldVector<ctype, grid1Dim>  GridCoords;
 
     static
-    unsigned int parent(const Parent & m, unsigned int idx)
+    unsigned int parent(const Parent & m, unsigned int idx, unsigned int parId = 0)
     {
-      return m.grid1Parent(idx);
+      return m.grid1Parent(idx, parId);
     }
 
     static
-    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner)
+    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner, unsigned int parId = 0)
     {
-      return m.grid1ParentLocal(idx, corner);
+      return m.grid1ParentLocal(idx, corner, parId);
     }
 
   };
@@ -49,15 +49,15 @@ namespace {
     typedef Dune::FieldVector<ctype, grid2Dim>  GridCoords;
 
     static
-    unsigned int parent(const Parent & m, unsigned int idx)
+    unsigned int parent(const Parent & m, unsigned int idx, unsigned int parId = 0)
     {
-      return m.grid2Parent(idx);
+      return m.grid2Parent(idx, parId);
     }
 
     static
-    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner)
+    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner, unsigned int parId = 0)
     {
-      return m.grid2ParentLocal(idx, corner);
+      return m.grid2ParentLocal(idx, corner, parId);
     }
 
   };
@@ -133,9 +133,9 @@ public:
    * @return index of the parent simplex
    */
   template<int n>
-  unsigned int parent(unsigned int idx) const
+  unsigned int parent(unsigned int idx, unsigned int parId = 0) const
   {
-    return GridTraits<n>::Policy::parent(*this, idx);
+    return GridTraits<n>::Policy::parent(*this, idx, parId);
   }
 
   /**
@@ -160,9 +160,9 @@ public:
    * @return local coordinates in grid-n grid1
    */
   template<int n>
-  typename GridTraits<n>::Coords parentLocal(unsigned int idx, unsigned int corner) const
+  typename GridTraits<n>::Coords parentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const
   {
-    return GridTraits<n>::Policy::parentLocal(*this, idx, corner);
+    return GridTraits<n>::Policy::parentLocal(*this, idx, corner, parId);
   }
 
   /** \brief Counts the number of times the computeIntersection method has been called
@@ -179,14 +179,14 @@ private:
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
    */
-  virtual unsigned int grid1Parent(unsigned int idx) const = 0;
+  virtual unsigned int grid1Parent(unsigned int idx, unsigned int parId = 0) const = 0;
 
   /**
    * @brief get index of grid2 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid2 parent simplex
    */
-  virtual unsigned int grid2Parent(unsigned int idx) const = 0;
+  virtual unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const = 0;
 
 
   /**
@@ -196,7 +196,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid1
    */
-  virtual Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const = 0;
 
   /**
    * @brief get the grid2 parent's simplex local coordinates for a particular merged grid simplex corner
@@ -205,7 +205,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid2
    */
-  virtual Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const = 0;
 
 };
 

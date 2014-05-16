@@ -97,14 +97,14 @@ private:
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
    */
-  unsigned int grid1Parent(unsigned int idx) const;
+  unsigned int grid1Parent(unsigned int idx, unsigned int parId = 0) const;
 
   /**
    * @brief get index of grid2 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid2 parent simplex
    */
-  unsigned int grid2Parent(unsigned int idx) const;
+  unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const;
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
 
@@ -115,7 +115,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid1 simplex
    */
-  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
 
   /**
    * @brief get the grid2 parent's simplex local coordinates for a particular merged grid simplex corner
@@ -124,7 +124,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid2 simplex
    */
-  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
 
 };
 
@@ -245,14 +245,14 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int ConformingMerge<dim, dimworld, T>::grid1Parent(unsigned int idx) const
+inline unsigned int ConformingMerge<dim, dimworld, T>::grid1Parent(unsigned int idx, unsigned int parId) const
 {
   return this->intersections_[idx].grid1Entity_;
 }
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int ConformingMerge<dim, dimworld, T>::grid2Parent(unsigned int idx) const
+inline unsigned int ConformingMerge<dim, dimworld, T>::grid2Parent(unsigned int idx, unsigned int parId) const
 {
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after grid1 parent indices!!
   return this->intersections_[idx].grid2Entity_;
@@ -260,14 +260,14 @@ inline unsigned int ConformingMerge<dim, dimworld, T>::grid2Parent(unsigned int 
 
 
 template<int dim, int dimworld, typename T>
-typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
+typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   return this->intersections_[idx].grid1Local_[corner];
 }
 
 
 template<int dim, int dimworld, typename T>
-typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
+typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   return this->intersections_[idx].grid2Local_[corner];
 }

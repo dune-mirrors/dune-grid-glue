@@ -385,14 +385,14 @@ private:
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
    */
-  unsigned int grid1Parent(unsigned int idx) const;
+  unsigned int grid1Parent(unsigned int idx, unsigned int k) const;
 
   /**
    * @brief get index of target parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the target parent simplex
    */
-  unsigned int grid2Parent(unsigned int idx) const;
+  unsigned int grid2Parent(unsigned int idx, unsigned int k) const;
 
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
@@ -404,7 +404,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid1 simplex
    */
-  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int k) const;
 
   /**
    * @brief get the target parent's simplex local coordinates for a particular merged grid simplex corner
@@ -413,7 +413,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent target simplex
    */
-  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int k) const;
 
 };
 
@@ -447,7 +447,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int idx, unsigned int k, unsigned int parId) const
 {
   assert(valid);
   return this->olm_.domain(idx).tris[0];
@@ -455,7 +455,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int id
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int idx, unsigned int k, unsigned int parId) const
 {
   assert(valid);
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!

@@ -210,14 +210,14 @@ private:
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
    */
-  unsigned int grid1Parent(unsigned int idx) const;
+  unsigned int grid1Parent(unsigned int idx, unsigned int parId = 0) const;
 
   /**
    * @brief get index of grid2 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid2 parent simplex
    */
-  unsigned int grid2Parent(unsigned int idx) const;
+  unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const;
 
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
@@ -229,7 +229,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid1 simplex
    */
-  Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner) const;
+  Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
 
   /**
    * @brief get the grid2 parent's simplex local coordinates for a particular merged grid simplex corner
@@ -238,7 +238,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid2 simplex
    */
-  Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner) const;
+  Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
 
 };
 
@@ -687,7 +687,7 @@ inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::nSimplices() co
 }
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parent(unsigned int idx) const
+inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parent(unsigned int idx, unsigned int parId) const
 {
   assert(valid);
   return intersections_[idx].grid1Entity_;
@@ -695,7 +695,7 @@ inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parent(uns
 
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2Parent(unsigned int idx) const
+inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2Parent(unsigned int idx, unsigned int parId) const
 {
   assert(valid);
   return intersections_[idx].grid2Entity_;
@@ -703,7 +703,7 @@ inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2Parent(uns
 
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid1Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
+typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid1Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   assert(valid);
   return intersections_[idx].grid1Local_[corner];
@@ -711,7 +711,7 @@ typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid1Coords StandardMerge<
 
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid2Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
+typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid2Coords StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   assert(valid);
   return intersections_[idx].grid2Local_[corner];
