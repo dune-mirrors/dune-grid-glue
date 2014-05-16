@@ -289,7 +289,8 @@ namespace Dune {
 
 #if HAVE_MPI
   /**
-     \brief specialization of the CommPolicy struct, required for the ParallelIndexsets
+   * \brief specialization of the CommPolicy struct, required for the ParallelIndexsets
+   * \internal
    */
   template<typename GG, class DataHandleImp, class DataTypeImp>
   struct CommPolicy< ::Dune::GridGlue::CommInfo<GG, DataHandleImp, DataTypeImp> >
