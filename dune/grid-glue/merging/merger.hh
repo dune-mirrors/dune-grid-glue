@@ -27,6 +27,12 @@ namespace {
     typedef Dune::FieldVector<ctype, grid1Dim>  GridCoords;
 
     static
+    unsigned int parents(const Parent & m, unsigned int idx)
+    {
+        return m.grid1Parents(idx);
+    }
+
+    static
     unsigned int parent(const Parent & m, unsigned int idx, unsigned int parId = 0)
     {
       return m.grid1Parent(idx, parId);
@@ -47,6 +53,12 @@ namespace {
 
     /// @brief the local coordinate type for the grid2 coordinates
     typedef Dune::FieldVector<ctype, grid2Dim>  GridCoords;
+
+    static
+    unsigned int parents(const Parent & m, unsigned int idx)
+    {
+      return m.grid2Parents(idx);
+    }
 
     static
     unsigned int parent(const Parent & m, unsigned int idx, unsigned int parId = 0)
@@ -174,6 +186,10 @@ public:
 
 private:
 
+  virtual unsigned int grid1Parents(unsigned int idx) const = 0;
+
+  virtual unsigned int grid2Parents(unsigned int idx) const = 0;
+
   /**
    * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
@@ -187,7 +203,6 @@ private:
    * @return index of the grid2 parent simplex
    */
   virtual unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const = 0;
-
 
   /**
    * @brief get the grid1 parent's simplex local coordinates for a particular merged grid simplex corner

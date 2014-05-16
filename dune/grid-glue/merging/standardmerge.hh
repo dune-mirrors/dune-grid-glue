@@ -218,6 +218,20 @@ private:
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
 
   /**
+   * @brief get number of grid1 parents to the intersection idx
+   * @param idx index of the merged grid simplex
+   * @return amount of parent simplices
+   */
+  unsigned int grid1Parents(unsigned int idx) const;
+
+  /**
+   * @brief get number of grid2 parents to the intersection idx
+   * @param idx index of the merged grid simplex
+   * @return amount of parent simplices
+   */
+  unsigned int grid2Parents(unsigned int idx) const;
+
+  /**
    * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
@@ -697,6 +711,21 @@ inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::nSimplices() co
   assert(valid);
   return intersections_.size();
 }
+
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parents(unsigned int idx) const
+{
+  assert(valid);
+  return (intersections_[idx].grid1Entities_).size();
+}
+
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid2Parents(unsigned int idx) const
+{
+  assert(valid);
+  return (intersections_[idx].grid2Entities_).size();
+}
+
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::grid1Parent(unsigned int idx, unsigned int parId) const
