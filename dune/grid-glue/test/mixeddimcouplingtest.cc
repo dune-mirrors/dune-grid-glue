@@ -40,7 +40,11 @@ public:
                         unsigned int face) const
   {
     const int dim = GridView::dimension;
+#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
     const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(eptr->type());
+#else
+    const Dune::GenericReferenceElement<double,dim>& refElement = Dune::GenericReferenceElements<double, dim>::general(eptr->type());
+#endif
 
     int numVertices = refElement.size(face, 1, dim);
 
@@ -125,8 +129,13 @@ void test1d2dCouplingMatchingDimworld()
   HorizontalFaceDescriptor<DomGridView> domdesc(0);
   AllElementsDescriptor<TarGridView>  tardesc;
 
+#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
   tarEx.positiveNormalDirection() = (slice == 0.0);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
@@ -188,9 +197,14 @@ void test2d1dCouplingMatchingDimworld()
   AllElementsDescriptor<DomGridView>  domdesc;
   HorizontalFaceDescriptor<TarGridView> tardesc(0);
 
+#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
-  domEx.positiveNormalDirection() = (slice == 0.0);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
+  domEx.positiveNormalDirection() = (slice == 0.0);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
@@ -325,9 +339,14 @@ void test2d1dCoupling(double slice=0.0)
   AllElementsDescriptor<DomGridView>  domdesc;
   HorizontalFaceDescriptor<TarGridView> tardesc(slice);
 
+#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
-  domEx.positiveNormalDirection() = (slice == 0.0);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
+  domEx.positiveNormalDirection() = (slice == 0.0);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
