@@ -138,6 +138,14 @@ public:
 
   virtual void clear() = 0;
 
+   /**
+    * doc me
+    */
+  template<int n>
+  unsigned int parents(unsigned int idx) const {
+    return GridTraits<n>::Policy::parents(*this, idx);
+  }
+
   /**
    * @brief get index of grid-n's parent simplex for given merged grid simplex
    * @tparam n specify which grid
