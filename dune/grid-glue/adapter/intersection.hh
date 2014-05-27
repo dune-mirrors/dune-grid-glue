@@ -150,7 +150,7 @@ namespace Dune {
 
               typename GridGlue::Grid0Patch::LocalGeometry
               grid0LocalGeometry = glue.template patch<0>().geometryLocal(grid0indices_[par]);
-
+              typename GridGlue::Grid0Patch::Geometry grid0WorldGeometry1 =  glue.template patch<0>().geometry(grid0indices_[par]);
               for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
                 corners_element_local[i] = grid0LocalGeometry.global(corners_subEntity_local[i]);
               }
@@ -228,7 +228,7 @@ namespace Dune {
                   corners_global[i]        = grid1WorldGeometry.global(corners_subEntity_local[i]);
                 }
 
-                grid1geom_      = make_shared<Grid0Geometry>(type, corners_global);
+                grid1geom_      = make_shared<Grid1Geometry>(type, corners_global);
               }
             }
         }
