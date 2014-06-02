@@ -4,6 +4,7 @@ TESTPROGS = \
     callmergertwicetest        \
     mixeddimcouplingtest       \
     mixeddimoverlappingtest    \
+    mixeddimoverlappingtest3D  \
     multivectortest            \
     nonoverlappingcouplingtest \
     overlappingcouplingtest
@@ -40,7 +41,9 @@ nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -DWR
 nonoverlappingcouplingtest_mpi_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
 endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
-mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc
+mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc -DWRITE_TO_VTK
+mixeddimcouplingtest3D_SOURCES = mixeddimcouplingtest3D.cc
+mixeddimoverlappingtest3D_SOURCES = mixeddimoverlappingtest3D.cc -DWRITE_TO_VTK
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
