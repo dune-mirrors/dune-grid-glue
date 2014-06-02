@@ -487,10 +487,10 @@ namespace Dune {
       /** \brief For parallel computations: Return true if outside() entity exists locally */
       size_t neighbor(unsigned int g = 0) const
       {
-          if (g == 0 && IntersectionDataView<P0,P1,0>::local(*i_)) {
-            return IntersectionDataView<P0,P1,0>::parents(*i_);
-          } else if (g == 1  && IntersectionDataView<P0,P1,1>::local(*i_)) {
-            return IntersectionDataView<P0,P1,1>::parents(*i_);
+          if (g == 0 && IntersectionDataView<P0,P1,O>::local(*i_)) {
+            return IntersectionDataView<P0,P1,O>::parents(*i_);
+          } else if (g == 1  && IntersectionDataView<P0,P1,I>::local(*i_)) {
+            return IntersectionDataView<P0,P1,I>::parents(*i_);
           }
           return 0;
       }
