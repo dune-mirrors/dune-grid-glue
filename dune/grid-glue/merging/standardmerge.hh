@@ -377,9 +377,9 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
 
   for (size_t i=0; i<grid1_element_types.size(); i++)
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    elementNeighbors1_[i].resize(Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1), -1);
+    elementNeighbors1_[i].resize(Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1)*6, -1);
 #else
-    elementNeighbors1_[i].resize(Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1), -1);
+    elementNeighbors1_[i].resize(27, -1);
 #endif
 
   for (size_t i=0; i<grid1_element_types.size(); i++) {
@@ -655,10 +655,37 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
             isCandidate0.insert(neighbor);
           }
 
+          //add neighbors of the neighbors: subneighbors
+          for (size_t j=0; j<elementNeighbors1_[neighbor].size(); j++) {
+
+            int subneighbor = elementNeighbors1_[neighbor][j];
+
+            if (subneighbor == -1)            //do nothing at the grid boundary
+              continue;
+
+             if (isHandled0.find(subneighbor) == isHandled0.end()
+                 && isCandidate0.find(subneighbor) == isCandidate0.end())  {
+              candidates0.push(subneighbor);
+              isCandidate0.insert(subneighbor);
+            }
+
+            //add neighbors of the subneighbors: subsubneighbors
+            for (size_t k=0; k<elementNeighbors1_[subneighbor].size(); k++) {
+
+              int subsubneighbor = elementNeighbors1_[subneighbor][k];
+
+              if (subsubneighbor == -1)            //do nothing at the grid boundary
+                continue;
+
+               if (isHandled0.find(subsubneighbor) == isHandled0.end()
+                  && isCandidate0.find(subsubneighbor) == isCandidate0.end())  {
+                candidates0.push(subsubneighbor);
+                isCandidate0.insert(subsubneighbor);
+              }
+            }
+          }
         }
-
       }
-
     }
 
     // We have now found all intersections of elements in the grid1 side with currentCandidate1
@@ -680,6 +707,35 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         break;
       }
 
+      //add neighbors of the neighbors: subneighbors
+      for (size_t j=0; j<elementNeighbors2_[neighbor].size(); j++) {
+
+        int subneighbor = elementNeighbors2_[neighbor][j];
+
+        if (subneighbor == -1)            //do nothing at the grid boundary
+          continue;
+
+        if (!isHandled1[subneighbor][0] && !isCandidate1[subneighbor][0] and seeds[subneighbor]>0) {
+          candidates1.push(subneighbor);
+          seedFound = true;
+          break;
+        }
+
+        //add neighbors of the subneighbors: subsubneighbors
+        for (size_t k=0; k<elementNeighbors2_[subneighbor].size(); k++) {
+
+          int subsubneighbor = elementNeighbors2_[subneighbor][k];
+
+          if (subsubneighbor == -1)            //do nothing at the grid boundary
+            continue;
+
+          if (!isHandled1[subsubneighbor][0] && !isCandidate1[subsubneighbor][0] and seeds[subsubneighbor]>0) {
+            candidates1.push(subsubneighbor);
+            seedFound = true;
+            break;
+          }
+        }
+      }
     }
 
     if (seedFound)

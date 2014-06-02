@@ -3,7 +3,7 @@
 #include <config.h>
 
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 //#include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/grid/sgrid.hh>
@@ -46,7 +46,6 @@ public:
   {
     y[0] = x[0]+0.2;
     y[1] = x[0]+0.1;
-    //y[2] = x[0]+0.3;
   }
 };
 
@@ -96,8 +95,8 @@ int main(int argc, char** argv)
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
 
-  DomExtractor domEx(grid0.leafView(), domdesc);
-  TarExtractor tarEx(grid1.leafView(), tardesc);
+  DomExtractor domEx(grid0.leafGridView(), domdesc);
+  TarExtractor tarEx(grid1.leafGridView(), tardesc);
 
   typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
 

@@ -34,7 +34,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
       DUNE_THROW(Dune::GridError, "You cannot hand a " << domain_element_types[i]
                                                        << " to a " << dim << "-dimensional PSurfaceMerge!");
 
-    expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(domain_element_types[i]).size(dim);
+    expectedCorners += Dune::ReferenceElements<ctype,dim>::general(domain_element_types[i]).size(dim);
 
   }
 
@@ -52,7 +52,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
       DUNE_THROW(Dune::GridError, "You cannot hand a " << target_element_types[i]
                                                        << " to a " << dim << "-dimensional PSurfaceMerge!");
 
-    expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(target_element_types[i]).size(dim);
+    expectedCorners += Dune::ReferenceElements<ctype,dim>::general(target_element_types[i]).size(dim);
 
   }
 
