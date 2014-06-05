@@ -317,7 +317,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
 
 template<int dim, int dimworld, typename T>
-typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   // get the simplex overlap
   const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
@@ -346,7 +346,7 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 
 
 template<int dim, int dimworld, typename T>
-typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   // get the simplex overlap
   const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
