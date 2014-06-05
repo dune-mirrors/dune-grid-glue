@@ -379,7 +379,8 @@ private:
 
 
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
-
+  unsigned int grid1Parents(unsigned int idx) const;
+  unsigned int grid2Parents(unsigned int idx) const;
   /**
    * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
@@ -445,6 +446,20 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
   return this->olm_.nOverlaps();
 }
 
+template<int dim, int dimworld, typename T>
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parents(unsigned int idx) const
+{
+  assert(valid);
+  return 1;
+}
+
+
+template<int dim, int dimworld, typename T>
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parents(unsigned int idx) const
+{
+  assert(valid);
+  return 1;
+}
 
 template<int dim, int dimworld, typename T>
 inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int idx, unsigned int parId) const
