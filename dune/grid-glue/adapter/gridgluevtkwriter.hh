@@ -48,6 +48,7 @@ class GridGlueVtkWriter
     fgrid.open(filename.c_str());
 
     typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0Patch, typename Glue::Grid1Patch>::type Extractor;
     typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
     typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
     typedef typename Dune::conditional<(side==0),
@@ -58,6 +59,7 @@ class GridGlueVtkWriter
 
     const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
+    const int patchDim = Extractor::dim - Extractor::codim;
 
     // coordinates have to be in R^3 in the VTK format
     std::string coordinatePadding;
@@ -68,11 +70,10 @@ class GridGlueVtkWriter
 
     // WRITE POINTS
     // ----------------
-    typedef typename Glue::Grid0Patch Extractor;
     std::vector<typename Extractor::Coords> coords;
     glue.template patch<side>().getCoords(coords);
 
-    fgrid << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
+    fgrid << ((patchDim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
     fgrid << "POINTS " << coords.size() << " " << Dune::className<ctype>() << std::endl;
 
     for (size_t i=0; i<coords.size(); i++)
@@ -92,7 +93,7 @@ class GridGlueVtkWriter
     for (size_t i=0; i<faces.size(); i++)
       faceCornerCount += faces[i].size();
 
-    fgrid << ((dim==3) ? "CELLS " : "POLYGONS ")
+    fgrid << ((patchDim==3) ? "CELLS " : "POLYGONS ")
           << geometryTypes.size() << " " << geometryTypes.size() + faceCornerCount << std::endl;
 
     for (size_t i=0; i<faces.size(); i++) {
@@ -133,7 +134,7 @@ class GridGlueVtkWriter
     fgrid << std::endl;
 
     // 3d VTK files need an extra section specifying the CELL_TYPES aka GeometryTypes
-    if (dim==3) {
+    if (patchDim==3) {
 
       fgrid << "CELL_TYPES " << geometryTypes.size() << std::endl;
 
@@ -197,6 +198,7 @@ class GridGlueVtkWriter
 
     const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
+    const int intersectionDim = Glue::Intersection::mydim;
 
     // coordinates have to be in R^3 in the VTK format
     std::string coordinatePadding;
@@ -213,8 +215,8 @@ class GridGlueVtkWriter
 
     // the merged grid (i.e. the set of remote intersections
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
-    fmerged << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
-    fmerged << "POINTS " << overlaps*(dim+1) << " " << Dune::className<ctype>() << std::endl;
+    fmerged << ((intersectionDim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
+    fmerged << "POINTS " << overlaps*(intersectionDim+1) << " " << Dune::className<ctype>() << std::endl;
 
     for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
          isIt != glue.template iend<side>();
@@ -237,7 +239,7 @@ class GridGlueVtkWriter
       faceCornerCount += faces[i].size();
 
     int grid0SimplexCorners = dim-Glue::Grid0Patch::codim+1;
-    fmerged << ((dim==3) ? "CELLS " : "POLYGONS ")
+    fmerged << ((intersectionDim==3) ? "CELLS " : "POLYGONS ")
             << overlaps << " " << (grid0SimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {
@@ -248,7 +250,7 @@ class GridGlueVtkWriter
     }
 
     // 3d VTK files need an extra section specifying the CELL_TYPES aka GeometryTypes
-    if (dim==3) {
+    if (intersectionDim==3) {
 
       fmerged << "CELL_TYPES " << overlaps << std::endl;
 
