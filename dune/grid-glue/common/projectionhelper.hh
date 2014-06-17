@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_GLUE_COMMON_PROJECTION_HELPER_HH
 #define DUNE_GRID_GLUE_COMMON_PROJECTION_HELPER_HH
 
+#include <bitset>
+
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
