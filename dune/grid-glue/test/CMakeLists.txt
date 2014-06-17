@@ -30,6 +30,12 @@ if(MPI_C_FOUND)
   add_dune_mpi_flags(nonoverlappingcouplingtest_mpi)
 endif(MPI_C_FOUND)
 
+if(UG_FOUND)
+  add_executable(disconnectedtest disconnectedtest.cc)
+  add_dune_ug_flags(disconnectedtest)
+  list(APPEND TESTS disconnectedtest)
+endif()
+
 foreach(_exe ${TESTS})
   add_dune_psurface_flags(${_exe})
   target_link_libraries(${_exe} "dunegridglue" ${DUNE_LIBS})

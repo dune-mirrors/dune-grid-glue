@@ -11,6 +11,9 @@ TESTPROGS = \
 if MPI
 TESTPROGS += nonoverlappingcouplingtest_mpi
 endif
+if UG
+TESTPROGS += disconnectedtest
+endif
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTPROGS)
@@ -30,6 +33,9 @@ LDADD       += $(UG_LIBS)
 callmergertwicetest_SOURCES = callmergertwicetest.cc
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
 nonoverlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) # -DCALL_MERGER_TWICE
+if UG
+disconnectedtest_SOURCES = disconnectedtest.cc
+endif
 if MPI
 nonoverlappingcouplingtest_mpi_SOURCES = nonoverlappingcouplingtest.cc
 nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -DWRITE_TO_VTK
