@@ -25,6 +25,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/bitsetvector.hh>
+#include <dune/common/version.hh>
 
 #include <dune/grid/common/grid.hh>
 
