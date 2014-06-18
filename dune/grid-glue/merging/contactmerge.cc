@@ -16,10 +16,8 @@ void ContactMerge<dimworld, T>::computeIntersection(const Dune::GeometryType& gr
     std::vector<Dune::array<LocalCoords,2> > polytopeCorners;
 
     // Initialize
-    for (int i=0; i<(1<<dim); i++) {
-        neighborIntersects1[i] = false;
-        neighborIntersects2[i] = false;
-    }
+    neighborIntersects1.reset();
+    neighborIntersects2.reset();
 
     const int nCorners1 = grid1ElementCorners.size();
     const int nCorners2 = grid2ElementCorners.size();
