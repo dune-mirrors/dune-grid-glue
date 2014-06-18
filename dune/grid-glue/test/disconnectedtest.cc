@@ -1,5 +1,15 @@
 #include "config.h"
 
+/** \file
+ * \brief Tests a disconnected coupling boundary
+ *
+ * StandardMerge contains some extra logic to make sure it finds the complete coupling boundary
+ * if that boundary has more than one connected component.  Since StandardMerge is an advancing
+ * front-type algorithm this does not work automatically.  This test therefore constructs
+ * a setting where the coupling boundary consists of two connected components, and tests whether
+ * ContactMerge (which is based on StandardMerge) finds both components.
+ */
+
 #include <cmath>
 #include <iostream>
 #include <limits>
