@@ -266,6 +266,17 @@ private:
    */
   Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
 
+  /**
+   * Do a brute-force search to find one pair of intersecting elements
+   * to start or continue the advancing-front type algorithm.
+   */
+  void generateSeed(std::vector<int>& seeds,
+                    Dune::BitSetVector<1>& isHandled2,
+                    std::stack<unsigned>& candidates2,
+                    const std::vector<Dune::FieldVector<T, dimworld> >& grid1Coords,
+                    const std::vector<Dune::GeometryType>& grid1_element_types,
+                    const std::vector<Dune::FieldVector<T, dimworld> >& grid2Coords,
+                    const std::vector<Dune::GeometryType>& grid2_element_types);
 };
 
 
@@ -538,18 +549,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   // Set flag if the element has been entered in the queue
   Dune::BitSetVector<1> isCandidate2(grid2_element_types.size());
 
-  for (std::size_t j=0; j<grid2_element_types.size(); j++) {
-
-    int seed = bruteForceSearch(j,grid1Coords,grid1_element_types,grid2Coords,grid2_element_types);
-
-    if (seed >=0) {
-      candidates2.push(j);        // the candidate and a seed for the candidate
-      seeds[j] = seed;
-      break;
-    } else // If the brute force search did not find any intersection we can skip this element
-        isHandled2[j] = true;
-
-  }
+  generateSeed(seeds, isHandled2, candidates2, grid1Coords, grid1_element_types, grid2Coords, grid2_element_types);
 
   // /////////////////////////////////////////////////////////////////////
   //   Main loop
@@ -563,7 +563,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
     // Get the next element on the grid2 side
     unsigned int currentCandidate2 = candidates2.top();
-    unsigned int seed = seeds[currentCandidate2];
+    int seed = seeds[currentCandidate2];
     assert(seed >= 0);
 
     candidates2.pop();
@@ -693,11 +693,17 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         // we have a seed now
         candidates2.push(neighbor);
         seeds[neighbor] = seed;
+        seedFound = true;
 
       }
 
     }
 
+    /* Do a brute-force search if there is still no seed:
+     * There might still be a disconnected region out there.
+     */
+    if (!seedFound)
+      generateSeed(seeds, isHandled2, candidates2, grid1Coords, grid1_element_types, grid2Coords, grid2_element_types);
   }
 
   valid = true;
@@ -756,6 +762,25 @@ typename StandardMerge<T,grid1Dim,grid2Dim,dimworld>::Grid2Coords StandardMerge<
 {
   assert(valid);
   return intersections_[idx].grid2Local_[parId][corner];
+}
+
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::generateSeed(std::vector<int>& seeds, Dune::BitSetVector<1>& isHandled2, std::stack<unsigned>& candidates2, const std::vector<Dune::FieldVector<T, dimworld> >& grid1Coords, const std::vector<Dune::GeometryType>& grid1_element_types, const std::vector<Dune::FieldVector<T, dimworld> >& grid2Coords, const std::vector<Dune::GeometryType>& grid2_element_types)
+{
+  for (std::size_t j=0; j<grid2_element_types.size(); j++) {
+
+    if (seeds[j] > 0 || isHandled2[j][0])
+      continue;
+
+    int seed = bruteForceSearch(j,grid1Coords,grid1_element_types,grid2Coords,grid2_element_types);
+
+    if (seed >= 0) {
+      candidates2.push(j);        // the candidate and a seed for the candidate
+      seeds[j] = seed;
+      break;
+    } else // If the brute force search did not find any intersection we can skip this element
+      isHandled2[j] = true;
+  }
 }
 
 #define DECL extern
