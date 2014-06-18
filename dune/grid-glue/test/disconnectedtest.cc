@@ -48,7 +48,7 @@ public:
     }
 };
 
-void insert_cube(GridFactory& factory, unsigned int& vertex, const Vector& offset)
+void insertCube(GridFactory& factory, unsigned int& vertex, const Vector& offset)
 {
   std::vector<unsigned int> vertices;
 
@@ -67,7 +67,7 @@ void insert_cube(GridFactory& factory, unsigned int& vertex, const Vector& offse
   factory.insertElement(type, vertices);
 }
 
-bool test_disconnected(const std::string& name, MyMerger& merger)
+bool testDisconnected(const std::string& name, MyMerger& merger)
 {
   std::cout << "TEST: " << name << std::endl
             << "===================" << std::endl;
@@ -79,9 +79,9 @@ bool test_disconnected(const std::string& name, MyMerger& merger)
     unsigned int vertex(0);
     GridFactory factory;
     Vector offset(0); offset[dim-1] = i;
-    insert_cube(factory, vertex, offset);
+    insertCube(factory, vertex, offset);
     offset[0] = 2;
-    insert_cube(factory, vertex, offset);
+    insertCube(factory, vertex, offset);
     grids[i] = GridPtr(factory.createGrid());
   }
 
@@ -122,12 +122,12 @@ int main()
 
   {
     ContactMerge<dim> merger(0.0);
-    pass &= test_disconnected("ContactMerge", merger);
+    pass &= testDisconnected("ContactMerge", merger);
   }
 #if HAVE_PSURFACE
   {
     PSurfaceMerge<dim-codim, dim> merger;
-    pass &= test_disconnected("PSurfaceMerge", merger);
+    pass &= testDisconnected("PSurfaceMerge", merger);
   }
 #endif
 
