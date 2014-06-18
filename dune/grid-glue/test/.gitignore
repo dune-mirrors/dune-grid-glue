@@ -4,8 +4,10 @@ Makefile
 *.o
 *.log
 *.trs
+*.vtk
 
 callmergertwicetest
+disconnectedtest
 mixeddimcouplingtest
 mixeddimoverlappingtest
 multivectortest
