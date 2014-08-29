@@ -26,7 +26,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/merger.hh>
-
+#include <dune/grid-glue/merging/computeIntersection.hh>
 
 
 /** \brief Common base class for many merger implementations: produce pairs of entities that _may_ intersect
@@ -313,7 +313,7 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
                       grid2_element_types[candidate1], grid2ElementCorners, candidate1, neighborIntersects2);
 
   // Have we found an intersection?
-  return (intersections_.size() > oldNumberOfIntersections);
+  return (intersections_.size() > oldNumberOfIntersections || neighborIntersects1.any() || neighborIntersects2.any());
 
 }
 
@@ -333,7 +333,8 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::testIntersection(unsigned int 
                                                                    const std::vector<Dune::GeometryType>& grid2_element_types,
                                                                    std::bitset<(1<<grid2Dim)>& neighborIntersects2)
 {
-  unsigned int oldNumberOfIntersections = intersections_.size();
+  typedef typename Dune::GridGlue::SimplexMethod<dimworld,grid1Dim,grid2Dim,T> CM;
+  typedef typename Dune::GridGlue::IntersectionComputation<CM> IC;
 
   // Select vertices of the grid1 element
   int grid1NumVertices = grid1ElementCorners_[candidate0].size();
@@ -351,17 +352,12 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::testIntersection(unsigned int 
   //   Compute the intersection between the two elements
   // ///////////////////////////////////////////////////////
 
-  computeIntersection(grid1_element_types[candidate0], grid1ElementCorners, candidate0, neighborIntersects1,
-                      grid2_element_types[candidate1], grid2ElementCorners, candidate1, neighborIntersects2);
+  std::vector<std::vector<int> > SX(1<<grid1Dim),SY(1<<grid2Dim);
+  std::vector<Dune::FieldVector<T,dimworld> > surfPts;
 
-  // Have we found an intersection?
-  bool intersectionFound = (intersections_.size() > oldNumberOfIntersections);
+  bool intersectionFound = IC::computeIntersection(grid1ElementCorners,grid2ElementCorners,SX,SY,surfPts);
 
-  // very stupid: delete the compute intersection again
-  while (intersections_.size()> oldNumberOfIntersections)
-    intersections_.pop_back();
-
-  return intersectionFound;
+  return (intersectionFound || surfPts.size() > 0);
 }
 
 
@@ -413,7 +409,7 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTyp
     elementNeighbors[i].resize(Dune::GenericReferenceElements<T,gridDim>::general(gridElementTypes[i]).size(1), -1);
 #endif
 
-  for (size_t i=0; i<gridElementTypes.size(); i++) {
+  for (size_t i=0; i<gridElementTypes.size(); i++) { //iterate over all elements
 
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
     const Dune::ReferenceElement<T,gridDim>& refElement = Dune::ReferenceElements<T,gridDim>::general(gridElementTypes[i]);
@@ -421,7 +417,7 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTyp
     const Dune::GenericReferenceElement<T,gridDim>& refElement = Dune::GenericReferenceElements<T,gridDim>::general(gridElementTypes[i]);
 #endif
 
-    for (size_t j=0; j<(size_t)refElement.size(1); j++) {
+    for (size_t j=0; j<(size_t)refElement.size(1); j++) { // iterate over all faces of the element
 
       FaceType face;
       // extract element face
@@ -620,7 +616,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     // candidates.
 
     // Do we have an unhandled neighbor with a seed?
-    bool seedFound = false;
+    bool seedFound = !candidates2.empty();
     for (size_t i=0; i<elementNeighbors2_[currentCandidate2].size(); i++) {
 
       int neighbor = elementNeighbors2_[currentCandidate2][i];
@@ -635,7 +631,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         candidates2.push(neighbor);
         seedFound = true;
       }
-
     }
 
     if (seedFound)
@@ -665,6 +660,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           bool intersectionFound = testIntersection(*seedIt, neighbor,
                                                     grid1Coords,grid1_element_types, neighborIntersects1,
                                                     grid2Coords,grid2_element_types, neighborIntersects2);
+          std::cout << "fallback 01\n";
 
           // if the intersection is nonempty, *seedIt is our new seed candidate on the grid1 side
           if (intersectionFound) {
@@ -680,6 +676,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           seed = bruteForceSearch(neighbor,
                                   grid1Coords,grid1_element_types,
                                   grid2Coords,grid2_element_types);
+          std::cout << "fallback 02\n";
 
         }
 
@@ -702,8 +699,10 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
     /* Do a brute-force search if there is still no seed:
      * There might still be a disconnected region out there.
      */
-    if (!seedFound)
+    if (!seedFound && candidates2.empty()) {
       generateSeed(seeds, isHandled2, candidates2, grid1Coords, grid1_element_types, grid2Coords, grid2_element_types);
+      std::cout << "fallback 03\n";
+    }
   }
 
   valid = true;
@@ -782,6 +781,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::generateSeed(std::vector<int>&
       isHandled2[j] = true;
   }
 }
+
 
 #define DECL extern
 #define STANDARD_MERGE_INSTANTIATE(T,A,B,C) \
