@@ -116,19 +116,18 @@ protected:
 
   /** \brief Compute the intersection between two overlapping elements
 
-     The result is a set of simplices.
+     The result is a set of simplices stored in the vector intersections.
    */
-  virtual void computeIntersection(const Dune::GeometryType& grid1ElementType,
+  virtual void computeIntersections(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
-                                   unsigned int grid1Index,
                                    std::bitset<(1<<grid1Dim)>& neighborIntersects1,
                                    const Dune::GeometryType& grid2ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
-                                   unsigned int grid2Index,
-                                   std::bitset<(1<<grid2Dim)>& neighborIntersects2) = 0;
+                                   std::bitset<(1<<grid2Dim)>& neighborIntersects2,
+                                   std::vector<RemoteSimplicialIntersection>& intersections) = 0;
 
   /** \brief Compute the intersection between two overlapping elements
-   * \return true if there was a nonempty intersection
+   * \return true if at least one intersection point was found
    */
   bool computeIntersection(unsigned int candidate0, unsigned int candidate1,
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
@@ -136,18 +135,8 @@ protected:
                            std::bitset<(1<<grid1Dim)>& neighborIntersects1,
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
                            const std::vector<Dune::GeometryType>& grid2_element_types,
-                           std::bitset<(1<<grid2Dim)>& neighborIntersects2);
-
-  int bruteForceSearch(int candidate1,
-                       const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
-                       const std::vector<Dune::GeometryType>& grid1_element_types,
-                       const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
-                       const std::vector<Dune::GeometryType>& grid2_element_types);
-
-  template <int gridDim>
-  void computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTypes,
-                                  const std::vector<std::vector<unsigned int> >& gridElementCorners,
-                                  std::vector<std::vector<int> >& elementNeighbors);
+                           std::bitset<(1<<grid2Dim)>& neighborIntersects2,
+                           bool insert = true);
 
   /*   M E M B E R   V A R I A B L E S   */
 
@@ -266,6 +255,33 @@ private:
                     const std::vector<Dune::GeometryType>& grid1_element_types,
                     const std::vector<Dune::FieldVector<T, dimworld> >& grid2Coords,
                     const std::vector<Dune::GeometryType>& grid2_element_types);
+
+  /**
+    * Insert intersections into this->intersection_ and return index
+    */
+  int insertIntersections(std::vector<RemoteSimplicialIntersection>& intersections);
+
+  /**
+    * compare two Intersections
+    */
+  bool compareIntersections(RemoteSimplicialIntersection& is1, RemoteSimplicialIntersection& is2);
+
+  /**
+   * Find a grid2 element intersecting the candidate1 grid1 element by brute force search
+   */
+  int bruteForceSearch(int candidate1,
+                       const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
+                       const std::vector<Dune::GeometryType>& grid1_element_types,
+                       const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
+                       const std::vector<Dune::GeometryType>& grid2_element_types);
+
+  /**
+   * get the neighbor relations between the given elements
+   */
+  template <int gridDim>
+  void computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTypes,
+                                  const std::vector<std::vector<unsigned int> >& gridElementCorners,
+                                  std::vector<std::vector<int> >& elementNeighbors);
 };
 
 
