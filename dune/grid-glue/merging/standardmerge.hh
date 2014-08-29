@@ -138,17 +138,6 @@ protected:
                            const std::vector<Dune::GeometryType>& grid2_element_types,
                            std::bitset<(1<<grid2Dim)>& neighborIntersects2);
 
-  /** \brief Test whether there is a nonempty intersection between two overlapping elements
-   * \return true if there was a nonempty intersection
-   */
-  bool testIntersection(unsigned int candidate0, unsigned int candidate1,
-                        const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
-                        const std::vector<Dune::GeometryType>& grid1_element_types,
-                        std::bitset<(1<<grid1Dim)>& neighborIntersects1,
-                        const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
-                        const std::vector<Dune::GeometryType>& grid2_element_types,
-                        std::bitset<(1<<grid2Dim)>& neighborIntersects2);
-
   int bruteForceSearch(int candidate1,
                        const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
                        const std::vector<Dune::GeometryType>& grid1_element_types,
@@ -316,50 +305,6 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
   return (intersections_.size() > oldNumberOfIntersections || neighborIntersects1.any() || neighborIntersects2.any());
 
 }
-
-
-/** \note The implementation of this is very ugly: we compute the entire intersection,
- * which gets appended to the list of all intersections.  Then we throw it away again.
- * I'm afraid in the interest of speed this will have to be another pure virtual method.
- * The implementation (child) classes can usually determine whether an intersection
- * is nonempty without having to compute it entirely first.
- */
-template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::testIntersection(unsigned int candidate0, unsigned int candidate1,
-                                                                   const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
-                                                                   const std::vector<Dune::GeometryType>& grid1_element_types,
-                                                                   std::bitset<(1<<grid1Dim)>& neighborIntersects1,
-                                                                   const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
-                                                                   const std::vector<Dune::GeometryType>& grid2_element_types,
-                                                                   std::bitset<(1<<grid2Dim)>& neighborIntersects2)
-{
-  typedef typename Dune::GridGlue::SimplexMethod<dimworld,grid1Dim,grid2Dim,T> CM;
-  typedef typename Dune::GridGlue::IntersectionComputation<CM> IC;
-
-  // Select vertices of the grid1 element
-  int grid1NumVertices = grid1ElementCorners_[candidate0].size();
-  std::vector<Dune::FieldVector<T,dimworld> > grid1ElementCorners(grid1NumVertices);
-  for (int i=0; i<grid1NumVertices; i++)
-    grid1ElementCorners[i] = grid1Coords[grid1ElementCorners_[candidate0][i]];
-
-  // Select vertices of the grid2 element
-  int grid2NumVertices = grid2ElementCorners_[candidate1].size();
-  std::vector<Dune::FieldVector<T,dimworld> > grid2ElementCorners(grid2NumVertices);
-  for (int i=0; i<grid2NumVertices; i++)
-    grid2ElementCorners[i] = grid2Coords[grid2ElementCorners_[candidate1][i]];
-
-  // ///////////////////////////////////////////////////////
-  //   Compute the intersection between the two elements
-  // ///////////////////////////////////////////////////////
-
-  std::vector<std::vector<int> > SX(1<<grid1Dim),SY(1<<grid2Dim);
-  std::vector<Dune::FieldVector<T,dimworld> > surfPts;
-
-  bool intersectionFound = IC::computeIntersection(grid1ElementCorners,grid2ElementCorners,SX,SY,surfPts);
-
-  return (intersectionFound || surfPts.size() > 0);
-}
-
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::bruteForceSearch(int candidate1,
