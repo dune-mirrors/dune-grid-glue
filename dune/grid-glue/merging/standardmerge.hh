@@ -19,6 +19,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/bitsetvector.hh>
+#include <dune/common/stdstreams.hh>
 #include <dune/common/timer.hh>
 #include <dune/common/version.hh>
 
@@ -556,7 +557,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
                                                    grid2Coords,grid2_element_types, neighborIntersects2);
 
       for (size_t i=0; i<neighborIntersects2.size(); i++)
-        if (neighborIntersects2[i] and elementNeighbors2_[currentCandidate2][i] != -1)
+        if (neighborIntersects2[i] && elementNeighbors2_[currentCandidate2][i] != -1)
           seeds[elementNeighbors2_[currentCandidate2][i]] = currentCandidate1;
 
       // add neighbors of candidate0 to the list of elements to be checked
@@ -595,7 +596,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         continue;
 
       // Add all unhandled intersecting neighbors to the queue
-      if (!isHandled2[neighbor][0] && !isCandidate2[neighbor][0] and seeds[neighbor]>-1) {
+      if (!isHandled2[neighbor][0] && !isCandidate2[neighbor][0] && seeds[neighbor]>-1) {
 
         isCandidate2[neighbor][0] = true;
         candidates2.push(neighbor);
@@ -635,6 +636,8 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           // if the intersection is nonempty, *seedIt is our new seed candidate on the grid1 side
           if (intersectionFound) {
             seed = *seedIt;
+            dwarn << "Algorithm entered first fallback method and found a new seed in the build algorithm." <<
+                     "Probably, the neighborIntersects bitsets computed in computeIntersection specialization is wrong." << std::endl;
             break;
           }
 
@@ -646,15 +649,15 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           seed = bruteForceSearch(neighbor,
                                   grid1Coords,grid1_element_types,
                                   grid2Coords,grid2_element_types);
-          std::cout << "fallback 02\n";
+          dwarn << "Algorithm entered second fallback method. This probably should not happen." << std::endl;
 
         }
 
         // We have tried all we could: the candidate is 'handled' now
         isCandidate2[neighbor] = true;
 
+        // still no seed?  Then the new grid2 candidate isn't overlapped by anything
         if (seed < 0)
-          // still no seed?  Then the new grid2 candidate isn't overlapped by anything
           continue;
 
         // we have a seed now
@@ -671,7 +674,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
      */
     if (!seedFound && candidates2.empty()) {
       generateSeed(seeds, isHandled2, candidates2, grid1Coords, grid1_element_types, grid2Coords, grid2_element_types);
-      std::cout << "fallback 03\n";
     }
   }
 
