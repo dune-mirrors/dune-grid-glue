@@ -337,13 +337,14 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::bruteForceSearch(int candidate1
                                                                   const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
                                                                   const std::vector<Dune::GeometryType>& grid2_element_types)
 {
+  std::bitset<(1<<grid1Dim)> neighborIntersects1;
+  std::bitset<(1<<grid2Dim)> neighborIntersects2;
   for (std::size_t i=0; i<grid1_element_types.size(); i++) {
 
-    std::bitset<(1<<grid1Dim)> neighborIntersects1;
-    std::bitset<(1<<grid2Dim)> neighborIntersects2;
-    bool intersectionFound = testIntersection(i, candidate1,
-                                              grid1Coords,grid1_element_types, neighborIntersects1,
-                                              grid2Coords,grid2_element_types, neighborIntersects2);
+    bool intersectionFound = computeIntersection(i, candidate1,
+                                                 grid1Coords, grid1_element_types, neighborIntersects1,
+                                                 grid2Coords, grid2_element_types, neighborIntersects2,
+                                                 false);
 
     // if there is an intersection, i is our new seed candidate on the grid1 side
     if (intersectionFound)
