@@ -627,10 +627,10 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
           std::bitset<(1<<grid1Dim)> neighborIntersects1;
           std::bitset<(1<<grid2Dim)> neighborIntersects2;
-          bool intersectionFound = testIntersection(*seedIt, neighbor,
-                                                    grid1Coords,grid1_element_types, neighborIntersects1,
-                                                    grid2Coords,grid2_element_types, neighborIntersects2);
-          std::cout << "fallback 01\n";
+          bool intersectionFound = computeIntersection(*seedIt, neighbor,
+                                                       grid1Coords, grid1_element_types, neighborIntersects1,
+                                                       grid2Coords, grid2_element_types, neighborIntersects2,
+                                                       false);
 
           // if the intersection is nonempty, *seedIt is our new seed candidate on the grid1 side
           if (intersectionFound) {
