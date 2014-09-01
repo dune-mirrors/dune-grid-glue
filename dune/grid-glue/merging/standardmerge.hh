@@ -294,10 +294,9 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
                                                                       std::bitset<(1<<grid1Dim)>& neighborIntersects1,
                                                                       const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
                                                                       const std::vector<Dune::GeometryType>& grid2_element_types,
-                                                                      std::bitset<(1<<grid2Dim)>& neighborIntersects2)
+                                                                      std::bitset<(1<<grid2Dim)>& neighborIntersects2,
+                                                                      bool insert)
 {
-  unsigned int oldNumberOfIntersections = intersections_.size();
-
   // Select vertices of the grid1 element
   int grid1NumVertices = grid1ElementCorners_[candidate0].size();
   std::vector<Dune::FieldVector<T,dimworld> > grid1ElementCorners(grid1NumVertices);
@@ -314,11 +313,20 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
   //   Compute the intersection between the two elements
   // ///////////////////////////////////////////////////////
 
-  computeIntersection(grid1_element_types[candidate0], grid1ElementCorners, candidate0, neighborIntersects1,
-                      grid2_element_types[candidate1], grid2ElementCorners, candidate1, neighborIntersects2);
+  std::vector<RemoteSimplicialIntersection> intersections(0);
+
+  // compute the intersections
+  computeIntersection(grid1_element_types[candidate0], grid1ElementCorners, neighborIntersects1,
+                      grid2_element_types[candidate1], grid2ElementCorners, neighborIntersects2,
+                      intersections);
+
+  // insert intersections if needed
+  if(insert)
+      insertIntersections(intersections);
+
 
   // Have we found an intersection?
-  return (intersections_.size() > oldNumberOfIntersections || neighborIntersects1.any() || neighborIntersects2.any());
+  return (intersections.size() > 0 && (neighborIntersects1.any() || neighborIntersects2.any()));
 
 }
 
