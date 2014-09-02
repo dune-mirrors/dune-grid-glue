@@ -274,7 +274,8 @@ private:
   /**
    * Get the index of the intersection in intersections_ (= size if it is a new intersection)
    */
-  unsigned int intersectionIndex(RemoteSimplicialIntersection& intersection);
+  unsigned int intersectionIndex(unsigned int grid1Index, unsigned int grid2Index,
+                                 RemoteSimplicialIntersection& intersection);
 
   /**
    * get the neighbor relations between the given elements
@@ -762,7 +763,7 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
 
     for (size_t i = 0; i < intersections.size(); ++i) {
         // get the intersection index of the current intersection from intersections in this->intersections
-        unsigned int index = intersectionIndex(intersections[i]);
+        unsigned int index = intersectionIndex(intersections[i],candidate1,candidate2);
 
         if (index >= this->intersections_.size()) { //the intersection is not yet contained in this->intersections
             this->intersections_.push_back(intersections[i]);   // insert
@@ -794,7 +795,8 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
 }
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(RemoteSimplicialIntersection& intersection) {
+unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(unsigned int grid1Index, unsigned int grid2Index,
+                                                                            RemoteSimplicialIntersection& intersection) {
 
     int n_intersections = this->intersections_.size();
 
@@ -809,9 +811,6 @@ unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(Remo
 
         // iterate over all local representations
         for (unsigned m = 0; m < intersection.grid1Entities_.size(); ++m) {
-
-            unsigned int grid1Index = intersection.grid1Entities_[m];
-            unsigned int grid2Index = intersection.grid2Entities_[m];
 
             for (i=n_intersections-1; i >=  0; --i) {
                 n_parents1 = this->intersections_[i].grid1Entities_.size();
