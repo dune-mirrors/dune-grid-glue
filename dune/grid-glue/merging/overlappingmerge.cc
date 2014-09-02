@@ -1,677 +1,288 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include <algorithm>
-#include <dune/common/typetraits.hh>
 
-#include <dune/geometry/multilineargeometry.hh>
+#ifndef DUNE_GRIDGLUE_OVERLAPPINGMERGE_CC
+#define DUNE_GRIDGLUE_OVERLAPPINGMERGE_CC
+//#include <algorithm>
 
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::
-computeIntersection(const Dune::GeometryType& grid1ElementType,
-                    const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
-                    unsigned int grid1Index,
-                    std::bitset<(1<<dim)>& neighborIntersects1,
-                    const Dune::GeometryType& grid2ElementType,
-                    const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
-                    unsigned int grid2Index,
-                    std::bitset<(1<<dim)>& neighborIntersects2)
+namespace Dune {
+namespace GridGlue {
+
+template<int dim1, int dim2, int dimworld, typename T>
+bool OverlappingMerge<dim1,dim2,dimworld, T>::inPlane(std::vector<FieldVector<T,dimworld> >& points) {
+
+    T eps = 1e-8;
+
+    assert(dim1 == 3 && dim2 == 3 && dimworld == 3);
+    assert(points.size() == 4);
+
+    FieldVector<T,dimworld> v1 = points[1]-points[0];
+    FieldVector<T,dimworld> v2 = points[2]-points[0];
+    FieldVector<T,dimworld> v3 = points[3]-points[0];
+
+    FieldVector<T,dimworld> v1xv2;
+    v1xv2[0] = v1[1]*v2[2] - v1[2]*v2[1];
+    v1xv2[1] = v1[2]*v2[0] - v1[0]*v2[2];
+    v1xv2[2] = v1[0]*v2[1] - v1[1]*v2[0];
+
+    return (std::abs(v3.dot(v1xv2)) < eps);
+}
+
+template<int dim1, int dim2, int dimworld, typename T>
+int OverlappingMerge<dim1,dim2,dimworld, T>::intersectionIndex(int grid1Index, int grid2Index,
+                                                                  std::vector<FieldVector<T,dim1> > & g1Local,
+                                                                  std::vector<FieldVector<T,dim2> > & g2Local) {
+
+    int n_intersections = this->intersections_.size();
+
+    if (dim1 != dim2)  {
+        int i,j,k,l;
+        int isDim = std::min(dim1,dim2);
+        int n_parents1, n_parents2;
+        bool b1,b2;
+        T d;
+        T eps = 1e-10;
+
+        for (i=n_intersections-1; i >=  0; --i) {
+            n_parents1 = this->intersections_[i].grid1Entities_.size();
+            n_parents2 = this->intersections_[i].grid2Entities_.size();
+
+            if (n_parents1 > 0 || n_parents2 > 0) {
+                for (j = 0; j < n_parents1; ++j) {
+                    b2 = true;
+
+                    // an existing intersection candidate must be contained in at least one grid elem already
+                    if (this->intersections_[i].grid1Entities_[j] == grid1Index) {
+                        // start comparing local grid 1 intersection geometries to local grid 1 nodes
+                        for (k = 0; k < isDim+1; ++k) {
+                            b1 = false;
+                            FieldVector<T,dim1>  v = this->intersections_[i].grid1Local_[j][k];
+                            for (l = 0; l < isDim+1; ++l) {
+                                FieldVector<T,dim1> w = g1Local[l];
+                                d = (v-w).infinity_norm();
+                                b1 = b1 || (d < eps);
+                                if (d < eps)
+                                    break;
+                            }
+
+                            b2 = b2 && b1;
+
+                            if (!b2)
+                                break;
+
+                        }
+
+                        if (b2){
+                            return i;
+                        }
+                    }
+                }
+                for (j = 0; j < n_parents2;++j) {
+                    b2 = true;
+
+                    // an existing intersection candidate must be contained in at least one grid elem already
+                    if (this->intersections_[i].grid2Entities_[j] == grid2Index) {
+
+                        // start comparing local grid 1 intersection geometries to local grid 1 nodes
+                        for (k = 0; k < isDim+1; ++k) {
+                            b1 = false;
+                            FieldVector<T,dim2> v = this->intersections_[i].grid2Local_[j][k];
+                            for (l = 0; l < isDim+1; ++l) {
+                                FieldVector<T,dim2> w = g2Local[l];
+                                d = (v-w).infinity_norm();
+                                b1 = b1 || (d < eps);
+                                if (d < eps)
+                                    break;
+                            }
+
+                            b2 = b2 && b1;
+                            if (!b2)
+                                break;
+                        }
+
+                        if (b2)  {
+                            return i;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return n_intersections;
+}
+
+template<int dim1, int dim2, int dimworld, typename T>
+void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
+                                                                     const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
+                                                                     unsigned int grid1Index,
+                                                                     std::bitset<(1<<dim1)>& neighborIntersects1,
+                                                                     const Dune::GeometryType& grid2ElementType,
+                                                                     const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                                                                     unsigned int grid2Index,
+                                                                     std::bitset<(1<<dim2)>& neighborIntersects2)
 {
-  this->counter++;
+    this->counter++;
 
-  // A few consistency checks
+    typedef SimplexMethod<dimworld,dim1,dim2,T> CM;
+
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-  assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
-  assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
+    const Dune::ReferenceElement<T,dim1>& refElement1 = Dune::ReferenceElements<T,dim1>::general(grid1ElementType);
+    const Dune::ReferenceElement<T,dim2>& refElement2 = Dune::ReferenceElements<T,dim2>::general(grid2ElementType);
 #else
-  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
-  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
+    const Dune::GenericReferenceElement<T,dim1>& refElement1 = Dune::GenericReferenceElements<T,dim1>::general(grid1ElementType);
+    const Dune::GenericReferenceElement<T,dim2>& refElement2 = Dune::GenericReferenceElements<T,dim2>::general(grid2ElementType);
 #endif
 
-  // Make generic geometries representing the grid1- and grid2 element.
-  // this eases computation of local coordinates.
-  typedef Dune::CachedMultiLinearGeometry<T,dim,dim> Geometry;
+    // A few consistency checks
+    assert((unsigned int)(refElement1.size(dim1)) == grid1ElementCorners.size());
+    assert((unsigned int)(refElement2.size(dim2)) == grid2ElementCorners.size());
 
-  Geometry grid1Geometry(grid1ElementType, grid1ElementCorners);
-  Geometry grid2Geometry(grid2ElementType, grid2ElementCorners);
+    // Make generic geometries representing the grid1- and grid2 element.
+    // this eases computation of local coordinates.
+    typedef CachedMultiLinearGeometry<T,dim1,dimworld> Geometry1;
+    typedef CachedMultiLinearGeometry<T,dim2,dimworld> Geometry2;
 
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
+    Geometry1 grid1Geometry(grid1ElementType, grid1ElementCorners);
+    Geometry2 grid2Geometry(grid2ElementType, grid2ElementCorners);
 
-  switch (dim) {
-  case 1 : {
+    // get size_type for all the vectors we are using
+    typedef typename std::vector<Empty>::size_type size_type;
 
-    // Check consistent orientation
-    // \todo Reverse the orientation if this check fails
-    assert(grid1ElementCorners[0][0] <= grid1ElementCorners[1][0]);
-    assert(grid2ElementCorners[0][0] <= grid2ElementCorners[1][0]);
+    const int dimis = dim1 < dim2 ? dim1 : dim2;
+    const size_type n_intersectionnodes = dimis+1;
+    size_type i, isindex;
 
-    T lowerBound = std::max(grid1ElementCorners[0][0], grid2ElementCorners[0][0]);
-    T upperBound = std::min(grid1ElementCorners[1][0], grid2ElementCorners[1][0]);
+    std::vector<FieldVector<T,dimworld> >  P(0);
+    std::vector<std::vector<int> >          H,SX(1<<dim1),SY(1<<dim2);
+    FieldVector<T,dimworld>                centroid;
+    std::vector<FieldVector<T,dim1> > g1local(n_intersectionnodes);
+    std::vector<FieldVector<T,dim2> > g2local(n_intersectionnodes);
 
-    if (lowerBound <= upperBound) {      // Intersection is non-empty
+    // compute the intersection nodes
+    bool b = IntersectionComputation<CM>::computeIntersection(grid1ElementCorners,grid2ElementCorners,SX,SY,P);
 
-      this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
-
-      // Compute local coordinates in the grid1 element
-      this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
-
-      // Compute local coordinates in the grid2 element
-      this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
-
-      //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
-
+    for (size_type i = 0; i < neighborIntersects1.size(); ++i) {
+        if (i < SX.size())
+            neighborIntersects1[i] = (SX[i].size() > 0);
+        else
+            neighborIntersects1[i] = false;
     }
-    break;
-  }
-  case 2 : {
+    for (size_type i = 0; i < neighborIntersects2.size(); ++i) {
+        if (i < SY.size())
+            neighborIntersects2[i] = (SY[i].size() > 0);
+        else
+            neighborIntersects2[i] = false;
+    }
 
-    std::vector<Dune::FieldVector<T,dim> >  P;
+    // P is an simplex of dimension dimis
+    if (P.size() == n_intersectionnodes) {
 
-    // find the intersections of any segment of the two triangles.
-    edgeIntersections2D(grid1ElementCorners,grid2ElementCorners,P);
+        for (i = 0; i < n_intersectionnodes; ++i) {
+            g1local[i] = grid1Geometry.local(P[i]);
+            g2local[i] = grid2Geometry.local(P[i]);
+        }
+        isindex = intersectionIndex(grid1Index,grid2Index,g1local,g2local);  // check whether the intersection is contained in the intersections already
+        bool isinplane = false;
+        if (dimis == 3)
+            isinplane = inPlane(P);
 
-    // add the points of grid1 in grid2 and of grid2 in grid1.
-    pointsofXinY2D(grid1ElementCorners,grid2ElementCorners,P);
-    pointsofXinY2D(grid2ElementCorners,grid1ElementCorners,P);
+        if (isindex >= this->intersections_.size() && !isinplane) { // a new intersection is found
+            this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+            for (i = 0; i < n_intersectionnodes; ++i) {
+                this->intersections_.back().grid1Local_[0][i] = g1local[i];
+                this->intersections_.back().grid2Local_[0][i] = g2local[i];
+            }
 
-    // sort points counter clock wise and removes duplicates
-    if (P.size()>=3)
-      sortAndRemoveDoubles2D(P);
+        } else if (isindex < this->intersections_.size() && !isinplane) {// intersections equal
 
-    //      TO check if the previous function made a good job, uncomment the next lines.
-    //
-    //        if (P.size()>=3) {   for ( size_type i=0 ; i < 3 ; ++i) std::cout << " grid1 " << grid1ElementCorners[i] << std::endl ;
-    //                             for ( size_type i=0 ; i < 3 ; ++i) std::cout << " grid2 " << grid2ElementCorners[i] << std::endl ;
-    //                             std::cout << " Size E " << P.size() << std::endl ;
-    //                             for ( size_type i=0 ; i < P.size() ; ++i) std::cout << " P " << P[i] << std::endl ;  }
+            array<FieldVector<T,dim1>, n_intersectionnodes > g1localarr;
+            array<FieldVector<T,dim2>, n_intersectionnodes > g2localarr;
 
-    if (P.size()>=3)
-      for ( size_type i=0 ; i < P.size() - 2 ; ++i) {
+            for (i = 0; i < n_intersectionnodes; ++i) {
+                g1localarr[i] = g1local[i];
+                g2localarr[i] = g2local[i];
+            }
 
-        this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+            // not efficient, we push back local coordinates of at least one element twice
+            this->intersections_[isindex].grid1Local_.push_back(g1localarr);
+            this->intersections_[isindex].grid2Local_.push_back(g2localarr);
+            this->intersections_[isindex].grid1Entities_.push_back(grid1Index);
+            this->intersections_[isindex].grid2Entities_.push_back(grid2Index);
+        }
+    } else if (P.size() > n_intersectionnodes) {  // P is a union of simplices of dimension dimis
 
-        // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[0]);
-        this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[i+1]);
-        this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[i+2]);
+        assert(dimis != 1);
+        std::vector<FieldVector<T,dimworld> > global(n_intersectionnodes);
 
-        // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[0]);
-        this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[i+1]);
-        this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[i+2]);
-
-      }
-
-    break;
-  }
-  case 3 : {
-
-    std::vector<Dune::FieldVector<T,dim> >  P;
-    std::vector<std::vector<int> >          H,SX(4),SY(4);
-    Dune::FieldVector<T,dim>                centroid;
-
-    // Compute intersections ( Create SX, SY and P )
-    intersections3D(grid1ElementCorners,grid2ElementCorners,SX,SY,P) ;
-
-    if (P.size()>=4) {
-
-      if (P.size()==4) {         // if the intersection is one tetrahedron, no need to go further
-
-        this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
-
-        // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[0]);
-        this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[1]);
-        this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[2]);
-        this->intersections_.back().grid1Local_[0][3] = grid1Geometry.local(P[3]);
-
-        // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[0]);
-        this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[1]);
-        this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[2]);
-        this->intersections_.back().grid2Local_[0][3] = grid2Geometry.local(P[3]);
-      }
-      else
-      {
         // Compute the centroid
         centroid=0;
         for (size_type i=0; i < P.size(); i++)
-          centroid += P[i] ;
+            centroid += P[i] ;
         centroid /= static_cast<T>(P.size()) ;
 
-        // Sorte each faces ( Create H )
+        // order the points and get intersection face indices
         H.clear() ;
-        sorting3D(centroid,SX,SY,P,H) ;
+        IntersectionComputation<CM>::template orderPoints<dimis,dimworld>(centroid,SX,SY,P,H);
 
-        /*      TO check if the previous routines made a good job, uncomment the next lines.
+        //  Loop over all intersection elements
+        for (size_type i=0; i < H.size(); i++) {
+            int hs = H[i].size(); // number of nodes of the intersection
 
-                std::cout << " ------------------------------------------------------------ " << std::endl ;
+            // if the intersection element is not degenerated
+            if (hs==dimis) {
 
-                   for ( size_type i=0 ; i < 4 ; ++i) std::cout << " grid1 " << grid1ElementCorners[i] << std::endl ;
-                   for ( size_type i=0 ; i < 4 ; ++i) std::cout << " grid2 " << grid2ElementCorners[i] << std::endl ;
-                   std::cout << " +++ Size P " << P.size() << std::endl ;
-                   for ( size_type i=0 ; i < P.size() ; ++i) std::cout << " P " << P[i] << std::endl ;
+                // create the intersection geometry
+                for ( size_type j=0 ; j < dimis; ++j) {
+                    global[j]= P[H[i][j]]; // get the intersection face
+                }
 
-                   std::cout << " +++ SX " << std::endl ;
-                   for ( size_type i=0; i < SX.size() ; i++)
-                        { for ( size_type j=0 ; j < SX[i].size() ; ++j)  {   std::cout  << SX[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
+                // intersection face + centroid = new element
+                global[dimis]=centroid;
 
-                   std::cout << " +++ SY " << std::endl ;
-                   for ( size_type i=0; i < SY.size() ; i++)
-                        { for ( size_type j=0 ; j < SY[i].size() ; ++j)  {   std::cout  << SY[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
+                // create local representation of the intersection
+                for (size_type j = 0; j < n_intersectionnodes; ++j) {
+                    g1local[j] = grid1Geometry.local(global[j]);
+                    g2local[j] = grid2Geometry.local(global[j]);
+                }
 
-                   std::cout << " +++ H " << std::endl ;
-                   for ( size_type i=0; i < H.size() ; i++)
-                        { for ( size_type j=0 ; j < H[i].size() ; ++j)   {   std::cout  << H[i][j] << "  ;  "  ; }  std::cout << std::endl ; }
-         */
+                // do not insert degenerated elements
+                bool isinplane = false;
+                if (dimis == 3)
+                    isinplane = inPlane(global);
 
-        //  Loop over all facets
-        for (size_type i=0; i < H.size() ; i++) {
-          //  Loop over all triangles of facets if the face is not degenerated
-          if (H[i].size()>=3)
-            for ( size_type j=0 ; j < H[i].size() - 2 ; ++j) {
+                // check whether the intersection is contained in the intersections already
+                isindex = intersectionIndex(grid1Index,grid2Index,g1local,g2local);
 
-              // Output the tetrahedron (anchor, next, nextNext, centroid)
-              this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+                if (isindex >= this->intersections_.size()  && !isinplane) { // a new intersection is found
+                    this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+                    for (size_type j = 0; j < n_intersectionnodes; ++j) {
+                        this->intersections_.back().grid1Local_[0][j] = g1local[j];
+                        this->intersections_.back().grid2Local_[0][j] = g2local[j];
+                    }
 
-              // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[H[i][0]]);
-              this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[H[i][j+1]]);
-              this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[H[i][j+2]]);
-              this->intersections_.back().grid1Local_[0][3] = grid1Geometry.local(centroid);
+                } else if (isindex < this->intersections_.size() && !isinplane) {// intersections equal
 
-              // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[H[i][0]]);
-              this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[H[i][j+1]]);
-              this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[H[i][j+2]]);
-              this->intersections_.back().grid2Local_[0][3] = grid2Geometry.local(centroid);
+                    array<FieldVector<T,dim1>, n_intersectionnodes > g1localarr;
+                    array<FieldVector<T,dim2>, n_intersectionnodes > g2localarr;
+
+                    for (size_type j = 0; j < n_intersectionnodes; ++j) {
+                        g1localarr[j] = g1local[j];
+                        g2localarr[j] = g2local[j];
+                    }
+
+                    // not efficient, we push back local coordinates of at least one element twice
+                    this->intersections_[isindex].grid1Local_.push_back(g1localarr);
+                    this->intersections_[isindex].grid2Local_.push_back(g2localarr);
+                    this->intersections_[isindex].grid1Entities_.push_back(grid1Index);
+                    this->intersections_[isindex].grid2Entities_.push_back(grid2Index);
+                }
             }
         }
-      }
     }
-
-    break;
-  }
-  default :
-    DUNE_THROW(Dune::NotImplemented, "OverlappingMerge is not implemented for dim==" << dim << "!");
-
-  }
-
 }
 
-// -------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------
-//
-//                               2 D   sub  routines !
-//
-// -------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------
+} /* namespace Dune::GridGlue */
+} /* namespace Dune */
 
-
-//  Computes edge intersections of two triangles for the two given triangles X and Y
-//  (point coordinates are stored column-wise, in counter clock order) the points P where their edges intersect.
-
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::edgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >& X,
-                                                    const std::vector<Dune::FieldVector<T,dim> >& Y,
-                                                    std::vector<Dune::FieldVector<T,dim> > & P )
-{
-
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
-
-  Dune::FieldVector<T,dim>  p,r ;
-  Dune::FieldMatrix<T,dim,dim>  A ;
-
-  for ( size_type i=0; i<3; ++i)
-    for ( size_type j=0; j<3; ++j)
-    {
-
-      Dune::FieldVector<T,dim> B = Y[j] - X[i] ;
-
-      int I = (i+1)%3 ;
-      int J = (j+1)%3 ;
-
-      A[0][0] =  X[I][0] - X[i][0] ;  A[1][0] =  X[I][1] - X[i][1] ;
-      A[0][1] =  Y[j][0] - Y[J][0] ;  A[1][1] =  Y[j][1] - Y[J][1] ;
-
-      if (A.determinant()!=0) {
-
-        A.solve(r,B) ;
-
-        if ((r[0]>=0)&&(r[0]<=1)&&(r[1]>=0)&&(r[1]<=1)) {
-          p = X[I] - X[i] ;
-          p *= r[0] ;
-          p += X[i] ;
-          P.push_back(p);
-        }
-      }
-    }
-
-}
-
-// PointsofXinY finds corners of one triangle within another one, computes for the two given triangles X
-// and Y (point coordinates are stored column-wise, in counter clock  order) the corners P of X which lie in the interior of Y.
-
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::pointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
-                                               const std::vector<Dune::FieldVector<T,dim> >   Y,
-                                               std::vector<Dune::FieldVector<T,dim> > & P )
-{
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
-
-  Dune::FieldMatrix<double,dim,dim> A ;
-  Dune::FieldVector<double,dim>  v0 ,v1 ,v2, U, B  ;
-
-  v0 = Y[1] - Y[0] ;
-  v1 = Y[2] - Y[0] ;
-
-  A[0][0] = v0*v0 ;
-  A[0][1] = v0*v1 ;
-  A[1][0] = v1*v0 ;
-  A[1][1] = v1*v1 ;
-
-  for ( size_type i=0; i<3; ++i) {
-    v2 = X[i] - Y[0];
-    B[0] = v0*v2 ;
-    B[1] = v1*v2 ;
-    A.solve(U,B) ;
-    if ((U[0]>=0)&&(U[1]>=0)&&(U[0]+U[1]<=1))
-      P.push_back(X[i]);
-  }
-
-}
-
-//  SortAndRemoveDoubles: orders polygon corners in P counter clock wise and removes duplicates
-
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::sortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P )
-{
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
-
-  Dune::FieldVector<double,dim> c ;
-  std::vector< double > ai ;
-
-  // build barycentre c of all these points
-  c = 0 ;
-  for ( size_type i=0; i < P.size(); i++)
-    c += P[i] ;
-  c /= static_cast<T>(P.size()) ;
-
-  // definition of angles
-  for ( size_type i=0; i < P.size(); i++)
-    ai.push_back(atan2(P[i][1]-c[1],P[i][0]-c[0]));
-
-  // sort according to increasing angles
-  for ( size_type j=1; j < ai.size(); j++)
-    for ( size_type i=0; i < j; i++) if (ai[j]<ai[i]) {
-        std::swap<double>(ai[i],ai[j]);
-        std::swap<Dune::FieldVector<double,dim> >(P[i],P[j]);
-      }
-
-  //  Remove exact Doubles
-  P.erase(std::unique(P.begin(), P.end()), P.end());
-
-  // If for some reasons, one wants to eliminate also very close neighbouring (up to a distance eps)
-  // then just coment the previous line, ad uncomment the next ones.
-
-  //        double eps=1.e-10 ;
-  //        std::vector<Dune::FieldVector<double,dim> >   Q = P ;
-  //        P.clear() ;
-  //        P.push_back(Q[0]) ;
-  //        for ( size_type j=1; j < Q.size(); j++) if ((P[P.size()-1] - Q[j]).infinity_norm()>eps) P.push_back(Q[j]) ;
-
-}
-
-// -------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------
-//
-//                               3D subroutines !
-//
-// -------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------
-
-//  INTERSECTIONS computes edge intersections of two triangles for the two given triangles X and Y
-//  (point coordinates are stored column-wise, in counter clock order) the points P where their edges intersect.
-
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::intersections3D( const std::vector<Dune::FieldVector<T,dim> >   X,
-                                                const std::vector<Dune::FieldVector<T,dim> >   Y,
-                                                std::vector<std::vector<int> >         & SX,
-                                                std::vector<std::vector<int> >         & SY,
-                                                std::vector<Dune::FieldVector<T,dim> > & P )
-{
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
-
-  int l1[6],l2[6],s1[6],s2[6],ni[4][3] ;
-  Dune::FieldVector<T,dim>  p ;
-  int k ;
-
-  l1[0]= 0 ; l1[1]= 1 ; l1[2]= 2 ; l1[3]= 3 ; l1[4]= 0 ; l1[5]= 1 ;   //  enumeration of lines
-  l2[0]= 1 ; l2[1]= 2 ; l2[2]= 3 ; l2[3]= 0 ; l2[4]= 2 ; l2[5]= 3 ;
-
-  s1[0]= 0 ; s1[1]= 0 ; s1[2]= 1 ; s1[3]= 2 ; s1[4]= 0 ; s1[5]= 1 ;   // faces touching each line
-  s2[0]= 3 ; s2[1]= 1 ; s2[2]= 2 ; s2[3]= 3 ; s2[4]= 2 ; s2[5]= 3 ;
-
-  ni[0][0]= 0 ;   ni[0][1]= 2 ;   ni[0][2]= 3 ;   // faces touching each node
-  ni[1][0]= 0 ;   ni[1][1]= 1 ;   ni[1][2]= 3 ;
-  ni[2][0]= 0 ;   ni[2][1]= 1 ;   ni[2][2]= 2 ;
-  ni[3][0]= 1 ;   ni[3][1]= 2 ;   ni[3][2]= 3 ;
-
-  //  find the intersection of edges of X vs triangles of Y
-
-  for ( size_type i=0; i<6; ++i) for ( size_type j=0; j<4; ++j)
-    {
-      p = 0 ;
-      if (triangleLineIntersection3D(X[l1[i]],X[l2[i]],Y[j],Y[(j+1)%4],Y[(j+2)%4],p))
-      {
-        k=insertPoint3D(p,P) ;
-        SY[j].push_back(k) ;                 // remember to which surfaces
-        SX[s1[i]].push_back(k) ;
-        SX[s2[i]].push_back(k) ;
-      }
-    }
-
-  //  find the intersection of edges of Y vs triangles of X
-
-  for ( size_type i=0; i<6; ++i) for ( size_type j=0; j<4; ++j)
-    {
-      p = 0 ;
-      if (triangleLineIntersection3D(Y[l1[i]],Y[l2[i]],X[j],X[(j+1)%4],X[(j+2)%4],p))
-      {
-        k=insertPoint3D(p,P) ;
-        SX[j].push_back(k) ;                // remember to which surfaces
-        SY[s1[i]].push_back(k) ;
-        SY[s2[i]].push_back(k) ;
-      }
-    }
-
-  // find the points of X in Y
-
-  for ( size_type i=0; i<4; ++i)
-  {
-    if (pointInTetrahedra3D(X[i],Y))
-    {
-      k=insertPoint3D(X[i],P) ;
-      SX[ni[i][0]].push_back(k) ;             // remember to which surfaces
-      SX[ni[i][1]].push_back(k) ;
-      SX[ni[i][2]].push_back(k) ;
-    }
-  }
-
-  // find the points of Y in X
-
-  for ( size_type i=0; i<4; ++i)
-  {
-    if (pointInTetrahedra3D(Y[i],X))
-    {
-      k=insertPoint3D(Y[i],P) ;
-      SY[ni[i][0]].push_back(k) ;               // remember to which surfaces
-      SY[ni[i][1]].push_back(k) ;
-      SY[ni[i][2]].push_back(k) ;
-    }
-  }
-
-}
-
-// SORTING ROUTINE
-
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::sorting3D( const Dune::FieldVector<T,dim>    centroid,
-                                          const std::vector<std::vector<int> >           SX,
-                                          const std::vector<std::vector<int> >           SY,
-                                          const std::vector<Dune::FieldVector<T,dim> >   P,
-                                          std::vector<std::vector<int> >               & H)
-{
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
-
-  // sorting
-  int m ;
-  std::vector<int> no,id,temp ;
-  std::vector<Dune::FieldVector<T,dim> > p ;
-
-  if (P.size()>3)
-  {
-    for ( size_type i=0; i<4; ++i)
-    {
-      if (SX[i].size()>0)         // loop on faces of X
-      {
-        no = SX[i] ;
-        removeDuplicates(no) ;
-        m = no.size() ;
-        if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons and check if face is new
-        {
-          for ( size_type l=0; l<m; ++l)
-            p.push_back(P[no[l]]) ;
-          orderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
-          for ( size_type l=0; l<m; ++l)
-            temp.push_back(no[id[l]]) ;
-          H.push_back(temp) ;
-          temp.clear();
-          p.clear();
-          id.clear();                 // clean
-        }
-        no.clear() ;             // clean
-      }
-      if (SY[i].size()>0)         // loop on faces of Y
-      {
-        no = SY[i] ;
-        removeDuplicates(no) ;
-        m = no.size() ;
-        if ((m>2) && newFace3D(no,H))               // don't compute degenerate polygons  and check if face is new
-        {
-          m = no.size() ;
-          for ( size_type l=0; l<m; ++l)
-            p.push_back(P[no[l]]) ;
-          orderPoints3D(centroid,id,p) ;                                   // order points counter-clock-wise
-          for ( size_type l=0; l<m; ++l)
-            temp.push_back(no[id[l]]) ;
-          H.push_back(temp) ;
-          temp.clear();
-          p.clear();
-          id.clear();                 // clean
-        }
-        no.clear() ;             // clean
-      }
-    }
-  }
-
-}
-
-//   TRIANGLELINEINTERSECTION intersection of a line and a triangle TriangeLineIntersection(X,Y,P);
-//   computes for a given line X in 3d,  and a triangle Y in 3d, the point p of intersection in the
-//   triangle, and otherwise returns p=[];
-
-template<int dim, typename T>
-bool OverlappingMerge<dim, T>::triangleLineIntersection3D( const Dune::FieldVector<T,dim>    X0,
-                                                           const Dune::FieldVector<T,dim>    X1,
-                                                           const Dune::FieldVector<T,dim>    Y0,
-                                                           const Dune::FieldVector<T,dim>    Y1,
-                                                           const Dune::FieldVector<T,dim>    Y2,
-                                                           Dune::FieldVector<T,dim>   & p)
-{
-  Dune::FieldVector<T,dim>      B,r ;
-  Dune::FieldMatrix<T,dim,dim>  A ;
-  bool found = false ;
-
-  B = Y0 - X0 ;
-
-  A[0][0] =  X1[0] - X0[0] ;  A[0][1] =  Y0[0] - Y1[0] ;  A[0][2] =  Y0[0] - Y2[0] ;
-  A[1][0] =  X1[1] - X0[1] ;  A[1][1] =  Y0[1] - Y1[1] ;  A[1][2] =  Y0[1] - Y2[1] ;
-  A[2][0] =  X1[2] - X0[2] ;  A[2][1] =  Y0[2] - Y1[2] ;  A[2][2] =  Y0[2] - Y2[2] ;
-
-  if (A.determinant()!=0) {
-
-    A.solve(r,B) ;
-
-    if ((r[0]>=0)&&(r[0]<=1)&&(r[1]>=0)&&(r[1]<=1)&&(r[2]>=0)&&((r[1]+r[2])<=1)) {
-      p =  X1 - X0 ;
-      p *= r[0] ;
-      p += X0 ;
-      found = true ;
-    }
-
-  }
-  return found ;
-}
-
-//   POINTINTETRAHEDRA check if the point X is contained in the tetrahedra Y.
-
-template<int dim, typename T>
-bool OverlappingMerge<dim, T>::pointInTetrahedra3D( const Dune::FieldVector<T,dim>                 X,
-                                                    const std::vector<Dune::FieldVector<T,dim> >   Y)
-{
-  Dune::FieldMatrix<T,dim+1,dim+1>  D,DD ;
-  T D0,D1,D2,D3,D4 ;
-
-  D[0][0] =  Y[0][0] ;  D[0][1] =  Y[1][0] ;  D[0][2] =  Y[2][0] ;  D[0][3] =  Y[3][0] ;
-  D[1][0] =  Y[0][1] ;  D[1][1] =  Y[1][1] ;  D[1][2] =  Y[2][1] ;  D[1][3] =  Y[3][1] ;
-  D[2][0] =  Y[0][2] ;  D[2][1] =  Y[1][2] ;  D[2][2] =  Y[2][2] ;  D[2][3] =  Y[3][2] ;
-  D[3][0] =        1 ;  D[3][1] =        1 ;  D[3][2] =        1 ;  D[3][3] =        1 ;
-
-  D0 = D.determinant() ;
-
-  DD = D ; DD[0][0] = X[0] ; DD[1][0] = X[1] ; DD[2][0] = X[2] ; D1 = DD.determinant() ;
-  DD = D ; DD[0][1] = X[0] ; DD[1][1] = X[1] ; DD[2][1] = X[2] ; D2 = DD.determinant() ;
-  DD = D ; DD[0][2] = X[0] ; DD[1][2] = X[1] ; DD[2][2] = X[2] ; D3 = DD.determinant() ;
-  DD = D ; DD[0][3] = X[0] ; DD[1][3] = X[1] ; DD[2][3] = X[2] ; D4 = DD.determinant() ;
-
-  return ((D0*D1>=0)&&(D0*D2>=0)&&(D0*D3>=0)&&(D0*D4>=0)) ;
-}
-
-//  INSERTPOINT inserts an intersection point p into the list of intersection points P. If the point p is already
-//  contained in P, the point is not inserted, and k is the index of the point found in the list. Otherwise,
-//  the new point is inserted, and k is its index in the list.
-
-template<int dim, typename T>
-int OverlappingMerge<dim, T>::insertPoint3D( const Dune::FieldVector<T,dim>  p, std::vector<Dune::FieldVector<T,dim> > &  P)
-{
-  double eps= 1.e-10 ;     // tolerance for identical nodes
-  int k=0 ;
-
-  if (P.size()>0) {
-
-    while ((k<P.size())&&((p - P[k]).infinity_norm()>eps))
-      k++ ;
-
-    if (k>=P.size())
-      P.push_back(p) ;        //  new node is not contained in P
-
-  }
-  else
-    P.push_back(p);
-
-  return k ;
-}
-
-// REMOVEDUPLICATES removes duplicate entries from the vector p.
-
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::removeDuplicates( std::vector<int> & p)
-{
-  sort(p.begin(),p.end());
-  std::vector<int>::iterator it = std::unique(p.begin(),p.end());
-  p.erase(it,p.end());
-}
-
-//   ORDERPOINTS order points counterclockwise [p,id]=OrderPoints(p,centroid); orders the points in a plane in 3d
-//   stored columnwise in the matrix p counterclockwise looking from the side opposite to the point centroid
-//   outside the plane. There must be more than two points. p contains the reorderd points, and id
-//   contains the index reordering.
-
-template<int dim, typename T>
-void OverlappingMerge<dim, T>::orderPoints3D(const Dune::FieldVector<T,dim>     centroid,
-                                             std::vector<int> &                      id,
-                                             std::vector<Dune::FieldVector<T,dim> >  & P)
-{
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
-
-  Dune::FieldVector<T,dim> c,d1,d2,dr,dn,cross,d ;
-  std::vector<T> ai ;
-
-  d1 = P[1] - P[0] ;    // two reference vectors
-  d2 = P[2] - P[0] ;
-
-  cross[0] = d1[1]*d2[2] - d1[2]*d2[1] ;    // cross product
-  cross[1] = d1[2]*d2[0] - d1[0]*d2[2] ;
-  cross[2] = d1[0]*d2[1] - d1[1]*d2[0] ;
-
-  if (((centroid - P[0])*cross)<0)   // good orientation ?
-  {
-    dr = d1 ;
-    dr /= dr.two_norm()  ;       // 'x-axis' unit vector
-    dn = dr ;
-    dn *= -(d2*dr) ;
-    dn += d2 ;
-    dn /= dn.two_norm()  ;       // 'y-axis' unit vector
-  }
-  else
-  {
-    dr = d2 ;
-    dr /= dr.two_norm()  ;       // 'y-axis' unit vector
-    dn = dr ;
-    dn *= -(d1*dr) ;
-    dn += d1 ;
-    dn /= dn.two_norm()  ;        // 'x-axis' unit vector
-  }
-
-  // definition of angles, using projection on the local reference, ie by scalarly multipliying by dr and dn resp.
-  for ( size_type j=1 ; j < P.size() ; j++)
-  {
-    ai.push_back(atan2((P[j]-P[0])*dn,(P[j]-P[0])*dr)) ;
-    id.push_back(j) ;
-  }
-
-  // sort according to increasing angles
-  for ( size_type j=1; j < ai.size(); j++)
-    for ( size_type i=0; i < j; i++)
-      if (ai[j]<ai[i]) {
-        std::swap<T>(ai[i],ai[j]) ;
-        std::swap<int>(id[i],id[j]) ;
-      }
-
-  id.insert(id.begin(),0) ;
-}
-
-// NEWFACE checks if index set is contained already in H  b=NewFace(H,id) checks if a permutation
-// of the vector id is contained in a row of the matrix H.
-
-template<int dim, typename T>
-bool OverlappingMerge<dim, T>::newFace3D(const std::vector<int> id, const std::vector<std::vector<int> > H)
-{
-  // get size_type for all the vectors we are using
-  typedef typename std::vector<Dune::Empty>::size_type size_type;
-
-  int n = H.size() ;
-  int m = id.size() ;
-  std::vector<int> A ;
-  std::vector<int> B = id ;
-  sort(B.begin(),B.end()) ;
-  int i = 0 ;
-  bool b = true ;
-  double tp ;
-
-  while ( b && (i<n) )
-  {
-    if ((H[i].size())>=m)
-    {
-      A=H[i] ;
-      sort(A.begin(),A.end());
-      tp = 0 ;
-      for ( size_type j=0 ; j < m; j++)
-        tp += std::fabs(A[j]-B[j]) ;
-      b = (tp>0) ;
-    }
-
-    i += 1 ;
-  }
-
-  return b ;
-}
+#endif // DUNE_GRIDGLUE_OVERLAPPINGMERGE_HH
