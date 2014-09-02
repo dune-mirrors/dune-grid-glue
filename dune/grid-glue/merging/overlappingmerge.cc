@@ -29,7 +29,7 @@ bool OverlappingMerge<dim1,dim2,dimworld, T>::inPlane(std::vector<FieldVector<T,
 }
 
 template<int dim1, int dim2, int dimworld, typename T>
-void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
+void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::GeometryType& grid1ElementType,
                                                const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                                                std::bitset<(1<<dim1)>& neighborIntersects1,
                                                const Dune::GeometryType& grid2ElementType,
@@ -38,6 +38,7 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::Ge
                                                std::vector<RemoteSimplicialIntersection>& intersections)
 {
     this->counter++;
+    intersections.clear();
 
     typedef SimplexMethod<dimworld,dim1,dim2,T> CM;
 
@@ -102,7 +103,7 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::Ge
         if (dimis == 3)
             isinplane = inPlane(P);
 
-        intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+        intersections.push_back(RemoteSimplicialIntersection(1, 1));
         for (i = 0; i < n_intersectionnodes; ++i) {
             intersections.back().grid1Local_[0][i] = g1local[i];
             intersections.back().grid2Local_[0][i] = g2local[i];
@@ -149,7 +150,7 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::Ge
                 if (dimis == 3)
                     isinplane = inPlane(global);
 
-                intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+                intersections.push_back(RemoteSimplicialIntersection(1, 1));
                 for (size_type j = 0; j < n_intersectionnodes; ++j) {
                     intersections.back().grid1Local_[0][j] = g1local[j];
                     intersections.back().grid2Local_[0][j] = g2local[j];

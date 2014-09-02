@@ -51,8 +51,7 @@ public:
   OverlappingMerge()
   {}
 
-private:
-
+protected:
   typedef typename StandardMerge<T,dim1,dim2,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
   /** \brief Compute the intersection between two overlapping elements
@@ -66,7 +65,7 @@ private:
    \param grid2ElementCorners World coordinates of the corners of the second element
 
    */
-  void computeIntersection(const Dune::GeometryType& grid1ElementType,
+  void computeIntersections(const Dune::GeometryType& grid1ElementType,
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                            std::bitset<(1<<dim1)>& neighborIntersects1,
                            const Dune::GeometryType& grid2ElementType,
@@ -74,6 +73,7 @@ private:
                            std::bitset<(1<<dim2)>& neighborIntersects2,
                            std::vector<RemoteSimplicialIntersection>& intersections);
 
+private:
   bool inPlane(std::vector<FieldVector<T,dimworld> >& points);
 
 };
