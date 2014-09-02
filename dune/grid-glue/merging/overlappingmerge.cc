@@ -30,13 +30,12 @@ bool OverlappingMerge<dim1,dim2,dimworld, T>::inPlane(std::vector<FieldVector<T,
 
 template<int dim1, int dim2, int dimworld, typename T>
 void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
-                                                                     const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
-                                                                     unsigned int grid1Index,
-                                                                     std::bitset<(1<<dim1)>& neighborIntersects1,
-                                                                     const Dune::GeometryType& grid2ElementType,
-                                                                     const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
-                                                                     unsigned int grid2Index,
-                                                                     std::bitset<(1<<dim2)>& neighborIntersects2)
+                                               const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
+                                               std::bitset<(1<<dim1)>& neighborIntersects1,
+                                               const Dune::GeometryType& grid2ElementType,
+                                               const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                                               std::bitset<(1<<dim2)>& neighborIntersects2,
+                                               std::vector<RemoteSimplicialIntersection>& intersections)
 {
     this->counter++;
 
@@ -67,7 +66,7 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::Ge
 
     const int dimis = dim1 < dim2 ? dim1 : dim2;
     const size_type n_intersectionnodes = dimis+1;
-    size_type i, isindex;
+    size_type i;
 
     std::vector<FieldVector<T,dimworld> >  P(0);
     std::vector<std::vector<int> >          H,SX(1<<dim1),SY(1<<dim2);
@@ -98,34 +97,17 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::Ge
             g1local[i] = grid1Geometry.local(P[i]);
             g2local[i] = grid2Geometry.local(P[i]);
         }
-        isindex = intersectionIndex(grid1Index,grid2Index,g1local,g2local);  // check whether the intersection is contained in the intersections already
+
         bool isinplane = false;
         if (dimis == 3)
             isinplane = inPlane(P);
 
-        if (isindex >= this->intersections_.size() && !isinplane) { // a new intersection is found
-            this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
-            for (i = 0; i < n_intersectionnodes; ++i) {
-                this->intersections_.back().grid1Local_[0][i] = g1local[i];
-                this->intersections_.back().grid2Local_[0][i] = g2local[i];
-            }
-
-        } else if (isindex < this->intersections_.size() && !isinplane) {// intersections equal
-
-            array<FieldVector<T,dim1>, n_intersectionnodes > g1localarr;
-            array<FieldVector<T,dim2>, n_intersectionnodes > g2localarr;
-
-            for (i = 0; i < n_intersectionnodes; ++i) {
-                g1localarr[i] = g1local[i];
-                g2localarr[i] = g2local[i];
-            }
-
-            // not efficient, we push back local coordinates of at least one element twice
-            this->intersections_[isindex].grid1Local_.push_back(g1localarr);
-            this->intersections_[isindex].grid2Local_.push_back(g2localarr);
-            this->intersections_[isindex].grid1Entities_.push_back(grid1Index);
-            this->intersections_[isindex].grid2Entities_.push_back(grid2Index);
+        intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+        for (i = 0; i < n_intersectionnodes; ++i) {
+            intersections.back().grid1Local_[0][i] = g1local[i];
+            intersections.back().grid2Local_[0][i] = g2local[i];
         }
+
     } else if (P.size() > n_intersectionnodes) {  // P is a union of simplices of dimension dimis
 
         assert(dimis != 1);
@@ -167,31 +149,10 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersection(const Dune::Ge
                 if (dimis == 3)
                     isinplane = inPlane(global);
 
-                // check whether the intersection is contained in the intersections already
-                isindex = intersectionIndex(grid1Index,grid2Index,g1local,g2local);
-
-                if (isindex >= this->intersections_.size()  && !isinplane) { // a new intersection is found
-                    this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
-                    for (size_type j = 0; j < n_intersectionnodes; ++j) {
-                        this->intersections_.back().grid1Local_[0][j] = g1local[j];
-                        this->intersections_.back().grid2Local_[0][j] = g2local[j];
-                    }
-
-                } else if (isindex < this->intersections_.size() && !isinplane) {// intersections equal
-
-                    array<FieldVector<T,dim1>, n_intersectionnodes > g1localarr;
-                    array<FieldVector<T,dim2>, n_intersectionnodes > g2localarr;
-
-                    for (size_type j = 0; j < n_intersectionnodes; ++j) {
-                        g1localarr[j] = g1local[j];
-                        g2localarr[j] = g2local[j];
-                    }
-
-                    // not efficient, we push back local coordinates of at least one element twice
-                    this->intersections_[isindex].grid1Local_.push_back(g1localarr);
-                    this->intersections_[isindex].grid2Local_.push_back(g2localarr);
-                    this->intersections_[isindex].grid1Entities_.push_back(grid1Index);
-                    this->intersections_[isindex].grid2Entities_.push_back(grid2Index);
+                intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+                for (size_type j = 0; j < n_intersectionnodes; ++j) {
+                    intersections.back().grid1Local_[0][j] = g1local[j];
+                    intersections.back().grid2Local_[0][j] = g2local[j];
                 }
             }
         }

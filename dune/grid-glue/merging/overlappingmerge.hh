@@ -68,12 +68,11 @@ private:
    */
   void computeIntersection(const Dune::GeometryType& grid1ElementType,
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
-                           unsigned int grid1Index,
                            std::bitset<(1<<dim1)>& neighborIntersects1,
                            const Dune::GeometryType& grid2ElementType,
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
-                           unsigned int grid2Index,
-                           std::bitset<(1<<dim2)>& neighborIntersects2);
+                           std::bitset<(1<<dim2)>& neighborIntersects2,
+                           std::vector<RemoteSimplicialIntersection>& intersections);
 
   bool inPlane(std::vector<FieldVector<T,dimworld> >& points);
 
