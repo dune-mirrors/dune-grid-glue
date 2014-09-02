@@ -263,11 +263,6 @@ private:
   int insertIntersections(std::vector<RemoteSimplicialIntersection>& intersections);
 
   /**
-    * compare two Intersections
-    */
-  bool compareIntersections(RemoteSimplicialIntersection& is1, RemoteSimplicialIntersection& is2);
-
-  /**
    * Find a grid2 element intersecting the candidate1 grid1 element by brute force search
    */
   int bruteForceSearch(int candidate1,
