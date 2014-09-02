@@ -637,7 +637,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           // if the intersection is nonempty, *seedIt is our new seed candidate on the grid1 side
           if (intersectionFound) {
             seed = *seedIt;
-            dwarn << "Algorithm entered first fallback method and found a new seed in the build algorithm." <<
+            Dune::dwarn << "Algorithm entered first fallback method and found a new seed in the build algorithm." <<
                      "Probably, the neighborIntersects bitsets computed in computeIntersection specialization is wrong." << std::endl;
             break;
           }
@@ -650,7 +650,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
           seed = bruteForceSearch(neighbor,
                                   grid1Coords,grid1_element_types,
                                   grid2Coords,grid2_element_types);
-          dwarn << "Algorithm entered second fallback method. This probably should not happen." << std::endl;
+          Dune::dwarn << "Algorithm entered second fallback method. This probably should not happen." << std::endl;
 
         }
 
