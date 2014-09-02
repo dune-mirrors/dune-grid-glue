@@ -754,6 +754,44 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::generateSeed(std::vector<int>&
   }
 }
 
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned int candidate1, unsigned int candidate2,
+                                                                        std::vector<RemoteSimplicialIntersection>& intersections)
+{
+    typedef typename std::vector<RemoteSimplicialIntersection>::size_type size_t;
+
+    for (size_t i = 0; i < intersections.size(); ++i) {
+        // get the intersection index of the current intersection from intersections in this->intersections
+        unsigned int index = intersectionIndex(intersections[i]);
+
+        if (index >= this->intersections_.size()) { //the intersection is not yet contained in this->intersections
+            this->intersections_.push_back(intersections[i]);   // insert
+        } else {
+            // NOTE: This is not efficient. Some elements are stored twice!!!
+            if (*(std::find(intersections_[index].grid1Entities_.begin(), intersections_[index].grid1Entities_.end()),
+                  candidate1) >= intersections_[index].grid1Entities_.size()  ||
+                *(std::find(intersections_[index].grid2Entities_.begin(), intersections_[index].grid2Entities_.end()),
+                                      candidate2) >= intersections_[index].grid2Entities_.size()) {
+
+                // insert each grid1 element and local representation of intersections[i] with parent candidate1
+                for (size_t j = 0; j < intersections[i].grid1Entities_.size(); ++j) {
+                    if (intersections[i].grid1Entities_[j] == candidate1)  {
+                        this->intersections_[index].grid1Entities_.push_back(candidate1);
+                        this->intersections_[index].grid1Local_.push_back(intersections[i].grid1Local_[j]);
+                    }
+                }
+
+                // insert each grid2 element and local representation of intersections[i] with parent candidate2
+                for (size_t j = 0; j < intersections[i].grid2Entities_.size(); ++j) {
+                    if (intersections[i].grid2Entities_[j] == candidate2)  {
+                        this->intersections_[index].grid2Entities_.push_back(candidate2);
+                        this->intersections_[index].grid2Local_.push_back(intersections[i].grid2Local_[j]);
+                    }
+                }
+            }
+        }
+    }
+}
 
 #define DECL extern
 #define STANDARD_MERGE_INSTANTIATE(T,A,B,C) \
