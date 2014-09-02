@@ -75,10 +75,6 @@ private:
                            unsigned int grid2Index,
                            std::bitset<(1<<dim2)>& neighborIntersects2);
 
-  int intersectionIndex(int grid1Index, int grid2Index,
-                        std::vector<FieldVector<T,dim1> > & g1Local,
-                        std::vector<FieldVector<T,dim2> > & g2Local);
-
   bool inPlane(std::vector<FieldVector<T,dimworld> >& points);
 
 };
