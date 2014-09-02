@@ -272,6 +272,11 @@ private:
                        const std::vector<Dune::GeometryType>& grid2_element_types);
 
   /**
+   * Get the index of the intersection in intersections_ (= size if it is a new intersection)
+   */
+  unsigned int intersectionIndex(RemoteSimplicialIntersection& intersection);
+
+  /**
    * get the neighbor relations between the given elements
    */
   template <int gridDim>
