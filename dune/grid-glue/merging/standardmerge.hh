@@ -762,7 +762,7 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
         if (index >= this->intersections_.size()) { //the intersection is not yet contained in this->intersections
             this->intersections_.push_back(intersections[i]);   // insert
         } else {
-            // NOTE: This is not efficient. Some elements are stored twice!!!
+            // NOTE: This is not efficient. Some elements are stored twice!!! This property is used in intersectionIndex!
             if (*(std::find(intersections_[index].grid1Entities_.begin(), intersections_[index].grid1Entities_.end()),
                   candidate1) >= intersections_[index].grid1Entities_.size()  ||
                 *(std::find(intersections_[index].grid2Entities_.begin(), intersections_[index].grid2Entities_.end()),
@@ -786,6 +786,96 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
             }
         }
     }
+}
+
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(RemoteSimplicialIntersection& intersection) {
+
+    int n_intersections = this->intersections_.size();
+
+    // return a number if at least one local representation and the grid indices are equal
+    if (dim1 != dim2)  {
+        int i,j,k,l,m;
+        int isDim = std::min(dim1,dim2);
+        int n_parents1, n_parents2;
+        bool b1,b2;
+        T d;
+        T eps = 1e-10;
+
+        // iterate over all local representations
+        for (unsigned m = 0; m < intersection.grid1Entities_.size(); ++m) {
+
+            unsigned int grid1Index = intersection.grid1Entities_[m];
+            unsigned int grid2Index = intersection.grid2Entities_[m];
+
+            for (i=n_intersections-1; i >=  0; --i) {
+                n_parents1 = this->intersections_[i].grid1Entities_.size();
+                n_parents2 = this->intersections_[i].grid2Entities_.size();
+
+                if (n_parents1 > 0 || n_parents2 > 0) {
+                    for (j = 0; j < n_parents1; ++j) {
+                        b2 = true;
+
+                        // an existing intersection candidate must be contained in at least one grid elem already
+                        if (this->intersections_[i].grid1Entities_[j] == grid1Index) {
+                            // start comparing local grid 1 intersection geometries to local grid 1 nodes
+                            for (k = 0; k < isDim+1; ++k) {
+                                b1 = false;
+                                FieldVector<T,dim1>  v = this->intersections_[i].grid1Local_[j][k];
+                                for (l = 0; l < isDim+1; ++l) {
+                                    FieldVector<T,dim1> w = intersection.grid1Local_[m][l];
+                                    d = (v-w).infinity_norm();
+                                    b1 = b1 || (d < eps);
+                                    if (d < eps)
+                                        break;
+                                }
+
+                                b2 = b2 && b1;
+
+                                if (!b2)
+                                    break;
+
+                            }
+
+                            if (b2){
+                                return i;
+                            }
+                        }
+                    }
+                    for (j = 0; j < n_parents2;++j) {
+                        b2 = true;
+
+                        // an existing intersection candidate must be contained in at least one grid elem already
+                        if (this->intersections_[i].grid2Entities_[j] == grid2Index) {
+
+                            // start comparing local grid 1 intersection geometries to local grid 1 nodes
+                            for (k = 0; k < isDim+1; ++k) {
+                                b1 = false;
+                                FieldVector<T,dim2> v = this->intersections_[i].grid2Local_[j][k];
+                                for (l = 0; l < isDim+1; ++l) {
+                                    FieldVector<T,dim2> w = intersection.grid2Local_[m][l];
+                                    d = (v-w).infinity_norm();
+                                    b1 = b1 || (d < eps);
+                                    if (d < eps)
+                                        break;
+                                }
+
+                                b2 = b2 && b1;
+                                if (!b2)
+                                    break;
+                            }
+
+                            if (b2)  {
+                                return i;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return n_intersections;
 }
 
 #define DECL extern
