@@ -315,7 +315,7 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
   //   Compute the intersection between the two elements
   // ///////////////////////////////////////////////////////
 
-  std::vector<RemoteSimplicialIntersection> intersections;
+  std::vector<RemoteSimplicialIntersection> intersections(0);
 
   // compute the intersections
   computeIntersections(grid1_element_types[candidate0], grid1ElementCorners, neighborIntersects1,
@@ -325,7 +325,6 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
   // insert intersections if needed
   if(insert && intersections.size() > 0)
       insertIntersections(candidate0,candidate1,intersections);
-
 
   // Have we found an intersection?
   return (intersections.size() > 0 || neighborIntersects1.any() || neighborIntersects2.any());
@@ -768,27 +767,27 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
 
         if (index >= this->intersections_.size()) { //the intersection is not yet contained in this->intersections
             this->intersections_.push_back(intersections[i]);   // insert
+
+            // insert right grid entity numbers
+            for (size_t ii = 0; ii < this->intersections_[index].grid1Entities_.size(); ++ii)
+                this->intersections_[index].grid1Entities_[ii] = candidate1;
+            for (size_t ii = 0; ii < this->intersections_[index].grid2Entities_.size(); ++ii)
+                this->intersections_[index].grid2Entities_[ii] = candidate2;
             ++count;
         } else {
-            // NOTE: This is not efficient. Some elements are stored twice!!! This property is used in intersectionIndex!
-            if (*(std::find(intersections_[index].grid1Entities_.begin(), intersections_[index].grid1Entities_.end(),
-                            candidate1)) >= intersections_[index].grid1Entities_.size()  ||
-                *(std::find(intersections_[index].grid2Entities_.begin(), intersections_[index].grid2Entities_.end(),
-                                      candidate2)) >= intersections_[index].grid2Entities_.size()) {
-
-                // insert each grid1 element and local representation of intersections[i] with parent candidate1
-                for (size_t j = 0; j < intersections[i].grid1Entities_.size(); ++j) {
-                    this->intersections_[index].grid1Entities_.push_back(candidate1);
-                    this->intersections_[index].grid1Local_.push_back(intersections[i].grid1Local_[j]);
-                }
-
-                // insert each grid2 element and local representation of intersections[i] with parent candidate2
-                for (size_t j = 0; j < intersections[i].grid2Entities_.size(); ++j) {
-                    this->intersections_[index].grid2Entities_.push_back(candidate2);
-                    this->intersections_[index].grid2Local_.push_back(intersections[i].grid2Local_[j]);
-                }
-                ++count;
+            // insert each grid1 element and local representation of intersections[i] with parent candidate1
+            for (size_t j = 0; j < intersections[i].grid1Entities_.size(); ++j) {
+                this->intersections_[index].grid1Entities_.push_back(candidate1);
+                this->intersections_[index].grid1Local_.push_back(intersections[i].grid1Local_[j]);
             }
+
+            // insert each grid2 element and local representation of intersections[i] with parent candidate2
+            for (size_t j = 0; j < intersections[i].grid2Entities_.size(); ++j) {
+                this->intersections_[index].grid2Entities_.push_back(candidate2);
+                this->intersections_[index].grid2Local_.push_back(intersections[i].grid2Local_[j]);
+            }
+
+            ++count;
         }
     }
     return count;
@@ -798,79 +797,77 @@ template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(unsigned int grid1Index, unsigned int grid2Index,
                                                                             RemoteSimplicialIntersection& intersection) {
 
-    int n_intersections = this->intersections_.size();
 
-    // return a number if at least one local representation and the grid indices are equal
-    int i,j,k,l,m;
-    int isDim = std::min(grid1Dim,grid2Dim);
-    int n_parents1, n_parents2;
-    bool b1,b2;
-    T d;
+    // return index in intersections_ if at least one local representation of a Remote Simplicial Intersection (RSI)
+    // of intersections_ is equal to the local representation of one element in intersections
+
+    std::size_t n_intersections = this->intersections_.size();
     T eps = 1e-10;
 
-    // iterate over all local representations
-    for (unsigned m = 0; m < intersection.grid1Entities_.size(); ++m) {
+    for (std::size_t i = 0; i < n_intersections; ++i) {
 
-        for (i=n_intersections-1; i >=  0; --i) {
-            n_parents1 = this->intersections_[i].grid1Entities_.size();
-            n_parents2 = this->intersections_[i].grid2Entities_.size();
+        // compare the local representation of the subelements of the RSI
+        for (std::size_t ei = 0; ei < this->intersections_[i].grid1Entities_.size(); ++ei) // merger subelement
+        {
+            if (this->intersections_[i].grid1Entities_[ei] == grid1Index)
+            {
+                for (std::size_t er = 0; er < intersection.grid1Entities_.size(); ++er) // list subelement
+                {
+                    bool found_all = true;
+                    // compare the local coordinate representations
+                    for (std::size_t ci = 0; ci < this->intersections_[i].grid1Local_[ei].size(); ++ci)
+                    {
+                        Dune::FieldVector<T,grid1Dim> ni = this->intersections_[i].grid1Local_[ei][ci];
+                        bool found_ni = false;
+                        for (std::size_t cr = 0; cr < intersection.grid1Local_[er].size(); ++cr)
+                        {
+                            Dune::FieldVector<T,grid1Dim> nr = intersection.grid1Local_[er][cr];
 
-            if (n_parents1 > 0 || n_parents2 > 0) {
-                for (j = 0; j < n_parents1; ++j) {
-                    b2 = true;
-
-                    // an existing intersection candidate must be contained in at least one grid elem already
-                    if (this->intersections_[i].grid1Entities_[j] == grid1Index) {
-                        // start comparing local grid 1 intersection geometries to local grid 1 nodes
-                        for (k = 0; k < isDim+1; ++k) {
-                            b1 = false;
-                            Dune::FieldVector<T,grid1Dim>  v = this->intersections_[i].grid1Local_[j][k];
-                            for (l = 0; l < isDim+1; ++l) {
-                                Dune::FieldVector<T,grid1Dim> w = intersection.grid1Local_[m][l];
-                                d = (v-w).infinity_norm();
-                                b1 = b1 || (d < eps);
-                                if (d < eps)
-                                    break;
-                            }
-
-                            b2 = b2 && b1;
-
-                            if (!b2)
+                            found_ni = found_ni || ((ni-nr).infinity_norm() < eps);
+                            if (found_ni)
                                 break;
-
                         }
+                        found_all = found_all && found_ni;
 
-                        if (b2){
-                            return i;
-                        }
+                        if (!found_ni)
+                            break;
                     }
+
+                    if (found_all)
+                        return i;
                 }
-                for (j = 0; j < n_parents2;++j) {
-                    b2 = true;
+            }
+        }
 
-                    // an existing intersection candidate must be contained in at least one grid elem already
-                    if (this->intersections_[i].grid2Entities_[j] == grid2Index) {
+        // compare the local representation of the subelements of the RSI
+        for (std::size_t ei = 0; ei < this->intersections_[i].grid2Entities_.size(); ++ei) // merger subelement
+        {
+            if (this->intersections_[i].grid2Entities_[ei] == grid2Index)
+            {
+                for (std::size_t er = 0; er < intersection.grid2Entities_.size(); ++er) // list subelement
+                {
+                    bool found_all = true;
+                    // compare the local coordinate representations
+                    for (std::size_t ci = 0; ci < this->intersections_[i].grid2Local_[ei].size(); ++ci)
+                    {
+                        Dune::FieldVector<T,grid2Dim> ni = this->intersections_[i].grid2Local_[ei][ci];
+                        bool found_ni = false;
+                        for (std::size_t cr = 0; cr < intersection.grid2Local_[er].size(); ++cr)
+                        {
+                            Dune::FieldVector<T,grid2Dim> nr = intersection.grid2Local_[er][cr];
+                            found_ni = found_ni || ((ni-nr).infinity_norm() < eps);
 
-                        // start comparing local grid 1 intersection geometries to local grid 1 nodes
-                        for (k = 0; k < isDim+1; ++k) {
-                            b1 = false;
-                            Dune::FieldVector<T,grid2Dim> v = this->intersections_[i].grid2Local_[j][k];
-                            for (l = 0; l < isDim+1; ++l) {
-                                Dune::FieldVector<T,grid2Dim> w = intersection.grid2Local_[m][l];
-                                d = (v-w).infinity_norm();
-                                b1 = b1 || (d < eps);
-                                if (d < eps)
-                                    break;
-                            }
-
-                            b2 = b2 && b1;
-                            if (!b2)
+                            if (found_ni)
                                 break;
                         }
+                        found_all = found_all && found_ni;
 
-                        if (b2)  {
-                            return i;
-                        }
+                        if (!found_ni)
+                            break;
+                    }
+
+                    if (found_all) {
+                        return i;
                     }
                 }
             }
