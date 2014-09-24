@@ -323,12 +323,12 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
                       intersections);
 
   // insert intersections if needed
-  if(insert)
+  if(insert && intersections.size() > 0)
       insertIntersections(candidate0,candidate1,intersections);
 
 
   // Have we found an intersection?
-  return (intersections.size() > 0 && (neighborIntersects1.any() || neighborIntersects2.any()));
+  return (intersections.size() > 0 || neighborIntersects1.any() || neighborIntersects2.any());
 
 }
 
