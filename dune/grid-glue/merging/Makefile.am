@@ -2,8 +2,8 @@
 
 # These libraries do not need other libraries besides lcommon and lgrid
 mergingdir = $(includedir)/dune/glue/merging
-merging_HEADERS = computeIntersection.hh \
-                  computeIntersection.cc \
+merging_HEADERS = computeintersection.hh \
+                  computeintersection.cc \
                   conformingmerge.hh \
                   contactmerge.hh \
                   merger.hh \

@@ -189,6 +189,6 @@ inline int insertPoint(const V p, std::vector<V>& P)
 } /* namespace Dune */
 
 #include "simplexIntersection.cc"
-#include "computeIntersection.cc"
+#include "computeintersection.cc"
 
 #endif

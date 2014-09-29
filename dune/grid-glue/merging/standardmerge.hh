@@ -27,7 +27,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/merger.hh>
-#include <dune/grid-glue/merging/computeIntersection.hh>
+#include <dune/grid-glue/merging/computeintersection.hh>
 
 
 /** \brief Common base class for many merger implementations: produce pairs of entities that _may_ intersect
