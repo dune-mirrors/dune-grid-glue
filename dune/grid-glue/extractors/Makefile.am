@@ -1,6 +1,6 @@
 # $Id: Makefile.am 4229 2009-03-16 14:41:32Z chupa $
 
-extractorsdir = $(includedir)/dune/glue/extractors
+extractorsdir = $(includedir)/dune/grid-glue/extractors
 extractors_HEADERS = codim0extractor.hh codim1extractor.hh extractor.hh \
 	extractorpredicate.hh\
 	vtksurfacewriter.hh

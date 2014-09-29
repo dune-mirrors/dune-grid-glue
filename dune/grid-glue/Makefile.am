@@ -1,4 +1,4 @@
-gluedir = $(includedir)/glue
+gluedir = $(includedir)/dune/grid-glue
 glue_HEADERS = \
 	gridglue.hh
 
