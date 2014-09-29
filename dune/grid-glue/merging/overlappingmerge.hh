@@ -18,7 +18,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/standardmerge.hh>
-#include <dune/grid-glue/merging/computeIntersection.hh>
+#include <dune/grid-glue/merging/computeintersection.hh>
 
 namespace Dune {
 namespace GridGlue {
