@@ -1,6 +1,7 @@
 #install headers
 install(FILES
   conformingmerge.hh
+  contactmerge.cc
   contactmerge.hh
   merger.hh
   mixeddimoverlappingmerge.hh

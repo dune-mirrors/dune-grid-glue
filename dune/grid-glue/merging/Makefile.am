@@ -3,6 +3,7 @@
 # These libraries do not need other libraries besides lcommon and lgrid
 mergingdir = $(includedir)/dune/grid-glue/merging
 merging_HEADERS = conformingmerge.hh \
+                  contactmerge.cc \
                   contactmerge.hh \
                   merger.hh \
                   mixeddimoverlappingmerge.hh \
