@@ -11,7 +11,7 @@ install(FILES
   psurfacemerge.hh
   standardmerge.cc
   standardmerge.hh
-  DESTINATION include/dune/grid_glue/merging)
+  DESTINATION include/dune/grid-glue/merging)
 
 dune_add_library(dunegridglue
   psurfacemerge.cc

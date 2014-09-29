@@ -7,4 +7,4 @@ install(FILES
   intersection.hh
   intersectionindexset.hh
   intersectioniterator.hh
-  DESTINATION include/dune/grid_glue/adapter)
+  DESTINATION include/dune/grid-glue/adapter)

@@ -5,4 +5,4 @@ add_subdirectory(extractors)
 add_subdirectory(test EXCLUDE_FROM_ALL)
 install(FILES
   gridglue.hh
-  DESTINATION include/dune/grid_glue)
+  DESTINATION include/dune/grid-glue)

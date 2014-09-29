@@ -5,4 +5,4 @@ install(FILES
   extractor.hh
   extractorpredicate.hh
   vtksurfacewriter.hh
-  DESTINATION include/dune/grid_glue/extractors)
+  DESTINATION include/dune/grid-glue/extractors)
