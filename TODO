@@ -1,5 +1,4 @@
 - Test: does indexInInside for codim0-coupling always return 0?
-- orientedSubface für Subentities beliebiger Kodimension verallgemeinern
 - GridGlueVTKWriter doesn't seem to work
 - GridGlueVTKWriter crashes when started on an empty GridGlue
 
