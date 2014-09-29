@@ -188,7 +188,7 @@ inline int insertPoint(const V p, std::vector<V>& P)
 } /* namespace Dune::GridGlue */
 } /* namespace Dune */
 
-#include "simplexIntersection.cc"
+#include "simplexintersection.cc"
 #include "computeintersection.cc"
 
 #endif

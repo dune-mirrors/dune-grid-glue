@@ -12,7 +12,7 @@ merging_HEADERS = computeintersection.hh \
                   overlappingmerge.cc \
                   psurfacemerge.hh \
                   psurfacemerge.cc \
-                  simplexIntersection.cc \
+                  simplexintersection.cc \
                   standardmerge.hh
 
 include $(top_srcdir)/am/global-rules
