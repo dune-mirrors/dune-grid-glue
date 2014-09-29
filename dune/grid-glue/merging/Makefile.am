@@ -7,7 +7,6 @@ merging_HEADERS = computeintersection.hh \
                   conformingmerge.hh \
                   contactmerge.hh \
                   merger.hh \
-                  mixeddimoverlappingmerge.hh \
                   overlappingmerge.hh \
                   overlappingmerge.cc \
                   psurfacemerge.hh \
