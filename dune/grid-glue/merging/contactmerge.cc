@@ -4,14 +4,15 @@
 #include <dune/grid-glue/common/projectionhelper.hh>
 
 template<int dimworld, typename T>
-void ContactMerge<dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
+void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
-                                   unsigned int grid1Index,
                                    std::bitset<(1<<dim)>& neighborIntersects1,
+                                   unsigned int grid1Index,
                                    const Dune::GeometryType& grid2ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                                   std::bitset<(1<<dim)>& neighborIntersects2,
                                    unsigned int grid2Index,
-                                   std::bitset<(1<<dim)>& neighborIntersects2)
+                                   std::vector<RemoteSimplicialIntersection>& intersections)
 {
     std::vector<Dune::array<LocalCoords,2> > polytopeCorners;
 
@@ -165,7 +166,7 @@ void ContactMerge<dimworld, T>::computeIntersection(const Dune::GeometryType& gr
             intersect.grid1Local_[0][j]=polytopeCorners[j][0];
             intersect.grid2Local_[0][j]=polytopeCorners[j][1];
         }
-        this->intersections_.push_back(intersect);
+        intersections.push_back(intersect);
 
         return;
     }
@@ -207,7 +208,7 @@ void ContactMerge<dimworld, T>::computeIntersection(const Dune::GeometryType& gr
         intersect.grid1Local_[0][dim]=center[0];
         intersect.grid2Local_[0][dim]=center[1];
 
-        this->intersections_.push_back(intersect);
+        intersections.push_back(intersect);
     }
 }
 

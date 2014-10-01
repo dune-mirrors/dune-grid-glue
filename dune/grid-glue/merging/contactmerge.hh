@@ -85,6 +85,9 @@ public:
         overlap_ = overlap;
     }
 
+protected:
+  typedef typename StandardMerge<T,dimworld-1,dimworld-1,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
+
 private:
     /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
@@ -110,14 +113,15 @@ private:
      *
      *   The result is a set of simplices.
      */
-    void computeIntersection(const Dune::GeometryType& grid1ElementType,
+    void computeIntersections(const Dune::GeometryType& grid1ElementType,
             const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
-            unsigned int grid1Index,
             std::bitset<(1<<dim)>& neighborIntersects1,
+            unsigned int grid1Index,
             const Dune::GeometryType& grid2ElementType,
             const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+            std::bitset<(1<<dim)>& neighborIntersects2,
             unsigned int grid2Index,
-            std::bitset<(1<<dim)>& neighborIntersects2);
+            std::vector<RemoteSimplicialIntersection>& intersections);
 
     /**
       * @copydoc StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build
