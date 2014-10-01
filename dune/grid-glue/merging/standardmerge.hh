@@ -772,12 +772,6 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
         if (index >= this->intersections_.size()) { //the intersection is not yet contained in this->intersections
             this->intersections_.push_back(intersections[i]);   // insert
 
-            // insert right grid entity numbers
-            for (size_t ii = 0; ii < this->intersections_[index].grid1Entities_.size(); ++ii)
-                this->intersections_[index].grid1Entities_[ii] = candidate1;
-            for (size_t ii = 0; ii < this->intersections_[index].grid2Entities_.size(); ++ii)
-                this->intersections_[index].grid2Entities_[ii] = candidate2;
-
             ++count;
         } else if (index > -1) {
             // insert each grid1 element and local representation of intersections[i] with parent candidate1
