@@ -122,9 +122,11 @@ protected:
   virtual void computeIntersections(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                                    std::bitset<(1<<grid1Dim)>& neighborIntersects1,
+                                   unsigned int grid1Index,
                                    const Dune::GeometryType& grid2ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
                                    std::bitset<(1<<grid2Dim)>& neighborIntersects2,
+                                   unsigned int grid2Index,
                                    std::vector<RemoteSimplicialIntersection>& intersections) = 0;
 
   /** \brief Compute the intersection between two overlapping elements
@@ -318,9 +320,11 @@ bool StandardMerge<T,grid1Dim,grid2Dim,dimworld>::computeIntersection(unsigned i
   std::vector<RemoteSimplicialIntersection> intersections(0);
 
   // compute the intersections
-  computeIntersections(grid1_element_types[candidate0], grid1ElementCorners, neighborIntersects1,
-                      grid2_element_types[candidate1], grid2ElementCorners, neighborIntersects2,
-                      intersections);
+  computeIntersections(grid1_element_types[candidate0], grid1ElementCorners,
+                       neighborIntersects1, candidate0,
+                       grid2_element_types[candidate1], grid2ElementCorners,
+                       neighborIntersects2, candidate1,
+                       intersections);
 
   // insert intersections if needed
   if(insert && intersections.size() > 0)
