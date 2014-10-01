@@ -73,14 +73,15 @@ private:
 
      The result is a set of simplices.
    */
-  virtual void computeIntersection(const Dune::GeometryType& grid1ElementType,
+  void computeIntersections(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
-                                   unsigned int grid1Index,
                                    std::bitset<(1<<dim)>& neighborIntersects1,
+                                   unsigned int grid1Index,
                                    const Dune::GeometryType& grid2ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                                   std::bitset<(1<<dim)>& neighborIntersects2,
                                    unsigned int grid2Index,
-                                   std::bitset<(1<<dim)>& neighborIntersects2);
+                                   std::vector<RemoteSimplicialIntersection>& intersections);
 
 public:
 
@@ -130,14 +131,15 @@ private:
 
 
 template<int dim, int dimworld, typename T>
-void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::GeometryType& grid1ElementType,
+void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::GeometryType& grid1ElementType,
                                                             const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
-                                                            unsigned int grid1Index,
                                                             std::bitset<(1<<dim)>& neighborIntersects1,
+                                                            unsigned int grid1Index,
                                                             const Dune::GeometryType& grid2ElementType,
                                                             const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                                                            std::bitset<(1<<dim)>& neighborIntersects2,
                                                             unsigned int grid2Index,
-                                                            std::bitset<(1<<dim)>& neighborIntersects2)
+                                                            std::vector<RemoteSimplicialIntersection>& intersections)
 {
   this->counter++;
 
@@ -194,11 +196,11 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
   /** \todo Currently the RemoteIntersections have to be simplices */
   if (grid1ElementType.isSimplex()) {
 
-    this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+    intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
     for (int i=0; i<refElement.size(dim); i++) {
-      this->intersections_.back().grid1Local_[0][i] = refElement.position(i,dim);
-      this->intersections_.back().grid2Local_[0][i] = refElement.position(other[i],dim);
+      intersections.back().grid1Local_[0][i] = refElement.position(i,dim);
+      intersections.back().grid2Local_[0][i] = refElement.position(other[i],dim);
     }
 
   } else if (grid1ElementType.isQuadrilateral()) {
@@ -215,7 +217,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
         newSimplicialIntersection.grid2Local_[0][j] = refElement.position(subVertices[i][other[j]],dim);
       }
 
-      this->intersections_.push_back(newSimplicialIntersection);
+      intersections.push_back(newSimplicialIntersection);
 
     }
 
@@ -234,7 +236,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersection(const Dune::Geometry
         newSimplicialIntersection.grid2Local_[0][j] = refElement.position(subVertices[i][other[j]],dim);
       }
 
-      this->intersections_.push_back(newSimplicialIntersection);
+      intersections.push_back(newSimplicialIntersection);
 
     }
 
