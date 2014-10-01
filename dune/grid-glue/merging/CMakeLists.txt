@@ -4,7 +4,6 @@ install(FILES
   contactmerge.cc
   contactmerge.hh
   merger.hh
-  mixeddimoverlappingmerge.hh
   overlappingmerge.cc
   overlappingmerge.hh
   psurfacemerge.cc

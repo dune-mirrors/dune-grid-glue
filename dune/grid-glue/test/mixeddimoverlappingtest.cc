@@ -15,7 +15,7 @@
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/gridglue.hh>
-#include <dune/grid-glue/merging/mixeddimoverlappingmerge.hh>
+#include <dune/grid-glue/merging/overlappingmerge.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
 
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 {
   Dune::MPIHelper::instance(argc, argv);
 
-  MixedDimOverlappingMerge<2,1,2> mixedDimOverlappingMerge;
+  OverlappingMerge<2,1,2> overlappingMerge;
 
   // /////////////////////////////////////////////////////////
   //   Make a 2d unit cube grid and a 1d grid embedded in 2d
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 
   // The following code is out-commented, because the test functionality
   // doesn't actually work yet.
-  MixedDimOverlappingMerge<2,1,2> merger;
+  OverlappingMerge<2,1,2> merger;
   GlueType glue(domEx, tarEx, &merger);
 
   glue.build();

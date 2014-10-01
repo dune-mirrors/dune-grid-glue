@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef OVERLAPPING_MERGE_HH
-#define OVERLAPPING_MERGE_HH
+#ifndef DUNE_GRID_GLUE_OVERLAPPING_MERGE_HH
+#define DUNE_GRID_GLUE_OVERLAPPING_MERGE_HH
 
 #include <iostream>
 #include <iomanip>
@@ -10,24 +10,29 @@
 
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid-glue/merging/standardmerge.hh>
+#include <dune/grid-glue/merging/computeintersection.hh>
 
-/** \brief Computing overlapping grid intersections without using an external library
+namespace Dune {
+namespace GridGlue {
 
-   Implementation of computeIntersection, described in 'An Algorithm for Non-Matching Grid Projections with Linear Complexity,
-   M.J. Gander and C. Japhet, Domain Decomposition Methods in Science and Engineering XVIII, pp. 185--192, Springer-Verlag, 2009.'
+/** \brief Computing overlapping grid intersections for grids of different dimensions
 
-   \tparam dim Grid dimension of the coupling grids.  The world dimension is assumed to be the same.
+   \tparam dim1 Grid dimension of grid 1
+   \tparam dim2 Grid dimension of grid 2
+   \tparam dimworld World dimension
    \tparam T Type used for coordinates
  */
-template<int dim, typename T = double>
+template<int dim1, int dim2, int dimworld, typename T = double>
 class OverlappingMerge
-  : public StandardMerge<T,dim,dim,dim>
+      : public StandardMerge<T,dim1,dim2,dimworld>
 {
 
 public:
@@ -38,79 +43,47 @@ public:
   typedef T ctype;
 
   /// @brief the coordinate type used in this interface
-  typedef Dune::FieldVector<T, dim>  WorldCoords;
+  typedef Dune::FieldVector<T, dimworld>  WorldCoords;
 
   /// @brief the coordinate type used in this interface
-  typedef Dune::FieldVector<T, dim>  LocalCoords;
+  //typedef Dune::FieldVector<T, dim>  LocalCoords;
 
-private:
+  OverlappingMerge()
+  {}
 
-  typedef typename StandardMerge<T,dim,dim,dim>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
+protected:
+  typedef typename StandardMerge<T,dim1,dim2,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
   /** \brief Compute the intersection between two overlapping elements
 
-     The result is a set of simplices.
+   The result is a set of simplices.
+
+   \param grid1ElementType Type of the first element to be intersected
+   \param grid1ElementCorners World coordinates of the corners of the first element
+
+   \param grid2ElementType Type of the second element to be intersected
+   \param grid2ElementCorners World coordinates of the corners of the second element
+
    */
-  void computeIntersection(const Dune::GeometryType& grid1ElementType,
-                           const std::vector<Dune::FieldVector<T,dim> >& grid1ElementCorners,
+  void computeIntersections(const Dune::GeometryType& grid1ElementType,
+                           const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
+                           std::bitset<(1<<dim1)>& neighborIntersects1,
                            unsigned int grid1Index,
-                           std::bitset<(1<<dim)>& neighborIntersects1,
                            const Dune::GeometryType& grid2ElementType,
-                           const std::vector<Dune::FieldVector<T,dim> >& grid2ElementCorners,
+                           const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
+                           std::bitset<(1<<dim2)>& neighborIntersects2,
                            unsigned int grid2Index,
-                           std::bitset<(1<<dim)>& neighborIntersects2);
+                           std::vector<RemoteSimplicialIntersection>& intersections);
 
 private:
-
-  //  ROUTINES 2D
-
-  static void edgeIntersections2D( const std::vector<Dune::FieldVector<T,dim> >&  X,
-                                   const std::vector<Dune::FieldVector<T,dim> >&  Y,
-                                   std::vector<Dune::FieldVector<T,dim> > & P ) ;
-
-  static void pointsofXinY2D( const std::vector<Dune::FieldVector<T,dim> >   X,
-                              const std::vector<Dune::FieldVector<T,dim> >   Y,
-                              std::vector<Dune::FieldVector<T,dim> > & P ) ;
-
-  static void sortAndRemoveDoubles2D( std::vector<Dune::FieldVector<T,dim> > & P ) ;
-
-  //  ROUTINES 3D
-
-  static void intersections3D( const std::vector<Dune::FieldVector<T,dim> >   X,
-                               const std::vector<Dune::FieldVector<T,dim> >   Y,
-                               std::vector<std::vector<int> >         & SX,
-                               std::vector<std::vector<int> >         & SY,
-                               std::vector<Dune::FieldVector<T,dim> > & P ) ;
-
-  static void sorting3D( const Dune::FieldVector<T,dim>          centroid,
-                         const std::vector<std::vector<int> >           SX,
-                         const std::vector<std::vector<int> >           SY,
-                         const std::vector<Dune::FieldVector<T,dim> >   P,
-                         std::vector<std::vector<int> >         & H) ;
-
-  static bool triangleLineIntersection3D( const Dune::FieldVector<T,dim>    X0,
-                                          const Dune::FieldVector<T,dim>    X1,
-                                          const Dune::FieldVector<T,dim>    Y0,
-                                          const Dune::FieldVector<T,dim>    Y1,
-                                          const Dune::FieldVector<T,dim>    Y2,
-                                          Dune::FieldVector<T,dim>   & p) ;
-
-  static bool pointInTetrahedra3D( const Dune::FieldVector<T,dim>                 X,
-                                   const std::vector<Dune::FieldVector<T,dim> >   Y) ;
-
-  static int insertPoint3D( const Dune::FieldVector<T,dim>                  p,
-                            std::vector<Dune::FieldVector<T,dim> > &  P)  ;
-
-  static void removeDuplicates( std::vector<int > & p) ;
-
-  static void orderPoints3D(const Dune::FieldVector<T,dim>          centroid,
-                            std::vector<int>                      & id,
-                            std::vector<Dune::FieldVector<T,dim> > &  P)  ;
-
-  static bool newFace3D(const std::vector<int> no, const std::vector<std::vector<int> > H) ;
+  bool inPlane(std::vector<FieldVector<T,dimworld> >& points);
 
 };
 
+} /* namespace Dune::GridGlue */
+} /* namespace Dune */
+
 #include "overlappingmerge.cc"
 
-#endif // OVERLAPPING_MERGE_HH
+
+#endif // DUNE_GRID_GLUE_MIXED_DIM_OVERLAPPING_MERGE_HH
