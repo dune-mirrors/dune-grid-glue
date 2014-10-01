@@ -68,9 +68,11 @@ protected:
   void computeIntersections(const Dune::GeometryType& grid1ElementType,
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
                            std::bitset<(1<<dim1)>& neighborIntersects1,
+                           unsigned int grid1Index,
                            const Dune::GeometryType& grid2ElementType,
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
                            std::bitset<(1<<dim2)>& neighborIntersects2,
+                           unsigned int grid2Index,
                            std::vector<RemoteSimplicialIntersection>& intersections);
 
 private:
