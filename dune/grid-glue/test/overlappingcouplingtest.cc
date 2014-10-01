@@ -260,8 +260,8 @@ int main(int argc, char** argv) try
   // //////////////////////////////////////////////////////////
   //   Test with the OverlappingMerge implementation
   // //////////////////////////////////////////////////////////
-  OverlappingMerge<1,double> overlappingMerge1d;
-  OverlappingMerge<2,double> overlappingMerge2d;
+  OverlappingMerge<1,1,1,double> overlappingMerge1d;
+  OverlappingMerge<2,2,2,double> overlappingMerge2d;
 
   testCubeGrids<1>(overlappingMerge1d, FieldVector<double,1>(0.05));
   testCubeGrids<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
