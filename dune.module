@@ -3,7 +3,7 @@
 
 #Name of the module
 Module: dune-grid-glue
-Version: 2.2-svn
+Version: 2.3.0
 Maintainer: christian.engwer@uni-muenster.de,sander@igpm.rwth-aachen.de
 #depending on
 Depends: dune-common  (>= 2.2) dune-grid (>= 2.2)
