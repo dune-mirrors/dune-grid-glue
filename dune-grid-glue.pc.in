@@ -9,7 +9,7 @@ DEPENDENCIES=@REQUIRES@
 Name: @PACKAGE_NAME@
 Version: @VERSION@
 Description: dune-grid-glue module
-URL: http://dune-project.org/
+URL: http://www.dune-project.org/modules/dune-grid-glue/
 Requires: dune-common dune-grid
 Libs: -L${libdir} -ldunegridglue
 Cflags: -I${includedir}
