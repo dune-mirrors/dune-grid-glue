@@ -8,7 +8,6 @@
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: Class thought to make graphical debugging of couplings easier.
- *  subversion:  $Id$
  *
  */
 /**

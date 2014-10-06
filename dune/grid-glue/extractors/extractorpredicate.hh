@@ -8,7 +8,6 @@
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: simple uniform descriptor for surface or mesh parts
- *  subversion:  $Id$
  *
  */
 /**

@@ -1,5 +1,3 @@
-# $Id: $
-
 SUBDIRS = grid-glue
 EXTRA_DIST = CMakeLists.txt
 

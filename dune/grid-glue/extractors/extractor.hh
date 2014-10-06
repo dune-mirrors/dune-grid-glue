@@ -8,7 +8,6 @@
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: base class for all grid extractors
- *  subversion:  $Id$
  *
  */
 /**

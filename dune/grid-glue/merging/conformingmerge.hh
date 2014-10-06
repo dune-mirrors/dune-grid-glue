@@ -8,7 +8,6 @@
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: implementation of the Merger concept for conforming interfaces
- *  subversion:  $Id$
  *
  */
 /**

@@ -1,5 +1,3 @@
-# $Id: $
-
 lib_LTLIBRARIES = libdunegridglue.la
 
 libdunegridglue_la_SOURCES = \

@@ -8,7 +8,6 @@
  *  ---------------------------------
  *  Project:     dune-grid-glue
  *  Description: helper class for graphical output of grids in generic representation
- *  subversion:  $Id$
  *
  */
 /**
