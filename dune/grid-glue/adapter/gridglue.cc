@@ -159,12 +159,19 @@ namespace GridGlue {
 
 template<typename P0, typename P1>
 GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger) :
-  patch0_(gp0), patch1_(gp1), merger_(merger)
+  GridGlue(Dune::stackobject_to_shared_ptr(gp0), Dune::stackobject_to_shared_ptr(gp1), Dune::stackobject_to_shared_ptr(*merger))
+{
+  /* Nothing. */
+}
+
+template<typename P0, typename P1>
+GridGlue<P0, P1>::GridGlue(const std::shared_ptr<const Grid0Patch> gp0, const std::shared_ptr<const Grid1Patch> gp1, const std::shared_ptr<Merger> merger)
+  : patch0_(gp0), patch1_(gp1), merger_(merger)
 {
 #if HAVE_MPI
   // if we have only seq. meshes don't use parallel glueing
-  if (gp0.gridView().comm().size() == 1
-      && gp1.gridView().comm().size() == 1)
+  if (gp0->gridView().comm().size() == 1
+      && gp1->gridView().comm().size() == 1)
     mpicomm_ = MPI_COMM_SELF;
   else
     mpicomm_ = MPI_COMM_WORLD;
@@ -201,8 +208,8 @@ void GridGlue<P0, P1>::build()
 
   // retrieve the coordinate and topology information from the extractors
   // and apply transformations if necessary
-  extractGrid(patch0_, patch0coords, patch0entities, patch0types);
-  extractGrid(patch1_, patch1coords, patch1entities, patch1types);
+  extractGrid(*patch0_, patch0coords, patch0entities, patch0types);
+  extractGrid(*patch1_, patch1coords, patch1entities, patch1types);
 
   std::cout << ">>>> rank " << myrank << " coords: "
             << patch0coords.size() << " and " << patch1coords.size() << std::endl;
@@ -508,12 +515,12 @@ void GridGlue<P0, P1>::mergePatches(
       GlobalId gid(patch0rank, patch1rank, i);
       if (it.grid0local_)
       {
-        Dune::PartitionType ptype = patch0_.element(it.grid0indices_[0])->partitionType();
+        Dune::PartitionType ptype = patch0_->element(it.grid0indices_[0])->partitionType();
         patch0_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
       if (it.grid1local_)
       {
-        Dune::PartitionType ptype = patch1_.element(it.grid1indices_[1])->partitionType();
+        Dune::PartitionType ptype = patch1_->element(it.grid1indices_[1])->partitionType();
         patch1_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
     }

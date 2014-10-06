@@ -18,6 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 #include <vector>
 #include <algorithm>
 #include <limits>
@@ -25,6 +26,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/bitsetvector.hh>
+#include <dune/common/shared_ptr.hh>
 #include <dune/common/version.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -297,7 +299,7 @@ private:
   /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
    */
-  const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections_;
+  std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > domainDirections_;
 
   /** \brief Vector field on the target surface which prescribes a 'forward'
       direction.
@@ -307,7 +309,7 @@ private:
       (e.g. because it is not properly oriented), they can be given
       explicitly through the targetDirections field.
    */
-  const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections_;
+  std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > targetDirections_;
 
   bool valid;
 
@@ -315,8 +317,11 @@ private:
 
 public:
 
-  PSurfaceMerge(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections = NULL,
-                const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections = NULL);
+  PSurfaceMerge(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
+                const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections);
+
+  PSurfaceMerge(std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > domainDirections = nullptr,
+                std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > targetDirections = nullptr);
 
   /*   M O D E L   S P E C I F I C   E X T E N D I N G   F U N C T I O N A L I T Y   */
 
@@ -332,6 +337,10 @@ public:
   inline
   void setSurfaceDirections(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
                             const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections);
+
+  inline
+  void setSurfaceDirections(std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > domainDirections,
+                            std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > targetDirections);
 
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
 
@@ -426,13 +435,27 @@ private:
 template<int dim, int dimworld, typename T>
 PSurfaceMerge<dim, dimworld, T>::PSurfaceMerge(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
                                                const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
-  : domainDirections_(domainDirections), targetDirections_(targetDirections), valid(false)
+  : PSurfaceMerge(Dune::stackobject_to_shared_ptr(*domainDirections), Dune::stackobject_to_shared_ptr(*targetDirections))
 {}
 
+template<int dim, int dimworld, typename T>
+PSurfaceMerge<dim, dimworld, T>::PSurfaceMerge(std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > domainDirections,
+                                               std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > targetDirections)
+  : domainDirections_(domainDirections)
+  , targetDirections_(targetDirections)
+  , valid(false)
+{}
 
 template<int dim, int dimworld, typename T>
 inline void PSurfaceMerge<dim, dimworld, T>::setSurfaceDirections(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
                                                                   const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* targetDirections)
+{
+  setSurfaceDirections(Dune::stackobject_to_shared_ptr(*domainDirections), Dune::stackobject_to_shared_ptr(*targetDirections));
+}
+
+template<int dim, int dimworld, typename T>
+inline void PSurfaceMerge<dim, dimworld, T>::setSurfaceDirections(std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > domainDirections,
+                                                                  std::shared_ptr<const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype> > targetDirections)
 {
   domainDirections_ = domainDirections;
   targetDirections_ = targetDirections;

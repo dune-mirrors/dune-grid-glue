@@ -221,7 +221,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
     // compute the merged grid using the psurface library
     cm.build(domc_, domi_,tarc_, tari_,
-             domainDirections_, targetDirections_);
+             domainDirections_.get(), targetDirections_.get());
 
   }
 

@@ -13,6 +13,7 @@
 #include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
+#include <dune/common/shared_ptr.hh>
 
 #include "adapter/gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
@@ -66,7 +67,7 @@ struct GridGlueView<P0,P1,0>
   typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
   static const P0& patch(const GridGlue<P0,P1>& g)
   {
-    return g.patch0_;
+    return *g.patch0_;
   }
 };
 
@@ -78,7 +79,7 @@ struct GridGlueView<P0,P1,1>
   typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
   static const P1& patch(const GridGlue<P0,P1>& g)
   {
-    return g.patch1_;
+    return *g.patch1_;
   }
 };
 
@@ -278,13 +279,13 @@ private:
   /*   M E M B E R   V A R I A B L E S   */
 
   /// @brief the patch0 description
-  const Grid0Patch&       patch0_;
+  const std::shared_ptr<const Grid0Patch> patch0_;
 
   /// @brief the patch1 description
-  const Grid1Patch&       patch1_;
+  const std::shared_ptr<const Grid1Patch> patch1_;
 
   /// @brief the surface merging utility
-  Merger*                 merger_;
+  const std::shared_ptr<Merger> merger_;
 
   /// @brief number of intersections
   IndexType index__sz;
@@ -358,6 +359,8 @@ public:
    * to be a model of the SurfaceMergeConcept.
    */
   GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger);
+  GridGlue(const std::shared_ptr<const Grid0Patch> gp0, const std::shared_ptr<const Grid1Patch> gp1, const std::shared_ptr<Merger> merger);
+
   /*   G E T T E R S   */
 
   /** \todo Please doc me! */
