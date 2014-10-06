@@ -15,3 +15,4 @@ DISTCHECK_CONFIGURE_FLAGS = --with-dune-common=$(DUNE_COMMON_ROOT) --with-dune-g
 
 include $(top_srcdir)/am/top-rules
 include $(top_srcdir)/am/global-rules
+include $(top_srcdir)/am/cmake-pkg-config
