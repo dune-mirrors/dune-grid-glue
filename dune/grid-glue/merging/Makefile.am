@@ -6,6 +6,7 @@ merging_HEADERS = computeintersection.hh \
                   computeintersection.cc \
                   conformingmerge.hh \
                   contactmerge.hh \
+                  contactmerge.cc \
                   merger.hh \
                   overlappingmerge.hh \
                   overlappingmerge.cc \
