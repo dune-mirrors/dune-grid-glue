@@ -11,5 +11,5 @@ Version: @VERSION@
 Description: dune-grid-glue module
 URL: http://dune-project.org/
 Requires: dune-common dune-grid
-Libs: -L
-Cflags: -I
+Libs: -L${libdir} -ldunegridglue
+Cflags: -I${includedir}
