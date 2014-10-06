@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_GLUE_OVERLAPPING_MERGE_HH
-#define DUNE_GRID_GLUE_OVERLAPPING_MERGE_HH
+#ifndef DUNE_GRIDGLUE_MERGING_OVERLAPPINGMERGE_HH
+#define DUNE_GRIDGLUE_MERGING_OVERLAPPINGMERGE_HH
 
 #include <iostream>
 #include <iomanip>
@@ -86,4 +86,4 @@ private:
 #include "overlappingmerge.cc"
 
 
-#endif // DUNE_GRID_GLUE_MIXED_DIM_OVERLAPPING_MERGE_HH
+#endif // DUNE_GRIDGLUE_MERGING_OVERLAPPINGMERGE_HH

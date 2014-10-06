@@ -16,8 +16,8 @@
  * @brief extractor base class
  */
 
-#ifndef DUNE_EXTRACTOR_HH
-#define DUNE_EXTRACTOR_HH
+#ifndef DUNE_GRIDGLUE_EXTRACTORS_EXTRACTOR_HH
+#define DUNE_GRIDGLUE_EXTRACTORS_EXTRACTOR_HH
 
 #include <vector>
 #include <map>
@@ -461,4 +461,4 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
 
 }  // namespace Dune
 
-#endif // DUNE_EXTRACTOR_HH
+#endif // DUNE_GRIDGLUE_EXTRACTORS_EXTRACTOR_HH

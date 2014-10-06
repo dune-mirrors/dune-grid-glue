@@ -9,8 +9,8 @@
  * \deprecated For use with Dune 2.2 and older.
  */
 
-#ifndef SIMPLEXGEOMETRY_HH
-#define SIMPLEXGEOMETRY_HH
+#ifndef DUNE_GRIDGLUE_COMMON_SIMPLEXGEOMETRY_HH
+#define DUNE_GRIDGLUE_COMMON_SIMPLEXGEOMETRY_HH
 
 #include <dune/common/static_assert.hh>
 #include <dune/common/array.hh>
@@ -92,4 +92,4 @@ namespace Dune {
   } // end namespace GridGlue
 } // end namespace Dune
 
-#endif // SIMPLEXGEOMETRY_HH
+#endif // DUNE_GRIDGLUE_COMMON_SIMPLEXGEOMETRY_HH

@@ -1,5 +1,5 @@
-#ifndef DUNE_GRIDGLUE_INTERSECTIONINDEXSET_HH
-#define DUNE_GRIDGLUE_INTERSECTIONINDEXSET_HH
+#ifndef DUNE_GRIDGLUE_ADAPTER_INTERSECTIONINDEXSET_HH
+#define DUNE_GRIDGLUE_ADAPTER_INTERSECTIONINDEXSET_HH
 
 #include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/adapter/intersection.hh>
@@ -53,4 +53,4 @@ namespace Dune {
     } // end namespace GridGlue
 } // end namespace Dune
 
-#endif // DUNE_GRIDGLUE_INTERSECTIONINDEXSET_HH
+#endif // DUNE_GRIDGLUE_ADAPTER_INTERSECTIONINDEXSET_HH

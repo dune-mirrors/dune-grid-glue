@@ -5,8 +5,8 @@
   @brief Merge two grid boundary surfaces that may be a positive distance apart
  */
 
-#ifndef DUNE_GRID_GLUE_MERGING_CONTACTMERGE_HH
-#define DUNE_GRID_GLUE_MERGING_CONTACTMERGE_HH
+#ifndef DUNE_GRIDGLUE_MERGING_CONTACTMERGE_HH
+#define DUNE_GRIDGLUE_MERGING_CONTACTMERGE_HH
 
 
 #include <iostream>
@@ -224,4 +224,4 @@ private:
 
 #include "contactmerge.cc"
 
-#endif // DUNE_GRID_GLUE_MERGING_CONTACTMERGE_HH
+#endif // DUNE_GRIDGLUE_MERGING_CONTACTMERGE_HH

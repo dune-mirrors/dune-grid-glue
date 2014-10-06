@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_MULTIVECTOR_HH
-#define DUNE_MULTIVECTOR_HH
+#ifndef DUNE_GRIDGLUE_COMMON_MULTIVECTOR_HH
+#define DUNE_GRIDGLUE_COMMON_MULTIVECTOR_HH
 
 #include <dune/common/tuples.hh>
 #include <dune/common/tupleutility.hh>
@@ -296,4 +296,4 @@ namespace Dune {
 
 } // end namespace Dune
 
-#endif // DUNE_MULTIVECTOR_HH
+#endif // DUNE_GRIDGLUE_COMMON_MULTIVECTOR_HH

@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_GLUE_COMMON_PROJECTION_HELPER_HH
-#define DUNE_GRID_GLUE_COMMON_PROJECTION_HELPER_HH
+#ifndef DUNE_GRIDGLUE_COMMON_PROJECTIONHELPER_HH
+#define DUNE_GRIDGLUE_COMMON_PROJECTIONHELPER_HH
 
 #include <bitset>
 

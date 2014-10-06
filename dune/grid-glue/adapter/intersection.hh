@@ -6,8 +6,8 @@
    @brief Model of the Intersection concept provided by GridGlue.
  */
 
-#ifndef DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
-#define DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
+#ifndef DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH
+#define DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH
 
 #include <dune/common/version.hh>
 
@@ -602,4 +602,4 @@ namespace Dune {
   } // end namesapce GridGlue
 } // end namesapce Dune
 
-#endif // DUNE_GRIDGLUE_REMOTEINTERSECTION_HH
+#endif // DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH

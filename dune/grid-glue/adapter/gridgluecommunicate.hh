@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRIDGLUECOMMUNICATE_HH
-#define DUNE_GRIDGLUECOMMUNICATE_HH
+#ifndef DUNE_GRIDGLUE_ADAPTER_GRIDGLUECOMMUNICATE_HH
+#define DUNE_GRIDGLUE_ADAPTER_GRIDGLUECOMMUNICATE_HH
 
 /**@file
    @author Christian Engwer

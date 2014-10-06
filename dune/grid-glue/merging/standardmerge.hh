@@ -5,8 +5,8 @@
  * \brief Common base class for many merger implementations: produce pairs of entities that _may_ intersect
  */
 
-#ifndef STANDARD_MERGE_HH
-#define STANDARD_MERGE_HH
+#ifndef DUNE_GRIDGLUE_MERGING_STANDARDMERGE_HH
+#define DUNE_GRIDGLUE_MERGING_STANDARDMERGE_HH
 
 
 #include <iostream>
@@ -898,4 +898,4 @@ STANDARD_MERGE_INSTANTIATE(double,3,3,3);
 #undef STANDARD_MERGE_INSTANTIATE
 #undef DECL
 
-#endif // STANDARD_MERGE_HH
+#endif // DUNE_GRIDGLUE_MERGING_STANDARDMERGE_HH

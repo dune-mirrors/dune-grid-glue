@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef GRIDGLUE_COUPLINGTEST_HH
-#define GRIDGLUE_COUPLINGTEST_HH
+#ifndef DUNE_GRIDGLUE_TEST_COUPLINGTEST_HH
+#define DUNE_GRIDGLUE_TEST_COUPLINGTEST_HH
 
 #include <iostream>
 
@@ -180,4 +180,4 @@ void testCoupling(const GlueType& glue)
     DUNE_THROW(Dune::Exception, "Test failed, see above for details.");
 }
 
-#endif // GRIDGLUE_COUPLINGTEST_HH
+#endif // DUNE_GRIDGLUE_TEST_COUPLINGTEST_HH

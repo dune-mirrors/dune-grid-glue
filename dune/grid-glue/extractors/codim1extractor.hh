@@ -16,8 +16,8 @@
  * @brief Grid extractor class for codim 1 subgrids
  */
 
-#ifndef DUNE_CODIM_1_EXTRACTOR_HH
-#define DUNE_CODIM_1_EXTRACTOR_HH
+#ifndef DUNE_GRIDGLUE_EXTRACTORS_CODIM1EXTRACTOR_HH
+#define DUNE_GRIDGLUE_EXTRACTORS_CODIM1EXTRACTOR_HH
 
 #include "extractor.hh"
 #include "extractorpredicate.hh"
@@ -378,4 +378,4 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
 
 }  // namespace Dune
 
-#endif // DUNE_CODIM_1_EXTRACTOR_HH
+#endif // DUNE_GRIDGLUE_EXTRACTORS_CODIM1EXTRACTOR_HH

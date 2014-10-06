@@ -16,8 +16,8 @@
  * @brief Write all remote intersections to a vtk file for debugging
  */
 
-#ifndef GRIDGLUEVTKWRITER_HH
-#define GRIDGLUEVTKWRITER_HH
+#ifndef DUNE_GRIDGLUE_ADAPTER_GRIDGLUEVTKWRITER_HH
+#define DUNE_GRIDGLUE_ADAPTER_GRIDGLUEVTKWRITER_HH
 
 
 #include <fstream>
@@ -305,4 +305,4 @@ public:
 
 
 
-#endif // GRIDGLUEVTKWRITER_HH
+#endif // DUNE_GRIDGLUE_ADAPTER_GRIDGLUEVTKWRITER_HH

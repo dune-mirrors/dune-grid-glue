@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef GRIDGLUE_COMMTEST_HH
-#define GRIDGLUE_COMMTEST_HH
+#ifndef DUNE_GRIDGLUE_TEST_COMMUNICATIONTEST_HH
+#define DUNE_GRIDGLUE_TEST_COMMUNICATIONTEST_HH
 
 template <typename ctype, int dimw>
 class CheckGlobalCoordDataHandle :
@@ -49,4 +49,4 @@ void testCommunication (const GlueType& glue)
   glue.communicate(dh, Dune::All_All_Interface, Dune::BackwardCommunication);
 }
 
-#endif // GRIDGLUE_COMMTEST_HH
+#endif // DUNE_GRIDGLUE_TEST_COMMUNICATIONTEST_HH

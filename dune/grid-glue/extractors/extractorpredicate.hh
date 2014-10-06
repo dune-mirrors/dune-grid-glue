@@ -16,8 +16,8 @@
  * @brief Base class for predicates selecting the part of a grid to be extracted
  */
 
-#ifndef EXTRACTOR_PREDICATES_HH
-#define EXTRACTOR_PREDICATES_HH
+#ifndef DUNE_GRIDGLUE_EXTRACTORS_EXTRACTORPREDICATES_HH
+#define DUNE_GRIDGLUE_EXTRACTORS_EXTRACTORPREDICATES_HH
 
 namespace Dune {
 
@@ -46,4 +46,4 @@ public:
 
 }  // namespace Dune
 
-#endif // EXTRACTOR_PREDICATES_HH
+#endif // DUNE_GRIDGLUE_EXTRACTORS_EXTRACTORPREDICATES_HH

@@ -17,8 +17,8 @@
  * Implementation of the Merger concept for conforming interfaces
  */
 
-#ifndef CONFORMING_MERGE_HH
-#define CONFORMING_MERGE_HH
+#ifndef DUNE_GRIDGLUE_MERGING_CONFORMINGMERGE_HH
+#define DUNE_GRIDGLUE_MERGING_CONFORMINGMERGE_HH
 
 #include <iomanip>
 #include <vector>
@@ -278,4 +278,4 @@ typename ConformingMerge<dim, dimworld, T>::LocalCoords ConformingMerge<dim, dim
 
 }  // namespace Dune
 
-#endif // CONFORMING_MERGE_HH
+#endif // DUNE_GRIDGLUE_MERGING_CONFORMINGMERGE_HH

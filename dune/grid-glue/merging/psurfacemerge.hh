@@ -11,8 +11,8 @@
    specified by the concept.
  */
 
-#ifndef PSURFACEMERGE_HH
-#define PSURFACEMERGE_HH
+#ifndef DUNE_GRIDGLUE_MERGING_PSURFACEMERGE_HH
+#define DUNE_GRIDGLUE_MERGING_PSURFACEMERGE_HH
 
 
 #include <iostream>
@@ -486,4 +486,4 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int id
 #undef PSURFACE_EXTERN
 #endif
 
-#endif // PSURFACEMERGE_HH
+#endif // DUNE_GRIDGLUE_MERGING_PSURFACEMERGE_HH

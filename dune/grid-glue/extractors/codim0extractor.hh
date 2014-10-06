@@ -16,8 +16,8 @@
  * @brief Mesh grid extractor base class
  */
 
-#ifndef DUNE_CODIM_0_EXTRACTOR_HH
-#define DUNE_CODIM_0_EXTRACTOR_HH
+#ifndef DUNE_GRIDGLUE_EXTRACTORS_CODIM0EXTRACTOR_HH
+#define DUNE_GRIDGLUE_EXTRACTORS_CODIM0EXTRACTOR_HH
 
 #include <deque>
 
@@ -235,4 +235,4 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
 
 }  // namespace Dune
 
-#endif // DUNE_CODIM_0_EXTRACTOR_HH
+#endif // DUNE_GRIDGLUE_EXTRACTORS_CODIM0EXTRACTOR_HH

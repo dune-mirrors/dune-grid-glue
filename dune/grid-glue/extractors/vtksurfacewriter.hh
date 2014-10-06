@@ -16,8 +16,8 @@
  * @brief helper class for graphical output of grids in generic representation
  */
 
-#ifndef VTKSURFACEWRITER_HH
-#define VTKSURFACEWRITER_HH
+#ifndef DUNE_GRIDGLUE_EXTRACTORS_VTKSURFACEWRITER_HH
+#define DUNE_GRIDGLUE_EXTRACTORS_VTKSURFACEWRITER_HH
 
 #include <fstream>
 #include <iomanip>
@@ -208,4 +208,4 @@ private:
 
 }  // namespace Dune
 
-#endif // VTKSURFACEWRITER_HH
+#endif // DUNE_GRIDGLUE_EXTRACTORS_VTKSURFACEWRITER_HH
