@@ -520,7 +520,7 @@ void GridGlue<P0, P1>::mergePatches(
       }
       if (it.grid1local_)
       {
-        Dune::PartitionType ptype = patch1_->element(it.grid1indices_[1])->partitionType();
+        Dune::PartitionType ptype = patch1_->element(it.grid1indices_[0])->partitionType();
         patch1_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
     }
