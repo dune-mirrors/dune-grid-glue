@@ -25,6 +25,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/array.hh>
+#include <dune/common/version.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
@@ -51,15 +52,6 @@ class Extractor
 
 public:
 
-  template<int dim>
-  struct CellLayout
-  {
-    bool contains (Dune::GeometryType gt)
-    {
-      return gt.dim()==dim;
-    }
-  };
-
   enum {dimworld = GV::dimensionworld};
   enum {dim      = GV::dimension};
   enum {codim    = cd};
@@ -84,7 +76,7 @@ public:
 
   typedef std::vector<unsigned int>                                VertexVector;
 
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, CellLayout> CellMapper;
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> CellMapper;
   // typedef typename CellMapper::IndexType                               IndexType;
   typedef int IndexType;
 public:

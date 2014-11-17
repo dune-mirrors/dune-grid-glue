@@ -7,10 +7,10 @@
 #define DECL
 #define STANDARD_MERGE_INSTANTIATE(T,A,B,C) \
   DECL template \
-  void StandardMerge<T,A,B,C>::build(const std::vector<Dune::FieldVector<T,C> >& grid1Coords, \
+  void StandardMerge<T,A,B,C>::build(const std::vector<Dune::FieldVector<T,C> >& grid1_coords, \
                                      const std::vector<unsigned int>& grid1_elements, \
                                      const std::vector<Dune::GeometryType>& grid1_element_types, \
-                                     const std::vector<Dune::FieldVector<T,C> >& grid2Coords, \
+                                     const std::vector<Dune::FieldVector<T,C> >& grid2_coords, \
                                      const std::vector<unsigned int>& grid2_elements, \
                                      const std::vector<Dune::GeometryType>& grid2_element_types \
                                      )

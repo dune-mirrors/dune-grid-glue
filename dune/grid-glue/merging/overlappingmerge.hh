@@ -12,7 +12,6 @@
 #include <dune/common/fvector.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/geometry.hh>
 
 #include <dune/grid/common/grid.hh>
 

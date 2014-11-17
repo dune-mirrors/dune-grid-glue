@@ -2,16 +2,19 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-
+#include <dune/common/version.hh>
+#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
 #include <dune/common/parallel/mpihelper.hh>
-//#include <dune/geometry/quadraturerules.hh>
+#else
+#include <dune/common/mpihelper.hh>
+#endif
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/geometrygrid.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim0extractor.hh>
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/merging/mixeddimoverlappingmerge.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
@@ -37,8 +40,8 @@ template<int dim, int dimw, class ctype>
 class MixedDimTrafo
   : public AnalyticalCoordFunction< ctype, dim, dimw, MixedDimTrafo<dim,dimw,ctype> >
 {
-  //dune_static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
-  dune_static_assert(dim==1, "MixedDimTrafo currently assumes dim==1");
+  static_assert(dim+1==dimw, "MixedDimTrafo assumes dim+1=dimworld");
+  static_assert(dim==1, "MixedDimTrafo currently assumes dim==1");
 public:
 
   //! evaluate method for global mapping
@@ -95,10 +98,14 @@ int main(int argc, char** argv)
   AllElementsDescriptor<DomGridView> domdesc;
   AllElementsDescriptor<TarGridView> tardesc;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(grid0.leafGridView(), domdesc);
   TarExtractor tarEx(grid1.leafGridView(), tardesc);
-
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+#else
+  DomExtractor domEx(grid0.leafView(), domdesc);
+  TarExtractor tarEx(grid1.leafView(), tardesc);
+#endif
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // The following code is out-commented, because the test functionality
   // doesn't actually work yet.

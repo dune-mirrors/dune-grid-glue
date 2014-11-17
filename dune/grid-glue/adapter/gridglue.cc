@@ -5,7 +5,7 @@
 #include "intersection.hh"
 #include <vector>
 #include <iterator>
-#include "gridglue.hh"
+#include "../gridglue.hh"
 
 #include "../common/multivector.hh"
 
@@ -154,6 +154,9 @@ namespace {
 }
 #endif // HAVE_MPI
 
+namespace Dune {
+namespace GridGlue {
+
 template<typename P0, typename P1>
 GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger) :
   patch0_(gp0), patch1_(gp1), merger_(merger)
@@ -181,7 +184,7 @@ void GridGlue<P0, P1>::build()
 
   // clear the contents from the current intersections array
   {
-    std::vector<IntersectionData> dummy;
+    std::vector<IntersectionData> dummy(1); // we need size 1, as we always store data for the end-intersection
     intersections_.swap(dummy);
   }
 
@@ -215,23 +218,23 @@ void GridGlue<P0, P1>::build()
   char patch1surf[256];
   sprintf(patch1surf, "/tmp/vtk-patch1-test-%i", myrank);
 
-  std::cout << prefix << "Writing patch0 surface to '" << patch0surf << ".vtk'...\n";
-  VtkSurfaceWriter vtksw(patch0surf);
-  vtksw.writeSurface(patch0coords, patch0entities, grid0dim, dimworld);
-  std::cout << prefix << "Done writing patch0 surface!\n";
+  // std::cout << prefix << "Writing patch0 surface to '" << patch0surf << ".vtk'...\n";
+  // VtkSurfaceWriter vtksw(patch0surf);
+  // vtksw.writeSurface(patch0coords, patch0entities, grid0dim, dimworld);
+  // std::cout << prefix << "Done writing patch0 surface!\n";
 
-  std::cout << prefix << "Writing patch1 surface to '" << patch1surf << ".vtk'...\n";
-  vtksw.setFilename(patch1surf);
-  vtksw.writeSurface(patch1coords, patch1entities, grid1dim, dimworld);
-  std::cout << prefix << "Done writing patch1 surface!\n";
+  // std::cout << prefix << "Writing patch1 surface to '" << patch1surf << ".vtk'...\n";
+  // vtksw.setFilename(patch1surf);
+  // vtksw.writeSurface(patch1coords, patch1entities, grid1dim, dimworld);
+  // std::cout << prefix << "Done writing patch1 surface!\n";
 #endif // WRITE_TO_VTK
 
 #if HAVE_MPI
   if (commsize > 1)
   {
     // setup parallel indexset
-    domain_is_.beginResize();
-    target_is_.beginResize();
+    patch0_is_.beginResize();
+    patch1_is_.beginResize();
   }
 #endif // HAVE_MPI
 
@@ -252,17 +255,28 @@ void GridGlue<P0, P1>::build()
   int mpi_result;
   MPI_Status mpi_status;
 
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+  std::cout << myrank << " Comm Size" << commsize << std::endl;
+#endif
+
   if (commsize > 1)
   {
     // get patch sizes
     PatchSizes patchSizes (patch0coords, patch0entities, patch0types,
                            patch1coords, patch1entities, patch1types);
 
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+    std::cout << myrank << " Start Communication" << std::endl;
+#endif
+
     // communicate max patch size
     PatchSizes maxPatchSizes;
     mpi_result = MPI_Allreduce(&patchSizes, &maxPatchSizes,
                                6, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
     CheckMPIStatus(mpi_result, 0);
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+    std::cout << myrank << " maxPatchSizes " << "done" << std::endl;
+#endif
 
     /**
        \todo Use vector<struct> for message buffer and MultiVector to copy these
@@ -315,47 +329,63 @@ void GridGlue<P0, P1>::build()
         CheckMPIStatus(mpi_result, mpi_status);
       }
 
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patchSizes " <<  "done" << std::endl;
+#endif
+
       /* send remote patch to right neighbor and receive from left neighbor */
 
       // patch0coords
-      // std::cout << myrank << " patch0coords" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch0coords" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch0coords, tmpPatchCoords, patchSizes.patch0coords,
         rightrank, leftrank, mpicomm_);
 
       // patch0entities
-      // std::cout << myrank << " patch0entities" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch0entities" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch0entities, tmpPatchEntities, patchSizes.patch0entities,
         rightrank, leftrank, mpicomm_);
 
       // patch0types
-      // std::cout << myrank << " patch0types" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch0types" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch0types, tmpPatchTypes, patchSizes.patch0types,
         rightrank, leftrank, mpicomm_);
 
       // patch1coords
-      // std::cout << myrank << " patch1coords" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch1coords" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch1coords, tmpPatchCoords, patchSizes.patch1coords,
         rightrank, leftrank, mpicomm_);
 
       // patch1entities
-      // std::cout << myrank << " patch1entities" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch1entities" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch1entities, tmpPatchEntities, patchSizes.patch1entities,
         rightrank, leftrank, mpicomm_);
 
       // patch1types
-      // std::cout << myrank << " patch1types" << std::endl;
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+      std::cout << myrank << " patch1types" << std::endl;
+#endif
       MPI_SendVectorInRing(
         remotePatch1types, tmpPatchTypes, patchSizes.patch1types,
         rightrank, leftrank, mpicomm_);
 
       /* merging */
       // merge local & remote patches
-      // domain_is_ and target__is are updated automatically
+      // patch0_is_ and patch1_is_ are updated automatically
       if (remotePatch1entities.size() > 0 && patch0entities.size() > 0)
         mergePatches(patch0coords, patch0entities, patch0types, myrank,
                      remotePatch1coords, remotePatch1entities, remotePatch1types, remoterank);
@@ -372,13 +402,26 @@ void GridGlue<P0, P1>::build()
   if (commsize > 1)
   {
     // finalize ParallelIndexSet & RemoteIndices
-    domain_is_.endResize();
-    target_is_.endResize();
+    patch0_is_.endResize();
+    patch1_is_.endResize();
 
     // setup remote index information
-    remoteIndices_.setIncludeSelf(false);
-    remoteIndices_.setIndexSets(domain_is_, target_is_, mpicomm_) ;
-    remoteIndices_.rebuild<true>();
+    remoteIndices_.setIncludeSelf(true);
+#warning add list of neighbors ...
+    remoteIndices_.setIndexSets(patch0_is_, patch1_is_, mpicomm_) ;
+    remoteIndices_.rebuild<true/* all indices are public */>();
+
+    // DEBUG Print all remote indices
+#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
+    for (auto it = remoteIndices_.begin(); it != remoteIndices_.end(); it++)
+    {
+      std::cout << myrank << "\tri-list\t" << it->first << std::endl;
+      for (auto xit = it->second.first->begin(); xit != it->second.first->end(); ++xit)
+        std::cout << myrank << "\tri-list 1 \t" << it->first << "\t" << *xit << std::endl;
+      for (auto xit = it->second.second->begin(); xit != it->second.second->end(); ++xit)
+        std::cout << myrank << "\tri-list 2 \t" << it->first << "\t" << *xit << std::endl;
+    }
+#endif
   }
 #endif
 
@@ -421,7 +464,7 @@ void GridGlue<P0, P1>::mergePatches(
   const bool patch1local = (myrank == patch1rank);
 
   // remember the number of previous remote intersections
-  const unsigned int offset = intersections_.size();
+  const unsigned int offset = intersections_.size()-1;
 
   std::cout << myrank
             << " GridGlue::mergePatches : rank " << patch0rank << " / " << patch1rank << std::endl;
@@ -455,27 +498,23 @@ void GridGlue<P0, P1>::mergePatches(
   if (commsize > 1)
   {
     // update remote index sets
-#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,2,1)
-    assert(Dune::RESIZE == domain_is_.state());
-    assert(Dune::RESIZE == target_is_.state());
-#endif
+    assert(Dune::RESIZE == patch0_is_.state());
+    assert(Dune::RESIZE == patch1_is_.state());
+
     for (unsigned int i = 0; i < merger_->nSimplices(); i++)
     {
 #warning only handle the newest intersections / merger info
       const IntersectionData & it = intersections_[i];
-      GlobalId gid;
-      gid.first.first = patch0rank;
-      gid.first.second = patch1rank;
-      gid.second = offset+i;
+      GlobalId gid(patch0rank, patch1rank, i);
       if (it.grid0local_)
       {
         Dune::PartitionType ptype = patch0_.element(it.grid0index_)->partitionType();
-        domain_is_.add (gid, LocalIndex(offset+i, ptype) );
+        patch0_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
       if (it.grid1local_)
       {
         Dune::PartitionType ptype = patch1_.element(it.grid1index_)->partitionType();
-        target_is_.add (gid, LocalIndex(offset+i, ptype) );
+        patch1_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
     }
   }
@@ -519,3 +558,6 @@ void GridGlue<P0, P1>::extractGrid (const Extractor & extractor,
   extractor.getGeometryTypes(geometryTypes);
 
 }
+
+} // end namespace GridGlue
+} // end namespace Dune

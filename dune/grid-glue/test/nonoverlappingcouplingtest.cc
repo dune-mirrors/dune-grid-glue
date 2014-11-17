@@ -21,7 +21,8 @@
 #include <dune/grid-glue/extractors/codim1extractor.hh>
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/merging/contactmerge.hh>
+#include <dune/grid-glue/gridglue.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
 #include <dune/grid-glue/test/communicationtest.hh>
@@ -42,7 +43,11 @@ public:
                         unsigned int face) const
   {
     const int dim = GridView::dimension;
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+    const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(eptr->type());
+#else
     const Dune::GenericReferenceElement<double,dim>& refElement = Dune::GenericReferenceElements<double, dim>::general(eptr->type());
+#endif
 
     int numVertices = refElement.size(face, 1, dim);
 
@@ -109,13 +114,19 @@ void testMatchingCubeGrids()
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
+
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
 #if HAVE_PSURFACE
+  // Testing with PSurfaceMerge
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
@@ -130,9 +141,26 @@ void testMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
+  testCommunication(glue);
 #endif
+
+  // Testing with ContactMerge
+  typedef ContactMerge<dim,double> ContactMergeImpl;
+
+  ContactMergeImpl contactMerger(0.01);
+  GlueType contactGlue(domEx, tarEx, &contactMerger);
+
+  contactGlue.build();
+
+  std::cout << "Gluing successful, " << contactGlue.size() << " remote intersections found!" << std::endl;
+  assert(contactGlue.size() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(contactGlue);
+  testCommunication(contactGlue);
 }
 
 
@@ -172,13 +200,18 @@ void testNonMatchingCubeGrids()
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+#else
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#endif
+
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
 #if HAVE_PSURFACE
   typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
@@ -193,9 +226,26 @@ void testNonMatchingCubeGrids()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
+  testCommunication(glue);
 #endif
+
+  // Testing with ContactMerge
+  typedef ContactMerge<dim,double> ContactMergeImpl;
+
+  ContactMergeImpl contactMerger(0.01);
+  GlueType contactGlue(domEx, tarEx, &contactMerger);
+
+  contactGlue.build();
+
+  std::cout << "Gluing successful, " << contactGlue.size() << " remote intersections found!" << std::endl;
+  assert(contactGlue.size() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(contactGlue);
+  testCommunication(contactGlue);
 }
 
 
@@ -208,7 +258,7 @@ public:
 
   typedef SGrid<dim,dim> GridType;
 
-  GridType & generate()
+  std::shared_ptr<GridType> generate()
   {
     FieldVector<int, dim> elements(2);
     FieldVector<double,dim> lower(0);
@@ -221,8 +271,7 @@ public:
       upper[0] += 1;
     }
 
-    GridType * gridp = new GridType(elements, lower, upper);
-    return *gridp;
+    return std::make_shared<GridType>(elements, lower, upper);
   }
 };
 
@@ -237,17 +286,23 @@ public:
   typedef YaspGrid<dim> HostGridType;
   typedef GeometryGrid<HostGridType, ShiftTrafo<dim,double> > GridType;
 
-  GridType & generate()
+  std::shared_ptr<GridType> generate()
   {
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+    Dune::array<int,dim> elements;
+    std::fill(elements.begin(), elements.end(), 2);
+    std::bitset<dim> periodic(0);
+#else
     FieldVector<int, dim> elements(2);
-    FieldVector<double,dim> size(1);
     FieldVector<bool,dim> periodic(false);
+#endif
+    FieldVector<double,dim> size(1);
     int overlap = 1;
     double shift = 0.0;
 
     if (tar)
     {
-      elements = 4;
+      std::fill(elements.begin(), elements.end(), 4);
       shift = 1.0;
     }
 
@@ -257,8 +312,7 @@ public:
 #endif // HAVE_MPI
       size, elements, periodic, overlap);
     ShiftTrafo<dim,double> * trafop = new ShiftTrafo<dim,double>(shift);
-    GridType * gridp = new GridType(*hostgridp, *trafop);
-    return *gridp;
+    return std::make_shared<GridType>(*hostgridp, *trafop);
   }
 };
 
@@ -278,8 +332,8 @@ void testParallelCubeGrids()
 
   double slice = 1.0;
 
-  GridType0 & cubeGrid0 = domGen.generate();
-  GridType1 & cubeGrid1 = tarGen.generate();
+  std::shared_ptr<GridType0> cubeGrid0 = domGen.generate();
+  std::shared_ptr<GridType1> cubeGrid1 = tarGen.generate();
 
   // ////////////////////////////////////////
   //   Set up Traits
@@ -294,16 +348,23 @@ void testParallelCubeGrids()
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
-  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
+  DomExtractor domEx(cubeGrid0->levelGridView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1->levelGridView(0), tardesc);
+#else
+  DomExtractor domEx(cubeGrid0->levelView(0), domdesc);
+  TarExtractor tarEx(cubeGrid1->levelView(0), tardesc);
+#endif
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
   // ////////////////////////////////////////
-#if HAVE_PSURFACE
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
-  typedef ::GridGlue<DomExtractor,TarExtractor> GlueType;
+  typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
+
+#if HAVE_PSURFACE
+  // Test using PSurfaceMerge
+  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
 
   SurfaceMergeImpl merger;
   GlueType glue(domEx, tarEx, &merger);
@@ -319,21 +380,42 @@ void testParallelCubeGrids()
 
   testCoupling(glue);
   testCommunication(glue);
-#else
-    #warning Not testing, because psurface backend is not available.
 #endif
+  // Testing with ContactMerge
+  typedef ContactMerge<dim,double> ContactMergeImpl;
+
+  ContactMergeImpl contactMerger(0.01);
+  GlueType contactGlue(domEx, tarEx, &contactMerger);
+
+  contactGlue.build();
+
+  std::cout << "Gluing successful, " << contactGlue.size() << " remote intersections found!" << std::endl;
+  assert(contactGlue.size() > 0);
+
+  // ///////////////////////////////////////////
+  //   Test the coupling
+  // ///////////////////////////////////////////
+
+  testCoupling(contactGlue);
+  testCommunication(contactGlue);
 }
 
 #if HAVE_MPI
 void eh( MPI_Comm *comm, int *err, ... )
 {
-  DUNE_THROW(Dune::Exception, "MPI ERROR");
+  int len = 1024;
+  char error_txt[len];
+
+  MPI_Error_string(*err, error_txt, &len);
+  assert(len <= 1024);
+  DUNE_THROW(Dune::Exception, "MPI ERROR -- " << error_txt);
 }
 #endif // HAVE_MPI
 
 int main(int argc, char *argv[]) try
 {
   Dune::MPIHelper::instance(argc, argv);
+  Dune::dinfo.attach(std::cout);
 
 #if HAVE_MPI
   MPI_Errhandler errhandler;
@@ -346,7 +428,6 @@ int main(int argc, char *argv[]) try
   typedef MeshGenerator<2,true>   Par;
 
   // Test two unit squares
-#if ! HAVE_MPI
   std::cout << "==== 2D hybrid =============================================\n";
   testMatchingCubeGrids<2>();
   std::cout << "============================================================\n";
@@ -358,7 +439,6 @@ int main(int argc, char *argv[]) try
   std::cout << "============================================================\n";
   testParallelCubeGrids<2,Seq,Par>();
   std::cout << "============================================================\n";
-#endif // HAVE_MPI
   testParallelCubeGrids<2,Par,Par>();
   std::cout << "============================================================\n";
 
@@ -367,8 +447,8 @@ int main(int argc, char *argv[]) try
   typedef MeshGenerator<3,true>   Par3d;
 
   // Test two unit cubes
-#if ! HAVE_MPI
   std::cout << "==== 3D hybrid =============================================\n";
+#if ! HAVE_MPI
   testMatchingCubeGrids<3>();
   std::cout << "============================================================\n";
   testNonMatchingCubeGrids<3>();
@@ -379,9 +459,9 @@ int main(int argc, char *argv[]) try
   std::cout << "============================================================\n";
   testParallelCubeGrids<3,Seq3d,Par3d>();
   std::cout << "============================================================\n";
-#endif // HAVE_MPI
   testParallelCubeGrids<3,Par3d,Par3d>();
   std::cout << "============================================================\n";
+#endif // HAVE_MPI
 
   return 0;
 }

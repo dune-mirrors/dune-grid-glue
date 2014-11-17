@@ -4,7 +4,7 @@
 #Name of the module
 Module: dune-grid-glue
 Version: 2.2-svn
-Maintainer: christi@uni-hd.de,sander@mi.fu-berlin.de
+Maintainer: christian.engwer@uni-muenster.de,sander@igpm.rwth-aachen.de
 #depending on
-Depends: dune-common dune-grid dune-foamgrid
+Depends: dune-common  (>= 2.2) dune-grid (>= 2.2) dune-foamgrid
 Whitespace-Hook: Yes

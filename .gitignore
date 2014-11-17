@@ -1,5 +1,6 @@
 Makefile
 Makefile.in
+build-cmake/
 config.*
 configure
 dependencies.m4
@@ -15,4 +16,6 @@ semantic.cache
 stamp-h1
 ltmain.sh
 am
+compile
+test-driver
 .libs

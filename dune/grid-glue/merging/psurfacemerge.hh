@@ -25,6 +25,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/bitsetvector.hh>
+#include <dune/common/version.hh>
 
 #include <dune/grid/common/grid.hh>
 
@@ -37,6 +38,8 @@
 #else
 // forward declaration of PSurface classes
 template <int dim, typename ctype> class DirectionFunction;
+// switch off the macro that contains (in certain versions) the psurface namespace prefix
+#define PSURFACE_NAMESPACE
 #endif
 
 
@@ -50,11 +53,19 @@ template<int dim, int dimworld, typename T = double>
 class PSurfaceMerge
   : public Merger<T,dim,dim,dimworld>
 {
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,3,0)
   static_assert( dim==1 || dim==2,
                       "PSurface can only handle the cases dim==1 and dim==2!");
 
   static_assert( dim==dimworld || dim+1==dimworld,
                       "PSurface can only handle the cases dim==dimworld and dim+1==dimworld!");
+#else
+  dune_static_assert( dim==1 || dim==2,
+                      "PSurface can only handle the cases dim==1 and dim==2!");
+
+  static_assert( dim==dimworld || dim+1==dimworld,
+                      "PSurface can only handle the cases dim==dimworld and dim+1==dimworld!");
+#endif
 
   // The psurface library itself always expects dimworld to be dim+1
   // To be able to handle the case dim==dimworld we keep an artificial world
@@ -315,7 +326,8 @@ public:
    * The matching of the geometries offers the possibility to specify a function for
    * the exact evaluation of domain surface normals. If no such function is specified
    * (default) normals are interpolated.
-   * @param value the new function (or NULL to unset the function)
+   * @param domainDirections the new function for the outer normal of grid0 (domain) (or NULL to unset the function)
+   * @param targetDirections the new function for the outer normal of grid1 (domain) (or NULL to unset the function)
    */
   inline
   void setSurfaceDirections(const PSURFACE_NAMESPACE DirectionFunction<psurfaceDimworld,ctype>* domainDirections,
@@ -324,24 +336,14 @@ public:
   /*   C O N C E P T   I M P L E M E N T I N G   I N T E R F A C E   */
 
   /**
-   * @brief builds the merged grid
-   *
-   * Note that the indices are used consequently throughout the whole class interface just like they are
-   * introduced here.
-   *
-   * @param domain_coords the domain vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param domain_elements array with all domain simplices represented as corner indices into @c domain_coords;
-   * the simplices are just written to this array one after another
-   * @param target_coords the target vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param target_elements just like with the domain_elements and domain_coords
+   * @copydoc Merger<T,dim,dim,dimworld>::build
    */
-  void build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
-             const std::vector<unsigned int>& domain_elements,
-             const std::vector<Dune::GeometryType>& domain_element_types,
-             const std::vector<Dune::FieldVector<T,dimworld> >& target_coords,
-             const std::vector<unsigned int>& target_elements,
-             const std::vector<Dune::GeometryType>& target_element_types
-             );
+  void build(const std::vector<Dune::FieldVector<ctype,dimworld> >& grid1_coords,
+             const std::vector<unsigned int>& grid1_elements,
+             const std::vector<Dune::GeometryType>& grid1_element_types,
+             const std::vector<Dune::FieldVector<ctype,dimworld> >& grid2_coords,
+             const std::vector<unsigned int>& grid2_elements,
+             const std::vector<Dune::GeometryType>& grid2_element_types);
 
 
   /*   Q U E S T I O N I N G   T H E   M E R G E D   G R I D   */
@@ -378,20 +380,21 @@ private:
 
 
   /*   M A P P I N G   O N   I N D E X   B A S I S   */
-
+  unsigned int grid1Parents(unsigned int idx) const;
+  unsigned int grid2Parents(unsigned int idx) const;
   /**
    * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
    */
-  unsigned int grid1Parent(unsigned int idx) const;
+  unsigned int grid1Parent(unsigned int idx, unsigned int parId = 0) const;
 
   /**
    * @brief get index of target parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the target parent simplex
    */
-  unsigned int grid2Parent(unsigned int idx) const;
+  unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const;
 
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
@@ -403,7 +406,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid1 simplex
    */
-  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
 
   /**
    * @brief get the target parent's simplex local coordinates for a particular merged grid simplex corner
@@ -412,7 +415,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent target simplex
    */
-  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner) const;
+  LocalCoords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
 
 };
 
@@ -444,9 +447,23 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::nSimplices() const
   return this->olm_.nOverlaps();
 }
 
+template<int dim, int dimworld, typename T>
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parents(unsigned int idx) const
+{
+  assert(valid);
+  return 1;
+}
+
 
 template<int dim, int dimworld, typename T>
-inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parents(unsigned int idx) const
+{
+  assert(valid);
+  return 1;
+}
+
+template<int dim, int dimworld, typename T>
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int idx, unsigned int parId) const
 {
   assert(valid);
   return this->olm_.domain(idx).tris[0];
@@ -454,7 +471,7 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid1Parent(unsigned int id
 
 
 template<int dim, int dimworld, typename T>
-inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int idx) const
+inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int idx, unsigned int parId) const
 {
   assert(valid);
   // Warning: Be careful to use the ACTUAL indexing here defined in the array sorted after domain parent indices!!

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/merging/psurfacemerge.hh>
 
 template <class ctype, int dimworld>
@@ -44,7 +44,7 @@ struct setupGrid<1> {
     /*
        0  2        5
        |--|--------|
-       M |--|--|-----|
+     M |--|--|-----|
        |-----|-----|
        0     3     5
      */
@@ -88,10 +88,10 @@ struct setupGrid<2> {
     /*
        0,1   1,1
        |-----|
-     | \ / |
-     |  X  |
-     | / \ |
-     ||-----|
+       | \ / |
+       |  X  |
+       | / \ |
+       |-----|
        0,0   1,0
      */
 
@@ -126,7 +126,7 @@ struct setupGrid<2> {
 };
 
 /*
-   we split the domain and target side into different subdomains and
+   we split the grid0 and grid1 side into different subdomains and
    call the merger multiple times. This should ensure that the
    resulting merged grid is the same.
 
@@ -198,7 +198,7 @@ int main ()
     callMergerTwice(&merger);
   }
 #else
-    #warning Not testing, because psurface backend is not available.
+  exit(77); // Test is skipped, if PSurface is not present
 #endif
 
 }

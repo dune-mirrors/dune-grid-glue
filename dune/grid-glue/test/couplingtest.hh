@@ -6,15 +6,18 @@
 #include <iostream>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/exceptions.hh>
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
-#include <dune/grid-glue/adapter/gridglue.hh>
+#include <dune/grid-glue/gridglue.hh>
 
 template <class IntersectionIt>
-void testIntersection(const IntersectionIt & rIIt)
+bool testIntersection(const IntersectionIt & rIIt)
 {
+  bool success = true;
+
   typedef typename IntersectionIt::value_type Intersection;
   // Dimension of the intersection
   const int dim = Intersection::mydim;
@@ -29,37 +32,48 @@ void testIntersection(const IntersectionIt & rIIt)
 
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
-    // Test whether local domain position is consistent with global domain position
-    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> localDomainPos =
+    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> localGrid0Pos =
       rIIt->inside()->geometry().global(rIIt->geometryInInside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> globalDomainPos =
+    Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> globalGrid0Pos =
       rIIt->geometry().global(quadPos);
 
-    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> localTargetPos =
+    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> localGrid1Pos =
       rIIt->outside()->geometry().global(rIIt->geometryInOutside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
-    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> globalTargetPos =
+    Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> globalGrid1Pos =
       rIIt->geometryOutside().global(quadPos);
 
-    // Test whether local domain position is consistent with global domain position
-    assert( (localDomainPos-globalDomainPos).two_norm() < 1e-6 );
+    // Test whether local grid0 position is consistent with global grid0 position
+    if ( (localGrid0Pos-globalGrid0Pos).two_norm() >= 1e-6 )
+    {
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid0Pos-globalGrid0Pos).two_norm() < 1e-6 ) failed\n";
+      std::cerr << "localGrid0Pos  = " << localGrid0Pos << "\n";
+      std::cerr << "globalGrid0Pos = " << globalGrid0Pos << "\n";
+      success = false;
+    }
 
-    // Test whether local target position is consistent with global target position
-    assert( (localTargetPos-globalTargetPos).two_norm() < 1e-6 );
+    // Test whether local grid1 position is consistent with global grid1 position
+    if ( (localGrid1Pos-globalGrid1Pos).two_norm() >= 1e-6 )
+    {
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid1Pos-globalGrid1Pos).two_norm() < 1e-6 ) failed\n";
+      std::cerr << "localGrid1Pos  = " << localGrid1Pos << "\n";
+      std::cerr << "globalGrid1Pos = " << globalGrid1Pos << "\n";
+      success = false;
+    }
 
     // Here we assume that the two interfaces match geometrically:
-    if ( (globalDomainPos-globalTargetPos).two_norm() >= 1e-4 )
+    if ( (globalGrid0Pos-globalGrid1Pos).two_norm() >= 1e-4 )
     {
-      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-4 ) failed\n";
-      std::cerr << "localDomainPos  = " << localDomainPos << "\n";
-      std::cerr << "globalDomainPos = " << globalDomainPos << "\n";
-      std::cerr << "localTargetPos  = " << localTargetPos << "\n";
-      std::cerr << "globalTargetPos = " << globalTargetPos << "\n";
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalGrid0Pos-globalGrid1Pos).two_norm() < 1e-4 ) failed\n";
+      std::cerr << "localGrid0Pos  = " << localGrid0Pos << "\n";
+      std::cerr << "globalGrid0Pos = " << globalGrid0Pos << "\n";
+      std::cerr << "localGrid1Pos  = " << localGrid1Pos << "\n";
+      std::cerr << "globalGrid1Pos = " << globalGrid1Pos << "\n";
+      success = false;
     }
-    //assert( (globalDomainPos-globalTargetPos).two_norm() < 1e-6 );
 
     // Test the normal vector methods.  At least test whether they don't crash
     if (coorddim - dim != 2)
@@ -71,14 +85,15 @@ void testIntersection(const IntersectionIt & rIIt)
       rIIt->centerUnitOuterNormal();
     }
   }
+
+  return success;
 }
 
 
 template <class GlueType>
 void testCoupling(const GlueType& glue)
 {
-  typedef typename GlueType::ctype ctype;
-
+  bool success = true;
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, Dune::MCMGElementLayout > View0Mapper;
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, Dune::MCMGElementLayout > View1Mapper;
   View0Mapper view0mapper(glue.template gridView<0>());
@@ -88,6 +103,43 @@ void testCoupling(const GlueType& glue)
   std::vector<unsigned int> countOutside1(view1mapper.size());
   std::vector<unsigned int> countInside1(view1mapper.size(), 0);
   std::vector<unsigned int> countOutside0(view0mapper.size(), 0);
+
+  // ///////////////////////////////////////
+  //   IndexSet
+  // ///////////////////////////////////////
+
+  {
+    size_t count = 0;
+    typename GlueType::Grid0IntersectionIterator rIIt    = glue.template ibegin<0>();
+    typename GlueType::Grid0IntersectionIterator rIEndIt = glue.template iend<0>();
+    for (; rIIt!=rIEndIt; ++rIIt) count ++;
+    typename GlueType::IndexSet is = glue.indexSet();
+    if(is.size() != glue.size())
+      DUNE_THROW(Dune::Exception,
+        "Inconsistent size information: indexSet.size() " << is.size() << " != GridGlue.size() " << glue.size());
+    if(is.size() != count)
+      DUNE_THROW(Dune::Exception,
+        "Inconsistent size information: indexSet.size() " << is.size() << " != iterator count " << count);
+    std::vector<bool> visited(count, false);
+    for (rIIt = glue.template ibegin<0>(); rIIt!=rIEndIt; ++rIIt) {
+      size_t idx = is.index(*rIIt);
+      if(idx >= count)
+        DUNE_THROW(Dune::Exception,
+          "Inconsistent IndexSet: index " << idx << " out of range, size is " << count);
+      if(visited[idx] != false)
+        DUNE_THROW(Dune::Exception,
+          "Inconsistent IndexSet: visited index " << idx << " twice");
+      visited[idx] = true;
+    }
+    // make sure that we have a consecutive zero starting index set
+    for (size_t i = 0; i<count; i++)
+    {
+      if (visited[i] != true)
+        DUNE_THROW(Dune::Exception,
+          "Non-consective IndexSet: " << i << " missing.");
+    }
+  }
+
 
   // ///////////////////////////////////////
   //   MergedGrid centric Grid0->Grid1
@@ -102,7 +154,7 @@ void testCoupling(const GlueType& glue)
       {
         countInside0[view0mapper.map(*rIIt->inside())]++;
         countOutside1[view1mapper.map(*rIIt->outside())]++;
-        testIntersection(rIIt);
+        success = success && testIntersection(rIIt);
       }
     }
   }
@@ -120,10 +172,13 @@ void testCoupling(const GlueType& glue)
       {
         //countInside1[view1mapper.map(*rIIt->inside())]++;
         countOutside0[view0mapper.map(*rIIt->outside())]++;
-        testIntersection(rIIt);
+        success = success && testIntersection(rIIt);
       }
     }
   }
+
+  if (! success)
+    DUNE_THROW(Dune::Exception, "Test failed, see above for details.");
 }
 
 #endif // GRIDGLUE_COUPLINGTEST_HH

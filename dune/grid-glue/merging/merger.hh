@@ -27,15 +27,21 @@ namespace {
     typedef Dune::FieldVector<ctype, grid1Dim>  GridCoords;
 
     static
-    unsigned int parent(const Parent & m, unsigned int idx)
+    unsigned int parents(const Parent & m, unsigned int idx)
     {
-      return m.grid1Parent(idx);
+        return m.grid1Parents(idx);
     }
 
     static
-    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner)
+    unsigned int parent(const Parent & m, unsigned int idx, unsigned int parId = 0)
     {
-      return m.grid1ParentLocal(idx, corner);
+      return m.grid1Parent(idx, parId);
+    }
+
+    static
+    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner, unsigned int parId = 0)
+    {
+      return m.grid1ParentLocal(idx, corner, parId);
     }
 
   };
@@ -49,15 +55,21 @@ namespace {
     typedef Dune::FieldVector<ctype, grid2Dim>  GridCoords;
 
     static
-    unsigned int parent(const Parent & m, unsigned int idx)
+    unsigned int parents(const Parent & m, unsigned int idx)
     {
-      return m.grid2Parent(idx);
+      return m.grid2Parents(idx);
     }
 
     static
-    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner)
+    unsigned int parent(const Parent & m, unsigned int idx, unsigned int parId = 0)
     {
-      return m.grid2ParentLocal(idx, corner);
+      return m.grid2Parent(idx, parId);
+    }
+
+    static
+    GridCoords parentLocal(const Parent & m, unsigned int idx, unsigned int corner, unsigned int parId = 0)
+    {
+      return m.grid2ParentLocal(idx, corner, parId);
     }
 
   };
@@ -76,8 +88,8 @@ class Merger
 {
 
   // the policy class get's access to the Merger
-  friend class MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 0>;
-  friend class MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 1>;
+  friend struct MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 0>;
+  friend struct MergerGridPolicy<ctype, grid1Dim, grid2Dim, dimworld, 1>;
 
 public:
 
@@ -106,10 +118,11 @@ public:
    * introduced here.
    *
    * @param grid1_coords the grid1 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param grid1_simplices array with all grid1 simplices represented as corner indices into @c grid1_coords;
-   * the simplices are just written to this array one after another
+   * @param grid1_elements array with all grid1 elements represented as corner indices into @c grid1_coords
+   * @param grid1_element_types array with the GeometryType of the elements listed grid1_elements
    * @param grid2_coords the grid2 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param grid2_simplices just like with the grid1_simplices and grid1_coords
+   * @param grid2_elements just like with the grid1_elements and grid1_coords
+   * @param grid2_element_types array with the GeometryType of the elements listed grid2_elements
    */
   virtual void build(const std::vector<Dune::FieldVector<ctype,dimworld> >& grid1_coords,
                      const std::vector<unsigned int>& grid1_elements,
@@ -125,6 +138,14 @@ public:
 
   virtual void clear() = 0;
 
+   /**
+    * doc me
+    */
+  template<int n>
+  unsigned int parents(unsigned int idx) const {
+    return GridTraits<n>::Policy::parents(*this, idx);
+  }
+
   /**
    * @brief get index of grid-n's parent simplex for given merged grid simplex
    * @tparam n specify which grid
@@ -132,9 +153,9 @@ public:
    * @return index of the parent simplex
    */
   template<int n>
-  unsigned int parent(unsigned int idx) const
+  unsigned int parent(unsigned int idx, unsigned int parId = 0) const
   {
-    return GridTraits<n>::Policy::parent(*this, idx);
+    return GridTraits<n>::Policy::parent(*this, idx, parId);
   }
 
   /**
@@ -159,9 +180,9 @@ public:
    * @return local coordinates in grid-n grid1
    */
   template<int n>
-  typename GridTraits<n>::Coords parentLocal(unsigned int idx, unsigned int corner) const
+  typename GridTraits<n>::Coords parentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const
   {
-    return GridTraits<n>::Policy::parentLocal(*this, idx, corner);
+    return GridTraits<n>::Policy::parentLocal(*this, idx, corner, parId);
   }
 
   /** \brief Counts the number of times the computeIntersection method has been called
@@ -173,20 +194,23 @@ public:
 
 private:
 
+  virtual unsigned int grid1Parents(unsigned int idx) const = 0;
+
+  virtual unsigned int grid2Parents(unsigned int idx) const = 0;
+
   /**
    * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
    */
-  virtual unsigned int grid1Parent(unsigned int idx) const = 0;
+  virtual unsigned int grid1Parent(unsigned int idx, unsigned int parId = 0) const = 0;
 
   /**
    * @brief get index of grid2 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid2 parent simplex
    */
-  virtual unsigned int grid2Parent(unsigned int idx) const = 0;
-
+  virtual unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const = 0;
 
   /**
    * @brief get the grid1 parent's simplex local coordinates for a particular merged grid simplex corner
@@ -195,7 +219,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid1
    */
-  virtual Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const = 0;
 
   /**
    * @brief get the grid2 parent's simplex local coordinates for a particular merged grid simplex corner
@@ -204,7 +228,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid2
    */
-  virtual Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner) const = 0;
+  virtual Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const = 0;
 
 };
 

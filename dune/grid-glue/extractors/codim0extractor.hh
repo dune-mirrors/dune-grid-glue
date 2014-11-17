@@ -46,7 +46,7 @@ public:
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
 
-  static const Dune::PartitionIteratorType PType = Dune::All_Partition;
+  static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
 
   // import typedefs from base class
@@ -59,6 +59,7 @@ public:
   /**
    * @brief Constructor
    * @param gv the grid view object to work with
+   * @param descr a predicate to mark entities for extraction (unary functor returning bool)
    */
   Codim0Extractor(const GV& gv, const ExtractorPredicate<GV,0>& descr)
     :  Extractor<GV,0>(gv), positiveNormalDirection_(false)
@@ -97,7 +98,8 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
   std::deque<SubEntityInfo> temp_faces;
 
   // iterate over all codim 0 elements on the grid
-  for (ElementIter elit = this->gv_.template begin<0>(); elit != this->gv_.template end<0>(); ++elit)
+  for (ElementIter elit = this->gv_.template begin<0, PType>();
+       elit != this->gv_.template end<0, PType>(); ++elit)
   {
     ElementPtr eptr(elit);
     IndexType eindex = this->cellMapper_.map(*elit);

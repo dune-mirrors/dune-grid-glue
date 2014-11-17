@@ -23,9 +23,9 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
-#include <list>
 
 #include <dune/common/classname.hh>
+#include <dune/common/typetraits.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
 
@@ -41,23 +41,25 @@ class GridGlueVtkWriter
   template <class Glue, int side>
   static void writeExtractedPart(const Glue& glue, const std::string& filename)
   {
-    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
     std::ofstream fgrid;
 
     fgrid.open(filename.c_str());
 
-    typedef typename Dune::SelectType<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::Type GridView;
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0Patch, typename Glue::Grid1Patch>::type Extractor;
     typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
     typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
-    typedef typename Dune::SelectType<(side==0),
+    typedef typename Dune::conditional<(side==0),
         typename Glue::Grid0IntersectionIterator,
-        typename Glue::Grid1IntersectionIterator>::Type RemoteIntersectionIterator;
+        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
 
     typedef typename GridView::ctype ctype;
 
     const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
+    const int patchDim = Extractor::dim - Extractor::codim;
 
     // coordinates have to be in R^3 in the VTK format
     std::string coordinatePadding;
@@ -68,11 +70,10 @@ class GridGlueVtkWriter
 
     // WRITE POINTS
     // ----------------
-    typedef typename Glue::Grid0Patch Extractor;
     std::vector<typename Extractor::Coords> coords;
     glue.template patch<side>().getCoords(coords);
 
-    fgrid << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
+    fgrid << ((patchDim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
     fgrid << "POINTS " << coords.size() << " " << Dune::className<ctype>() << std::endl;
 
     for (size_t i=0; i<coords.size(); i++)
@@ -92,7 +93,7 @@ class GridGlueVtkWriter
     for (size_t i=0; i<faces.size(); i++)
       faceCornerCount += faces[i].size();
 
-    fgrid << ((dim==3) ? "CELLS " : "POLYGONS ")
+    fgrid << ((patchDim==3) ? "CELLS " : "POLYGONS ")
           << geometryTypes.size() << " " << geometryTypes.size() + faceCornerCount << std::endl;
 
     for (size_t i=0; i<faces.size(); i++) {
@@ -133,7 +134,7 @@ class GridGlueVtkWriter
     fgrid << std::endl;
 
     // 3d VTK files need an extra section specifying the CELL_TYPES aka GeometryTypes
-    if (dim==3) {
+    if (patchDim==3) {
 
       fgrid << "CELL_TYPES " << geometryTypes.size() << std::endl;
 
@@ -180,23 +181,24 @@ class GridGlueVtkWriter
   template <class Glue, int side>
   static void writeIntersections(const Glue& glue, const std::string& filename)
   {
-    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
     std::ofstream fmerged;
 
     fmerged.open(filename.c_str());
 
-    typedef typename Dune::SelectType<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::Type GridView;
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
     typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
     typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
-    typedef typename Dune::SelectType<(side==0),
+    typedef typename Dune::conditional<(side==0),
         typename Glue::Grid0IntersectionIterator,
-        typename Glue::Grid1IntersectionIterator>::Type RemoteIntersectionIterator;
+        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
 
     typedef typename GridView::ctype ctype;
 
     const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
+    const int intersectionDim = Glue::Intersection::mydim;
 
     // coordinates have to be in R^3 in the VTK format
     std::string coordinatePadding;
@@ -213,8 +215,8 @@ class GridGlueVtkWriter
 
     // the merged grid (i.e. the set of remote intersections
     fmerged << "# vtk DataFile Version 2.0\nFilename: " << filename << "\nASCII" << std::endl;
-    fmerged << ((dim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
-    fmerged << "POINTS " << overlaps*(dim+1) << " " << Dune::className<ctype>() << std::endl;
+    fmerged << ((intersectionDim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
+    fmerged << "POINTS " << overlaps*(intersectionDim+1) << " " << Dune::className<ctype>() << std::endl;
 
     for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
          isIt != glue.template iend<side>();
@@ -236,19 +238,19 @@ class GridGlueVtkWriter
     for (size_t i=0; i<faces.size(); i++)
       faceCornerCount += faces[i].size();
 
-    int domainSimplexCorners = dim-Glue::Grid0Patch::codim+1;
-    fmerged << ((dim==3) ? "CELLS " : "POLYGONS ")
-            << overlaps << " " << (domainSimplexCorners+1)*overlaps << std::endl;
+    int grid0SimplexCorners = dim-Glue::Grid0Patch::codim+1;
+    fmerged << ((intersectionDim==3) ? "CELLS " : "POLYGONS ")
+            << overlaps << " " << (grid0SimplexCorners+1)*overlaps << std::endl;
 
     for (int i = 0; i < overlaps; ++i) {
-      fmerged << domainSimplexCorners;
-      for (int j=0; j<domainSimplexCorners; j++)
-        fmerged << " " << domainSimplexCorners*i+j;
+      fmerged << grid0SimplexCorners;
+      for (int j=0; j<grid0SimplexCorners; j++)
+        fmerged << " " << grid0SimplexCorners*i+j;
       fmerged << std::endl;
     }
 
     // 3d VTK files need an extra section specifying the CELL_TYPES aka GeometryTypes
-    if (dim==3) {
+    if (intersectionDim==3) {
 
       fmerged << "CELL_TYPES " << overlaps << std::endl;
 
@@ -285,17 +287,17 @@ public:
 
     // Write extracted grid and remote intersection on the grid0-side
     writeExtractedPart<Glue,0>(glue,
-                               filenameTrunk + "-domain.vtk");
+                               filenameTrunk + "-grid0.vtk");
 
     writeIntersections<Glue,0>(glue,
-                               filenameTrunk + "-intersections-domain.vtk");
+                               filenameTrunk + "-intersections-grid0.vtk");
 
     // Write extracted grid and remote intersection on the grid1-side
     writeExtractedPart<Glue,1>(glue,
-                               filenameTrunk + "-target.vtk");
+                               filenameTrunk + "-grid1.vtk");
 
     writeIntersections<Glue,1>(glue,
-                               filenameTrunk + "-intersections-target.vtk");
+                               filenameTrunk + "-intersections-grid1.vtk");
 
   }
 

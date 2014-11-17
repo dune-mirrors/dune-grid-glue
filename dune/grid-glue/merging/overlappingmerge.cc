@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <dune/common/typetraits.hh>
 
+#include <dune/geometry/multilineargeometry.hh>
+
 template<int dim, typename T>
 void OverlappingMerge<dim, T>::
 computeIntersection(const Dune::GeometryType& grid1ElementType,
@@ -17,12 +19,17 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
   this->counter++;
 
   // A few consistency checks
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
+  assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
+  assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
+#else
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
   assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
+#endif
 
   // Make generic geometries representing the grid1- and grid2 element.
   // this eases computation of local coordinates.
-  typedef Dune::GenericGeometry::BasicGeometry<dim, Dune::GenericGeometry::DefaultGeometryTraits<T,dim,dim> > Geometry;
+  typedef Dune::CachedMultiLinearGeometry<T,dim,dim> Geometry;
 
   Geometry grid1Geometry(grid1ElementType, grid1ElementCorners);
   Geometry grid2Geometry(grid2ElementType, grid2ElementCorners);
@@ -46,12 +53,12 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
       this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
       // Compute local coordinates in the grid1 element
-      this->intersections_.back().grid1Local_[0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid1Local_[1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+      this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(Dune::FieldVector<T,dim>(upperBound));
 
       // Compute local coordinates in the grid2 element
-      this->intersections_.back().grid2Local_[0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
-      this->intersections_.back().grid2Local_[1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
+      this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(Dune::FieldVector<T,dim>(lowerBound));
+      this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(Dune::FieldVector<T,dim>(upperBound));
 
       //std::cout << "Intersection between elements " << grid1Index << " and " << grid2Index << std::endl;
 
@@ -86,14 +93,14 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[0]);
-        this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[i+1]);
-        this->intersections_.back().grid1Local_[2] = grid1Geometry.local(P[i+2]);
+        this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[0]);
+        this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[i+1]);
+        this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[i+2]);
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[0]);
-        this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[i+1]);
-        this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[i+2]);
+        this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[0]);
+        this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[i+1]);
+        this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[i+2]);
 
       }
 
@@ -115,16 +122,16 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[0]);
-        this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[1]);
-        this->intersections_.back().grid1Local_[2] = grid1Geometry.local(P[2]);
-        this->intersections_.back().grid1Local_[3] = grid1Geometry.local(P[3]);
+        this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[0]);
+        this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[1]);
+        this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[2]);
+        this->intersections_.back().grid1Local_[0][3] = grid1Geometry.local(P[3]);
 
         // Compute local coordinates in the grid1 element
-        this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[0]);
-        this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[1]);
-        this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[2]);
-        this->intersections_.back().grid2Local_[3] = grid2Geometry.local(P[3]);
+        this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[0]);
+        this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[1]);
+        this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[2]);
+        this->intersections_.back().grid2Local_[0][3] = grid2Geometry.local(P[3]);
       }
       else
       {
@@ -132,7 +139,7 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
         centroid=0;
         for (size_type i=0; i < P.size(); i++)
           centroid += P[i] ;
-        centroid /= P.size() ;
+        centroid /= static_cast<T>(P.size()) ;
 
         // Sorte each faces ( Create H )
         H.clear() ;
@@ -170,16 +177,16 @@ computeIntersection(const Dune::GeometryType& grid1ElementType,
               this->intersections_.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid1Local_[0] = grid1Geometry.local(P[H[i][0]]);
-              this->intersections_.back().grid1Local_[1] = grid1Geometry.local(P[H[i][j+1]]);
-              this->intersections_.back().grid1Local_[2] = grid1Geometry.local(P[H[i][j+2]]);
-              this->intersections_.back().grid1Local_[3] = grid1Geometry.local(centroid);
+              this->intersections_.back().grid1Local_[0][0] = grid1Geometry.local(P[H[i][0]]);
+              this->intersections_.back().grid1Local_[0][1] = grid1Geometry.local(P[H[i][j+1]]);
+              this->intersections_.back().grid1Local_[0][2] = grid1Geometry.local(P[H[i][j+2]]);
+              this->intersections_.back().grid1Local_[0][3] = grid1Geometry.local(centroid);
 
               // Compute local coordinates in the grid1 element
-              this->intersections_.back().grid2Local_[0] = grid2Geometry.local(P[H[i][0]]);
-              this->intersections_.back().grid2Local_[1] = grid2Geometry.local(P[H[i][j+1]]);
-              this->intersections_.back().grid2Local_[2] = grid2Geometry.local(P[H[i][j+2]]);
-              this->intersections_.back().grid2Local_[3] = grid2Geometry.local(centroid);
+              this->intersections_.back().grid2Local_[0][0] = grid2Geometry.local(P[H[i][0]]);
+              this->intersections_.back().grid2Local_[0][1] = grid2Geometry.local(P[H[i][j+1]]);
+              this->intersections_.back().grid2Local_[0][2] = grid2Geometry.local(P[H[i][j+2]]);
+              this->intersections_.back().grid2Local_[0][3] = grid2Geometry.local(centroid);
             }
         }
       }
@@ -293,7 +300,7 @@ void OverlappingMerge<dim, T>::sortAndRemoveDoubles2D( std::vector<Dune::FieldVe
   c = 0 ;
   for ( size_type i=0; i < P.size(); i++)
     c += P[i] ;
-  c /= P.size() ;
+  c /= static_cast<T>(P.size()) ;
 
   // definition of angles
   for ( size_type i=0; i < P.size(); i++)

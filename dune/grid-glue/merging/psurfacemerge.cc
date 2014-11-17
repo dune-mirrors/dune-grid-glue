@@ -4,11 +4,15 @@
 #include "config.h"
 #endif
 
+#include <dune/common/version.hh>
+
 #include <dune/grid-glue/merging/psurfacemerge.hh>
-#include <psurface/ContactMapping.h>
 
 #if HAVE_PSURFACE
 
+#include <psurface/ContactMapping.h>
+
+/* we deliberately use other names here than in the interface, because these names adhere to the psurface convention */
 template<int dim, int dimworld, typename T>
 void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
                                             const std::vector<unsigned int>& domain_elements,
@@ -34,8 +38,11 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
       DUNE_THROW(Dune::GridError, "You cannot hand a " << domain_element_types[i]
                                                        << " to a " << dim << "-dimensional PSurfaceMerge!");
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
     expectedCorners += Dune::ReferenceElements<ctype,dim>::general(domain_element_types[i]).size(dim);
-
+#else
+    expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(domain_element_types[i]).size(dim);
+#endif
   }
 
   if (domain_elements.size() != expectedCorners)
@@ -52,8 +59,11 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
       DUNE_THROW(Dune::GridError, "You cannot hand a " << target_element_types[i]
                                                        << " to a " << dim << "-dimensional PSurfaceMerge!");
 
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
     expectedCorners += Dune::ReferenceElements<ctype,dim>::general(target_element_types[i]).size(dim);
-
+#else
+    expectedCorners += Dune::GenericReferenceElements<ctype,dim>::general(target_element_types[i]).size(dim);
+#endif
   }
 
   if (target_elements.size() != expectedCorners)
@@ -247,8 +257,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
         Dune::FieldVector<double,dim> ref = barycentricToReference(barycentric);
 
         // this is the actual transformation.  (0,0) becomes (1,1), (1,0) becomes (0,1),  (0,1) becomes (1,0)
-        ref *= -1;
-        ref +=  1;
+        ref *= -1.0;
+        ref +=  1.0;
 
         // back to barycentric
         barycentric = referenceToBarycentric(ref);
@@ -276,8 +286,8 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
         Dune::FieldVector<double,dim> ref = barycentricToReference(barycentric);
 
         // this is the actual transformation.  (0,0) becomes (1,1), (1,0) becomes (0,1),  (0,1) becomes (1,0)
-        ref *= -1;
-        ref +=  1;
+        ref *= -1.0;
+        ref +=  1.0;
 
         // back to barycentric
         barycentric = referenceToBarycentric(ref);
@@ -307,7 +317,7 @@ void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<
 
 
 template<int dim, int dimworld, typename T>
-typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   // get the simplex overlap
   const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);
@@ -336,7 +346,7 @@ typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworl
 
 
 template<int dim, int dimworld, typename T>
-typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner) const
+typename PSurfaceMerge<dim, dimworld, T>::LocalCoords PSurfaceMerge<dim, dimworld, T>::grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId) const
 {
   // get the simplex overlap
   const PSURFACE_NAMESPACE IntersectionPrimitive<dim,ctype>& ip = this->olm_.domain(idx);

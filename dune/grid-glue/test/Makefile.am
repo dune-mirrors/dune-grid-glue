@@ -12,9 +12,8 @@ TESTPROGS = \
 if MPI
 TESTPROGS += nonoverlappingcouplingtest_mpi
 endif
-
 if UG
-TESTPROGS += orientedsubfacetest
+TESTPROGS += disconnectedtest
 endif
 
 # programs just to build when "make check" is used
@@ -34,7 +33,10 @@ LDADD       += $(UG_LIBS)
 # define the programs
 callmergertwicetest_SOURCES = callmergertwicetest.cc
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
-nonoverlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -DCALL_MERGER_TWICE
+nonoverlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) # -DCALL_MERGER_TWICE
+if UG
+disconnectedtest_SOURCES = disconnectedtest.cc
+endif
 if MPI
 nonoverlappingcouplingtest_mpi_SOURCES = nonoverlappingcouplingtest.cc
 nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -DWRITE_TO_VTK
@@ -47,6 +49,7 @@ mixeddimoverlappingtest3D_SOURCES = mixeddimoverlappingtest3D.cc -DWRITE_TO_VTK
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
-orientedsubfacetest_SOURCES = orientedsubfacetest.cc
+
+EXTRA_DIST = CMakeLists.txt
 
 include $(top_srcdir)/am/global-rules

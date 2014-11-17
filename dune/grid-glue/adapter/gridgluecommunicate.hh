@@ -10,14 +10,10 @@
 
 #include <dune/common/version.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
+#include <dune/common/parallel/communicator.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
 
-#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,1,0)
-  #include <dune/common/parallel/communicator.hh>
-#else
-  #include <dune/istl/communicator.hh>
-#endif
 
 namespace Dune {
   namespace GridGlue {
@@ -25,17 +21,41 @@ namespace Dune {
     typedef std::pair<int, int> RankPair;
     struct GlobalId : public std::pair<RankPair, unsigned int>
     {
+      /** default constructor, required for dune-common RemoteIndices
+          \internal
+       */
       GlobalId() {
         this->first.first = 0;
         this->first.second = 0;
         this->second = 0;
       }
+      /** constructor from int, required for dune-common RemoteIndices
+          \internal
+       */
       GlobalId(int i) {
         this->first.first = i;
         this->first.second = i;
         this->second = 0;
       }
+      /** constructor
+          \param i rank of processor 1
+          \param j rank of processor 2
+          \param n local intersection index
+      */
+      GlobalId(int i, int j, unsigned int n) {
+        this->first.first = std::min(i,j);
+        this->first.second = std::max(i,j);
+        this->second = n;
+      }
     };
+
+    inline std::ostream& operator<<(std::ostream& os, const GlobalId & id)
+    {
+      os << "("
+         << id.first.first << "," << id.first.second << ","
+         << id.second << ")";
+      return os;
+    }
 
     /**
        \brief describes the features of a data handle for
@@ -75,7 +95,7 @@ namespace Dune {
       /** @brief pack data from user to message buffer
           @param buff message buffer provided by the grid
           @param e entity for which date should be packed to buffer
-          @param i Intersection for which date should be packed to buffer
+          @param i Intersection for which data should be packed to buffer
        */
       template<class MessageBufferImp, class EntityType, class RISType>
       void gather (MessageBufferImp& buff, const EntityType& e, const RISType & i) const
@@ -88,6 +108,7 @@ namespace Dune {
          n is the number of objects sent by the sender
          @param buff message buffer provided by the grid
          @param e entity for which date should be unpacked from buffer
+         @param i Intersection for which data is received
          @param n number of data written to buffer for this entity before
        */
       template<class MessageBufferImp, class EntityType, class RISType>
@@ -130,7 +151,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
+        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         a[i++] = data;
       }
 
@@ -138,7 +159,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
+        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         data = a[j++];
       }
 
@@ -182,15 +203,15 @@ namespace Dune {
           commInfo.mbuffer.clear();
           if (dir == Dune::ForwardCommunication)
           {
-            // read from domain
+            // read from grid0
             if(ris.self())
               commInfo.data->gather(commInfo.mbuffer, ris.inside(), ris);
           }
           else   // (dir == Dune::BackwardCommunication)
           {
-            // read from target
+            // read from grid1
             if(ris.neighbor())
-              commInfo.data->gather(commInfo.mbuffer, ris.outside(), ris);
+              commInfo.data->gather(commInfo.mbuffer, ris.outside(), ris.flip());
           }
         }
 
@@ -221,13 +242,13 @@ namespace Dune {
         {
           if (dir == Dune::ForwardCommunication)
           {
-            // write to target
+            // write to grid1
             if(ris.neighbor())
-              commInfo.data->scatter(commInfo.mbuffer, ris.outside(), ris, commInfo.currentsize);
+              commInfo.data->scatter(commInfo.mbuffer, ris.outside(), ris.flip(), commInfo.currentsize);
           }
           else   // (dir == Dune::BackwardCommunication)
           {
-            // write to domain
+            // write to grid0
             if(ris.self())
               commInfo.data->scatter(commInfo.mbuffer, ris.inside(), ris, commInfo.currentsize);
           }
@@ -268,7 +289,8 @@ namespace Dune {
 
 #if HAVE_MPI
   /**
-     \brief specialization of the CommPolicy struct, required for the ParallelIndexsets
+   * \brief specialization of the CommPolicy struct, required for the ParallelIndexsets
+   * \internal
    */
   template<typename GG, class DataHandleImp, class DataTypeImp>
   struct CommPolicy< ::Dune::GridGlue::CommInfo<GG, DataHandleImp, DataTypeImp> >
@@ -297,15 +319,6 @@ namespace Dune {
       // get Intersection
       typedef typename Type::GridGlue::Intersection Intersection;
       Intersection ris(commInfo.gridglue->getIntersection(i));
-
-      if (commInfo.dir == Dune::ForwardCommunication)
-      {
-        if (!ris.self()) return 0;
-      }
-      else
-      {
-        if (!ris.neighbor()) return 0;
-      }
 
       // ask data handle for size
       return commInfo.data->size(ris);

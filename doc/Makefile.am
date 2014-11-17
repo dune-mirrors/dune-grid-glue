@@ -1,5 +1,6 @@
 
 SUBDIRS = doxygen
+EXTRA_DIST = CMakeLists.txt
 
 # setting like in dune-web
 BASEDIR=..
