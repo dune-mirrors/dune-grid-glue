@@ -30,7 +30,30 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/scsgmapper.hh>
 
+struct data2test{
 
+  /*typedef typename Dune::conditional<(side==0),
+                                     typename Glue::Grid0View,
+                                     typename Glue::Grid1View>::type GridView;
+  typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPtr;
+  typedef typename Dune::conditional<(side==0),
+                                     typename Glue::Grid0IntersectionIterator,
+                                     typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
+  */
+  int elm;
+  int inter;
+  //ElementPtr eIt;
+  //RemoteIntersectionIterator rIt;
+  double frac;
+  double data;
+
+  data2test()
+    {
+
+    }
+
+
+};
 /** \brief Write remote intersections to a vtk file for debugging purposes
  */
 class GridGlueVtkWriterRoot
@@ -42,7 +65,7 @@ class GridGlueVtkWriterRoot
   template <class Glue, int side>
   static void writeExtractedPart(const Glue& glue, const std::string& filename)
   {
-    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
     std::ofstream fgrid;
 
@@ -180,7 +203,7 @@ class GridGlueVtkWriterRoot
   template <class Glue, int side>
   static void writeIntersections(const Glue& glue, const std::string& filename)
   {
-    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
     std::ofstream fmerged;
 
@@ -226,8 +249,7 @@ class GridGlueVtkWriterRoot
     for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
          isIt != glue.template iend<side>();
          ++isIt)
-
-    {
+      {
       for (int i = 0; i < isIt->inside()->geometry().corners(); ++i){
         if (side == 0){
           //std::cout <<"isIt->inside()->geometry().corner(i)" <<isIt->inside()->geometry().corner(i) << std::endl;
@@ -303,9 +325,12 @@ class GridGlueVtkWriterRoot
   template <class Glue, int side>
   static void writeElementIntersectionMap(const Glue& glue , std::multimap<int,int> mymm2)
   {
-    dune_static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
     typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename  Glue::Grid0View GridView0;
+    typedef typename  Glue::Grid1View GridView1;
+
     typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPtr;
     typedef typename GridView::Traits::template Codim<0>::Entity Element;
 
@@ -318,40 +343,238 @@ class GridGlueVtkWriterRoot
 
     typedef typename Dune::SingleCodimSingleGeomTypeMapper<GridView, 0> ::SingleCodimSingleGeomTypeMapper Mapper;
 
+     std::multimap<int,RemoteIntersectionIterator> mymm0;
+     std::multimap<int,int> mymm1;
+
      Mapper mapper(glue.template patch<side>().gridView());
-     std::multimap<int,RemoteIntersectionIterator> mymm;
 
     // iteration over all remote intersections
-    for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
-         isIt != glue.template iend<side>();
-         ++isIt)
-      {
-        // get element ID from inside-element of the remote intersection
-        int eId = mapper.map(*isIt->inside());
+     for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
+            isIt != glue.template iend<side>();
+            ++isIt)
+       {
+         int eId = 0;
+         int eId2 = 0;
 
-        // get Intersection ID from remote intersection
-        int interId = isIt->index();
+         mymm0.insert (std::pair<int,int>(eId,isIt));
+         mymm0.insert (std::pair<int,int>(eId,eId2));
+       }
 
-        // insert element ID and RemoteIntersection iterator in multi-map
-        mymm.insert (std::pair<int,RemoteIntersectionIterator>(eId,isIt));
+     // test multi-maps by iteration over all elements
+     ElementIter eIt0 =  glue.template patch<side>().gridView().template begin<0>();
+     ElementIter eEndIt0 = glue.template patch<side>().gridView().template end<0>();
+     for (; eIt0 != eEndIt0; ++eIt0)
+       {
+         int eId0 = mapper.map(*eIt0);
+         std::cout << "There are " << mymm0.count(eId0) << " elements with key " << eId0 << ":";
 
-        // insert element ID and intersection ID in multi-map
-        mymm2.insert (std::pair<int,int>(eId,interId));
-      }
+         typename std::multimap<int,int>::iterator it0;
+         for (it0=mymm0.equal_range(eId0).first; it0!=mymm0.equal_range(eId0).second; ++it0)
+           std::cout << ' ' << (*it0).second;
+         std::cout << '\n';
+       }
+  }
 
-    // test multi-maps by iteration over all elements
-    ElementIter eIt =  glue.template patch<side>().gridView().template begin<0>();
-    ElementIter eEndIt = glue.template patch<side>().gridView().template end<0>();
-    for (; eIt != eEndIt; ++eIt)
-      {
-        int eId = mapper.map(*eIt);
-        std::cout << "There are " << mymm2.count(eId) << " elements with key " << eId << ":";
+  template <class Glue, int side>
+  static void writeElementIntersectionMap0(const Glue& glue, std::multimap<int,data2test> &mymm3)
+  {
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
 
-        typename std::multimap<int,int>::iterator it;
-        for (it=mymm2.equal_range(eId).first; it!=mymm2.equal_range(eId).second; ++it)
-          std::cout << ' ' << (*it).second;
-        std::cout << '\n';
-      }
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename  Glue::Grid0View GridView0;
+    typedef typename  Glue::Grid1View GridView1;
+
+    typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPtr;
+    typedef typename GridView::Traits::template Codim<0>::Entity Element;
+
+    static const Dune::PartitionIteratorType PType = Dune::All_Partition;
+    typedef typename GridView::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
+    typedef typename GridView0::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter0;
+    typedef typename GridView1::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter1;
+
+    typedef typename Dune::conditional<(side==0),
+        typename Glue::Grid0IntersectionIterator,
+        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
+    typedef typename Glue::Grid0IntersectionIterator RemoteIntersectionIterator0;
+    typedef typename Glue::Grid1IntersectionIterator RemoteIntersectionIterator1;
+
+    typedef typename Dune::SingleCodimSingleGeomTypeMapper<GridView, 0> ::SingleCodimSingleGeomTypeMapper Mapper;
+    typedef typename Dune::SingleCodimSingleGeomTypeMapper<GridView0, 0> ::SingleCodimSingleGeomTypeMapper Mapper0;
+    typedef typename Dune::SingleCodimSingleGeomTypeMapper<GridView1, 0> ::SingleCodimSingleGeomTypeMapper Mapper1;
+
+    std::multimap<int,RemoteIntersectionIterator0> mymm0;
+    //std::multimap<int,data2test<Glue,side> > mymm3;
+
+    Mapper mapper(glue.template patch<side>().gridView());
+    Mapper0 mapper0(glue.template patch<0>().gridView());
+    Mapper1 mapper1(glue.template patch<1>().gridView());
+
+    int gridsize1d = glue.template patch<1>().gridView().size(0);
+    std::vector<double > frac1d(gridsize1d);
+
+    for (RemoteIntersectionIterator0 isIt = glue.template ibegin<0>();
+          isIt != glue.template iend<0>();
+            ++isIt)
+       {
+         int eId = mapper0.map(*isIt->inside());
+         int eId2 = mapper1.map(*isIt->outside());
+         int interId = isIt->index();
+         data2test mapstruct;
+
+         mapstruct.elm = eId2;
+         mapstruct.inter = interId;
+         frac1d[eId2] += isIt->geometry().volume()/ isIt->outside()->geometry().volume();
+
+         mymm0.insert (std::pair<int,RemoteIntersectionIterator0>(eId,isIt));
+         mymm3.insert (std::pair<int, data2test>(eId,mapstruct));
+       }
+
+     // test multi-maps by iteration over all elements
+     ElementIter0 eIt1 =  glue.template patch<0>().gridView().template begin<0>();
+     ElementIter0 eEndIt1 = glue.template patch<0>().gridView().template end<0>();
+     for (; eIt1 != eEndIt1; ++eIt1)
+       {
+         int eId1 = mapper0.map(*eIt1);
+         double interVolsum = 0.;
+         double fracTot = 0;
+         std::vector<double > frac(mymm3.count(eId1));
+
+         if (mymm3.count(eId1) != 0)
+           {
+             double interVol = 0.;
+             int k = 0;
+             double eVol = 0.;
+
+             typename std::multimap<int,RemoteIntersectionIterator0>::iterator it1;
+             typename std::multimap<int,data2test>::iterator it3;
+             it3=mymm3.equal_range(eId1).first;
+             for (it1=mymm0.equal_range(eId1).first; it1!=mymm0.equal_range(eId1).second; ++it1){
+               interVol = (*it1).second->geometry().volume();
+               eVol = (*it1).second->outside()->geometry().volume();
+
+               (*it3).second.frac = interVol/eVol/frac1d[(*it3).second.elm];
+               k++;
+               ++it3;
+             }
+           }
+       }
+
+     eIt1 =  glue.template patch<0>().gridView().template begin<0>();
+     eEndIt1 = glue.template patch<0>().gridView().template end<0>();
+
+     for (; eIt1 != eEndIt1; ++eIt1)
+       {
+         int eId1 = mapper0.map(*eIt1);
+         std::cout << "There are " << mymm3.count(eId1) << " elements with key " << eId1 << ":"<< '\n';
+
+         typename std::multimap<int,data2test >::iterator it3;
+         for (it3=mymm3.equal_range(eId1).first; it3!=mymm3.equal_range(eId1).second; ++it3){
+           std::cout << "elem: " << (*it3).second.elm << " inter: " << (*it3).second.inter << " frac: " << (*it3).second.frac<< '\n';
+         }
+       }
+  }
+
+  template <class Glue, int side>
+  static void writeElementIntersectionMap1(const Glue& glue, std::multimap<int,data2test > &mymm3)
+  {
+    static_assert((side==0 || side==1), "'side' can only be 0 or 1");
+
+    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename  Glue::Grid0View GridView0;
+    typedef typename  Glue::Grid1View GridView1;
+
+    typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPtr;
+    typedef typename GridView::Traits::template Codim<0>::Entity Element;
+
+    static const Dune::PartitionIteratorType PType = Dune::All_Partition;
+    typedef typename GridView::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
+    typedef typename GridView1::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter1;
+
+    typedef typename Dune::conditional<(side==0),
+        typename Glue::Grid0IntersectionIterator,
+        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
+    typedef typename Glue::Grid0IntersectionIterator RemoteIntersectionIterator0;
+    typedef typename Glue::Grid1IntersectionIterator RemoteIntersectionIterator1;
+
+    typedef typename Dune::SingleCodimSingleGeomTypeMapper<GridView, 0> ::SingleCodimSingleGeomTypeMapper Mapper;
+    typedef typename Dune::SingleCodimSingleGeomTypeMapper<GridView0, 0> ::SingleCodimSingleGeomTypeMapper Mapper0;
+    typedef typename Dune::SingleCodimSingleGeomTypeMapper<GridView1, 0> ::SingleCodimSingleGeomTypeMapper Mapper1;
+
+     std::multimap<int,RemoteIntersectionIterator1> mymm0;
+     //std::multimap<int,data2test<Glue,side> > mymm3;
+
+     Mapper mapper(glue.template patch<side>().gridView());
+     Mapper0 mapper0(glue.template patch<0>().gridView());
+     Mapper1 mapper1(glue.template patch<1>().gridView());
+
+     for (RemoteIntersectionIterator1 isIt = glue.template ibegin<1>();
+          isIt != glue.template iend<1>();
+            ++isIt)
+       {
+         int eId = mapper1.map(*isIt->inside());
+         int eId2 = mapper0.map(*isIt->outside());
+         int interId = isIt->index();
+         data2test mapstruct;
+
+         mapstruct.elm = eId2;
+         mapstruct.inter = interId;
+
+         mymm0.insert (std::pair<int,RemoteIntersectionIterator1>(eId,isIt));
+         mymm3.insert (std::pair<int, data2test>(eId,mapstruct));
+       }
+
+     // test multi-maps by iteration over all elements
+     ElementIter1 eIt1 =  glue.template patch<1>().gridView().template begin<0>();
+     ElementIter1 eEndIt1 = glue.template patch<1>().gridView().template end<0>();
+
+     for (; eIt1 != eEndIt1; ++eIt1)
+       {
+         int eId1 = mapper1.map(*eIt1);
+         double interVolsum = 0.;
+         double fracTot = 0;
+         std::vector<double > frac(mymm3.count(eId1));
+
+         if (mymm3.count(eId1) != 0)
+           {
+             double eVol = eIt1->geometry().volume();
+             double interVol = 0.;
+             double interVolsum = 0.;
+             int k = 0;
+
+             typename std::multimap<int,RemoteIntersectionIterator1>::iterator it1;
+             typename std::multimap<int,data2test>::iterator it3;
+             for (it1=mymm0.equal_range(eId1).first; it1!=mymm0.equal_range(eId1).second; ++it1){
+               interVol = (*it1).second->geometry().volume();
+               interVolsum += (*it1).second->geometry().volume();
+               frac[k] = interVol/eVol;
+               k++;
+             }
+
+             it3=mymm3.equal_range(eId1).first;
+             for (int m = 0; m < frac.size(); m++){
+               frac[m] = frac[m]/(interVolsum/eVol);
+               fracTot +=  frac[m];
+               (*it3).second.frac =  frac[m];
+               ++it3;
+             }
+             std::cout << "frac total: " << fracTot <<  std::endl;
+           }
+       }
+
+     eIt1 =  glue.template patch<1>().gridView().template begin<0>();
+     eEndIt1 = glue.template patch<1>().gridView().template end<0>();
+
+     for (; eIt1 != eEndIt1; ++eIt1)
+       {
+         int eId1 = mapper1.map(*eIt1);
+         std::cout << "There are " << mymm3.count(eId1) << " elements with key " << eId1 << ":"<< '\n';
+
+         typename std::multimap<int,data2test>::iterator it3;
+         for (it3=mymm3.equal_range(eId1).first; it3!=mymm3.equal_range(eId1).second; ++it3){
+           std::cout << "elem: " << (*it3).second.elm << " inter: " << (*it3).second.inter << " frac: " << (*it3).second.frac<< '\n';
+         }
+       }
+
   }
 
 public:
@@ -372,12 +595,19 @@ public:
 
     writeIntersections<Glue,1>(glue,
                                filenameTrunk + "-intersections-target.vtk");
+  }
 
-    std::multimap<int,int> mymm0;
-    writeElementIntersectionMap<Glue,0>(glue, mymm0);
+template<typename Glue>
+static void writeMaps(const Glue& glue, std::multimap<int,data2test> &mymm0, std::multimap<int,data2test> &mymm1)
+  {
+    //writeElementIntersectionMap<Glue,0>(glue, mymm0);
 
-    std::multimap<int,int> mymm1;
-    writeElementIntersectionMap<Glue,1>(glue, mymm1);
+    //writeElementIntersectionMap<Glue,1>(glue, mymm1);
+
+    writeElementIntersectionMap0<Glue,0>(glue, mymm0);
+
+    writeElementIntersectionMap1<Glue,1>(glue, mymm1);
+
   }
 
 };
