@@ -50,10 +50,10 @@ template<int dim, int dimworld, typename T = double>
 class PSurfaceMerge
   : public Merger<T,dim,dim,dimworld>
 {
-  dune_static_assert( dim==1 || dim==2,
+  static_assert( dim==1 || dim==2,
                       "PSurface can only handle the cases dim==1 and dim==2!");
 
-  dune_static_assert( dim==dimworld || dim+1==dimworld,
+  static_assert( dim==dimworld || dim+1==dimworld,
                       "PSurface can only handle the cases dim==dimworld and dim+1==dimworld!");
 
   // The psurface library itself always expects dimworld to be dim+1

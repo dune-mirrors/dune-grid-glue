@@ -24,6 +24,7 @@
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/scsgmapper.hh>
 
 #include <dune/grid-glue/merging/merger.hh>
 
@@ -75,7 +76,7 @@ protected:
   struct RemoteSimplicialIntersection
   {
     /** \brief Dimension of this intersection */
-    enum {intersectionDim = (grid1Dim<grid2Dim) ? grid1Dim : grid2Dim};
+    enum {intersectionDim = (grid1Dim<grid2Dim) ? grid2Dim-grid1Dim : grid2Dim};
 
     /** \brief Number of vertices of the intersection (it's a simplex) */
     enum {nVertices = intersectionDim + 1};
@@ -366,115 +367,128 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& grid1_element_
                            const std::vector<Dune::GeometryType>& grid2_element_types
                            )
 {
-  typedef std::vector<unsigned int> FaceType;
-  typedef std::map<FaceType, std::pair<unsigned int, unsigned int> > FaceSetType;
-
   ///////////////////////////////////////////////////////////////////////////////////////
   //  First: grid 1
   ///////////////////////////////////////////////////////////////////////////////////////
-  FaceSetType faces;
+
+ // vector of element indices
+  typedef std::vector<unsigned int> ElementIdx1;
+  // mapping vertex index to all connected elements
+  typedef std::map<unsigned int, ElementIdx1 > VertexMap1;
+  VertexMap1 vertexMap1;
+  // resize elementNeighbors1_ to number of elements
   elementNeighbors1_.resize(grid1_element_types.size());
 
-  for (size_t i=0; i<grid1_element_types.size(); i++)
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    elementNeighbors1_[i].resize(Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]).size(1)*6, -1);
+  // loop over all elements
+  // resize to max 8 neighbors per element, default value is -1
+  for (size_t i=0; i<grid1_element_types.size(); i++){
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,1,3)
+    elementNeighbors1_[i].resize(0, -1);
 #else
-    elementNeighbors1_[i].resize(27, -1);
+    elementNeighbors1_[i].resize(0, -1);
 #endif
 
-  for (size_t i=0; i<grid1_element_types.size(); i++) {
+    // build vertex map: store for each vertex index all element neighbors of that vertex
+    // loop over all vertices of an elmenet
+    for (int ii=0; ii<grid1ElementCorners_[i].size();ii++){
 
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    const Dune::ReferenceElement<T,grid1Dim>& refElement = Dune::ReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
-#else
-    const Dune::GenericReferenceElement<T,grid1Dim>& refElement = Dune::GenericReferenceElements<T,grid1Dim>::general(grid1_element_types[i]);
-#endif
+      unsigned int vtxIdx = grid1ElementCorners_[i][ii];
+      unsigned int elmIdx = i;
 
-    for (size_t j=0; j<(size_t)refElement.size(1); j++) {
+      typename VertexMap1::iterator vtxHandle1 = vertexMap1.find(vtxIdx);
 
-      FaceType face;
-      // extract element face
-      for (size_t k=0; k<(size_t)refElement.size(j,1,grid1Dim); k++)
-        face.push_back(grid1ElementCorners_[i][refElement.subEntity(j,1,k,grid1Dim)]);
-
-      // sort the face vertices to get rid of twists and other permutations
-      std::sort(face.begin(), face.end());
-
-      typename FaceSetType::iterator faceHandle = faces.find(face);
-
-      if (faceHandle == faces.end()) {
-
-        // face has not been visited before
-        faces.insert(std::make_pair(face, std::make_pair(i,j)));
-
-      } else {
-
-        // face has been visited before: store the mutual neighbor information
-        elementNeighbors1_[i][j] = faceHandle->second.first;
-        elementNeighbors1_[faceHandle->second.first][faceHandle->second.second] = i;
-
-        faces.erase(faceHandle);
-
+      // if vertex (number) was not found yet, insert new vertex entry with first element neighbor
+      if (vtxHandle1 == vertexMap1.end()) {
+        vertexMap1.insert(std::make_pair(vtxIdx,  std::vector<unsigned int>(1,elmIdx)));
       }
-
+      else {// else (if vertex (number) was already found), insert another element neighbor to that vertex
+        vtxHandle1->second.push_back(elmIdx);
+      }
     }
-
   }
 
+  // loop over all vertices (map of vertices)
+  for (VertexMap1::iterator it=vertexMap1.begin(); it!=vertexMap1.end(); ++it)
+    {
+      unsigned int m = 0;
+      //iterate over all elements in vertex map
+      for (unsigned int k = 0; k< it->second.size();k++ ){
+
+        //iterate again over all elements in vertex map
+        for (unsigned int m = 0; m< it->second.size();m++ ){
+
+          // iterator m and k over vertex map are not equal
+          if(it->second[k] != it->second[m]){
+
+            // if elmenent it->second[k] was not yet insert into elementNeighbors1_
+            if(elementNeighbors1_[it->second[k]].end()==std::find(elementNeighbors1_[it->second[k]].begin(),elementNeighbors1_[it->second[k]].end(),it->second[m])){
+              // insert element to vector
+              elementNeighbors1_[it->second[k]].push_back(it->second[m]);
+            }
+          }
+        }
+      }
+    }
   ///////////////////////////////////////////////////////////////////////////////////////
   //  Next: grid 2
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  faces.clear();
+
+  // vector of element indices
+  typedef std::vector<unsigned int> ElementIdx2;
+  // mapping vertex index to all connected elements
+  typedef std::map<unsigned int, ElementIdx2 > VertexMap2;
+  VertexMap2 vertexMap2;
+  // resize elementNeighbors2_ to number of elements
   elementNeighbors2_.resize(grid2_element_types.size());
 
-  for (size_t i=0; i<grid2_element_types.size(); i++)
+  // loop over all elements
+  // resize neighbors per element, default value is -1
+  for (size_t i=0; i<grid2_element_types.size(); i++){
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    elementNeighbors2_[i].resize(Dune::ReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(1), -1);
+    elementNeighbors2_[i].resize(0, -1);
 #else
-    elementNeighbors2_[i].resize(Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]).size(1), -1);
+    elementNeighbors2_[i].resize(0, -1);
 #endif
 
-  for (size_t i=0; i<grid2_element_types.size(); i++) {
+    // build vertex map: store for each vertex index all element neighbors of that vertex
+    // loop over all vertices of an elmenet
+    for (int ii=0; ii<grid2ElementCorners_[i].size();ii++){
 
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    const Dune::ReferenceElement<T,grid2Dim>& refElement = Dune::ReferenceElements<T,grid2Dim>::general(grid2_element_types[i]);
-#else
-    const Dune::GenericReferenceElement<T,grid2Dim>& refElement = Dune::GenericReferenceElements<T,grid2Dim>::general(grid2_element_types[i]);
-#endif
+      unsigned int vtxIdx = grid2ElementCorners_[i][ii];
+      unsigned int elmIdx = i;
 
-    for (size_t j=0; j<(size_t)refElement.size(1); j++) {
+      typename VertexMap2::iterator vtxHandle2 = vertexMap2.find(vtxIdx);
 
-      FaceType face;
-      // extract element face
-      for (size_t k=0; k<(size_t)refElement.size(j,1,grid2Dim); k++)
-        face.push_back(grid2ElementCorners_[i][refElement.subEntity(j,1,k,grid2Dim)]);
-
-      // sort the face vertices to get rid of twists and other permutations
-      std::sort(face.begin(), face.end());
-
-      typename FaceSetType::iterator faceHandle = faces.find(face);
-
-      if (faceHandle == faces.end()) {
-
-        // face has not been visited before
-        faces.insert(std::make_pair(face, std::make_pair(i,j)));
-
-      } else {
-
-        // face has been visited before: store the mutual neighbor information
-        elementNeighbors2_[i][j] = faceHandle->second.first;
-        elementNeighbors2_[faceHandle->second.first][faceHandle->second.second] = i;
-
-        faces.erase(faceHandle);
-
-      }
-
+      // if vertex (number) was not found yet, insert new vertex entry with first element neighbor
+      if (vtxHandle2 == vertexMap2.end())
+        vertexMap2.insert(std::make_pair(vtxIdx,  std::vector<unsigned int>(1,elmIdx)));
+      else // else (if vertex (number) was already found), insert another element neighbor to that vertex
+        vtxHandle2->second.push_back(elmIdx);
     }
-
   }
 
+  // loop over all vertices (map of vertices)
+  for (VertexMap2::iterator it2=vertexMap2.begin(); it2!=vertexMap2.end(); ++it2)
+    {
+      //iterate over all elements in vertex map
+      for (unsigned int k = 0; k< it2->second.size();k++ ){
 
+        //iterate again over all elements in vertex map
+        for (unsigned int m = 0; m< it2->second.size();m++ ){
+
+          // iterator m and k over vertex map are not equal
+          if(it2->second[k] != it2->second[m]){
+
+            // if elmenent it->second[k] was not yet insert into elementNeighbors2_
+            if(elementNeighbors2_[it2->second[k]].end()==std::find(elementNeighbors2_[it2->second[k]].begin(),elementNeighbors2_[it2->second[k]].end(),it2->second[m])){
+              // insert where element to array
+              elementNeighbors2_[it2->second[k]].push_back(it2->second[m]);
+            }
+          }
+        }
+      }
+    }
 }
 
 // /////////////////////////////////////////////////////////////////////
@@ -549,7 +563,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
   ////////////////////////////////////////////////////////////////////////
 
   computeNeighborsPerElement(grid1_element_types, grid2_element_types);
-#if 0
+ #if 0
   std::cout << "   --- grid 1 --- " << std::endl;
   for (int i=0; i<elementNeighbors1_.size(); i++) {
     std::cout << "neighbors of element " << i << ":   ";
@@ -565,7 +579,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
       std::cout << elementNeighbors2_[i][j] << "  ";
     std::cout << std::endl;
   }
-#endif
+ #endif
 
   std::cout << "setup took " << watch.elapsed() << " seconds." << std::endl;
 
@@ -654,36 +668,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
             candidates0.push(neighbor);
             isCandidate0.insert(neighbor);
           }
-
-          //add neighbors of the neighbors: subneighbors
-          for (size_t j=0; j<elementNeighbors1_[neighbor].size(); j++) {
-
-            int subneighbor = elementNeighbors1_[neighbor][j];
-
-            if (subneighbor == -1)            //do nothing at the grid boundary
-              continue;
-
-             if (isHandled0.find(subneighbor) == isHandled0.end()
-                 && isCandidate0.find(subneighbor) == isCandidate0.end())  {
-              candidates0.push(subneighbor);
-              isCandidate0.insert(subneighbor);
-            }
-
-            //add neighbors of the subneighbors: subsubneighbors
-            for (size_t k=0; k<elementNeighbors1_[subneighbor].size(); k++) {
-
-              int subsubneighbor = elementNeighbors1_[subneighbor][k];
-
-              if (subsubneighbor == -1)            //do nothing at the grid boundary
-                continue;
-
-               if (isHandled0.find(subsubneighbor) == isHandled0.end()
-                  && isCandidate0.find(subsubneighbor) == isCandidate0.end())  {
-                candidates0.push(subsubneighbor);
-                isCandidate0.insert(subsubneighbor);
-              }
-            }
-          }
         }
       }
     }
@@ -705,36 +689,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
         candidates1.push(neighbor);
         seedFound = true;
         break;
-      }
-
-      //add neighbors of the neighbors: subneighbors
-      for (size_t j=0; j<elementNeighbors2_[neighbor].size(); j++) {
-
-        int subneighbor = elementNeighbors2_[neighbor][j];
-
-        if (subneighbor == -1)            //do nothing at the grid boundary
-          continue;
-
-        if (!isHandled1[subneighbor][0] && !isCandidate1[subneighbor][0] and seeds[subneighbor]>0) {
-          candidates1.push(subneighbor);
-          seedFound = true;
-          break;
-        }
-
-        //add neighbors of the subneighbors: subsubneighbors
-        for (size_t k=0; k<elementNeighbors2_[subneighbor].size(); k++) {
-
-          int subsubneighbor = elementNeighbors2_[subneighbor][k];
-
-          if (subsubneighbor == -1)            //do nothing at the grid boundary
-            continue;
-
-          if (!isHandled1[subsubneighbor][0] && !isCandidate1[subsubneighbor][0] and seeds[subsubneighbor]>0) {
-            candidates1.push(subsubneighbor);
-            seedFound = true;
-            break;
-          }
-        }
       }
     }
 

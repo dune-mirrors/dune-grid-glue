@@ -350,6 +350,7 @@ private:
                 this->intersections_.back().grid2Local_[1] = 1;
               }
           }
+
           return;
         }
 
@@ -468,7 +469,13 @@ void MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::segmentPlaneIntersection
   if (A.determinant()!=0) {
     A.solve(r,B) ;
 
-    if ((r[1]>=(0.0 -eps))&&(r[1]<=(1.+eps))&&(r[2]>=(0.-eps))&&(r[2]<=(1.+eps))) {
+    if ( ((r[0])>= 0.0)&&
+         ((r[0])<= 1.0)&&
+         ((r[1])>= 0.0)&&
+         ((r[1])<= 1.0)&&
+         ((r[2])>= 0.0)&&
+         ((r[2])<= 1.0) )
+      {
 
       p = X[i] - X[i+1] ;
       p *= r[0] ;
@@ -481,13 +488,18 @@ void MixedDimOverlappingMerge<dim1, dim2, dimworld, T>::segmentPlaneIntersection
         v3[2] = std::abs(P[k][2] - p[2]);
 
         // skip if this intersection was already found in this element
-        // -> to avoid confusion if we intersect a corner point
         if( ((v3[0] < eps)&& (v3[1] < eps) && (v3[2] < eps) ) && sameElement )
           return;
       }
 
       if( ( std::abs(p[0]) < eps )||  (std::abs(p[1]) < eps) || ( std::abs(p[2]) < eps) )
         return;
+
+      for (int m = 0; m < 2; m++)
+        if(  (std::abs(p[0]- X[0+m][0]) < eps ) &&
+             (std::abs(p[1]- X[0+m][1]) < eps ) &&
+             (std::abs(p[2]- X[0+m][2]) < eps ) )
+          return;
 
       P.push_back(p);
       sameElement = true;
