@@ -724,7 +724,7 @@ public:
         SY.resize(4);
 
         int s1[6],s2[6],fi[4][3];
-        int ci,np,ne,i,j;
+        int ci,np;
 
         s1[0]= 0 ; s1[1]= 0 ; s1[2]= 0 ; s1[3]= 1 ; s1[4]= 1 ; s1[5]= 2 ;   // faces touching each line
         s2[0]= 1 ; s2[1]= 2 ; s2[2]= 3 ; s2[3]= 2 ; s2[4]= 3 ; s2[5]= 3 ;
@@ -1030,7 +1030,7 @@ public:
         SY.resize(4);
 
         bool b = false;
-        int ci,np,ne,k,ep, ni[4][3];
+        int ci,np,ne,k,ni[4][3];
 
         ni[0][0]= 0 ;   ni[0][1]= 1 ;   ni[0][2]= 2 ;   // faces touching each node
         ni[1][0]= 0 ;   ni[1][1]= 1 ;   ni[1][2]= 3 ;
