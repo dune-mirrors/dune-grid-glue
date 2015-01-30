@@ -28,6 +28,7 @@
 #include <dune/common/bitsetvector.hh>
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/version.hh>
+#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 
