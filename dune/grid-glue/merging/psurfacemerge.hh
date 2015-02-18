@@ -56,7 +56,7 @@ template<int dim, int dimworld, typename T = double>
 class PSurfaceMerge
   : public Merger<T,dim,dim,dimworld>
 {
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,3,0)
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,4)
   static_assert( dim==1 || dim==2,
                       "PSurface can only handle the cases dim==1 and dim==2!");
 
