@@ -105,7 +105,7 @@ protected:
     // Local coordinates in the grid1 entity
     std::vector<Dune::array<Dune::FieldVector<T,grid1Dim>, nVertices> > grid1Local_;
 
-    // Local coordinates in the grid1 entity
+    // Local coordinates in the grid2 entity
     std::vector<Dune::array<Dune::FieldVector<T,grid2Dim>, nVertices> > grid2Local_;
 
     //
