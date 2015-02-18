@@ -144,9 +144,9 @@ void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,3>,
         if (hs >= 3) {
             for (int j = 1; j <= hs-2;++j) {
                 temp.clear();
-                temp.push_back(H[i][0]);
+                temp.push_back(tempH[i][0]);
                 for (int k = 0; k < 2; ++k)
-                    temp.push_back(H[i][j+k]);
+                    temp.push_back(tempH[i][j+k]);
                 H.push_back(temp);
             }
         }
