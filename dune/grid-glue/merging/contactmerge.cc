@@ -31,8 +31,8 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     // The grid2 projection directions
     // These are only needed in a check for validity of the projection and they should be chosen
     // to be some outer pointing directions, e.g. outer normals
-    std::vector<WorldCoords> directions2(nCorners1);
-    for (size_t i=0; i<directions1.size(); i++)
+    std::vector<WorldCoords> directions2(nCorners2);
+    for (size_t i=0; i<directions2.size(); i++)
         directions2[i] = nodalTargetDirections_[this->grid2ElementCorners_[grid2Index][i]];
 
     /////////////////////////////////////////////////////
