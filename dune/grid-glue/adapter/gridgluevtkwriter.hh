@@ -102,7 +102,7 @@ class GridGlueVtkWriter
       // vtk expects the vertices to by cyclically ordered
       // therefore unfortunately we have to deal with several element types on a case-by-case basis
       if (geometryTypes[i].isSimplex()) {
-        for (int j=0; j<dim; j++)
+        for (int j=0; j<patchDim+1; j++)
           fgrid << " " << faces[i][j];
 
       } else if (geometryTypes[i].isQuadrilateral()) {
