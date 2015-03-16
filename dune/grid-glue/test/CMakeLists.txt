@@ -5,6 +5,7 @@ endif(MPI_C_FOUND)
 # tests where program to build and program to run are equal
 set(TESTS
  callmergertwicetest
+ inexactinverseprojection
  mixeddimcouplingtest
  mixeddimoverlappingtest
  multivectortest
@@ -13,6 +14,7 @@ set(TESTS
  ${MPI_PROGRAMS})
 
 add_executable(callmergertwicetest callmergertwicetest.cc)
+add_executable(inexactinverseprojection inexactinverseprojection.cc)
 add_executable(mixeddimcouplingtest mixeddimcouplingtest.cc)
 add_executable(mixeddimoverlappingtest mixeddimoverlappingtest.cc)
 add_executable(multivectortest multivectortest.cc)
