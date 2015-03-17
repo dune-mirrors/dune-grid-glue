@@ -419,6 +419,14 @@ namespace Projection
                 // feasible initial Newton iterate
                 const int nCorners = 3;
                 Dune::FieldVector<T,nCorners> x(1.0/((T) nCorners));
+                {
+                    WorldCoords d(0);
+                    for (int i = 0; i < corners.size(); ++i)
+                        d += corners[i];
+                    d *= 1./3;
+                    d -= target;
+                    x[2] = d.two_norm();
+                }
 
                 for (int i=0; i<30; i++) {
 
