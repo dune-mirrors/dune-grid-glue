@@ -439,7 +439,12 @@ namespace Projection
                     FPrimexk[2].axpy(x[0],directions[0]-directions[2]);
                     FPrimexk[2].axpy(x[1],directions[1]-directions[2]);
 
-                    FPrimexk.invert();
+                    try {
+                        FPrimexk.invert();
+                    }
+                    catch (const Dune::FMatrixError&) {
+                        return false;
+                    }
 
                     WorldCoords newtonCorrection; // = (-1) * FPrimexk.inverse() * Fxk;
 
