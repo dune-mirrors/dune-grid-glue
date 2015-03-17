@@ -413,6 +413,8 @@ namespace Projection
                     const std::vector<WorldCoords>& directions,
                     const WorldCoords& target, LocalCoords& preImage, const T overlap=1e-1)
             {
+                assert(corners.size() == 3);
+                assert(directions.size() == 3);
 
                 // feasible initial Newton iterate
                 const int nCorners = 3;
