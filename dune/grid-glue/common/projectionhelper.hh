@@ -421,7 +421,7 @@ namespace Projection
                 Dune::FieldVector<T,nCorners> x(1.0/((T) nCorners));
                 {
                     WorldCoords d(0);
-                    for (int i = 0; i < corners.size(); ++i)
+                    for (std::size_t i = 0; i < corners.size(); ++i)
                         d += corners[i];
                     d *= 1./3;
                     d -= target;

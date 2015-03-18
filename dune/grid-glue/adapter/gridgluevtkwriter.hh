@@ -48,15 +48,9 @@ class GridGlueVtkWriter
 
     typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
     typedef typename Dune::conditional<(side==0), typename Glue::Grid0Patch, typename Glue::Grid1Patch>::type Extractor;
-    typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
-    typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
-    typedef typename Dune::conditional<(side==0),
-        typename Glue::Grid0IntersectionIterator,
-        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
 
     typedef typename GridView::ctype ctype;
 
-    const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
     const int patchDim = Extractor::dim - Extractor::codim;
 
@@ -187,8 +181,6 @@ class GridGlueVtkWriter
     fmerged.open(filename.c_str());
 
     typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
-    typedef typename GridView::Traits::template Codim<0>::Iterator ElementIterator;
-    typedef typename GridView::Traits::template Codim<0>::EntityPointer ElementPointer;
     typedef typename Dune::conditional<(side==0),
         typename Glue::Grid0IntersectionIterator,
         typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
@@ -253,7 +245,7 @@ class GridGlueVtkWriter
 
       fmerged << "CELL_TYPES " << overlaps << std::endl;
 
-      for (size_t i=0; i<overlaps; i++)
+      for (int i = 0; i < overlaps; i++)
         fmerged << "10" << std::endl;
 
     }
