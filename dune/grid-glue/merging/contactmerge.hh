@@ -126,6 +126,7 @@ private:
     /**
       * @copydoc StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build
      */
+protected:
     void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
         const std::vector<unsigned int>& grid1Elements,
         const std::vector<Dune::GeometryType>& grid1ElementTypes,
@@ -186,6 +187,7 @@ private:
         return bar;
     }
 
+protected:
     //! Compute global coordinates of a local point using linear interpolation of the corners
     static WorldCoords interpolate(const std::vector<WorldCoords>& p,
             const Dune::GeometryType& gt, const LocalCoords& local)
@@ -200,6 +202,7 @@ private:
         return global;
     }
 
+private:
     //! Order the corners of the intersection polytope in cyclic order
     void computeCyclicOrder(const std::vector<Dune::array<LocalCoords,2> >& polytopeCorners,
             const LocalCoords& center, std::vector<int>& ordering) const;
