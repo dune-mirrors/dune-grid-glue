@@ -30,12 +30,13 @@ template<typename GV, int codim>
 class ExtractorPredicate
 {
 public:
+  typedef typename GV::Traits::template Codim<0>::Entity Element;
 
   /** \brief Return true if a subentity should be extracted.
       \param element An element
       \param subentity Subentity number
    */
-  virtual bool contains(const typename GV::Traits::template Codim<0>::EntityPointer& element, unsigned int subentity) const = 0;
+  virtual bool contains(const Element& element, unsigned int subentity) const = 0;
 
   /** \brief Dummy virtual destructor */
   virtual ~ExtractorPredicate() {}

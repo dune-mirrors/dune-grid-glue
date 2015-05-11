@@ -54,7 +54,9 @@ public:
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
+  typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
+  typedef typename GV::Traits::template Codim<0>::Entity Element;
 
   static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
@@ -133,23 +135,27 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
     for (ElementIter elit = this->gv_.template begin<0, PType>();
          elit != this->gv_.template end<0, PType>(); ++elit)
     {
-      ElementPtr eptr(elit);
-      Dune::GeometryType gt = elit->type();
+      const auto& elmt = *elit;
+      Dune::GeometryType gt = elmt.type();
 
       // if some face is part of the surface add it!
       if (elit->hasBoundaryIntersections())
       {
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
-        eindex = this->cellMapper_.map(*elit);
-        this->elmtInfo_[eindex] = new ElementInfo(simplex_index, eptr, 0);
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+        eindex = this->cellMapper_.index(elmt);
+#else
+        eindex = this->cellMapper_.map(elmt);
+#endif
+        this->elmtInfo_[eindex] = new ElementInfo(simplex_index, elmt, 0);
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
-        for (IsIter is = this->gv_.ibegin(*elit); is != this->gv_.iend(*elit); ++is)
+        for (IsIter is = this->gv_.ibegin(elmt); is != this->gv_.iend(elmt); ++is)
         {
           // Stop only at selected boundary faces
-          if (!is->boundary() or !descr.contains(eptr, is->indexInInside()))
+          if (!is->boundary() or !descr.contains(elmt, is->indexInInside()))
             continue;
 
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
@@ -185,10 +191,14 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
               int vertex_number = refElement.subEntity(is->indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
-              VertexPtr vptr(elit->template subEntity<dim>(vertex_number));
-              cornerCoords[i] = vptr->geometry().corner(0);
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+              const Vertex vertex = elit->template subEntity<dim>(vertex_number);
+#else
+              const Vertex& vertex = *elit->template subEntity<dim>(vertex_number);
+#endif
+              cornerCoords[i] = vertex.geometry().corner(0);
 
-              IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
+              IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
 
               // remember the vertex' number in parent element's vertices
               temp_faces.back().corners[i].num = vertex_number;
@@ -199,7 +209,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
               if (vimit == this->vtxInfo_.end())
               {
                 // insert into the map
-                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
+                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vertex);
                 // remember the vertex as a corner of the current face in temp_faces
                 temp_faces.back().corners[i].idx = vertex_index;
                 // increase the current index
@@ -258,10 +268,14 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
               vertex_numbers[i] = refElement.subEntity(is->indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
-              VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
-              cornerCoords[i] = vptr->geometry().corner(0);
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+              const Vertex vertex = elit->template subEntity<dim>(vertex_numbers[i]);
+#else
+              const Vertex &vertex = *elit->template subEntity<dim>(vertex_numbers[i]);
+#endif
+              cornerCoords[i] = vertex.geometry().corner(0);
 
-              IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
+              IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
 
               // if the vertex is not yet inserted in the vertex info map
               // it is a new one -> it will be inserted now!
@@ -269,7 +283,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
               if (vimit == this->vtxInfo_.end())
               {
                 // insert into the map
-                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
+                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vertex);
                 // remember this vertex' index
                 vertex_indices[i] = vertex_index;
                 // increase the current index
@@ -368,7 +382,12 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
     current->vtxindex = it1->first;
     // store the vertex' coordinates under the associated index
     // in the coordinates array
-    current->coord = it1->second->p->geometry().corner(0);
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+    const auto vtx = this->grid().entity(it1->second->p);
+#else
+    const auto& vtx = *this->grid().entityPointer(it1->second->p);
+#endif
+    current->coord = vtx.geometry().corner(0);
   }
 
 }

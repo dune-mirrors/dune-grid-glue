@@ -416,7 +416,12 @@ namespace Dune {
 
       /** \brief Return EntityPointer to the Entity on the inside of this intersection.
        */
-      InsideEntityPointer inside(unsigned int parentId = 0) const
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
+      InsideEntity
+#else
+      InsideEntityPointer
+#endif
+      inside(unsigned int parentId = 0) const
       {
         assert(self());
         return glue_->template patch<I>().element(
@@ -425,7 +430,12 @@ namespace Dune {
 
       /** \brief Return EntityPointer to the Entity on the outside of this intersection.
        */
-      OutsideEntityPointer outside(unsigned int parentId = 0) const
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
+      OutsideEntity
+#else
+      OutsideEntityPointer
+#endif
+      outside(unsigned int parentId = 0) const
       {
         assert(neighbor());
         return glue_->template patch<O>().element(

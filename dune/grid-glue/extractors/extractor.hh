@@ -60,6 +60,7 @@ public:
   };
 
   typedef GV GridView;
+  typedef typename GridView::Grid Grid;
 
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
@@ -67,9 +68,11 @@ public:
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
+  typedef typename Vertex::EntitySeed VertexSeed;
 
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   typedef typename GV::Traits::template Codim<0>::Entity Element;
+  typedef typename Element::EntitySeed ElementSeed;
   typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
 
   typedef std::vector<unsigned int>                                VertexVector;
@@ -126,19 +129,19 @@ protected:
    */
   struct VertexInfo
   {
-    VertexInfo(unsigned int idx_, VertexPtr p_) : idx(idx_), p(p_)
+    VertexInfo(unsigned int idx_, const Vertex& p_) : idx(idx_), p(p_.seed())
     {}
     unsigned int idx;
-    VertexPtr p;
+    VertexSeed p;
   };
 
 
   /**
-   * @brief simple struct holding an entity pointer and an index
+   * @brief simple struct holding an element seed and an index
    */
   struct ElementInfo
   {
-    ElementInfo(unsigned int idx_, ElementPtr p_, unsigned int f_) : idx(idx_), faces(f_), p(p_)
+    ElementInfo(unsigned int idx_, const Element& p_, unsigned int f_) : idx(idx_), faces(f_), p(p_.seed())
     {}
 
     /// @brief the index of this element's first face in the internal list of extracted faces
@@ -147,8 +150,8 @@ protected:
     /// @brief the number of extracted faces for this element
     unsigned int faces : 4;
 
-    /// @brief the entity pointer to the element
-    ElementPtr p;
+    /// @brief the entity seed for the element
+    ElementSeed p;
   };
 
 
@@ -375,17 +378,32 @@ public:
     return gv_;
   }
 
+  const Grid& grid() const
+  {
+    return gv_.grid();
+  }
+
   /**
    * @brief gets the parent element for a given face index,
    * throws an exception if index not valid
    * @param index the index of the face
    * @return a reference to the element's stored pointer
    */
-  const ElementPtr& element(unsigned int index) const
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
+  Element
+#else
+  ElementPtr
+#endif
+  element(unsigned int index) const
   {
     if (index >= subEntities_.size())
       DUNE_THROW(Dune::GridError, "invalid face index");
-    return (elmtInfo_.find(subEntities_[index].parent))->second->p;
+    const ElementSeed seed = (elmtInfo_.find(subEntities_[index].parent))->second->p;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+    return grid().entity(seed);
+#else
+    return grid().entityPointer(seed);
+#endif
   }
 
 #if 1
@@ -395,11 +413,21 @@ public:
    * @param index the index of the coordinate
    * @return a reference to the vertex' stored pointer
    */
-  const VertexPtr& vertex(unsigned int index) const
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
+  Vertex
+#else
+  VertexPtr
+#endif
+  vertex(unsigned int index) const
   {
     if (index >= coords_.size())
       DUNE_THROW(Dune::GridError, "invalid coordinate index");
-    return (vtxInfo_.find(coords_[index].vtxindex))->second->p;
+    const VertexSeed seed = (vtxInfo_.find(coords_[index].vtxindex))->second->p;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+    return grid().entity(seed);
+#else
+    return grid().entityPointer(seed);
+#endif
   }
 #endif
 
@@ -442,7 +470,13 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   Dune::GeometryType facetype = subEntities_[index].geometryType_;
 
   // get reference element
-  Dune::GeometryType celltype = elmtInfo_.find(face.parent)->second->p->type();
+  const auto elmtseed = elmtInfo_.find(face.parent)->second->p;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+  const auto elmt = grid().entity(elmtseed);
+#else
+  const auto& elmt = *grid().entityPointer(elmtseed);
+#endif
+  const Dune::GeometryType celltype = elmt.type();
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
   const Dune::ReferenceElement<ctype, dim> & re =
     Dune::ReferenceElements<ctype, dim>::general(celltype);

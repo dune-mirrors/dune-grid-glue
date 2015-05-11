@@ -39,20 +39,20 @@ public:
     : sliceCoord_(sliceCoord)
   {}
 
-  virtual bool contains(const typename GridView::Traits::template Codim<0>::EntityPointer& eptr,
-                        unsigned int face) const
+  bool contains(const typename GridView::Traits::template Codim<0>::Entity& element,
+                unsigned int face) const override
   {
     const int dim = GridView::dimension;
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
-    const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(eptr->type());
+    const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(element.type());
 #else
-    const Dune::GenericReferenceElement<double,dim>& refElement = Dune::GenericReferenceElements<double, dim>::general(eptr->type());
+    const Dune::GenericReferenceElement<double,dim>& refElement = Dune::GenericReferenceElements<double, dim>::general(element.type());
 #endif
 
     int numVertices = refElement.size(face, 1, dim);
 
     for (int i=0; i<numVertices; i++)
-      if ( std::abs(eptr->geometry().corner(refElement.subEntity(face,1,i,dim))[0] - sliceCoord_) > 1e-6 )
+      if ( std::abs(element.geometry().corner(refElement.subEntity(face,1,i,dim))[0] - sliceCoord_) > 1e-6 )
         return false;
 
     return true;

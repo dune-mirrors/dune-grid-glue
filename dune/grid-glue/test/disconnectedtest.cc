@@ -48,11 +48,11 @@ public:
   ZPlaneExtractorPredicate(const ctype z)
     : m_z(z)
     { /* Nothing. */ }
-  bool contains(const GridView::Traits::template Codim<0>::EntityPointer& entity, unsigned int subEntity) const override
+  bool contains(const GridView::Traits::template Codim<0>::Entity& entity, unsigned int subEntity) const override
     {
-      const auto& ref = Dune::ReferenceElements<ctype, GridView::dimension>::general(entity->type());
+      const auto& ref = Dune::ReferenceElements<ctype, GridView::dimension>::general(entity.type());
       const auto local = ref.template geometry<codim>(subEntity).center();
-      const auto global = entity->geometry().global(local);
+      const auto global = entity.geometry().global(local);
       const auto epsilon = std::numeric_limits<ctype>::epsilon();
       return std::abs(global[GridView::dimensionworld-1] - m_z) < epsilon;
     }

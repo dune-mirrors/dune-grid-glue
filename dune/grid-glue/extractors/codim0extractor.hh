@@ -43,7 +43,9 @@ public:
   typedef typename Extractor<GV,0>::IndexType IndexType;
 
   typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
+  typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
+  typedef typename GV::Traits::template Codim<0>::Entity Element;
 
   static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
@@ -100,28 +102,41 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
   for (ElementIter elit = this->gv_.template begin<0, PType>();
        elit != this->gv_.template end<0, PType>(); ++elit)
   {
-    ElementPtr eptr(elit);
-    IndexType eindex = this->cellMapper_.map(*elit);
+    const auto& elmt = *elit;
+    const auto geometry = elmt.geometry();
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+    IndexType eindex = this->cellMapper_.index(elmt);
+#else
+    IndexType eindex = this->cellMapper_.map(elmt);
+#endif
 
     // only do sth. if this element is "interesting"
     // implicit cast is done automatically
-    if (descr.contains(eptr,0))
+    if (descr.contains(elmt,0))
     {
       // add an entry to the element info map, the index will be set properly later
-      this->elmtInfo_[eindex] = new ElementInfo(element_index, eptr, 1);
+      this->elmtInfo_[eindex] = new ElementInfo(element_index, elmt, 1);
 
-      int numCorners = elit->template count<dim>();
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+      unsigned int numCorners = elmt.subEntities(dim);
+#else
+      unsigned int numCorners = elmt.template count<dim>();
+#endif
       unsigned int vertex_indices[numCorners];       // index in global vector
       unsigned int vertex_numbers[numCorners];       // index in parent entity
 
       // try for each of the faces vertices whether it is already inserted or not
-      for (int i = 0; i < numCorners; ++i)
+      for (unsigned int i = 0; i < numCorners; ++i)
       {
         vertex_numbers[i] = i;
 
         // get the vertex pointer and the index from the index set
-        VertexPtr vptr(elit->template subEntity<dim>(vertex_numbers[i]));
-        IndexType vindex = this->gv_.indexSet().template index<dim>(*vptr);
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+        const Vertex vertex = elit->template subEntity<dim>(vertex_numbers[i]);
+#else
+        const Vertex &vertex = *elit->template subEntity<dim>(vertex_numbers[i]);
+#endif
+        IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
 
         // if the vertex is not yet inserted in the vertex info map
         // it is a new one -> it will be inserted now!
@@ -129,7 +144,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
         if (vimit == this->vtxInfo_.end())
         {
           // insert into the map
-          this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vptr);
+          this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vertex);
           // remember this vertex' index
           vertex_indices[i] = vertex_index;
           // increase the current index
@@ -155,7 +170,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
           // this is dimworld == 1
           /* assert(dimworld==1); */
           bool elementNormalDirection =
-            (elit->geometry().corner(1)[0] < elit->geometry().corner(0)[0]);
+            (geometry.corner(1)[0] < geometry.corner(0)[0]);
           if ( positiveNormalDirection_ != elementNormalDirection )
           {
             std::swap(vertex_indices[0], vertex_indices[1]);
@@ -166,16 +181,16 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
         case 2 :
         {
           Dune::FieldVector<ctype, dimworld>
-          v0 = elit->geometry().corner(1),
-            v1 = elit->geometry().corner(2);
-          v0 -= elit->geometry().corner(0);
-          v1 -= elit->geometry().corner(0);
+          v0 = geometry.corner(1),
+            v1 = geometry.corner(2);
+          v0 -= geometry.corner(0);
+          v1 -= geometry.corner(0);
           ctype normal_sign = v0[0]*v1[1] - v0[1]*v1[0];
           bool elementNormalDirection = (normal_sign < 0);
           if ( positiveNormalDirection_ != elementNormalDirection )
           {
             std::cout << "swap\n";
-            if (elit->type().isCube())
+            if (elmt.type().isCube())
             {
               for (int i = 0; i < (1<<dim); i+=2)
               {
@@ -183,7 +198,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
                 std::swap(vertex_indices[i], vertex_indices[i+1]);
                 std::swap(vertex_numbers[i], vertex_numbers[i+1]);
               }
-            } else if (elit->type().isSimplex()) {
+            } else if (elmt.type().isSimplex()) {
               std::swap(vertex_indices[0], vertex_indices[1]);
               std::swap(vertex_numbers[0], vertex_numbers[1]);
             } else {
@@ -196,7 +211,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
       }
 
       // add a new face to the temporary collection
-      temp_faces.push_back(SubEntityInfo(eindex,0,elit->type()));
+      temp_faces.push_back(SubEntityInfo(eindex,0,elmt.type()));
       element_index++;
       for (int i=0; i<numCorners; i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];
@@ -225,7 +240,12 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
     current->vtxindex = it1->first;
     // store the vertex' coordinates under the associated index
     // in the coordinates array
-    current->coord = it1->second->p->geometry().corner(0);
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+    const auto vtx = this->grid().entity(it1->second->p);
+#else
+    const auto& vtx = *this->grid().entityPointer(it1->second->p);
+#endif
+    current->coord = vtx.geometry().corner(0);
   }
 
 }
