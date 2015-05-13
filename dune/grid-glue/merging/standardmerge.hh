@@ -14,6 +14,7 @@
 #include <vector>
 #include <stack>
 #include <set>
+#include <utility>
 #include <map>
 #include <algorithm>
 
@@ -109,9 +110,9 @@ protected:
     std::vector<Dune::array<Dune::FieldVector<T,grid2Dim>, nVertices> > grid2Local_;
 
     //
-    std::vector<int> grid1Entities_;
+    std::vector<unsigned int> grid1Entities_;
 
-    std::vector<int> grid2Entities_;
+    std::vector<unsigned int> grid2Entities_;
 
   };
 
@@ -276,7 +277,8 @@ private:
   /**
    * Get the index of the intersection in intersections_ (= size if it is a new intersection)
    */
-  int intersectionIndex(unsigned int grid1Index, unsigned int grid2Index,
+  std::pair<bool, unsigned int>
+  intersectionIndex(unsigned int grid1Index, unsigned int grid2Index,
                                  RemoteSimplicialIntersection& intersection);
 
   /**
@@ -767,13 +769,15 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
 
     for (size_t i = 0; i < intersections.size(); ++i) {
         // get the intersection index of the current intersection from intersections in this->intersections
-        int index = intersectionIndex(candidate1,candidate2,intersections[i]);
+      bool found;
+      unsigned int index;
+      std::tie(found, index) = intersectionIndex(candidate1,candidate2,intersections[i]);
 
-        if (index >= this->intersections_.size()) { //the intersection is not yet contained in this->intersections
+        if (found && index >= this->intersections_.size()) { //the intersection is not yet contained in this->intersections
             this->intersections_.push_back(intersections[i]);   // insert
 
             ++count;
-        } else if (index > -1) {
+        } else if (found) {
             // insert each grid1 element and local representation of intersections[i] with parent candidate1
             for (size_t j = 0; j < intersections[i].grid1Entities_.size(); ++j) {
                 this->intersections_[index].grid1Entities_.push_back(candidate1);
@@ -795,7 +799,8 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::insertIntersections(unsigned in
 }
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
-int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(unsigned int grid1Index, unsigned int grid2Index,
+std::pair<bool, unsigned int>
+StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(unsigned int grid1Index, unsigned int grid2Index,
                                                                             RemoteSimplicialIntersection& intersection) {
 
 
@@ -835,9 +840,9 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(unsigned int 
                     }
 
                     if (found_all && (this->intersections_[i].grid2Entities_[ei] != grid2Index))
-                        return i;
+                      return {true, i};
                     else if (found_all)
-                        return -1;
+                      return {false, 0};
                 }
             }
         }
@@ -870,15 +875,15 @@ int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(unsigned int 
                     }
 
                     if (found_all && (this->intersections_[i].grid1Entities_[ei] != grid1Index))
-                        return i;
+                      return {true, i};
                     else if (found_all)
-                        return -1;
+                      return {false, 0};
                 }
             }
         }
     }
 
-    return n_intersections;
+    return {true, n_intersections};
 }
 
 #define DECL extern
