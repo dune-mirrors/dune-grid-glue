@@ -10,6 +10,9 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 
+#include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
+
 /**
  *  \brief This namespace contains helper functions for the projection of two triangular surface on each other.
  */
