@@ -204,7 +204,7 @@ protected:
   /************************** MEMBER VARIABLES ************************/
 
   /// @brief the grid object to extract the surface from
-  const GridView&               gv_;
+  const GridView                gv_;
 
   /*        Geometrical and Topological Information                */
 
