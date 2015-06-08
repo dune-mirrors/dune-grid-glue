@@ -134,7 +134,8 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
         const Vertex vertex = elit->template subEntity<dim>(vertex_numbers[i]);
 #else
-        const Vertex &vertex = *elit->template subEntity<dim>(vertex_numbers[i]);
+        const VertexPtr vertexPtr = elit->template subEntity<dim>(vertex_numbers[i]);
+        const Vertex &vertex = *vertexPtr;
 #endif
         IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
 
@@ -243,7 +244,8 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     const auto vtx = this->grid().entity(it1->second->p);
 #else
-    const auto& vtx = *this->grid().entityPointer(it1->second->p);
+    const auto vtxPtr = this->grid().entityPointer(it1->second->p);
+    const auto& vtx = *vtxPtr;
 #endif
     current->coord = vtx.geometry().corner(0);
   }

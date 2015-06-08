@@ -474,7 +474,8 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
   const auto elmt = grid().entity(elmtseed);
 #else
-  const auto& elmt = *grid().entityPointer(elmtseed);
+  const auto elmtPtr = grid().entityPointer(elmtseed);
+  const auto& elmt = *elmtPtr;
 #endif
   const Dune::GeometryType celltype = elmt.type();
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
