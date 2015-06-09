@@ -614,4 +614,6 @@ public:
 #include "adapter/intersectioniterator.hh"
 #include "adapter/intersectionindexset.hh"
 
+#include "adapter/rangegenerators.hh"
+
 #endif // DUNE_GRIDGLUE_GRIDGLUE_HH
