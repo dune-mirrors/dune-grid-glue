@@ -16,6 +16,7 @@
 #include <set>
 #include <utility>
 #include <map>
+#include <memory>
 #include <algorithm>
 
 #include <dune/common/fvector.hh>
@@ -104,10 +105,10 @@ protected:
     }
 
     // Local coordinates in the grid1 entity
-    std::vector<Dune::array<Dune::FieldVector<T,grid1Dim>, nVertices> > grid1Local_;
+    std::vector<std::array<Dune::FieldVector<T,grid1Dim>, nVertices> > grid1Local_;
 
     // Local coordinates in the grid2 entity
-    std::vector<Dune::array<Dune::FieldVector<T,grid2Dim>, nVertices> > grid2Local_;
+    std::vector<std::array<Dune::FieldVector<T,grid2Dim>, nVertices> > grid2Local_;
 
     //
     std::vector<unsigned int> grid1Entities_;

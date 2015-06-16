@@ -4,9 +4,9 @@
 #define DUNE_GRIDGLUE_COMMON_PROJECTIONHELPER_HH
 
 #include <bitset>
+#include <memory>
 
 #include <dune/common/version.hh>
-#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 
@@ -676,7 +676,7 @@ namespace Projection
                     const std::vector<WorldCoords>& corners2,
                     const std::vector<WorldCoords>& directions1,
                     const Dune::GeometryType& gt1, Dune::GeometryType& gt2,
-                    std::vector<Dune::array<LocalCoords,2> >& polygonCorners,
+                    std::vector<std::array<LocalCoords,2> >& polygonCorners,
                     const std::vector<int>& hitCorners, std::bitset<(1<<dim)>& neighborIntersects1,
                     std::bitset<(1<<dim)>& neighborIntersects2, const T overlap = 1e-1)
             {
@@ -698,7 +698,7 @@ namespace Projection
                     const std::vector<WorldCoords>& corners2,
                     const std::vector<WorldCoords>& directions1,
                     const Dune::GeometryType& gt1, const Dune::GeometryType& gt2,
-                    std::vector<Dune::array<LocalCoords,2> >& polygonCorners,
+                    std::vector<std::array<LocalCoords,2> >& polygonCorners,
                     const std::vector<int>& hitCorners, std::bitset<2>& neighborIntersects1,
                     std::bitset<2>& neighborIntersects2, const T overlap=1e-1)
             {}
@@ -717,7 +717,7 @@ namespace Projection
                     const std::vector<WorldCoords>& corners2,
                     const std::vector<WorldCoords>& directions1,
                     const Dune::GeometryType& gt1, const Dune::GeometryType& gt2,
-                    std::vector<Dune::array<LocalCoords,2> >& polygonCorners,
+                    std::vector<std::array<LocalCoords,2> >& polygonCorners,
                     const std::vector<int>& hitCorners, std::bitset<4>& neighborIntersects1,
                     std::bitset<4>& neighborIntersects2, const T overlap=1e-1)
             {
@@ -730,7 +730,7 @@ namespace Projection
 #endif
 
                 //loop  over edges
-                Dune::array<Dune::FieldVector<T,1>,2> intersection;
+                std::array<Dune::FieldVector<T,1>,2> intersection;
                 for (int i=0; i<ref1.size(1); i++) {
 
                     std::vector<int> edgeCorners1(2);
@@ -758,7 +758,7 @@ namespace Projection
                             nIntersects++;
 
                             // compute the local coordinates
-                            Dune::array<LocalCoords,2> corner;
+                            std::array<LocalCoords,2> corner;
                             corner[0] = ref1.template geometry<1>(i).global(intersection[0]);
                             corner[1] = ref2.template geometry<1>(j).global(intersection[1]);
                             polygonCorners.push_back(corner);
@@ -792,7 +792,7 @@ namespace Projection
             static bool edgeIntersection(const WorldCoords& corner1, const WorldCoords& corner2,
                     const WorldCoords& target1, const WorldCoords& target2,
                     const WorldCoords& direction1, const WorldCoords& direction2,
-                    Dune::array<Dune::FieldVector<T,1>,2>& intersection, const T overlap = 1e-1)
+                    std::array<Dune::FieldVector<T,1>,2>& intersection, const T overlap = 1e-1)
             {
 
                 T eps = 1e-6;
@@ -986,7 +986,7 @@ namespace Projection
                 const std::vector<Dune::FieldVector<T,dimworld> >& corners2,
                 const std::vector<Dune::FieldVector<T,dimworld> >& directions1,
                 const Dune::GeometryType& gt1, const Dune::GeometryType& gt2,
-                std::vector<Dune::array<Dune::FieldVector<T,dim>,2> >& polygonCorners,
+                std::vector<std::array<Dune::FieldVector<T,dim>,2> >& polygonCorners,
                 const std::vector<int>& hitCorners, std::bitset<(1<<dim)>& neighborIntersects1,
                 std::bitset<(1<<dim)>& neighborIntersects2, const T overlap = 1e-1)
         {

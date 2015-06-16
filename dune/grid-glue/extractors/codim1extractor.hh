@@ -259,7 +259,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             // register the additional face(s) (2 simplices)
             this->elmtInfo_[eindex]->faces += 2;
 
-            Dune::array<FieldVector<ctype,dimworld>, 4> cornerCoords;
+            std::array<FieldVector<ctype,dimworld>, 4> cornerCoords;
 
             // get the vertex pointers for the quadrilateral's corner vertices
             // and try for each of them whether it is already inserted or not

@@ -15,6 +15,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 #include <dune/common/fvector.hh>
 #include <dune/common/function.hh>
@@ -257,7 +258,7 @@ protected:
     }
 
     //! Order the corners of the intersection polytope in cyclic order
-    void computeCyclicOrder(const std::vector<Dune::array<LocalCoords,2> >& polytopeCorners,
+    void computeCyclicOrder(const std::vector<std::array<LocalCoords,2> >& polytopeCorners,
             const LocalCoords& center, std::vector<int>& ordering) const;
 
     //! Setup the direction vectors containing the directions for each vertex
@@ -275,7 +276,7 @@ protected:
             std::vector<WorldCoords>& normals);
 
     //! Remove all multiples
-    void removeDoubles(std::vector<Dune::array<LocalCoords,2> >& polytopeCorners);
+    void removeDoubles(std::vector<std::array<LocalCoords,2> >& polytopeCorners);
 };
 
 #include "contactmerge.cc"

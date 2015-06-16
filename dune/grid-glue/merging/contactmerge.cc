@@ -14,7 +14,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
                                    unsigned int grid2Index,
                                    std::vector<RemoteSimplicialIntersection>& intersections)
 {
-    std::vector<Dune::array<LocalCoords,2> > polytopeCorners;
+    std::vector<std::array<LocalCoords,2> > polytopeCorners;
 
     // Initialize
     neighborIntersects1.reset();
@@ -62,7 +62,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
             // corner could be projected
             proj[i] = true;
 
-            Dune::array<LocalCoords,2> corner;
+            std::array<LocalCoords,2> corner;
             corner[1] = localCornerCoords(i,grid2ElementType);
             corner[0] = localCoords;
 
@@ -88,7 +88,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
                                         grid1ElementCorners[i], directions1[i], localCoords))
                 continue;
 
-            Dune::array<LocalCoords,2> corner;
+            std::array<LocalCoords,2> corner;
             corner[0] = localCornerCoords(i,grid1ElementType);
             corner[1] = localCoords;
 
@@ -167,7 +167,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     //  Compute a point in the middle of the polytope and order all corners cyclic
     //////////////////////////////////////////////////////////////////////////////
 
-    Dune::array<LocalCoords,2> center;
+    std::array<LocalCoords,2> center;
     center[0] = 0; center[1] = 0;
     for (int i=0; i<nPolyCorners; i++) {
         center[0].axpy(1.0/nPolyCorners,polytopeCorners[i][0]);
@@ -203,7 +203,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
 }
 
 template<int dimworld, typename T>
-void ContactMerge<dimworld, T>::computeCyclicOrder(const std::vector<Dune::array<LocalCoords,2> >& polytopeCorners,
+void ContactMerge<dimworld, T>::computeCyclicOrder(const std::vector<std::array<LocalCoords,2> >& polytopeCorners,
                         const LocalCoords& center, std::vector<int>& ordering) const
 {
     ordering.resize(polytopeCorners.size());
@@ -324,7 +324,7 @@ void ContactMerge<dimworld, T>::computeOuterNormalField(const std::vector<WorldC
 }
 
 template<int dimworld, typename T>
-void ContactMerge<dimworld, T>::removeDoubles(std::vector<Dune::array<LocalCoords,2> >& polytopeCorners)
+void ContactMerge<dimworld, T>::removeDoubles(std::vector<std::array<LocalCoords,2> >& polytopeCorners)
 {
 
     size_t counter(1);

@@ -9,6 +9,8 @@
 #ifndef DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH
 #define DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH
 
+#include <memory>
+
 #include <dune/common/version.hh>
 
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
@@ -135,14 +137,14 @@ namespace Dune {
         const int elementdim = GridGlue::Grid0View::template Codim<0>::Geometry::mydimension;
 
         // coordinates within the subentity that contains the remote intersection
-        Dune::array<Dune::FieldVector<ctype, dim1>, nSimplexCorners> corners_subEntity_local;
+        std::array<Dune::FieldVector<ctype, dim1>, nSimplexCorners> corners_subEntity_local;
 
         for (unsigned int par = 0; par < n_grid0Parents; ++par) {
             for (int i = 0; i < nSimplexCorners; ++i)
               corners_subEntity_local[i] = glue.merger_->template parentLocal<0>(mergeindex, i, par);
 
             // Coordinates of the remote intersection corners wrt the element coordinate system
-            Dune::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
+            std::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
 
             if (grid0local)
             {
@@ -169,7 +171,7 @@ namespace Dune {
                 grid0WorldGeometry = glue.template patch<0>().geometry(grid0indices_[par]);
 
                 // world coordinates of the remote intersection corners
-                Dune::array<Dune::FieldVector<ctype, GridGlue::Grid0View::dimensionworld>, nSimplexCorners> corners_global;
+                std::array<Dune::FieldVector<ctype, GridGlue::Grid0View::dimensionworld>, nSimplexCorners> corners_global;
 
                 for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
                   corners_global[i]        = grid0WorldGeometry.global(corners_subEntity_local[i]);
@@ -187,7 +189,7 @@ namespace Dune {
         const int elementdim = GridGlue::Grid1View::template Codim<0>::Geometry::mydimension;
 
         // coordinates within the subentity that contains the remote intersection
-        Dune::array<Dune::FieldVector<ctype, dim2>, nSimplexCorners> corners_subEntity_local;
+        std::array<Dune::FieldVector<ctype, dim2>, nSimplexCorners> corners_subEntity_local;
 
         for (unsigned int par = 0; par < n_grid1Parents; ++par) {
 
@@ -195,7 +197,7 @@ namespace Dune {
               corners_subEntity_local[i] = glue.merger_->template parentLocal<1>(mergeindex, i, par);
 
             // Coordinates of the remote intersection corners wrt the element coordinate system
-            Dune::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
+            std::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
 
             if (grid1local)
             {
@@ -222,7 +224,7 @@ namespace Dune {
                 grid1WorldGeometry = glue.template patch<1>().geometry(grid1indices_[par]);
 
                 // world coordinates of the remote intersection corners
-                Dune::array<Dune::FieldVector<ctype, GridGlue::Grid1View::dimensionworld>, nSimplexCorners> corners_global;
+                std::array<Dune::FieldVector<ctype, GridGlue::Grid1View::dimensionworld>, nSimplexCorners> corners_global;
 
                 for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
                   corners_global[i]        = grid1WorldGeometry.global(corners_subEntity_local[i]);

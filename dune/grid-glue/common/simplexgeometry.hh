@@ -12,8 +12,9 @@
 #ifndef DUNE_GRIDGLUE_COMMON_SIMPLEXGEOMETRY_HH
 #define DUNE_GRIDGLUE_COMMON_SIMPLEXGEOMETRY_HH
 
+#include <memory>
+
 #include <dune/common/static_assert.hh>
-#include <dune/common/array.hh>
 #include <dune/geometry/genericgeometry/geometry.hh>
 #include <dune/geometry/genericgeometry/geometrytraits.hh>
 #include <dune/geometry/genericgeometry/cornermapping.hh>
@@ -81,7 +82,7 @@ namespace Dune {
        * @param type the geometry type of this subface, i.e. most likely a simplex in 1D or 2D
        * @param coordinates The corner coordinates in DUNE numbering
        */
-      void setup(const Dune::GeometryType& type, const Dune::array<Dune::FieldVector<ctype, coorddim>, simplex_corners>& coordinates)
+      void setup(const Dune::GeometryType& type, const std::array<Dune::FieldVector<ctype, coorddim>, simplex_corners>& coordinates)
       {
         // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
         Base::operator=(Base(type, coordinates));

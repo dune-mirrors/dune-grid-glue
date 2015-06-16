@@ -10,7 +10,6 @@
 #ifndef DUNE_GRIDGLUE_GRIDGLUE_HH
 #define DUNE_GRIDGLUE_GRIDGLUE_HH
 
-#include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/shared_ptr.hh>
