@@ -609,7 +609,7 @@ namespace Dune {
     };
 
 
-  } // end namesapce GridGlue
-} // end namesapce Dune
+  } // end namespace GridGlue
+} // end namespace Dune
 
 #endif // DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH
