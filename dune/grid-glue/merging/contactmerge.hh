@@ -202,6 +202,60 @@ protected:
         return global;
     }
 
+    /** \brief Check if the projection of a point and an opposing face is valid.
+     *
+     *  \param elementCorners Global coordinates of the corners of the face that was projected on.
+     *  \param contactDirections Contact diections for each corner the face that was projected on.
+     *  \param gt The geometry type of the face that was projected on.
+     *  \param preImage The point that was projected.
+     *  \param preContactDirection The contact direction of the point that was projected.
+     *  \param localCoords Local coordinates of the projected point.
+     *
+     *  \return Returns true if the projection is valid.
+     * */
+    bool isFeasibleProjection(const std::vector<WorldCoords>& elementCorners,
+                                       const std::vector<WorldCoords>& contactDirections,
+                                       const Dune::GeometryType& gt,
+                                       const WorldCoords& preImage,
+                                       const WorldCoords& preContactDirection,
+                                       const LocalCoords& localCoords)
+    {
+        T eps = 1e-6;
+
+        // Compute the global coordinates of the projected point and the corr. contact direction
+        WorldCoords projPoint = interpolate(elementCorners, gt, localCoords);
+        WorldCoords projDirection = interpolate(contactDirections, gt, localCoords);
+
+        WorldCoords segment = preImage - projPoint;
+        T distance = segment.two_norm();
+        segment /= distance;
+
+        // The 'segment' vector always points from the projection to the preimage, thus
+        // if the contact direction of the preimage and the segment point in the same direction,
+        // then one of the faces must be on the backside of the body - invalid.
+        T angleSegPreDir = segment*preContactDirection;
+
+        // The same holds if the segment and the contact direction at the projection.
+        T angleSegProjDir = segment*projDirection;
+
+        // If both invalid conditions hold, then the intersection can be valid, if the two underlying
+        // bodies overlap a bit, which is often the case in the large deformation framework
+        // This intersection is then valid if the distance is smaller than an allowed overlap.
+
+        // If both invalid-criterions hold
+        if (angleSegPreDir > -eps && angleSegProjDir < eps)
+        {
+            // then the projection is valid if the overlap is small
+            if (distance > overlap_)
+                return false;
+
+            // if only one holds then the projection is invalid
+        } else if (angleSegPreDir > -eps || angleSegProjDir < eps)
+            return false;
+
+        return true;
+    }
+
     //! Order the corners of the intersection polytope in cyclic order
     void computeCyclicOrder(const std::vector<Dune::array<LocalCoords,2> >& polytopeCorners,
             const LocalCoords& center, std::vector<int>& ordering) const;

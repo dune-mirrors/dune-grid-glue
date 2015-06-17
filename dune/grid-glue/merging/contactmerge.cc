@@ -48,31 +48,15 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
 
     // local coordinates
     LocalCoords localCoords;
-    T eps = 1e-4;
 
-    // Compute which points of the grid1 element lie inside the grid2 element
+    // Compute which points of the grid2 element lie inside the grid1 element
     for (size_t i=0; i<grid2ElementCorners.size(); i++)
         if (Projection::template inverseProjection<dim,dimworld,T>(grid1ElementCorners, directions1,
                                                                 grid2ElementCorners[i], localCoords, overlap_)) {
 
-            // There are case where the intersection is not valid
-            WorldCoords base = interpolate(grid1ElementCorners,grid1ElementType,localCoords);
-            WorldCoords baseNormal = interpolate(directions1,grid1ElementType,localCoords);
-
-            WorldCoords segment = grid2ElementCorners[i] - base;
-            T distance = segment.two_norm();
-
-            // If both criterions are invalid
-            if ((segment*directions2[i]) > eps
-                 && (segment*baseNormal) < -eps)
-            {
-                // then the projection is still valid if the overlap is small
-                if (distance > overlap_)
-                    continue;
-
-            // if only one is invalid then the projection is invalid
-            } else if ((segment*directions2[i]) > eps
-                    || (segment*baseNormal) < -eps)
+            // Check if projection is feasible
+            if (!isFeasibleProjection(grid1ElementCorners, directions1, grid1ElementType,
+                                        grid2ElementCorners[i], directions2[i], localCoords))
                 continue;
 
             // corner could be projected
@@ -90,7 +74,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
                 skip[hitCorners[i]]=true;
         }
 
-    // Compute which points of the grid2 element lie inside the grid1 element
+    // Compute which points of the grid1 element lie inside the grid2 element
     for (size_t i=0; i<grid1ElementCorners.size(); i++) {
 
         if (skip[i])
@@ -98,6 +82,12 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
 
         if (Projection::template projection<dim,dimworld,T>(grid1ElementCorners[i], directions1[i],
                                                                 grid2ElementCorners, localCoords, overlap_)) {
+
+            // Check if projection is feasible
+            if (!isFeasibleProjection(grid2ElementCorners, directions2, grid2ElementType,
+                                        grid1ElementCorners[i], directions1[i], localCoords))
+                continue;
+
             Dune::array<LocalCoords,2> corner;
             corner[0] = localCornerCoords(i,grid1ElementType);
             corner[1] = localCoords;
