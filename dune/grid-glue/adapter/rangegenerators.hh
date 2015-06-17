@@ -72,7 +72,7 @@ intersections(const GridGlue<...>& glue, const Reverse<...>& reverse = !reversed
 #else
 
 namespace {
-const Reverse<true> reversed;
+const Reverse<true> reversed = {};
 } /* namespace */
 
 #if DUNE_VERSION_NEWER(DUNE_COMMON, 2, 4)
