@@ -11,6 +11,7 @@ set(TESTS
  multivectortest
  nonoverlappingcouplingtest
  overlappingcouplingtest
+ projectionhelpertest
  ${MPI_PROGRAMS})
 
 add_executable(callmergertwicetest callmergertwicetest.cc)
@@ -24,6 +25,7 @@ set_property(TARGET nonoverlappingcouplingtest
 add_executable(overlappingcouplingtest overlappingcouplingtest.cc)
 set_property(TARGET overlappingcouplingtest
   APPEND PROPERTY COMPILE_FLAGS "-frounding-math")
+add_executable(projectionhelpertest projectionhelpertest.cc)
 
 if(MPI_C_FOUND)
   add_executable(nonoverlappingcouplingtest_mpi nonoverlappingcouplingtest.cc)
