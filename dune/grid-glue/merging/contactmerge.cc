@@ -226,11 +226,11 @@ void ContactMerge<dimworld, T>::computeCyclicOrder(const std::vector<Dune::array
         return;
 
     // compute angles inside the polygon plane w.r.t to this axis
-    LocalCoords  edge0 = polytopeCorners[0][0] - center;
+    LocalCoords  edge0 = polytopeCorners[1][0] - polytopeCorners[0][0];
 
     // Compute a vector that is perpendicular to the edge but lies in the polytope plane
     // So we have a unique ordering
-    LocalCoords  edge1 = polytopeCorners[1][0] - center;
+    LocalCoords  edge1 = polytopeCorners[2][0] - polytopeCorners[0][0];
     LocalCoords normal0 = edge1;
     normal0.axpy(-(edge0*edge1),edge0);
 
