@@ -202,7 +202,6 @@ protected:
         return global;
     }
 
-private:
     //! Order the corners of the intersection polytope in cyclic order
     void computeCyclicOrder(const std::vector<Dune::array<LocalCoords,2> >& polytopeCorners,
             const LocalCoords& center, std::vector<int>& ordering) const;
