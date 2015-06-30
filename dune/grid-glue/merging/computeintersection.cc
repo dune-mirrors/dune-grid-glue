@@ -307,12 +307,13 @@ void IntersectionComputation<CM>::orderPointsCC(std::integral_constant<int,2>,
     // get size_type for all the vectors we are using
     typedef typename std::vector<Empty>::size_type size_type;
 
-    std::vector<typename V::value_type> ai ;
+    std::vector<typename V::value_type> ai(P.size());
+    id.resize(P.size());
 
     // definition of angles
     for ( size_type i=0; i < P.size(); i++) {
-      ai.push_back(atan2(P[i][1]-centroid[1],P[i][0]-centroid[0]));
-      id.push_back(i);
+      ai[i] = atan2(P[i][1]-centroid[1],P[i][0]-centroid[0]);
+      id[i] = i;
     }
 
     // sort according to increasing angles
