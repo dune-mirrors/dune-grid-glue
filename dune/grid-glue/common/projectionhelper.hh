@@ -138,13 +138,18 @@ namespace Projection
                 image = 0;
 
                 Dune::FieldMatrix<T,3, 3> mat(0);
+                std::array<WorldCoords, 2> directions;
+                std::array<T, 2> scales;
+                for (unsigned i = 0; i < 2; ++i) {
+                    directions[i] = targetCorners[i+1] - targetCorners[0];
+                    scales[i] = directions[i].infinity_norm();
+                    directions[i] /= scales[i];
+                }
                 for (int i=0; i<3; i++) {
-                    mat[i][0] = targetCorners[1][i]-targetCorners[0][i];
-                    mat[i][1] = targetCorners[2][i]-targetCorners[0][i];
+                    mat[i][0] = directions[0][i];
+                    mat[i][1] = directions[1][i];
                     mat[i][2] = -direction[i];
                 }
-                if (std::fabs(mat.determinant())<eps)
-                    return false;
 
                 // Solve the linear system
                 WorldCoords rhs = corner - targetCorners[0];
@@ -158,8 +163,8 @@ namespace Projection
                 if (x[0]<-eps || x[1]<-eps || (x[0] + x[1]>1+eps) )
                     return false;
 
-                image[0] = x[0];
-                image[1] = x[1];
+                image[0] = x[0] * scales[0];
+                image[1] = x[1] * scales[1];
 
                 return true;
             }
