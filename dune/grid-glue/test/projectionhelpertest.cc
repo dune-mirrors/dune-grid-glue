@@ -33,19 +33,42 @@ testScaledProjection(const Real scale)
     target[i] = corner;
   }
 
-  Local image;
+  /* Project (0,0,0) on (0,0) */
+  {
+    Vector corner(0);
 
-  bool result = Projection::projection<dim-1, dim, Real>(corner, direction, target, image);
-  if (!result) {
-    std::cerr << "testScaledProjection(" << scale << "): projection failed" << std::endl;
-    pass = false;
+    Local image;
+    bool result = Projection::projection<dim-1, dim, Real>(corner, direction, target, image);
+    if (!result) {
+      std::cerr << "testScaledProjection(" << scale << "): projection failed" << std::endl;
+      pass = false;
+    }
+
+    /* expected image is (0,0) */
+    if (!(image.infinity_norm() < 1e-6)) {
+      std::cerr << "testScaledProjection(" << scale << "): image = "
+                << image << " does not match expected value (0,0)" << std::endl;
+      pass = false;
+    }
   }
 
-  /* expected image is (0,0) */
-  if (!(image.infinity_norm() < 1e-6)) {
-    std::cerr << "testScaledProjection(" << scale << "): image = "
-              << image << " does not match expected value (0,0)" << std::endl;
-    pass = false;
+  /* Project (0,10,0), should fail */
+  {
+    Vector corner(0);
+    corner[1] = 10 * scale;
+
+    Local image;
+    bool result = Projection::projection<dim-1, dim, Real>(corner, direction, target, image);
+
+    if (result) {
+      std::cerr << "FAIL: testScaledProjection(" << scale << "): projection succeeded for "
+                << corner << ", but is expected to fail." << std::endl
+                << "      image is " << image << std::endl;
+      pass = false;
+    }
+    else {
+      std::cout << "OK: projection failed, scale = " << scale << std::endl;
+    }
   }
 
   return pass;
@@ -54,6 +77,7 @@ testScaledProjection(const Real scale)
 int main()
 {
   bool pass = true;
+  pass &= testScaledProjection(1e10);
   pass &= testScaledProjection(1);
   pass &= testScaledProjection(1e-3);
   pass &= testScaledProjection(1e-9);
