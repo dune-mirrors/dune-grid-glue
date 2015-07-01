@@ -156,6 +156,9 @@ namespace Projection
                 WorldCoords x(0);
                 mat.solve(x,rhs);
 
+                for (unsigned i = 0; i < 2; ++i)
+                  x[i] /= scales[i];
+
                 // only allow a certain overlap (we solved for '-z')
                 if (x[2]<-overlap)
                     return false;
@@ -163,8 +166,8 @@ namespace Projection
                 if (x[0]<-eps || x[1]<-eps || (x[0] + x[1]>1+eps) )
                     return false;
 
-                image[0] = x[0] * scales[0];
-                image[1] = x[1] * scales[1];
+                image[0] = x[0];
+                image[1] = x[1];
 
                 return true;
             }
