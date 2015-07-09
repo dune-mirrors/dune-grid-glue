@@ -208,6 +208,8 @@ namespace Projection
 
                         return true;
                     }
+
+                    return false;
                 }
 
                 // try to solve a cubic equation for the distance parameter, then compute the barycentric coordinates from it
