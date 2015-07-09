@@ -726,14 +726,14 @@ namespace Projection
                 std::array<Dune::FieldVector<T,1>,2> intersection;
                 for (int i=0; i<ref1.size(1); i++) {
 
-                    std::vector<int> edgeCorners1(2);
+                    std::array<int, 2> edgeCorners1;
                     edgeCorners1[0] = ref1.subEntity(i,1,0,2);
                     edgeCorners1[1] = ref1.subEntity(i,1,1,2);
 
                     int nIntersects(0);
                     for (int j=0; j<ref2.size(1); j++) {
 
-                        std::vector<int> edgeCorners2(2);
+                        std::array<int, 2> edgeCorners2;
                         edgeCorners2[0] = ref2.subEntity(j,1,0,2);
                         edgeCorners2[1] = ref2.subEntity(j,1,1,2);
 
