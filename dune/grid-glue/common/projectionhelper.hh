@@ -326,6 +326,16 @@ namespace Projection
                 int index = -1;
                 WorldCoords r;
 
+                const auto residual = [&](const WorldCoords& x) -> WorldCoords {
+                    WorldCoords residual = p2q;
+                    residual.axpy(x[0],p02);
+                    residual.axpy(x[1],p12);
+                    residual.axpy(x[2]*x[0],n02);
+                    residual.axpy(x[2]*x[1],n12);
+                    residual.axpy(x[2],directions[2]);
+                    return residual;
+                };
+
                 for (size_t i=0;i<zeros.size();i++) {
 
                     T nu=zeros[i];
@@ -357,29 +367,14 @@ namespace Projection
 
                         r[0] = -(e[(j+1)%3]+r[1]*f[(j+1)%3])/g[(j+1)%3];
 
-                        // Compute the residual
-                        WorldCoords residual = p2q;
-                        residual.axpy(r[0],p02);
-                        residual.axpy(r[1],p12);
-                        residual.axpy(r[2]*r[0],n02);
-                        residual.axpy(r[2]*r[1],n12);
-                        residual.axpy(r[2],directions[2]);
-
-
-                        if (!(isnan(r[0]) || isinf(r[0])) && (residual.two_norm()<1e-5))
+                        // Check residual
+                        if (!(isnan(r[0]) || isinf(r[0])) && (residual(r).two_norm()<1e-5))
                             break;
 
                         r[0] = -(e[(j+2)%3]+r[1]*f[(j+2)%3])/g[(j+2)%3];
 
-                        // Compute the residual
-                        residual = p2q;
-                        residual.axpy(r[0],p02);
-                        residual.axpy(r[1],p12);
-                        residual.axpy(r[2]*r[0],n02);
-                        residual.axpy(r[2]*r[1],n12);
-                        residual.axpy(r[2],directions[2]);
-
-                        if (!(isnan(r[0]) || isinf(r[0])) && (residual.two_norm()<1e-5))
+                        // Check residual
+                        if (!(isnan(r[0]) || isinf(r[0])) && (residual(r).two_norm()<1e-5))
                             break;
 
                     }
@@ -391,14 +386,7 @@ namespace Projection
                 }
 
                 // Check if we found a feasible zero
-                WorldCoords residual = p2q;
-                residual.axpy(x[0],p02);
-                residual.axpy(x[1],p12);
-                residual.axpy(x[2]*x[0],n02);
-                residual.axpy(x[2]*x[1],n12);
-                residual.axpy(x[2],directions[2]);
-
-                if (residual.two_norm()<1e-6) {
+                if (residual(x).two_norm()<1e-6) {
                     if (index >= 0) {
                         preImage[0] = x[1];
                         preImage[1] = 1-x[0]-x[1];
