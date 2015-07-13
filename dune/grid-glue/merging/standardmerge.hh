@@ -809,6 +809,9 @@ StandardMerge<T,grid1Dim,grid2Dim,dimworld>::intersectionIndex(unsigned int grid
     // of intersections_ is equal to the local representation of one element in intersections
 
     std::size_t n_intersections = this->intersections_.size();
+    if (grid1Dim == grid2Dim)
+      return {true, n_intersections};
+
     T eps = 1e-10;
 
     for (std::size_t i = 0; i < n_intersections; ++i) {
