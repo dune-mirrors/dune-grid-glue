@@ -119,8 +119,9 @@ namespace Projection
                         image[1] = 1-a;
                         return true;
                     }
-                }
 
+                    return false;
+                }
 
                 //////////////////////////////////////////////
                 //
