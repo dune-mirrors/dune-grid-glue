@@ -300,7 +300,7 @@ void ContactMerge<dimworld, T>::computeOuterNormalField(const std::vector<WorldC
         int nCorners = Dune::ReferenceElements<T,dim>::general(elementTypes[i]).size(dim);
 
         // For segments 1, for triangles or quadrilaterals take the first 2
-        std::vector<WorldCoords> edges(dim);
+        std::array<WorldCoords, dim> edges;
         for (int j=1; j<=dim; j++)
             edges[j-1] = coords[elements[offset + j]] - coords[elements[offset]];
 
