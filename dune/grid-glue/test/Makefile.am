@@ -23,6 +23,7 @@ TESTS = $(TESTPROGS)
 
 AM_CPPFLAGS += $(PSURFACE_CPPFLAGS)
 AM_LDFLAGS  += $(PSURFACE_LDFLAGS) $(AMIRAMESH_LDFLAGS)
+LDADD       += $(PSURFACE_LIBS)
 
 # If UG is available we can test pyramids and prisms
 AM_CPPFLAGS += $(UG_CPPFLAGS)
