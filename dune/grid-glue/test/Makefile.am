@@ -40,6 +40,7 @@ if MPI
 nonoverlappingcouplingtest_mpi_SOURCES = nonoverlappingcouplingtest.cc
 nonoverlappingcouplingtest_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -DWRITE_TO_VTK
 nonoverlappingcouplingtest_mpi_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+nonoverlappingcouplingtest_mpi_LDADD = $(LDADD) $(DUNEMPILIBS)
 endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
 mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc
