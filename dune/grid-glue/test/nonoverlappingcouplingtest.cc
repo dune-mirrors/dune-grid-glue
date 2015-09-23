@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include "config.h"
 
+#include <array>
+
 #include <dune/common/version.hh>
 
 #if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
@@ -289,7 +291,7 @@ public:
   std::shared_ptr<GridType> generate()
   {
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
-    Dune::array<int,dim> elements;
+    std::array<int,dim> elements;
     std::fill(elements.begin(), elements.end(), 2);
     std::bitset<dim> periodic(0);
 #else
