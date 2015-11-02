@@ -87,7 +87,7 @@ public:
     }
 
     //!Get the allowed overlap of the surfaces.
-    T getOverlap()
+    T getOverlap() const
     {
         return overlap_;
     }
