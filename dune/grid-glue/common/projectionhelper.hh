@@ -418,6 +418,8 @@ namespace Projection
                 assert(corners.size() == 3);
                 assert(directions.size() == 3);
 
+                T eps = 1e-6;
+
                 // feasible initial Newton iterate
                 const int nCorners = 3;
                 Dune::FieldVector<T,nCorners> x(1.0/((T) nCorners));
@@ -466,7 +468,7 @@ namespace Projection
                 }
 
 
-                if (x[0]>-1e-6 && x[1]>-1e-6 && (x[0]+x[1] <1+1e-6)) {
+                if (x[0]>-eps && x[1]>-eps && (x[0]+x[1] <1+eps)) {
 
                     WorldCoords residual = corners[2]-target;
                     residual.axpy(x[0],corners[0]-corners[2]);
@@ -500,7 +502,7 @@ namespace Projection
             static bool projection(const WorldCoords& corner, const WorldCoords& direction,
                     const std::vector<WorldCoords>& targetCorners, LocalCoords& image, const T overlap=1e-1)
             {
-                T eps = 1e-8;
+                T eps = 1e-6;
                 // we solve the equation basePoint + x_0 * normal = a + x_1 * (b-a)
                 image = 0;
 
@@ -544,7 +546,7 @@ namespace Projection
                     const WorldCoords& target, LocalCoords& preImage,
                     const T overlap=1e-1)
             {
-                T eps = 1e-8;
+                T eps = 1e-6;
 
                 preImage = 0;
                 WorldCoords p10 = corners[1]-corners[0];
