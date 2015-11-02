@@ -903,12 +903,27 @@ namespace Projection
                     return false;
                 }
 
-                // if the direct compuation failed, use a Newton method to compute at least one zero
+                // In some cases the direct solution is unstable, in this case we use
+                // Newton's method to compute at least one solution
+                return inexactEdgeIntersection(corner1,corner2,target1,target2,
+                                               direction1,direction2,intersection,overlap);
 
-                // Fix some initial value
-                // sometimes it only works when the initial value is an intersection...
-                x[0] = x[1] = 0.5;
-                x[2] = 0.5;
+            }
+
+            //! Solve the edge intersection problem using a Newton method
+            static bool inexactEdgeIntersection(const WorldCoords& corner1, const WorldCoords& corner2,
+                    const WorldCoords& target1, const WorldCoords& target2,
+                    const WorldCoords& direction1, const WorldCoords& direction2,
+                    std::array<Dune::FieldVector<T,1>,2>& intersection,
+                    const T overlap = 1e-1, WorldCoords x = {0.5, 0.5 ,0.5})
+            {
+
+                T eps = 1e-6;
+
+                WorldCoords n21 = direction2 - direction1;
+                WorldCoords p21 = corner2 - corner1;
+                WorldCoords q21 = target2 - target1;
+
                 WorldCoords newtonCorrection(0);
 
                 for (int i=0; i<30; i++) {
@@ -940,7 +955,7 @@ namespace Projection
                     x += newtonCorrection;
                 }
 
-                residual = p1q1;
+                auto residual = corner1-target1;
                 residual.axpy(x[0],p21); residual.axpy(x[2],direction1);
                 residual.axpy(x[2]*x[0],n21); residual.axpy(-x[1],q21);
 
