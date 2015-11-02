@@ -165,7 +165,7 @@ namespace Dune {
     #endif
               grid0localgeom_[par] = make_shared<Grid0LocalGeometry>(type, corners_element_local);
 
-              // Add world geomety only for 0th parent
+              // Add world geometry only for 0th parent
               if (par == 0) {
                 typename GridGlue::Grid0Patch::Geometry
                 grid0WorldGeometry = glue.template patch<0>().geometry(grid0indices_[par]);
