@@ -926,10 +926,13 @@ namespace Projection
                     FPrimexk[1] = target1-target2;
                     FPrimexk[2] = direction1;
                     FPrimexk[2].axpy(x[0],n21);
-                    if (FPrimexk.determinant()<1e-10)
-                        return false;
 
-                    FPrimexk.invert();
+                    try {
+                        FPrimexk.invert();
+                    }
+                    catch (const Dune::FMatrixError&) {
+                        return false;
+                    }
 
                     FPrimexk.mtv(Fxk, newtonCorrection);
 
