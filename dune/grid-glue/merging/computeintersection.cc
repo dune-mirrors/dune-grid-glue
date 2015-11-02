@@ -82,8 +82,8 @@ void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,3>,
     std::vector<V> p ;
     std::vector<std::vector<int> > tempH;
 
-    unsigned int faceOrderingX[n_facesX];
-    unsigned int faceOrderingY[n_facesY];
+    std::vector<int> faceOrderingX(n_facesX);
+    std::vector<int> faceOrderingY(n_facesY);
 
     if (n_facesX==3) {
         faceOrderingX[0] = 0; faceOrderingX[1] = 2; faceOrderingX[2] = 1;
