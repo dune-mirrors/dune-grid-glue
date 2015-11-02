@@ -770,7 +770,6 @@ namespace Projection
                 }
             }
 
-            private:
             /**
              * \brief Compute the projection along given directions of a surface element edge onto another edge.
              *
