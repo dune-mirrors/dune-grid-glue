@@ -413,7 +413,8 @@ namespace Projection
              */
             static bool inexactInverseProjection(const std::vector<WorldCoords>& corners,
                     const std::vector<WorldCoords>& directions,
-                    const WorldCoords& target, LocalCoords& preImage, const T overlap=1e-1)
+                    const WorldCoords& target, LocalCoords& preImage, const T overlap=1e-1,
+                    const WorldCoords* initX = nullptr)
             {
                 assert(corners.size() == 3);
                 assert(directions.size() == 3);
@@ -423,6 +424,9 @@ namespace Projection
                 // feasible initial Newton iterate
                 const int nCorners = 3;
                 Dune::FieldVector<T,nCorners> x(1.0/((T) nCorners));
+                if (initX != nullptr)
+                    x = *initX;
+                else
                 {
                     WorldCoords d(0);
                     for (std::size_t i = 0; i < corners.size(); ++i)
