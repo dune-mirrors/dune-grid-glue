@@ -86,6 +86,12 @@ public:
         overlap_ = overlap;
     }
 
+    //!Get the allowed overlap of the surfaces.
+    T getOverlap()
+    {
+        return overlap_;
+    }
+
 protected:
   typedef typename StandardMerge<T,dimworld-1,dimworld-1,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
