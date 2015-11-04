@@ -11,7 +11,6 @@
 #include <dune/common/mpihelper.hh>
 #endif
 #include <dune/common/fvector.hh>
-#include <dune/common/nullptr.hh>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/geometrygrid.hh>
 #include <dune/geometry/quadraturerules.hh>
