@@ -151,8 +151,8 @@ void testCoupling(const GlueType& glue)
     {
       if (rIIt->self() && rIIt->neighbor())
       {
-        countInside0[view0mapper.map(*rIIt->inside())]++;
-        countOutside1[view1mapper.map(*rIIt->outside())]++;
+        countInside0[view0mapper.index(*rIIt->inside())]++;
+        countOutside1[view1mapper.index(*rIIt->outside())]++;
         success = success && testIntersection(rIIt);
       }
     }
@@ -169,8 +169,8 @@ void testCoupling(const GlueType& glue)
     {
       if (rIIt->self() && rIIt->neighbor())
       {
-        countInside1[view1mapper.map(*rIIt->inside())]++;
-        countOutside0[view0mapper.map(*rIIt->outside())]++;
+        countInside1[view1mapper.index(*rIIt->inside())]++;
+        countOutside0[view0mapper.index(*rIIt->outside())]++;
         success = success && testIntersection(rIIt);
       }
     }
