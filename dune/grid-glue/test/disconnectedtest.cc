@@ -120,7 +120,7 @@ bool testDisconnected(const std::string& name, MyMerger& merger)
   if (!pass) {
     std::string filename("disconnected-");
     filename += name;
-    GridGlueVtkWriter::write<Glue>(glue, filename);
+    Dune::GridGlue::GridGlueVtkWriter::write<Glue>(glue, filename);
   }
 
   return pass;

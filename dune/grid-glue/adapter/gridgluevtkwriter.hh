@@ -28,6 +28,8 @@
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
 
+namespace Dune {
+namespace GridGlue {
 
 /** \brief Write remote intersections to a vtk file for debugging purposes
  */
@@ -294,6 +296,7 @@ public:
 
 };
 
-
+} /* namespace GridGlue */
+} /* namespace Dune */
 
 #endif // DUNE_GRIDGLUE_ADAPTER_GRIDGLUEVTKWRITER_HH
