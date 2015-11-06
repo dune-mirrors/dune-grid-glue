@@ -214,7 +214,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
       // add a new face to the temporary collection
       temp_faces.push_back(SubEntityInfo(eindex,0,elmt.type()));
       element_index++;
-      for (int i=0; i<numCorners; i++) {
+      for (unsigned int i=0; i<numCorners; i++) {
         temp_faces.back().corners[i].idx = vertex_indices[i];
         // remember the vertices' numbers in parent element's vertices
         temp_faces.back().corners[i].num = vertex_numbers[i];
