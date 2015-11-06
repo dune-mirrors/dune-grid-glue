@@ -26,6 +26,11 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     const int nCorners1 = grid1ElementCorners.size();
     const int nCorners2 = grid2ElementCorners.size();
 
+    if (nCorners1 != dimworld)
+      DUNE_THROW(Dune::Exception, "element1 must have " << dimworld << " corners, but has " << nCorners1);
+    if (nCorners2 != dimworld)
+      DUNE_THROW(Dune::Exception, "element2 must have " << dimworld << " corners, but has " << nCorners2);
+
     // The grid1 projection directions
     std::vector<WorldCoords> directions1(nCorners1);
     for (size_t i=0; i<directions1.size(); i++)
