@@ -133,7 +133,7 @@ struct setupGrid<2> {
    This test currently only support coupling of elements of the same dimension
  */
 template <class ctype, int dim, int dimworld>
-void callMergerTwice(Merger<ctype, dim, dim, dimworld> * merger)
+void callMergerTwice(Dune::GridGlue::Merger<ctype, dim, dim, dimworld> * merger)
 {
   std::cout << "============= callMergerTwice === dim "
             << dim << " === dimworld " << dimworld
@@ -175,25 +175,25 @@ int main ()
 
 #if HAVE_PSURFACE
   {
-    typedef PSurfaceMerge<1,1,double> Merger;
+    typedef Dune::GridGlue::PSurfaceMerge<1,1,double> Merger;
     Merger merger;
     callMergerTwice(&merger);
   }
 
   {
-    typedef PSurfaceMerge<1,2,double> Merger;
+    typedef Dune::GridGlue::PSurfaceMerge<1,2,double> Merger;
     Merger merger;
     callMergerTwice(&merger);
   }
 
   {
-    typedef PSurfaceMerge<2,2,double> Merger;
+    typedef Dune::GridGlue::PSurfaceMerge<2,2,double> Merger;
     Merger merger;
     callMergerTwice(&merger);
   }
 
   {
-    typedef PSurfaceMerge<2,3,double> Merger;
+    typedef Dune::GridGlue::PSurfaceMerge<2,3,double> Merger;
     Merger merger;
     callMergerTwice(&merger);
   }

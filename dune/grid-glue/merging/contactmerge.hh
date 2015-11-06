@@ -28,6 +28,9 @@
 #include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/extractors/extractorpredicate.hh>
 
+namespace Dune {
+namespace GridGlue {
+
 /** \brief Merge two codimension-1 surfaces that may be a positive distance apart
 
   \tparam dimworld  Dimension of the world coordinates.
@@ -284,6 +287,9 @@ protected:
     //! Remove all multiples
     void removeDoubles(std::vector<std::array<LocalCoords,2> >& polytopeCorners);
 };
+
+} /* namespace GridGlue */
+} /* namespace Dune */
 
 #include "contactmerge.cc"
 

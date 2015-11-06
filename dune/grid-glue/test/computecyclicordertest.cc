@@ -10,9 +10,9 @@ const static int dim = 3;
 typedef double Real;
 
 struct MyMerger
-  : public ContactMerge<3, Real>
+  : public Dune::GridGlue::ContactMerge<3, Real>
 {
-  typedef ContactMerge<3, Real> Base;
+  typedef Dune::GridGlue::ContactMerge<3, Real> Base;
   using Base::computeCyclicOrder;
 };
 

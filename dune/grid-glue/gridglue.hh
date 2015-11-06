@@ -255,7 +255,7 @@ public:
   typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::EntityPointer TargetVertexPtr DUNE_DEPRECATED;
 
   /** \brief Instance of a Merger */
-  typedef ::Merger<ctype,
+  typedef Dune::GridGlue::Merger<ctype,
       Grid0::dimension - Grid0Patch::codim,
       Grid1::dimension - Grid1Patch::codim,
       dimworld> Merger;

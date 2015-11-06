@@ -35,7 +35,7 @@ typedef Grid::LeafGridView GridView;
 typedef std::shared_ptr<Grid> GridPtr;
 typedef Dune::GridFactory<Grid> GridFactory;
 typedef Dune::FieldVector<double, dim> Vector;
-typedef Merger<Grid::ctype, dim-codim, dim-codim, dim> MyMerger;
+typedef Dune::GridGlue::Merger<Grid::ctype, dim-codim, dim-codim, dim> MyMerger;
 
 class ZPlaneExtractorPredicate
   : public Dune::GridGlue::ExtractorPredicate<GridView, codim>
@@ -131,12 +131,12 @@ int main()
   bool pass(true);
 
   {
-    ContactMerge<dim> merger(0.0);
+    Dune::GridGlue::ContactMerge<dim> merger(0.0);
     pass &= testDisconnected("ContactMerge", merger);
   }
 #if HAVE_PSURFACE
   {
-    PSurfaceMerge<dim-codim, dim> merger;
+    Dune::GridGlue::PSurfaceMerge<dim-codim, dim> merger;
     pass &= testDisconnected("PSurfaceMerge", merger);
   }
 #endif

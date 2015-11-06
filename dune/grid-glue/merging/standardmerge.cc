@@ -4,6 +4,9 @@
 
 #include "standardmerge.hh"
 
+namespace Dune {
+namespace GridGlue {
+
 #define DECL
 #define STANDARD_MERGE_INSTANTIATE(T,A,B,C) \
   DECL template \
@@ -20,3 +23,6 @@ STANDARD_MERGE_INSTANTIATE(double,2,2,2);
 STANDARD_MERGE_INSTANTIATE(double,3,3,3);
 #undef STANDARD_MERGE_INSTANTIATE
 #undef DECL
+
+} /* namespace GridGlue */
+} /* namespace Dune */

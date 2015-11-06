@@ -8,6 +8,9 @@
 #include <dune/common/fvector.hh>
 #include <dune/geometry/type.hh>
 
+namespace Dune {
+namespace GridGlue {
+
 // forward declaration
 template <class ctype, int grid1Dim, int grid2Dim, int dimworld>
 class Merger;
@@ -231,5 +234,8 @@ private:
   virtual Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const = 0;
 
 };
+
+} /* namespace GridGlue */
+} /* namespace Dune */
 
 #endif

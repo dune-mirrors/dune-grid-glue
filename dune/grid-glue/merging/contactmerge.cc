@@ -4,6 +4,9 @@
 #include <dune/grid-glue/common/crossproduct.hh>
 #include <dune/grid-glue/common/projection.hh>
 
+namespace Dune {
+namespace GridGlue {
+
 template<int dimworld, typename T>
 void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& grid1ElementType,
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid1ElementCorners,
@@ -309,7 +312,7 @@ void ContactMerge<dimworld, T>::computeOuterNormalField(const std::vector<WorldC
         if (dim==1) {
             elementNormal[0] = edges[0][1]; elementNormal[1] = -edges[0][0];
         } else
-            elementNormal = Dune::GridGlue::crossProduct(edges[0], edges[1]);
+            elementNormal = crossProduct(edges[0], edges[1]);
 
         elementNormal /= elementNormal.two_norm();
 
@@ -345,3 +348,6 @@ void ContactMerge<dimworld, T>::removeDoubles(std::vector<std::array<LocalCoords
     }
     polytopeCorners.resize(counter);
 }
+
+} /* namespace GridGlue */
+} /* namespace Dune */

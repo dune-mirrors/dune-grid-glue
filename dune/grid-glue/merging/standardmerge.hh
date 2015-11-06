@@ -31,6 +31,8 @@
 #include <dune/grid-glue/merging/merger.hh>
 #include <dune/grid-glue/merging/computeintersection.hh>
 
+namespace Dune {
+namespace GridGlue {
 
 /** \brief Common base class for many merger implementations: produce pairs of entities that _may_ intersect
 
@@ -906,5 +908,8 @@ STANDARD_MERGE_INSTANTIATE(double,2,2,2);
 STANDARD_MERGE_INSTANTIATE(double,3,3,3);
 #undef STANDARD_MERGE_INSTANTIATE
 #undef DECL
+
+} /* namespace GridGlue */
+} /* namespace Dune */
 
 #endif // DUNE_GRIDGLUE_MERGING_STANDARDMERGE_HH

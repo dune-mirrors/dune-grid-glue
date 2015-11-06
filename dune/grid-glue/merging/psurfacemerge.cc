@@ -12,6 +12,9 @@
 
 #include <psurface/ContactMapping.h>
 
+namespace Dune {
+namespace GridGlue {
+
 /* we deliberately use other names here than in the interface, because these names adhere to the psurface convention */
 template<int dim, int dimworld, typename T>
 void PSurfaceMerge<dim, dimworld, T>::build(const std::vector<Dune::FieldVector<T,dimworld> >& domain_coords,
@@ -464,5 +467,8 @@ template class PSurfaceMerge<1,2,double>;
 template class PSurfaceMerge<2,2,double>;
 template class PSurfaceMerge<2,3,double>;
 #endif
+
+} /* namespace GridGlue */
+} /* namespace Dune */
 
 #endif // HAVE_PSURFACE

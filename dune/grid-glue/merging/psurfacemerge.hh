@@ -43,6 +43,8 @@ template <int dim, typename ctype> class DirectionFunction;
 #define PSURFACE_NAMESPACE
 #endif
 
+namespace Dune {
+namespace GridGlue {
 
 /** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
 
@@ -493,6 +495,9 @@ inline unsigned int PSurfaceMerge<dim, dimworld, T>::grid2Parent(unsigned int id
 }
 
 #endif // HAVE_PSURFACE
+
+} /* namespace GridGlue */
+} /* namespace Dune */
 
 #ifdef PSURFACE_EXTRA_TYPES
 #define PSURFACE_EXTERN
