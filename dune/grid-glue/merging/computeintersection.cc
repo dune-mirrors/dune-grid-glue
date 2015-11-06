@@ -167,7 +167,7 @@ void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,2>,
 
     orderPointsCC(std::integral_constant<int,2>(),centroid,id,P);
 
-    for (int i = 0; i < id.size();++i) {
+    for (std::size_t i = 0; i < id.size();++i) {
         temp[0] = id[i];
         temp[1] = id[(i+1)%(id.size())];
         H.push_back(temp);
