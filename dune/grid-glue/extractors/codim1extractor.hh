@@ -23,7 +23,7 @@
 
 #include <deque>
 
-#include <dune/grid-glue/common/projectionhelper.hh>
+#include <dune/grid-glue/common/crossproduct.hh>
 
 namespace Dune {
 
@@ -238,7 +238,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             } else {    // boundary face is a triangle
               FieldVector<ctype,dimworld> segment1 = cornerCoords[1] - cornerCoords[0];
               FieldVector<ctype,dimworld> segment2 = cornerCoords[2] - cornerCoords[0];
-              reconstructedNormal = Projection::crossProduct(segment1, segment2);
+              reconstructedNormal = crossProduct(segment1, segment2);
             }
             reconstructedNormal /= reconstructedNormal.two_norm();
 
@@ -320,8 +320,8 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             FieldVector<ctype,dimworld> realNormal = is->centerUnitOuterNormal();
 
             // Compute segment normal
-            FieldVector<ctype,dimworld> reconstructedNormal = Projection::crossProduct(cornerCoords[1] - cornerCoords[0],
-                                                                                       cornerCoords[2] - cornerCoords[0]);
+            FieldVector<ctype,dimworld> reconstructedNormal = crossProduct(cornerCoords[1] - cornerCoords[0],
+                                                                           cornerCoords[2] - cornerCoords[0]);
             reconstructedNormal /= reconstructedNormal.two_norm();
 
             if (realNormal * reconstructedNormal < 0.0)
@@ -344,8 +344,8 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
             // when viewed from the outside of the grid. Therefore, we check the orientation of the
             // new face and possibly switch two vertices.
             // Compute segment normal
-            reconstructedNormal = Projection::crossProduct(cornerCoords[2] - cornerCoords[3],
-                                                           cornerCoords[1] - cornerCoords[3]);
+            reconstructedNormal = crossProduct(cornerCoords[2] - cornerCoords[3],
+                                               cornerCoords[1] - cornerCoords[3]);
             reconstructedNormal /= reconstructedNormal.two_norm();
 
             if (realNormal * reconstructedNormal < 0.0)

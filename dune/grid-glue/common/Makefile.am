@@ -1,6 +1,7 @@
 commondir = $(includedir)/dune/grid-glue/common
 
 common_HEADERS = \
+                 crossproduct.hh \
                  multivector.hh \
                  projection.hh \
                  projectionhelper.hh \

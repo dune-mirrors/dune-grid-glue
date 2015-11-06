@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#include <dune/grid-glue/common/projectionhelper.hh>
+#include <dune/grid-glue/common/crossproduct.hh>
 #include <dune/grid-glue/common/projection.hh>
 
 template<int dimworld, typename T>
@@ -309,7 +309,7 @@ void ContactMerge<dimworld, T>::computeOuterNormalField(const std::vector<WorldC
         if (dim==1) {
             elementNormal[0] = edges[0][1]; elementNormal[1] = -edges[0][0];
         } else
-            elementNormal = Projection::crossProduct(edges[0],edges[1]);
+            elementNormal = Dune::GridGlue::crossProduct(edges[0], edges[1]);
 
         elementNormal /= elementNormal.two_norm();
 
