@@ -101,10 +101,6 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
             g2local[i] = grid2Geometry.local(P[i]);
         }
 
-        bool isinplane = false;
-        if (dimis == 3)
-            isinplane = inPlane(P);
-
         intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
         for (i = 0; i < n_intersectionnodes; ++i) {
             intersections.back().grid1Local_[0][i] = g1local[i];
@@ -146,11 +142,6 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
                     g1local[j] = grid1Geometry.local(global[j]);
                     g2local[j] = grid2Geometry.local(global[j]);
                 }
-
-                // do not insert degenerated elements
-                bool isinplane = false;
-                if (dimis == 3)
-                    isinplane = inPlane(global);
 
                 intersections.push_back(RemoteSimplicialIntersection(grid1Index,grid2Index));
                 for (size_type j = 0; j < n_intersectionnodes; ++j) {
