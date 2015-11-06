@@ -6,18 +6,16 @@ endif(MPI_C_FOUND)
 set(TESTS
  callmergertwicetest
  computecyclicordertest
- inexactinverseprojection
  mixeddimcouplingtest
  mixeddimoverlappingtest
  multivectortest
  nonoverlappingcouplingtest
  overlappingcouplingtest
- projectionhelpertest
+ projectiontest
  ${MPI_PROGRAMS})
 
 add_executable(callmergertwicetest callmergertwicetest.cc)
 add_executable(computecyclicordertest computecyclicordertest.cc)
-add_executable(inexactinverseprojection inexactinverseprojection.cc)
 add_executable(mixeddimcouplingtest mixeddimcouplingtest.cc)
 add_executable(mixeddimoverlappingtest mixeddimoverlappingtest.cc)
 add_executable(multivectortest multivectortest.cc)
@@ -27,7 +25,7 @@ set_property(TARGET nonoverlappingcouplingtest
 add_executable(overlappingcouplingtest overlappingcouplingtest.cc)
 set_property(TARGET overlappingcouplingtest
   APPEND PROPERTY COMPILE_FLAGS "-frounding-math")
-add_executable(projectionhelpertest projectionhelpertest.cc)
+add_executable(projectiontest projectiontest.cc)
 
 if(MPI_C_FOUND)
   add_executable(nonoverlappingcouplingtest_mpi nonoverlappingcouplingtest.cc)

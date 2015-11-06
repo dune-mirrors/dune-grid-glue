@@ -1,8 +1,9 @@
 commondir = $(includedir)/dune/grid-glue/common
 
 common_HEADERS = \
+                 crossproduct.hh \
                  multivector.hh \
-                 projectionhelper.hh \
+                 projection.hh \
                  simplexgeometry.hh
 
 EXTRA_DIST = CMakeLists.txt

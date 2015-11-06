@@ -1,6 +1,7 @@
 #install headers
 install(FILES
+  crossproduct.hh
   multivector.hh
-  projectionhelper.hh
+  projection.hh
   simplexgeometry.hh
   DESTINATION include/dune/grid-glue/common)
