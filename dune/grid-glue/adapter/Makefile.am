@@ -3,6 +3,7 @@ adapterdir = $(includedir)/dune/grid-glue/adapter
 adapter_HEADERS = \
 	gridglue.cc \
 	gridglue.hh\
+	gridglueamirawriter.hh \
     gridgluecommunicate.hh \
 	gridgluevtkwriter.hh\
 	intersection.hh\

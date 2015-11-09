@@ -1,6 +1,7 @@
 #install headers
 install(FILES
   gridglue.cc
+  gridglueamirawriter.hh
   gridgluecommunicate.hh
   gridglue.hh
   gridgluevtkwriter.hh
