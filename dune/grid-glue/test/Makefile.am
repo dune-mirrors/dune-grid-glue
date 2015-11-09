@@ -2,11 +2,13 @@
 
 TESTPROGS = \
     callmergertwicetest        \
+    computecyclicordertest     \
     mixeddimcouplingtest       \
     mixeddimoverlappingtest    \
     multivectortest            \
     nonoverlappingcouplingtest \
-    overlappingcouplingtest
+    overlappingcouplingtest    \
+    projectiontest
 
 if MPI
 TESTPROGS += nonoverlappingcouplingtest_mpi
@@ -32,6 +34,7 @@ LDADD       += $(UG_LIBS)
 
 # define the programs
 callmergertwicetest_SOURCES = callmergertwicetest.cc
+computecyclicordertest_SOURCES = computecyclicordertest.cc
 nonoverlappingcouplingtest_SOURCES = nonoverlappingcouplingtest.cc
 nonoverlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) # -DCALL_MERGER_TWICE
 if UG
@@ -48,6 +51,7 @@ mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
+projectiontest_SOURCES = projectiontest.cc
 
 EXTRA_DIST = CMakeLists.txt
 
