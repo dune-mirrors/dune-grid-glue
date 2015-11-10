@@ -52,7 +52,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
 
     const auto corners = std::tie(grid1ElementCorners, grid2ElementCorners);
     const auto normals = std::tie(directions1, directions2);
-    Dune::GridGlue::Projection<WorldCoords> p;
+    Dune::GridGlue::Projection<WorldCoords> p(overlap_);
     p.project(corners, normals);
 
     /* projection */
