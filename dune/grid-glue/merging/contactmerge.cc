@@ -181,6 +181,24 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     std::vector<int> ordering;
     computeCyclicOrder(polytopeCorners,center[0],ordering);
 
+    // improve triangluation by dividing quadrilaterals into two triangles
+    if (nPolyCorners==dim+2) {
+
+        for (int i=0; i<3; i+=2) {
+            typename Base::RemoteSimplicialIntersection intersect;
+            intersect.grid1Entities_[0] = grid1Index;
+            intersect.grid2Entities_[0] = grid2Index;
+
+            for (int j=0;j<dim+1; j++) {
+                intersect.grid1Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][0];
+                intersect.grid2Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][1];
+            }
+
+            intersections.push_back(intersect);
+        }
+        return;
+    }
+
     //////////////////////////////////////
     // Add intersections
     ////////////////////////////////
