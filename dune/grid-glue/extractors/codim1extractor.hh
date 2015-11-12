@@ -22,7 +22,9 @@
 #include "extractorpredicate.hh"
 
 #include <deque>
+#include <functional>
 
+#include <dune/common/deprecated.hh>
 #include <dune/grid-glue/common/crossproduct.hh>
 
 namespace Dune {
@@ -57,6 +59,7 @@ public:
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   typedef typename GV::Traits::template Codim<0>::Entity Element;
+  typedef std::function<bool(const Element&, unsigned int subentity)> Predicate;
 
   static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
@@ -79,13 +82,31 @@ public:
    * @param gv the grid view object to work with
    * @param descr a predicate to mark entities for extraction (unary functor returning bool)
    */
+  DUNE_DEPRECATED_MSG("Please use a std::function<bool(const Element&, unsigned int)> in favor of the ExtractorPredicate.")
   Codim1Extractor(const GV& gv, const ExtractorPredicate<GV,1>& descr)
     :  Extractor<GV,1>(gv)
   {
     std::cout << "This is Codim1Extractor on a <" << dim
               << "," << dimworld << "> grid!"
               << std::endl;
-    update(descr);
+    const auto predicate = [&](const Element& element, unsigned int subentity) -> bool {
+      return descr.contains(element, subentity);
+    };
+    update(predicate);
+  }
+
+  /**
+   * @brief Constructor
+   * @param gv the grid view object to work with
+   * @param predicate a predicate to mark entities for extraction (unary functor returning bool)
+   */
+  Codim1Extractor(const GV& gv, const Predicate& predicate)
+    :  Extractor<GV,1>(gv)
+  {
+    std::cout << "This is Codim1Extractor on a <" << dim
+              << "," << dimworld << "> grid!"
+              << std::endl;
+    update(predicate);
   }
 
 private:
@@ -101,15 +122,15 @@ private:
    * index 1 is associated with the position x1. If the surface consists of triangles
    * we have always groups of 3 indices describing one triangle.
    *
-   * @param descr a predicate class that "selects" the faces to add to the surface
+   * @param predicate a predicate that "selects" the faces to add to the surface
    */
-  void update(const ExtractorPredicate<GV,1>& descr);
+  void update(const Predicate& predicate);
 
 };
 
 
 template<typename GV>
-void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
+void Codim1Extractor<GV>::update(const Predicate& predicate)
 {
   // free everything there is in this object
   this->clear();
@@ -155,7 +176,7 @@ void Codim1Extractor<GV>::update(const ExtractorPredicate<GV,1>& descr)
         for (IsIter is = this->gv_.ibegin(elmt); is != this->gv_.iend(elmt); ++is)
         {
           // Stop only at selected boundary faces
-          if (!is->boundary() or !descr.contains(elmt, is->indexInInside()))
+          if (!is->boundary() or !predicate(elmt, is->indexInInside()))
             continue;
 
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
