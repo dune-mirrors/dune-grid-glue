@@ -4,6 +4,7 @@ common_HEADERS = \
                  crossproduct.hh \
                  multivector.hh \
                  projection.hh \
+                 projection_impl.hh \
                  simplexgeometry.hh
 
 EXTRA_DIST = CMakeLists.txt
