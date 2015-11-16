@@ -6,6 +6,7 @@
 #include <tuple>
 
 #include <dune/grid-glue/common/projection.hh>
+#include <dune/grid-glue/common/projectionwriter.hh>
 
 using Dune::GridGlue::Projection;
 
@@ -77,6 +78,9 @@ test_project_simple()
     std::cout << "ERROR: test_project_simple: there were unexpected edge intersections" << std::endl;
     pass = false;
   }
+
+  if (!pass)
+    write(p, corners, normals, "projectiontest_project_simple.vtk");
 
   return pass;
 }
@@ -154,6 +158,9 @@ test_project_simple2()
     std::cout << "ERROR: test_project_simple2: there were unexpected edge intersections" << std::endl;
     pass = false;
   }
+
+  if (!pass)
+    write(p, corners, normals, "projectiontest_project_simple2.vtk");
 
   return pass;
 }
@@ -281,6 +288,9 @@ test_project3()
       }
     }
   }
+
+  if (!pass)
+    write(p, corners, normals, "projectiontest_project3.vtk");
 
   return pass;
 }
