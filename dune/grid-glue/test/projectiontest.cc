@@ -295,6 +295,59 @@ test_project3()
   return pass;
 }
 
+bool
+test_project4()
+{
+  /* Test with intersting numbers.
+   * The result was not checked, but is given to prevent accidential changes... Hopefully it is right.
+   */
+  using std::get;
+
+  bool pass = true;
+
+  using V = Dune::FieldVector<double, 3>;
+  using P = Projection<V>;
+  using Corners = std::array<V, 3>;
+  using Normals = Corners;
+
+  const Corners c0{{{3.3226, 4.41838, 2.5606}, {3.56991, 4.60089, 2.67132},{3.58641, 4.42509, 2.56724}}};
+  const Corners c1{{{3.53965, -0.313653, 3.39551},{4.06013, -0.311809, 3.39505},{3.54027, -0.434644, 3.61669}}};
+
+  const auto& corners = std::tie(c0, c1);
+
+  const Normals n0{{{-0.00668383, -0.480515, 0.876961},{-0.00186939, -0.440971, 0.897519},{-0.00727575, -0.477334, 0.878692}}};
+  const Normals n1{{{0.00296167, -0.872357, -0.48886},{0.0032529,-0.87389, -0.486112},{0.00375284, -0.877906, -0.478818}}};
+  const auto& normals = std::tie(n0, n1);
+
+  P p;
+  p.project(corners, normals);
+
+  /* Check image */
+  {
+    const auto& success = get<0>(p.success());
+    if (success.any()) {
+      std::cout << "ERROR: test_project4: unexpected Phi(x_i) are in the image triangle" << std::endl;
+      pass = false;
+    }
+  }
+
+  /* Check preimage */
+  {
+    const auto& success = get<1>(p.success());
+    if (success.any()) {
+      std::cout << "ERROR: test_project4: not all Phi^{-1}(y_i) are outside the preimage triangle" << std::endl;
+      pass = false;
+    }
+  }
+
+  if (p.numberOfEdgeIntersections() != 0) {
+    std::cout << "ERROR: test_project4: there were unexpected edge intersections" << std::endl;
+    pass = false;
+  }
+
+  return pass;
+}
+
 int main()
 {
   bool pass = true;
@@ -302,6 +355,7 @@ int main()
   pass = pass && test_project_simple();
   pass = pass && test_project_simple2();
   pass = pass && test_project3();
+  pass = pass && test_project4();
 
   return pass ? 0 : 1;
 }
