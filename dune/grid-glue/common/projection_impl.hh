@@ -115,9 +115,10 @@ inside(const Coordinate& x, const Field& epsilon)
       return false;
     sum += x[i];
   }
-  if (sum > Field(1) + epsilon)
-    return false;
-  return true;
+  /* If any xᵢ is NaN, sum will be NaN and this comparison false! */
+  if (sum <= Field(1) + epsilon)
+    return true;
+  return false;
 }
 
 } /* namespace ProjectionImplementation */
