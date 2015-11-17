@@ -275,11 +275,8 @@ Projection<Coordinate>
       preimages[i][j] = z[j];
 
     /* Calculate distance along normal direction */
-    {
-      const auto x = interpolate(z, get<0>(corners));
-      const auto nx = interpolate_unit_normals(z, get<0>(normals));
-      preimages[i][dim-1] = (target_corners[i] - x)*nx;
-    }
+    const auto x = interpolate(z, get<0>(corners));
+    preimages[i][dim-1] = (x - target_corners[i]) * get<1>(normals)[i];
 
     /* Check y_i lies inside the Φ(xⱼ) */
     const bool feasible = projectionFeasible(target_corners[i], preimages[i], get<0>(corners), get<0>(normals));

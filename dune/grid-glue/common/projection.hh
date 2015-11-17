@@ -207,7 +207,9 @@ public:
    *
    * The first d-1 values are the barycentric coordinates with respect
    * to the corners of the (pre)image, the last value is the signed
-   * distance between the projected point and its (pre)image.
+   * distance between the projected point and its (pre)image along the
+   * normal at the projected preimage corner or the inverse projected
+   * image corner.
    *
    * \note \ref project() must be called before this method can be used.
    *
