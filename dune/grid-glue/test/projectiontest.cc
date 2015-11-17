@@ -345,6 +345,9 @@ test_project4()
     pass = false;
   }
 
+  if (!pass)
+    write(p, corners, normals, "projectiontest_project4.vtk");
+
   return pass;
 }
 
