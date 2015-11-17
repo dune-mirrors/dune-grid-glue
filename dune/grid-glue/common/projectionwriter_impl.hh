@@ -21,6 +21,22 @@ void write_points(const Projection<Coordinate>& projection, const Corners& corne
   }
 }
 
+template<unsigned side, typename Coordinate, typename Normals>
+void write_normals(const Projection<Coordinate>& projection, const Normals& normals, std::ostream& out)
+{
+  using namespace ProjectionImplementation;
+  using std::get;
+  const unsigned other_side = 1 - side;
+
+  for (const auto& n : get<side>(normals))
+    out << n << "\n";
+
+  for (const auto& x : get<side>(projection.images())) {
+    const auto n = interpolate_unit_normals(x, get<other_side>(normals));
+    out << n << "\n";
+  }
+}
+
 template<typename Coordinate, typename Corners>
 void write_edge_intersection_points(const Projection<Coordinate>& projection, const Corners& corners, std::ostream& out)
 {
@@ -31,6 +47,22 @@ void write_edge_intersection_points(const Projection<Coordinate>& projection, co
     const auto& local = projection.edgeIntersections()[i].local;
     out << interpolate(local[0], get<0>(corners)) << "\n"
         << interpolate(local[1], get<1>(corners)) << "\n";
+  }
+}
+
+template<typename Coordinate, typename Normals>
+void write_edge_intersection_normals(const Projection<Coordinate>& projection, const Normals& normals, std::ostream& out)
+{
+  using namespace ProjectionImplementation;
+  using std::get;
+
+  for (std::size_t i = 0; i < projection.numberOfEdgeIntersections(); ++i) {
+    const auto& local = projection.edgeIntersections()[i].local;
+    const auto n0 = interpolate_unit_normals(local[0], get<0>(normals));
+    const auto n1 = interpolate_unit_normals(local[1], get<1>(normals));
+
+    out << n0 << "\n"
+        << n1 << "\n";
   }
 }
 
@@ -57,12 +89,13 @@ void write(const Projection<Coordinate>& projection,
   using namespace ProjectionWriterImplementation;
 
   const auto numberOfEdgeIntersections = projection.numberOfEdgeIntersections();
+  const auto nPoints = 12 + 2 * numberOfEdgeIntersections;
 
   out << "# vtk DataFile Version2.0\n"
       << "Filename: projection\n"
       << "ASCII\n"
       << "DATASET UNSTRUCTURED_GRID\n"
-      << "POINTS " << (12 + 2 * numberOfEdgeIntersections) << " double\n";
+      << "POINTS " << nPoints << " double\n";
   write_points<0>(projection, corners, out);
   write_points<1>(projection, corners, out);
   write_edge_intersection_points(projection, corners, out);
@@ -81,6 +114,11 @@ void write(const Projection<Coordinate>& projection,
   write_success<1>(projection, out);
   for (std::size_t i = 0; i < numberOfEdgeIntersections; ++i)
     out << "2\n";
+  out << "POINT_DATA " << nPoints << "\n"
+      << "NORMALS normals double\n";
+  write_normals<0>(projection, normals, out);
+  write_normals<1>(projection, normals, out);
+  write_edge_intersection_normals(projection, normals, out);
   out << "LOOKUP_TABLE success 3\n"
       << "1.0 0.0 0.0 1.0\n"
       << "0.0 1.0 0.0 1.0\n"
