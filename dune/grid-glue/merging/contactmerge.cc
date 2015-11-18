@@ -98,9 +98,6 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
       }
     }
 
-    // local coordinates
-    LocalCoords localCoords;
-
     // check which neighbors might also intersect
     const Dune::ReferenceElement<T,dim>& ref2 = Dune::ReferenceElements<T,dim>::general(grid2ElementType);
     for (int i=0; i<ref2.size(1); i++) {
