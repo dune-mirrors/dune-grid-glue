@@ -114,15 +114,14 @@ void write(const Projection<Coordinate>& projection,
   write_success<1>(projection, out);
   for (std::size_t i = 0; i < numberOfEdgeIntersections; ++i)
     out << "2\n";
+  out << "LOOKUP_TABLE success 2\n"
+      << "1.0 0.0 0.0 1.0\n"
+      << "0.0 1.0 0.0 1.0\n";
   out << "POINT_DATA " << nPoints << "\n"
       << "NORMALS normals double\n";
   write_normals<0>(projection, normals, out);
   write_normals<1>(projection, normals, out);
   write_edge_intersection_normals(projection, normals, out);
-  out << "LOOKUP_TABLE success 3\n"
-      << "1.0 0.0 0.0 1.0\n"
-      << "0.0 1.0 0.0 1.0\n"
-      << "0.0 0.0 1.0 1.0\n";
 }
 
 template<typename Coordinate, typename Corners, typename Normals>
