@@ -162,54 +162,7 @@ private:
         return ref.position(i,dim);
     }
 
-    //! Check if local coordinates correspond to a vertex and if yes returns its local index
-    static int isCorner(const Dune::GeometryType& gt, const LocalCoords& local)
-    {
-        const Dune::ReferenceElement<T,dim>& ref = Dune::ReferenceElements<T,dim>::general(gt);
-
-        for (int i=0; i<ref.size(dim); i++)
-            if ((ref.position(i,dim)-local).two_norm()<1e-8)
-                return i;
-        return -1;
-    }
-
-    //! Transform local to barycentric coordinates
-    static std::vector<T> localToBarycentric(const Dune::GeometryType& gt, const LocalCoords& local)
-    {
-        std::vector<T> bar(Dune::ReferenceElements<T,dim>::general(gt).size(dim));
-        if (bar.size()<4) {
-            bar[0] = 1.0;
-            for (int i=0; i<dim; i++) {
-                bar[i+1] = local[i];
-                bar[0] -= local[i];
-            }
-        } else {
-            // quadrilateral case
-            for (int i=0; i<4; i++) {
-                bar[i] = 1;
-
-                for (int j=0; j<dim; j++)
-                    // if j-th bit of i is set multiply with in[j], else with 1-in[j]
-                    bar[i] *= (i & (1<<j)) ? local[j] :  1-local[j];
-            }
-        }
-        return bar;
-    }
-
 protected:
-    //! Compute global coordinates of a local point using linear interpolation of the corners
-    static WorldCoords interpolate(const std::vector<WorldCoords>& p,
-            const Dune::GeometryType& gt, const LocalCoords& local)
-    {
-        // Compute barycentric coordinates
-        std::vector<T> bar = localToBarycentric(gt, local);
-
-        WorldCoords global(0);
-        for (size_t i=0; i<p.size(); i++)
-            global.axpy(bar[i],p[i]);
-
-        return global;
-    }
 
     //! Order the corners of the intersection polytope in cyclic order
     void computeCyclicOrder(const std::vector<std::array<LocalCoords,2> >& polytopeCorners,
