@@ -351,6 +351,81 @@ test_project4()
   return pass;
 }
 
+bool
+test_project_overlap()
+{
+  using std::get;
+
+  bool pass = true;
+
+  typedef Dune::FieldVector<double, 3> V;
+  typedef Projection<V> P;
+  using Corners = std::array<V, 3>;
+  using Normals = Corners;
+
+  const Corners c0{{{0, 0, 1}, {1, 0, 1}, {0, 4, -1}}};
+  const Corners c1{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0}}};
+  const auto& corners = std::tie(c0, c1);
+
+  const Normals n0{{{0, 0, -1}, {0, 0, -1}, {0, 0, -1}}};
+  const Normals n1{{{0, 0, 1}, {0, 0, 1}, {0, 0, 1}}};
+  const auto& normals = std::tie(n0, n1);
+
+  P p(0.0);
+  p.project(corners, normals);
+
+  /* Check image */
+  {
+    const auto& success = get<0>(p.success());
+    if (success != std::bitset<3>(0b011)) {
+      std::cout << "ERROR: test_project_overlap: forward projection did not succeed/fail as expected" << std::endl;
+      pass = false;
+    }
+
+    const Corners expected{{{0, 0, 1}, {1, 0, 1}, {0, 4, -1}}};
+    const auto& images = get<0>(p.images());
+    for (unsigned i = 0; i < images.size(); ++i) {
+      if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
+        std::cout << "ERROR: test_project_overlap: corner " << i
+                  << " was projected on " << images[i]
+                  << "; expected: " << expected[i] << std::endl;
+        pass = false;
+      }
+    }
+  }
+
+  /* Check preimage */
+  {
+    const auto& success = get<1>(p.success());
+    if (!success.all()) {
+      std::cout << "ERROR: test_project_overlap: not all Phi^{-1}(y_i) are inside the preimage triangle" << std::endl;
+      pass = false;
+    }
+
+    const Corners expected{{{0, 0, 1}, {1, 0, 1}, {0, 0.25, 0.5}}};
+    const auto& images = get<1>(p.images());
+    for (unsigned i = 0; i < images.size(); ++i) {
+      if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
+        std::cout << "ERROR: test_project_overlap: corner " << i
+                  << " was inverse-projected on " << images[i]
+                  << "; expected: " << expected[i] << std::endl;
+        pass = false;
+      }
+    }
+  }
+
+  /* No edge intersections. */
+  if (p.numberOfEdgeIntersections() != 0) {
+    std::cout << "ERROR: test_project_overlap: there were unexpected edge intersections" << std::endl;
+    pass = false;
+  }
+
+  if (!pass)
+    write(p, corners, normals, "projectiontest_project_overlap.vtk");
+
+  return pass;
+}
+
 int main()
 {
   bool pass = true;
@@ -359,6 +434,7 @@ int main()
   pass = pass && test_project_simple2();
   pass = pass && test_project3();
   pass = pass && test_project4();
+  pass = pass && test_project_overlap();
 
   return pass ? 0 : 1;
 }
