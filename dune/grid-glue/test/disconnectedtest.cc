@@ -36,27 +36,19 @@ typedef std::shared_ptr<Grid> GridPtr;
 typedef Dune::GridFactory<Grid> GridFactory;
 typedef Dune::FieldVector<double, dim> Vector;
 typedef Dune::GridGlue::Merger<Grid::ctype, dim-codim, dim-codim, dim> MyMerger;
+using Element = Grid::Codim<0>::Entity;
 
-class ZPlaneExtractorPredicate
-  : public Dune::GridGlue::ExtractorPredicate<GridView, codim>
+std::function<bool(const Element&, unsigned int)>
+make_z_plane_predicate(double z)
 {
-public:
-  typedef GridView::ctype ctype;
-private:
-  const GridView::ctype m_z;
-public:
-  ZPlaneExtractorPredicate(const ctype z)
-    : m_z(z)
-    { /* Nothing. */ }
-  bool contains(const GridView::Traits::template Codim<0>::Entity& entity, unsigned int subEntity) const override
-    {
-      const auto& ref = Dune::ReferenceElements<ctype, GridView::dimension>::general(entity.type());
-      const auto local = ref.template geometry<codim>(subEntity).center();
-      const auto global = entity.geometry().global(local);
-      const auto epsilon = std::numeric_limits<ctype>::epsilon();
-      return std::abs(global[GridView::dimensionworld-1] - m_z) < epsilon;
-    }
-};
+  return [z](const Element& element, unsigned int subentity) -> bool {
+    using std::abs;
+    const auto geometry = element.template subEntity<1>(subentity).geometry();
+    const auto global = geometry.center();
+    const auto epsilon = std::numeric_limits<Element::Geometry::ctype>::epsilon();
+    return abs(global[GridView::dimensionworld-1] - z) < epsilon;
+  };
+}
 
 void insertCube(GridFactory& factory, unsigned int& vertex, const Vector& offset)
 {
@@ -95,8 +87,8 @@ bool testDisconnected(const std::string& name, MyMerger& merger)
     grids[i] = GridPtr(factory.createGrid());
   }
 
-  ZPlaneExtractorPredicate predicate(1.0);
   typedef Dune::GridGlue::Codim1Extractor<GridView> Extractor;
+  const Extractor::Predicate predicate = make_z_plane_predicate(1.0);
   std::array<Extractor, 2> extractors{
     Extractor(grids[0]->leafGridView(), predicate),
     Extractor(grids[1]->leafGridView(), predicate),

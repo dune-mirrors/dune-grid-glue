@@ -19,7 +19,6 @@
 #include <dune/grid/geometrygrid.hh>
 #include <dune/geometry/quadraturerules.hh>
 
-#include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim1extractor.hh>
 
 #include <dune/grid-glue/merging/psurfacemerge.hh>
@@ -32,18 +31,12 @@
 using namespace Dune;
 using namespace Dune::GridGlue;
 
-template <class GridView>
-class VerticalFaceDescriptor
-  : public ExtractorPredicate<GridView,1>
+template<typename GridView>
+typename Dune::GridGlue::Codim1Extractor<GridView>::Predicate
+makeVerticalFacePredicate(double sliceCoord)
 {
-public:
-  VerticalFaceDescriptor(double sliceCoord)
-    : sliceCoord_(sliceCoord)
-  {}
-
-  bool contains(const typename GridView::Traits::template Codim<0>::Entity& element,
-                unsigned int face) const override
-  {
+  using Element = typename GridView::Traits::template Codim<0>::Entity;
+  auto predicate = [sliceCoord](const Element& element, unsigned int face) -> bool {
     const int dim = GridView::dimension;
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
     const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(element.type());
@@ -54,15 +47,13 @@ public:
     int numVertices = refElement.size(face, 1, dim);
 
     for (int i=0; i<numVertices; i++)
-      if ( std::abs(element.geometry().corner(refElement.subEntity(face,1,i,dim))[0] - sliceCoord_) > 1e-6 )
+      if ( std::abs(element.geometry().corner(refElement.subEntity(face,1,i,dim))[0] - sliceCoord) > 1e-6 )
         return false;
 
     return true;
-  }
-
-private:
-  double sliceCoord_;
-};
+  };
+  return predicate;
+}
 
 /** \brief trafo used for yaspgrids */
 template<int dim, typename ctype>
@@ -110,11 +101,11 @@ void testMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  VerticalFaceDescriptor<DomGridView> domdesc(1);
-  VerticalFaceDescriptor<TarGridView> tardesc(1);
-
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
+
+  const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(1);
+  const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(1);
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
@@ -196,11 +187,11 @@ void testNonMatchingCubeGrids()
   typedef typename GridType::LevelGridView DomGridView;
   typedef typename GridType::LevelGridView TarGridView;
 
-  VerticalFaceDescriptor<DomGridView> domdesc(1);
-  VerticalFaceDescriptor<TarGridView> tardesc(1);
-
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
+
+  const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(1);
+  const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(1);
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
@@ -344,11 +335,11 @@ void testParallelCubeGrids()
   typedef typename GridType0::LevelGridView DomGridView;
   typedef typename GridType1::LevelGridView TarGridView;
 
-  VerticalFaceDescriptor<DomGridView> domdesc(slice);
-  VerticalFaceDescriptor<TarGridView> tardesc(slice);
-
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
+
+  const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(slice);
+  const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(slice);
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(cubeGrid0->levelGridView(0), domdesc);

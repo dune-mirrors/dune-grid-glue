@@ -19,7 +19,9 @@
 #define DUNE_GRIDGLUE_EXTRACTORS_CODIM0EXTRACTOR_HH
 
 #include <deque>
+#include <functional>
 
+#include <dune/common/deprecated.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
 #include "extractor.hh"
@@ -46,6 +48,7 @@ public:
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
   typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   typedef typename GV::Traits::template Codim<0>::Entity Element;
+  typedef std::function<bool(const Element&, unsigned int subentity)> Predicate;
 
   static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
   typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
@@ -62,12 +65,29 @@ public:
    * @param gv the grid view object to work with
    * @param descr a predicate to mark entities for extraction (unary functor returning bool)
    */
+  DUNE_DEPRECATED_MSG("Please use a std::function<bool(const Element&, unsigned int)> in favor of the ExtractorPredicate.")
   Codim0Extractor(const GV& gv, const ExtractorPredicate<GV,0>& descr)
+    : Extractor<GV,0>(gv), positiveNormalDirection_(false)
+  {
+    std::cout << "This is Codim0Extractor on a <"
+              << GV::dimension << "," << GV::dimensionworld << "> grid!" << std::endl;
+    const auto predicate = [&](const Element& element, unsigned int subentity) -> bool {
+      return descr.contains(element, subentity);
+    };
+    update(predicate);
+  }
+
+  /**
+   * @brief Constructor
+   * @param gv the grid view object to work with
+   * @param predicate a predicate to mark entities for extraction (unary functor returning bool)
+   */
+  Codim0Extractor(const GV& gv, const Predicate& predicate)
     :  Extractor<GV,0>(gv), positiveNormalDirection_(false)
   {
     std::cout << "This is Codim0Extractor on a <"
               << GV::dimension << "," << GV::dimensionworld << "> grid!" << std::endl;
-    update(descr);
+    update(predicate);
   }
 
   bool & positiveNormalDirection() { return positiveNormalDirection_; }
@@ -76,12 +96,12 @@ public:
 protected:
   bool positiveNormalDirection_;
 private:
-  void update(const ExtractorPredicate<GV,0>& descr);
+  void update(const Predicate& predicate);
 };
 
 
 template<typename GV>
-void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
+void Codim0Extractor<GV>::update(const Predicate& predicate)
 {
   // In this first pass iterate over all entities of codim 0.
   // Get its corner vertices, find resp. store them together with their associated index,
@@ -112,7 +132,7 @@ void Codim0Extractor<GV>::update(const ExtractorPredicate<GV,0>& descr)
 
     // only do sth. if this element is "interesting"
     // implicit cast is done automatically
-    if (descr.contains(elmt,0))
+    if (predicate(elmt,0))
     {
       // add an entry to the element info map, the index will be set properly later
       this->elmtInfo_[eindex] = new ElementInfo(element_index, elmt, 1);

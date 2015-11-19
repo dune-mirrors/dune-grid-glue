@@ -26,7 +26,6 @@
 
 #include <dune/grid-glue/merging/standardmerge.hh>
 #include <dune/grid-glue/gridglue.hh>
-#include <dune/grid-glue/extractors/extractorpredicate.hh>
 
 namespace Dune {
 namespace GridGlue {
