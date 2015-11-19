@@ -12,7 +12,6 @@
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/geometrygrid.hh>
 
-#include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/merging/overlappingmerge.hh>
@@ -23,17 +22,16 @@ using namespace Dune;
 using namespace Dune::GridGlue;
 
 /** \brief Returns always true */
-template <class GridView>
-class AllElementsDescriptor
-  : public ExtractorPredicate<GridView,0>
+template<typename GridView>
+typename Codim0Extractor<GridView>::Predicate
+makeTruePredicate()
 {
-public:
-  bool contains(const typename GridView::Traits::template Codim<0>::Entity& element, unsigned int subentity) const override
-  {
+  using Element = typename GridView::Traits::template Codim<0>::Entity;
+  auto predicate = [](const Element&, unsigned int) -> bool {
     return true;
-  }
-};
-
+  };
+  return predicate;
+}
 
 /** \brief trafo from dim to dim+1 */
 template<int dim, int dimw, class ctype>
@@ -95,8 +93,8 @@ int main(int argc, char** argv)
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
-  AllElementsDescriptor<DomGridView> domdesc;
-  AllElementsDescriptor<TarGridView> tardesc;
+  const DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
+  const TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(grid0.leafGridView(), domdesc);

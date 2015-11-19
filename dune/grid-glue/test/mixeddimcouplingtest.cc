@@ -15,7 +15,6 @@
 #include <dune/grid/geometrygrid.hh>
 #include <dune/geometry/quadraturerules.hh>
 
-#include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/extractors/codim1extractor.hh>
 #include <dune/grid-glue/merging/psurfacemerge.hh>
@@ -26,18 +25,12 @@
 using namespace Dune;
 using namespace Dune::GridGlue;
 
-template <class GridView>
-class HorizontalFaceDescriptor
-  : public ExtractorPredicate<GridView,1>
+template<typename GridView>
+typename Dune::GridGlue::Codim1Extractor<GridView>::Predicate
+makeHorizontalFacePredicate(double sliceCoord)
 {
-public:
-  HorizontalFaceDescriptor(double sliceCoord)
-    : sliceCoord_(sliceCoord)
-  {}
-
-  bool contains(const typename GridView::Traits::template Codim<0>::Entity& element,
-                unsigned int face) const override
-  {
+  using Element = typename GridView::Traits::template Codim<0>::Entity;
+  auto predicate = [sliceCoord](const Element& element, unsigned int face) -> bool {
     const int dim = GridView::dimension;
 #if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
     const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(element.type());
@@ -48,27 +41,25 @@ public:
     int numVertices = refElement.size(face, 1, dim);
 
     for (int i=0; i<numVertices; i++)
-      if ( std::abs(element.geometry().corner(refElement.subEntity(face,1,i,dim))[1] - sliceCoord_) > 1e-6 )
+      if ( std::abs(element.geometry().corner(refElement.subEntity(face,1,i,dim))[1] - sliceCoord) > 1e-6 )
         return false;
 
     return true;
-  }
-
-private:
-  double sliceCoord_;
+  };
+  return predicate;
 };
 
 /** \brief Returns always true */
-template <class GridView>
-class AllElementsDescriptor
-  : public ExtractorPredicate<GridView,0>
+template<typename GridView>
+typename Dune::GridGlue::Codim0Extractor<GridView>::Predicate
+makeTruePredicate()
 {
-public:
-  bool contains(const typename GridView::Traits::template Codim<0>::Entity& element, unsigned int subentity) const override
-  {
+  using Element = typename GridView::Traits::template Codim<0>::Entity;
+  auto predicate = [](const Element&, unsigned int) -> bool {
     return true;
-  }
-};
+  };
+  return predicate;
+}
 
 /** \brief trafo from dim to dim+1 */
 template<int dim, int dimw, class ctype>
@@ -125,8 +116,8 @@ void test1d2dCouplingMatchingDimworld()
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
-  HorizontalFaceDescriptor<DomGridView> domdesc(0);
-  AllElementsDescriptor<TarGridView>  tardesc;
+  const typename DomExtractor::Predicate domdesc = makeHorizontalFacePredicate<DomGridView>(0);
+  const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
 #if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
   DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
@@ -193,8 +184,8 @@ void test2d1dCouplingMatchingDimworld()
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
-  AllElementsDescriptor<DomGridView>  domdesc;
-  HorizontalFaceDescriptor<TarGridView> tardesc(0);
+  const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
+  const typename TarExtractor::Predicate tardesc = makeHorizontalFacePredicate<TarGridView>(0);
 
 #if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
   DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
@@ -267,8 +258,8 @@ void test1d2dCoupling(double slice=0.0)
   typedef Codim1Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
-  HorizontalFaceDescriptor<DomGridView> domdesc(slice);
-  AllElementsDescriptor<TarGridView>  tardesc;
+  const typename DomExtractor::Predicate domdesc = makeHorizontalFacePredicate<DomGridView>(slice);
+  const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
   DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
@@ -335,8 +326,8 @@ void test2d1dCoupling(double slice=0.0)
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim1Extractor<TarGridView> TarExtractor;
 
-  AllElementsDescriptor<DomGridView>  domdesc;
-  HorizontalFaceDescriptor<TarGridView> tardesc(slice);
+  const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
+  const typename TarExtractor::Predicate tardesc = makeHorizontalFacePredicate<TarGridView>(slice);
 
 #if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
   DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);

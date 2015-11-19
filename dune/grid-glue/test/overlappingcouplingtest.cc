@@ -16,7 +16,6 @@
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
-#include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/gridglue.hh>
 
@@ -30,17 +29,16 @@ using namespace Dune;
 using namespace Dune::GridGlue;
 
 /** \brief Returns always true */
-template <class GridView>
-class AllElementsDescriptor
-  : public ExtractorPredicate<GridView,0>
+template<typename GridView>
+typename Dune::GridGlue::Codim0Extractor<GridView>::Predicate
+makeTruePredicate()
 {
-public:
-  bool contains(const typename GridView::Traits::template Codim<0>::Entity& element, unsigned int subentity) const override
-  {
+  using Element = typename GridView::Traits::template Codim<0>::Entity;
+  auto predicate = [](const Element&, unsigned int) -> bool {
     return true;
-  }
-};
-
+  };
+  return predicate;
+}
 
 template <int dim>
 void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
@@ -74,8 +72,8 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
-  AllElementsDescriptor<DomGridView> domdesc;
-  AllElementsDescriptor<TarGridView> tardesc;
+  const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
+  const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
   DomExtractor domEx(grid0.leafGridView(), domdesc);
   TarExtractor tarEx(grid1.leafGridView(), tardesc);
@@ -130,8 +128,8 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
-  AllElementsDescriptor<DomGridView> domdesc;
-  AllElementsDescriptor<TarGridView> tardesc;
+  const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
+  const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
   DomExtractor domEx(grid0.leafGridView(), domdesc);
   TarExtractor tarEx(grid1.leafGridView(), tardesc);
@@ -184,8 +182,8 @@ void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<do
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
-  AllElementsDescriptor<DomGridView> domdesc;
-  AllElementsDescriptor<TarGridView> tardesc;
+  const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
+  const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
   DomExtractor domEx(grid0->leafGridView(), domdesc);
   TarExtractor tarEx(grid1->leafGridView(), tardesc);
@@ -230,8 +228,8 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
 
-  AllElementsDescriptor<DomGridView> domdesc;
-  AllElementsDescriptor<TarGridView> tardesc;
+  const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
+  const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
   DomExtractor domEx(grid0->leafGridView(), domdesc);
   TarExtractor tarEx(grid1->leafGridView(), tardesc);

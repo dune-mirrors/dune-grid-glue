@@ -10,7 +10,6 @@
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
-#include <dune/grid-glue/extractors/extractorpredicate.hh>
 #include <dune/grid-glue/gridglue.hh>
 
 template <class IntersectionIt>
