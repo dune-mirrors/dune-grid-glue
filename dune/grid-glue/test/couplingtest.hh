@@ -163,8 +163,8 @@ void testCoupling(const GlueType& glue)
         const auto index0 = view0mapper.index(rIIt->inside());
         const auto index1 = view1mapper.index(rIIt->outside());
 #else
-        const auto index0 = view0mapper.index(*rIIt->inside());
-        const auto index1 = view1mapper.index(*rIIt->outside());
+        const auto index0 = view0mapper.map(*rIIt->inside());
+        const auto index1 = view1mapper.map(*rIIt->outside());
 #endif
         countInside0[index0]++;
         countOutside1[index1]++;
@@ -188,8 +188,8 @@ void testCoupling(const GlueType& glue)
         const auto index1 = view1mapper.index(rIIt->inside());
         const auto index0 = view0mapper.index(rIIt->outside());
 #else
-        const auto index1 = view1mapper.index(*rIIt->inside());
-        const auto index0 = view0mapper.index(*rIIt->outside());
+        const auto index1 = view1mapper.map(*rIIt->inside());
+        const auto index0 = view0mapper.map(*rIIt->outside());
 #endif
         countInside1[index1]++;
         countOutside0[index0]++;
