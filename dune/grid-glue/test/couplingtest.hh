@@ -28,18 +28,27 @@ bool testIntersection(const IntersectionIt & rIIt)
   const Dune::QuadratureRule<double, dim>& quad = Dune::QuadratureRules<double, dim>::rule(rIIt->type(), 3);
 
   for (unsigned int l=0; l<quad.size(); l++) {
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+    const auto inside = rIIt->inside();
+    const auto outside = rIIt->outside();
+#else
+    const auto insidePtr = rIIt->inside();
+    const auto& inside = *insidePtr;
+    const auto outsidePtr = rIIt->outside();
+    const auto& outside = *outsidePtr;
+#endif
 
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
     Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> localGrid0Pos =
-      rIIt->inside()->geometry().global(rIIt->geometryInInside().global(quadPos));
+      inside.geometry().global(rIIt->geometryInInside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
     Dune::FieldVector<double, Intersection::InsideGridView::dimensionworld> globalGrid0Pos =
       rIIt->geometry().global(quadPos);
 
     Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> localGrid1Pos =
-      rIIt->outside()->geometry().global(rIIt->geometryInOutside().global(quadPos));
+      outside.geometry().global(rIIt->geometryInOutside().global(quadPos));
 
     // currently the intersection maps to the GV::dimworld, this will hopefully change soon
     Dune::FieldVector<double, Intersection::OutsideGridView::dimensionworld> globalGrid1Pos =
@@ -150,8 +159,15 @@ void testCoupling(const GlueType& glue)
     {
       if (rIIt->self() && rIIt->neighbor())
       {
-        countInside0[view0mapper.index(*rIIt->inside())]++;
-        countOutside1[view1mapper.index(*rIIt->outside())]++;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+        const auto index0 = view0mapper.index(rIIt->inside());
+        const auto index1 = view1mapper.index(rIIt->outside());
+#else
+        const auto index0 = view0mapper.index(*rIIt->inside());
+        const auto index1 = view1mapper.index(*rIIt->outside());
+#endif
+        countInside0[index0]++;
+        countOutside1[index1]++;
         success = success && testIntersection(rIIt);
       }
     }
@@ -168,8 +184,15 @@ void testCoupling(const GlueType& glue)
     {
       if (rIIt->self() && rIIt->neighbor())
       {
-        countInside1[view1mapper.index(*rIIt->inside())]++;
-        countOutside0[view0mapper.index(*rIIt->outside())]++;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
+        const auto index1 = view1mapper.index(rIIt->inside());
+        const auto index0 = view0mapper.index(rIIt->outside());
+#else
+        const auto index1 = view1mapper.index(*rIIt->inside());
+        const auto index0 = view0mapper.index(*rIIt->outside());
+#endif
+        countInside1[index1]++;
+        countOutside0[index0]++;
         success = success && testIntersection(rIIt);
       }
     }
