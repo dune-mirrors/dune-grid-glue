@@ -367,6 +367,11 @@ Projection<Coordinate>
         if (!isfinite(z[0]) || !isfinite(z[1]))
           continue;
 
+        /* Filter out corner (pre)images. We only want "real" edge-edge intersections here. */
+        if (z[0] < m_epsilon || z[0] > Field(1) - m_epsilon
+            || z[1] < m_epsilon || z[1] > Field(1) - m_epsilon)
+          continue;
+
         Coordinate local_x = corner<Coordinate, Field>(i);
         local_x.axpy(z[0], corner<Coordinate, Field>(j) - corner<Coordinate, Field>(i));
         Coordinate local_y = corner<Coordinate, Field>(k);
