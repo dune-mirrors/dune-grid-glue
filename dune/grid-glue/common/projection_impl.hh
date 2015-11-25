@@ -125,8 +125,9 @@ inside(const Coordinate& x, const Field& epsilon)
 
 template<typename Coordinate>
 Projection<Coordinate>
-::Projection(const Field overlap)
+::Projection(const Field overlap, const Field max_normal_product)
   : m_overlap(overlap)
+  , m_max_normal_product(max_normal_product)
 {
   /* Nothing. */
 }
@@ -205,7 +206,7 @@ Projection<Coordinate>
       /* Solving gave us -δ as the term is "-δ nᵢ". */
       y[dim-1] *= Field(-1);
 
-      const bool feasible = projectionFeasible(origin[i], y, target, target_normals);
+      const bool feasible = projectionFeasible(origin[i], origin_normals[i], y, target, target_normals);
       success.set(i, feasible);
     }
     catch (const Dune::FMatrixError&) {
@@ -280,7 +281,7 @@ Projection<Coordinate>
     preimages[i][dim-1] = (x - target_corners[i]) * get<1>(normals)[i];
 
     /* Check y_i lies inside the Φ(xⱼ) */
-    const bool feasible = projectionFeasible(target_corners[i], preimages[i], get<0>(corners), get<0>(normals));
+    const bool feasible = projectionFeasible(target_corners[i], get<1>(normals)[i], preimages[i], get<0>(corners), get<0>(normals));
     success.set(i, feasible);
   }
 }
@@ -386,6 +387,10 @@ Projection<Coordinate>
         if (local_x[dim-1] < -m_overlap-m_epsilon || local_y[dim-1] < -m_overlap-m_epsilon)
           continue;
 
+        /* Normals should be opposing. */
+        if (nx*ny > m_max_normal_product + m_epsilon)
+          continue;
+
         /* Intersection is feasible. Store it. */
         auto& intersection = m_edge_intersections[m_number_of_edge_intersections++];
         intersection = { {edgex, edgey}, {local_x, local_y} };
@@ -400,7 +405,7 @@ Projection<Coordinate>
 template<typename Coordinate>
 template<typename Corners, typename Normals>
 bool Projection<Coordinate>
-::projectionFeasible(const Coordinate& x, const Coordinate& px, const Corners& corners, const Normals& normals) const
+::projectionFeasible(const Coordinate& x, const Coordinate& nx, const Coordinate& px, const Corners& corners, const Normals& normals) const
 {
   using namespace ProjectionImplementation;
 
@@ -418,6 +423,10 @@ bool Projection<Coordinate>
   const auto n = interpolate_unit_normals(px, normals);
   const auto d = xmy * n;
   if (d < -m_overlap-m_epsilon)
+    return false;
+
+  /* Normals at x and Φ(x) are opposing. */
+  if (nx * n > m_max_normal_product + m_epsilon)
     return false;
 
   /* Okay, projection is feasible. */

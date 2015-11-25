@@ -82,6 +82,16 @@ private:
   const Field m_overlap = Field(0);
 
   /**
+   * \brief Maximum value for scalar product ν(x)·ν(Φ(x)) of normals
+   *
+   * The normals at <code>x</code> and <code>Φ(x)</code> are expected
+   * to be opposing to some degree.  This value is used to indicate
+   * how much they are allowed to deviate from this by ensuring that
+   * <code>ν(x)·ν(Φ(x)) ≤ m_max_normal_product</code>.
+   */
+  const Field m_max_normal_product = Field(-0.5);
+
+  /**
    * \brief epsilon used for floating-point comparisons.
    *
    * See also \seealso epsilon(Field)
@@ -157,9 +167,11 @@ private:
    *   <li><code>px</code> is inside the image simplex</li>
    *   <li>The signed distance given is not smaller than <code>-\ref m_overlap</code></li>
    *   <li>The signed distance along the normal at <code>px</code> is not smaller than <code>-\ref m_overlap</li>
+   *   <li>The angle between the normals at <code>x</code> and <code>px</code> is at least \ref m_minimum_angle_between_normals
    * </ul>
    *
    * \param x euclidean coordinate of point to project
+   * \param nx outer normal ν(x) at <code>x</code>
    * \param px barycentric coordinates of projected point;
    *           last entry is distance along normal
    * \param corners corners of image simplex
@@ -167,13 +179,14 @@ private:
    * \return <code>true</code> if the projection is feasible, <code>false</code> otherwise.
    */
   template<typename Corners, typename Normals>
-  inline bool projectionFeasible(const Coordinate& x, const Coordinate& px, const Corners& corners, const Normals& normals) const;
+  inline bool projectionFeasible(const Coordinate& x, const Coordinate& nx, const Coordinate& px, const Corners& corners, const Normals& normals) const;
 
 public:
   /**
    * \param overlap allowed overlap
+   * \param max_normal_product maximum value for scalar product ν(x)·ν(Φ(x))
    */
-  Projection(const Field overlap = Field(0));
+  Projection(const Field overlap = Field(0), const Field max_normal_product = Field(1));
 
   /**
    * \brief Set epsilon used for floating-point comparisons.
