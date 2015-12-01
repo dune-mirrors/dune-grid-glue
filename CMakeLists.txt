@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.6)
 project(dune-grid-glue CXX)
 
+set(DUNE_TEST_MAGIC 0)
+set(DUNE_REENABLE_ADD_TEST 1)
+
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
       "${CMAKE_PREFIX_PATH}" MATCHES ".*dune-common.*"))
     string(REPLACE  ${CMAKE_PROJECT_NAME} dune-common dune-common_DIR

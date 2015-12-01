@@ -46,11 +46,6 @@ foreach(_exe ${TESTS})
   add_test(${_exe} ${_exe})
 endforeach(_exe ${TESTS})
 
-# We do not want want to build the tests during make all,
-# but just build them on demand
-add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${TESTS})
-
 set(SOURCES
   callmergertwicetest.cc
   communicationtest.hh
