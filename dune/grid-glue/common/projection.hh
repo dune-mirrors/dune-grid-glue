@@ -79,7 +79,7 @@ private:
   /**
    * \brief Overlap allowed for the projection to be considered valid.
    */
-  const Field m_overlap = Field(0);
+  const Field m_overlap;
 
   /**
    * \brief Maximum value for scalar product ν(x)·ν(Φ(x)) of normals
@@ -89,7 +89,7 @@ private:
    * how much they are allowed to deviate from this by ensuring that
    * <code>ν(x)·ν(Φ(x)) ≤ m_max_normal_product</code>.
    */
-  const Field m_max_normal_product = Field(-0.5);
+  const Field m_max_normal_product;
 
   /**
    * \brief epsilon used for floating-point comparisons.
