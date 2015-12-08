@@ -186,7 +186,7 @@ public:
    * \param overlap allowed overlap
    * \param max_normal_product maximum value for scalar product ν(x)·ν(Φ(x))
    */
-  Projection(const Field overlap = Field(0), const Field max_normal_product = Field(1));
+  Projection(const Field overlap = Field(0), const Field max_normal_product = Field(-0.1));
 
   /**
    * \brief Set epsilon used for floating-point comparisons.
