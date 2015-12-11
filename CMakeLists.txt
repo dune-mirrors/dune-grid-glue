@@ -23,6 +23,7 @@ dune_project()
 
 add_subdirectory("dune")
 add_subdirectory("doc")
+add_subdirectory("examples")
 add_subdirectory("lib")
 add_subdirectory("m4")
 
