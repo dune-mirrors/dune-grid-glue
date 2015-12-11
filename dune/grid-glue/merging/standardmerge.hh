@@ -300,6 +300,15 @@ private:
   void computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTypes,
                                   const std::vector<std::vector<unsigned int> >& gridElementCorners,
                                   std::vector<std::vector<int> >& elementNeighbors);
+
+  void buildAdvancingFront(
+    const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
+    const std::vector<unsigned int>& grid1_elements,
+    const std::vector<Dune::GeometryType>& grid1_element_types,
+    const std::vector<Dune::FieldVector<T,dimworld> >& grid2_coords,
+    const std::vector<unsigned int>& grid2_elements,
+    const std::vector<Dune::GeometryType>& grid2_element_types
+    );
 };
 
 
@@ -514,6 +523,22 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
   std::cout << "setup took " << watch.elapsed() << " seconds." << std::endl;
 
+  buildAdvancingFront(grid1Coords, grid1_elements, grid1_element_types, grid2Coords, grid2_elements, grid2_element_types);
+
+  valid = true;
+  std::cout << "intersection construction took " << watch.elapsed() << " seconds." << std::endl;
+}
+
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::buildAdvancingFront(
+  const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
+  const std::vector<unsigned int>& grid1_elements,
+  const std::vector<Dune::GeometryType>& grid1_element_types,
+  const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
+  const std::vector<unsigned int>& grid2_elements,
+  const std::vector<Dune::GeometryType>& grid2_element_types
+  )
+{
   ////////////////////////////////////////////////////////////////////////
   //   Data structures for the advancing-front algorithm
   ////////////////////////////////////////////////////////////////////////
@@ -694,9 +719,6 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
       generateSeed(seeds, isHandled2, candidates2, grid1Coords, grid1_element_types, grid2Coords, grid2_element_types);
     }
   }
-
-  valid = true;
-  std::cout << "intersection construction took " << watch.elapsed() << " seconds." << std::endl;
 }
 
 
