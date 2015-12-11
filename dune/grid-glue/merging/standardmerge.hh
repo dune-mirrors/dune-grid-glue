@@ -189,7 +189,16 @@ public:
     valid = false;
   }
 
+  void enableFallback(bool fallback)
+  {
+      m_enableFallback = fallback;
+  }
+
 private:
+  /**
+   * Enable fallback in case the advancing-front algorithm does not find an intersection.
+   */
+  bool m_enableFallback = false;
 
   /** clear arbitrary containers */
   template<typename V>
@@ -613,7 +622,7 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
       }
     }
 
-    if (seedFound)
+    if (seedFound || !m_enableFallback)
       continue;
 
     // There is no neighbor with a seed, so we need to be a bit more aggressive...
