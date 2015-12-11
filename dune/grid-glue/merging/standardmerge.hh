@@ -194,11 +194,21 @@ public:
       m_enableFallback = fallback;
   }
 
+  void enableBruteForce(bool bruteForce)
+  {
+      m_enableBruteForce = bruteForce;
+  }
+
 private:
   /**
    * Enable fallback in case the advancing-front algorithm does not find an intersection.
    */
   bool m_enableFallback = false;
+
+  /**
+   * Enable brute force implementation instead of advancing-front algorithm.
+   */
+  bool m_enableBruteForce = false;
 
   /** clear arbitrary containers */
   template<typename V>
@@ -302,6 +312,15 @@ private:
                                   std::vector<std::vector<int> >& elementNeighbors);
 
   void buildAdvancingFront(
+    const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
+    const std::vector<unsigned int>& grid1_elements,
+    const std::vector<Dune::GeometryType>& grid1_element_types,
+    const std::vector<Dune::FieldVector<T,dimworld> >& grid2_coords,
+    const std::vector<unsigned int>& grid2_elements,
+    const std::vector<Dune::GeometryType>& grid2_element_types
+    );
+
+  void buildBruteForce(
     const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
     const std::vector<unsigned int>& grid1_elements,
     const std::vector<Dune::GeometryType>& grid1_element_types,
@@ -523,7 +542,10 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build(const std::vector<Dune::
 
   std::cout << "setup took " << watch.elapsed() << " seconds." << std::endl;
 
-  buildAdvancingFront(grid1Coords, grid1_elements, grid1_element_types, grid2Coords, grid2_elements, grid2_element_types);
+  if (m_enableBruteForce)
+    buildBruteForce(grid1Coords, grid1_elements, grid1_element_types, grid2Coords, grid2_elements, grid2_element_types);
+  else
+    buildAdvancingFront(grid1Coords, grid1_elements, grid1_element_types, grid2Coords, grid2_elements, grid2_element_types);
 
   valid = true;
   std::cout << "intersection construction took " << watch.elapsed() << " seconds." << std::endl;
@@ -721,6 +743,27 @@ void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::buildAdvancingFront(
   }
 }
 
+template<typename T, int grid1Dim, int grid2Dim, int dimworld>
+void StandardMerge<T,grid1Dim,grid2Dim,dimworld>::buildBruteForce(
+  const std::vector<Dune::FieldVector<T,dimworld> >& grid1Coords,
+  const std::vector<unsigned int>& grid1_elements,
+  const std::vector<Dune::GeometryType>& grid1_element_types,
+  const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
+  const std::vector<unsigned int>& grid2_elements,
+  const std::vector<Dune::GeometryType>& grid2_element_types
+  )
+{
+  std::bitset<(1<<grid1Dim)> neighborIntersects1;
+  std::bitset<(1<<grid2Dim)> neighborIntersects2;
+
+  for (unsigned i = 0; i < grid1_element_types.size(); ++i) {
+    for (unsigned j = 0; j < grid2_element_types.size(); ++j) {
+      (void) computeIntersection(i, j,
+                                 grid1Coords, grid1_element_types, neighborIntersects1,
+                                 grid2Coords, grid2_element_types, neighborIntersects2);
+    }
+  }
+}
 
 template<typename T, int grid1Dim, int grid2Dim, int dimworld>
 inline unsigned int StandardMerge<T,grid1Dim,grid2Dim,dimworld>::nSimplices() const
