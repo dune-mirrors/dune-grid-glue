@@ -52,7 +52,6 @@ public:
      * @param SX indices of points in P on the index i face of X, where i denotes the vector index in SX
      * @param SY indices of points in P on the index i face of Y, where i denotes the vector index in SY
      * @param P the intersection points
-     * @param orderPoints order points (e.g. counterclockwise for dimWorld=2)
      * @return true if enough intersection points were found to define at least one intersection element
      */
     static bool computeIntersection(const std::vector<V> X,
