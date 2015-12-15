@@ -129,7 +129,7 @@ public:
   typedef typename Grid0View::Grid Grid0;
 
   /** \brief Grid 0 type
-      \deprecated please use typede Grid0
+      \deprecated please use typedef Grid0
    */
   typedef Grid0 DomainGridType DUNE_DEPRECATED;
 
@@ -153,7 +153,7 @@ public:
   typedef typename Grid1View::Grid Grid1;
 
   /** \brief Grid 1 type
-      \deprecated please use typede Grid0
+      \deprecated please use typedef Grid0
    */
   typedef Grid1 TargetGridType DUNE_DEPRECATED;
 

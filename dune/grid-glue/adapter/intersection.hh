@@ -546,7 +546,7 @@ namespace Dune {
       /** \brief Return an outer normal (length not necessarily 1) */
       GlobalCoordinate outerNormal(const Dune::FieldVector<ctype, mydim> &local) const
       {
-        Dune::FieldVector<ctype, coorddim> normal;
+        GlobalCoordinate normal;
 
         // Codimension with respect to the world(!)
         int codimension = coorddim - mydim;
@@ -558,7 +558,7 @@ namespace Dune {
         else if (codimension == 1) {
 
           /** \todo Implement the general n-ary cross product here */
-          FieldMatrix<ctype, mydim,coorddim> jacobianTransposed = geometry().jacobianTransposed(local);
+          const auto jacobianTransposed = geometry().jacobianTransposed(local);
           if (mydim==1) {
             normal[0] = - jacobianTransposed[0][1];
             normal[1] =   jacobianTransposed[0][0];
