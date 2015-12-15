@@ -91,9 +91,29 @@ namespace Dune {
       bool grid1local_;              //!< true if the associated grid1 entity is local
       std::vector<Grid1IndexType> grid1indices_;    //!< indices of the associated local grid1 entity
 
+      /**
+       * Embedding of intersection into local grid0 entity coordinates.
+       */
       std::vector<shared_ptr<Grid0LocalGeometry> >  grid0localgeom_;
+      /**
+       * Global intersection geometry on grid0 side.
+       *
+       * This is the same as gₚ∘iₚ for any embedding iₚ into a grid0
+       * entity as stored in grid0localgeom_ and that entities global
+       * geometry gₚ.
+       */
       shared_ptr<Grid0Geometry>       grid0geom_;
+      /**
+       * Embedding of intersection into local grid1 entity coordinates.
+       */
       std::vector<shared_ptr<Grid1LocalGeometry> >  grid1localgeom_;
+      /**
+       * Global intersection geometry on grid1 side.
+       *
+       * This is the same as gₚ∘iₚ for any embedding iₚ into a grid1
+       * entity as stored in grid1localgeom_ and that entities global
+       * geometry gₚ.
+       */
       shared_ptr<Grid1Geometry>       grid1geom_;
 
     };
