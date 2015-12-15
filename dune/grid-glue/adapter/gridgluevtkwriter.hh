@@ -231,7 +231,7 @@ class GridGlueVtkWriter
     for (size_t i=0; i<faces.size(); i++)
       faceCornerCount += faces[i].size();
 
-    int grid0SimplexCorners = dim-Glue::Grid0Patch::codim+1;
+    int grid0SimplexCorners = intersectionDim+1;
     fmerged << ((intersectionDim==3) ? "CELLS " : "POLYGONS ")
             << overlaps << " " << (grid0SimplexCorners+1)*overlaps << std::endl;
 
