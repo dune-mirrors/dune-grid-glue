@@ -516,7 +516,7 @@ namespace Dune {
         return IntersectionDataView<P0,P1,I>::local(*i_);
       }
 
-      /** \brief For parallel computations: Return true if outside() entity exists locally */
+      /** \brief Return number of embeddings into local grid0 (grid1) entities. */
       size_t neighbor(unsigned int g = 0) const
       {
           if (g == 0 && IntersectionDataView<P0,P1,O>::local(*i_)) {
