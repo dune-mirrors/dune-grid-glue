@@ -55,40 +55,42 @@ int main(int argc, char** argv)
 {
   Dune::MPIHelper::instance(argc, argv);
 
-  OverlappingMerge<2,1,2> overlappingMerge;
+  const static int dim0 = 2;
+  const static int dim1 = 1;
+  const static int dimworld = dim0;
 
   // /////////////////////////////////////////////////////////
   //   Make a 2d unit cube grid and a 1d grid embedded in 2d
   // /////////////////////////////////////////////////////////
 
-  typedef SGrid<2,2> GridType2d;
+  typedef SGrid<dim0,dim0> Grid0;
 
-  FieldVector<int, 2> elements(1);
-  FieldVector<double,2> lower(0);
-  FieldVector<double,2> upper(1);
+  FieldVector<int, dim0> elements0(2);
+  FieldVector<double, dim0> lower0(0);
+  FieldVector<double, dim0> upper0(1);
 
-  GridType2d grid0(elements, lower, upper);
+  Grid0 grid0(elements0, lower0, upper0);
 
-  typedef SGrid<1,1> GridType1d;
+  typedef SGrid<dim1,dim1> Grid1;
 
-  FieldVector<int, 1> elements1d(1);
-  FieldVector<double,1> lower1d(0);
-  FieldVector<double,1> upper1d(1);
+  FieldVector<int, dim1> elements1(2);
+  FieldVector<double, dim1> lower1(0);
+  FieldVector<double, dim1> upper1(1);
 
-  typedef GeometryGrid<GridType1d, MixedDimTrafo<1,2,double> > LiftedGridType;
+  typedef MixedDimTrafo<dim1, dimworld, double> Transformation;
+  typedef GeometryGrid<Grid1, Transformation> LiftedGrid;
 
-  GridType1d cubeGrid1_in(elements1d, lower1d, upper1d);
+  Grid1 cubeGrid1_in(elements1, lower1, upper1);
 
-  MixedDimTrafo<1,2,double> trafo;   // transform dim-1 to dim
-
-  LiftedGridType grid1(cubeGrid1_in, trafo);
+  Transformation trafo;   // transform dim-1 to dim
+  LiftedGrid grid1(cubeGrid1_in, trafo);
 
   // ////////////////////////////////////////
   //   Set up an overlapping coupling
   // ////////////////////////////////////////
 
-  typedef typename GridType2d::LeafGridView DomGridView;
-  typedef typename LiftedGridType::LeafGridView TarGridView;
+  typedef typename Grid0::LeafGridView DomGridView;
+  typedef typename LiftedGrid::LeafGridView TarGridView;
 
   typedef Codim0Extractor<DomGridView> DomExtractor;
   typedef Codim0Extractor<TarGridView> TarExtractor;
@@ -107,7 +109,7 @@ int main(int argc, char** argv)
 
   // The following code is out-commented, because the test functionality
   // doesn't actually work yet.
-  OverlappingMerge<2,1,2> merger;
+  OverlappingMerge<dim0, dim1, dimworld> merger;
   GlueType glue(domEx, tarEx, &merger);
 
   glue.build();
