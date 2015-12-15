@@ -261,37 +261,39 @@ void IntersectionComputation<CM>::orderPointsCC(std::integral_constant<int,3>,
 
     if (((centroid - P[0])*cross)<0)   // good orientation ?
     {
-    dr = d1 ;
-    dr /= dr.two_norm()  ;       // 'x-axis' unit vector
-    dn = dr ;
-    dn *= -(d2*dr) ;
-    dn += d2 ;
-    dn /= dn.two_norm()  ;       // 'y-axis' unit vector
+        dr = d1 ;
+        dr /= dr.two_norm()  ;       // 'x-axis' unit vector
+        dn = dr ;
+        dn *= -(d2*dr) ;
+        dn += d2 ;
+        dn /= dn.two_norm()  ;       // 'y-axis' unit vector
     }
     else
     {
-    dr = d2 ;
-    dr /= dr.two_norm()  ;       // 'y-axis' unit vector
-    dn = dr ;
-    dn *= -(d1*dr) ;
-    dn += d1 ;
-    dn /= dn.two_norm()  ;        // 'x-axis' unit vector
+        dr = d2 ;
+        dr /= dr.two_norm()  ;       // 'y-axis' unit vector
+        dn = dr ;
+        dn *= -(d1*dr) ;
+        dn += d1 ;
+        dn /= dn.two_norm()  ;        // 'x-axis' unit vector
     }
 
     // definition of angles, using projection on the local reference, ie by scalarly multipliying by dr and dn resp.
     for ( size_type j=1 ; j < P.size() ; j++)
     {
-    ai.push_back(atan2((P[j]-P[0])*dn,(P[j]-P[0])*dr)) ;
-    id.push_back(j) ;
+        ai.push_back(atan2((P[j]-P[0])*dn,(P[j]-P[0])*dr)) ;
+        id.push_back(j) ;
     }
 
     // sort according to increasing angles
-    for ( size_type j=1; j < ai.size(); j++)
-    for ( size_type i=0; i < j; i++)
-      if (ai[j]<ai[i]) {
-        std::swap<typename V::value_type>(ai[i],ai[j]) ;
-        std::swap<int>(id[i],id[j]) ;
-      }
+    for ( size_type j=1; j < ai.size(); j++) {
+        for ( size_type i=0; i < j; i++) {
+            if (ai[j]<ai[i]) {
+                std::swap<typename V::value_type>(ai[i],ai[j]) ;
+                std::swap<int>(id[i],id[j]) ;
+            }
+        }
+    }
 
     id.insert(id.begin(),0);
 }
@@ -312,15 +314,15 @@ void IntersectionComputation<CM>::orderPointsCC(std::integral_constant<int,2>,
 
     // definition of angles
     for ( size_type i=0; i < P.size(); i++) {
-      ai[i] = atan2(P[i][1]-centroid[1],P[i][0]-centroid[0]);
-      id[i] = i;
+        ai[i] = atan2(P[i][1]-centroid[1],P[i][0]-centroid[0]);
+        id[i] = i;
     }
 
     // sort according to increasing angles
     for ( size_type j=1; j < ai.size(); j++) {
-      for ( size_type i=0; i < j; i++) if (ai[j]<ai[i]) {
-          std::swap<typename V::value_type>(ai[i],ai[j]);
-          std::swap<int>(id[i],id[j]);
+        for ( size_type i=0; i < j; i++) if (ai[j]<ai[i]) {
+            std::swap<typename V::value_type>(ai[i],ai[j]);
+            std::swap<int>(id[i],id[j]);
         }
     }
 }
