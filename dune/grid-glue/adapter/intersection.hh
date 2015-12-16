@@ -98,9 +98,9 @@ namespace Dune {
       /**
        * Global intersection geometry on grid0 side.
        *
-       * This is the same as gₚ∘iₚ for any embedding iₚ into a grid0
+       * This is the same as g∘i for the first embedding i into a grid0
        * entity as stored in grid0localgeom_ and that entities global
-       * geometry gₚ.
+       * geometry g.
        */
       shared_ptr<Grid0Geometry>       grid0geom_;
       /**
@@ -110,9 +110,9 @@ namespace Dune {
       /**
        * Global intersection geometry on grid1 side.
        *
-       * This is the same as gₚ∘iₚ for any embedding iₚ into a grid1
+       * This is the same as g∘i for the first embedding i into a grid1
        * entity as stored in grid1localgeom_ and that entities global
-       * geometry gₚ.
+       * geometry g.
        */
       shared_ptr<Grid1Geometry>       grid1geom_;
 
