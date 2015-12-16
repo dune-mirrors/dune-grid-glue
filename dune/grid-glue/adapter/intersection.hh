@@ -544,7 +544,7 @@ namespace Dune {
       }
 
       /** \brief Return an outer normal (length not necessarily 1) */
-      GlobalCoordinate outerNormal(const Dune::FieldVector<ctype, mydim> &local) const
+      GlobalCoordinate outerNormal(const LocalCoordinate &local) const
       {
         GlobalCoordinate normal;
 
@@ -576,7 +576,7 @@ namespace Dune {
       }
 
       /** \brief Return a unit outer normal */
-      GlobalCoordinate unitOuterNormal(const Dune::FieldVector<ctype, mydim> &local) const
+      GlobalCoordinate unitOuterNormal(const LocalCoordinate &local) const
       {
         Dune::FieldVector<ctype, coorddim> normal = outerNormal(local);
         normal /= normal.two_norm();
@@ -584,7 +584,7 @@ namespace Dune {
       }
 
       /** \brief Return an outer normal with the length of the integration element */
-      GlobalCoordinate integrationOuterNormal(const Dune::FieldVector<ctype, mydim> &local) const
+      GlobalCoordinate integrationOuterNormal(const LocalCoordinate &local) const
       {
         return (unitOuterNormal(local) *= geometry().integrationElement(local));
       }
