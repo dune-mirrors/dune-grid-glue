@@ -436,7 +436,7 @@ namespace Dune {
 
       /*   F U N C T I O N A L I T Y   */
 
-      /** \brief Return EntityPointer to the Entity on the inside of this intersection.
+      /** \brief Return entity on the inside of this intersection.
        */
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
       InsideEntity
@@ -450,7 +450,7 @@ namespace Dune {
                  IntersectionDataView<P0,P1,I>::index(*i_, parentId));
       }
 
-      /** \brief Return EntityPointer to the Entity on the outside of this intersection.
+      /** \brief Return entity on the outside of this intersection.
        */
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
       OutsideEntity
