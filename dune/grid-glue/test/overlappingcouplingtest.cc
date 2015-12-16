@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <memory>
+
 #include <dune/common/version.hh>
 #include <dune/grid/sgrid.hh>
 #ifdef HAVE_UG
@@ -214,8 +216,8 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
 
   typedef UGGrid<dim> GridType;
 
-  std::auto_ptr<Dune::UGGrid<dim> > grid0(make2DHybridTestGrid<Dune::UGGrid<dim> >());
-  std::auto_ptr<Dune::UGGrid<dim> > grid1(make2DHybridTestGrid<Dune::UGGrid<dim> >());
+  std::unique_ptr<Dune::UGGrid<dim> > grid0(make2DHybridTestGrid<Dune::UGGrid<dim> >());
+  std::unique_ptr<Dune::UGGrid<dim> > grid1(make2DHybridTestGrid<Dune::UGGrid<dim> >());
 
 
   // ////////////////////////////////////////
