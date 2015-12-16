@@ -602,6 +602,9 @@ namespace Dune {
 #endif
       }
 
+      /**
+       * \brief Return a copy of the intersection with inside and outside switched.
+       */
       Intersection<P0,P1,O,I> flip() const
       {
         return Intersection<P0,P1,O,I>(glue_,i_);
