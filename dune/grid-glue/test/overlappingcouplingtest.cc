@@ -16,7 +16,9 @@
 #endif
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
-#include <doc/grids/gridfactory/hybridtestgrids.hh>
+#if HAVE_HYBRIDTESTGRIDS
+#  include <doc/grids/gridfactory/hybridtestgrids.hh>
+#endif
 
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/gridglue.hh>
@@ -204,8 +206,9 @@ void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<do
   testCoupling(glue);
 
 }
+#endif
 
-
+#if HAVE_UG && HAVE_HYBRIDTESTGRIDS
 template <int dim>
 void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
 {
@@ -269,6 +272,8 @@ int main(int argc, char** argv) try
   testSimplexGrids<1>(overlappingMerge1d, FieldVector<double,1>(0.05));
 #if HAVE_UG
   testSimplexGridsUG(overlappingMerge2d, FieldVector<double,2>(0.05));
+#endif
+#if HAVE_UG && HAVE_HYBRIDTESTGRIDS
   testHybridGridsUG<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
 #endif
 
@@ -285,6 +290,8 @@ int main(int argc, char** argv) try
   testSimplexGrids<1>(psurfaceMerge1d, FieldVector<double,1>(0.05));
 #if HAVE_UG
   testSimplexGridsUG(psurfaceMerge2d, FieldVector<double,2>(0.05));
+#endif
+#if HAVE_UG && HAVE_HYBRIDTESTGRIDS
   testHybridGridsUG<2>(psurfaceMerge2d, FieldVector<double,2>(0.05));
 #endif
 #endif
@@ -304,7 +311,8 @@ int main(int argc, char** argv) try
   testSimplexGrids<1>(conformingMerge1d, FieldVector<double,1>(0));
 #if HAVE_UG
   testSimplexGridsUG(conformingMerge2d, FieldVector<double,2>(0));
-
+#endif
+#if HAVE_UG && HAVE_HYBRIDTESTGRIDS
   testHybridGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
 } catch (Exception e) {
