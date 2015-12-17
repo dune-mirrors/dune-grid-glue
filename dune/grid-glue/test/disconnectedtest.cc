@@ -130,6 +130,7 @@ int main()
 
   {
     Dune::GridGlue::ContactMerge<dim> merger(0.0);
+    merger.enableFallback(true);
     pass &= testDisconnected("ContactMerge", merger);
   }
 #if HAVE_PSURFACE
