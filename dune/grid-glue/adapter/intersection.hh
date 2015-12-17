@@ -578,7 +578,7 @@ namespace Dune {
       /** \brief Return a unit outer normal */
       GlobalCoordinate unitOuterNormal(const LocalCoordinate &local) const
       {
-        Dune::FieldVector<ctype, coorddim> normal = outerNormal(local);
+        GlobalCoordinate normal = outerNormal(local);
         normal /= normal.two_norm();
         return normal;
       }
