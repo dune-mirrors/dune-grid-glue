@@ -45,12 +45,12 @@ namespace Dune {
 
     private:
       // intermediate quantities
-      static const int dim1 = GridGlue::Grid0View::Grid::dimension - GridGlue::Grid0Patch::codim;
-      static const int dim2 = GridGlue::Grid1View::Grid::dimension - GridGlue::Grid1Patch::codim;
+      static const int dim0 = GridGlue::Grid0View::Grid::dimension - GridGlue::Grid0Patch::codim;
+      static const int dim1 = GridGlue::Grid1View::Grid::dimension - GridGlue::Grid1Patch::codim;
 
     public:
       /** \brief Dimension of the intersection */
-      enum { mydim = (dim1<dim2) ? dim1 : dim2 };
+      enum { mydim = (dim0<dim1) ? dim0 : dim1 };
 
 #if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
       typedef AffineGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
@@ -157,7 +157,7 @@ namespace Dune {
         const int elementdim = GridGlue::Grid0View::template Codim<0>::Geometry::mydimension;
 
         // coordinates within the subentity that contains the remote intersection
-        std::array<Dune::FieldVector<ctype, dim1>, nSimplexCorners> corners_subEntity_local;
+        std::array<Dune::FieldVector<ctype, dim0>, nSimplexCorners> corners_subEntity_local;
 
         for (unsigned int par = 0; par < n_grid0Parents; ++par) {
             for (int i = 0; i < nSimplexCorners; ++i)
@@ -209,7 +209,7 @@ namespace Dune {
         const int elementdim = GridGlue::Grid1View::template Codim<0>::Geometry::mydimension;
 
         // coordinates within the subentity that contains the remote intersection
-        std::array<Dune::FieldVector<ctype, dim2>, nSimplexCorners> corners_subEntity_local;
+        std::array<Dune::FieldVector<ctype, dim1>, nSimplexCorners> corners_subEntity_local;
 
         for (unsigned int par = 0; par < n_grid1Parents; ++par) {
 
