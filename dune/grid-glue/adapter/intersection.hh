@@ -485,6 +485,10 @@ namespace Dune {
       }
 
       /** \brief Geometric information about this intersection as part of the inside grid.
+       *
+       * This is the same geometry as the application of the first
+       * embedding into the "inside" entity and then this entities
+       * global geometry.
        */
       const Geometry& geometry() const
       {
@@ -492,6 +496,10 @@ namespace Dune {
       }
 
       /** \brief Geometric information about this intersection as part of the outside grid.
+       *
+       * This is the same geometry as the application of the first
+       * embedding into the "outside" entity and then this entities
+       * global geometry.
        */
       const OutsideGeometry& geometryOutside() const // DUNE_DEPRECATED
       {
@@ -543,7 +551,10 @@ namespace Dune {
                  IntersectionDataView<P0,P1,O>::index(*i_, parentId));
       }
 
-      /** \brief Return an outer normal (length not necessarily 1) */
+      /** \brief Return an outer normal (length not necessarily 1)
+       *
+       * The outer normal is given with respect to the \ref geometry().
+       */
       GlobalCoordinate outerNormal(const LocalCoordinate &local) const
       {
         GlobalCoordinate normal;
@@ -568,14 +579,16 @@ namespace Dune {
             normal[2] =   (jacobianTransposed[0][0] * jacobianTransposed[1][1] - jacobianTransposed[0][1] * jacobianTransposed[1][0]);
           } else
             DUNE_THROW(Dune::NotImplemented, "Remote intersections don't implement the 'outerNormal' method for " << mydim << "-dimensional intersections yet");
-
         } else
           DUNE_THROW(Dune::NotImplemented, "Remote intersections don't implement the 'outerNormal' method for intersections with codim >= 2 yet");
 
         return normal;
       }
 
-      /** \brief Return a unit outer normal */
+      /** \brief Return a unit outer normal
+       *
+       * The outer normal is given with respect to the \ref geometry().
+       */
       GlobalCoordinate unitOuterNormal(const LocalCoordinate &local) const
       {
         GlobalCoordinate normal = outerNormal(local);
@@ -583,7 +596,10 @@ namespace Dune {
         return normal;
       }
 
-      /** \brief Return an outer normal with the length of the integration element */
+      /** \brief Return an outer normal with the length of the integration element
+       *
+       * The outer normal is given with respect to the \ref geometry().
+       */
       GlobalCoordinate integrationOuterNormal(const LocalCoordinate &local) const
       {
         return (unitOuterNormal(local) *= geometry().integrationElement(local));
@@ -591,7 +607,7 @@ namespace Dune {
 
       /** \brief Unit outer normal at the center of the intersection
        *
-       * Used for some grids that do not implement element geometries
+       * The outer normal is given with respect to the \ref geometry().
        */
       GlobalCoordinate centerUnitOuterNormal () const
       {
