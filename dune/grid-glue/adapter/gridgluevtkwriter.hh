@@ -189,7 +189,6 @@ class GridGlueVtkWriter
 
     typedef typename GridView::ctype ctype;
 
-    const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
     const int intersectionDim = Glue::Intersection::mydim;
 
