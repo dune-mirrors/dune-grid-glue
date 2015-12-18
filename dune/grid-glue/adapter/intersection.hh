@@ -428,6 +428,13 @@ namespace Dune {
 
       // typedef unsigned int IndexType;
 
+    private:
+      /**
+       * \brief codimension of the intersection with respect to the world dimension
+       */
+      const static int codimensionWorld = coorddim - mydim;
+
+    public:
       /*   C O N S T R U C T O R S   */
 
       /** \brief Constructor for a given Dataset */
@@ -559,16 +566,10 @@ namespace Dune {
       {
         GlobalCoordinate normal;
 
-        // Codimension with respect to the world(!)
-        int codimension = coorddim - mydim;
-
-        if (codimension == 0)
-
+        if (codimensionWorld == 0)
           DUNE_THROW(Dune::Exception, "There is no normal vector to a full-dimensional intersection");
-
-        else if (codimension == 1) {
-
-          /** \todo Implement the general n-ary cross product here */
+        else if (codimensionWorld == 1) {
+          /* TODO: Implement the general n-ary cross product here */
           const auto jacobianTransposed = geometry().jacobianTransposed(local);
           if (mydim==1) {
             normal[0] = - jacobianTransposed[0][1];
