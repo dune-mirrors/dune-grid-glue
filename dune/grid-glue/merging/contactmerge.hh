@@ -94,6 +94,24 @@ public:
         return overlap_;
     }
 
+    /**
+     * \brief set minimum angle in radians between normals at <code>x</code> and <code>Φ(x)</code>
+     */
+    void minNormalAngle(T angle)
+    {
+        using std::cos;
+        maxNormalProduct_ = cos(angle);
+    }
+
+    /**
+     * \brief get minimum angle in radians between normals at <code>x</code> and <code>Φ(x)</code>
+     */
+    T minNormalAngle() const
+    {
+        using std::acos;
+        return acos(maxNormalProduct_);
+    }
+
 protected:
   typedef typename StandardMerge<T,dimworld-1,dimworld-1,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
 
@@ -117,6 +135,11 @@ private:
 
     //! Allow some overlap, i.e. also look in the negative projection directions
     T overlap_;
+
+    /**
+     * See Projection::m_max_normal_product
+     */
+    T maxNormalProduct_ = T(-0.1);
 
     /** \brief Compute the intersection between two overlapping elements
      *
