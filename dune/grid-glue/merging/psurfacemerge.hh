@@ -32,7 +32,7 @@
 
 #include <dune/grid-glue/merging/merger.hh>
 
-#include <tr1/array>
+#include <array>
 #if HAVE_PSURFACE
 #include <psurface/DirectionFunction.h>
 #include <psurface/IntersectionPrimitive.h>
@@ -268,19 +268,19 @@ private:
   /* geometric data for both domain and target */
 
   /// @brief domain coordinates
-  std::vector<std::tr1::array<double,psurfaceDimworld> >   domc_;
+  std::vector<std::array<double,psurfaceDimworld> >   domc_;
 
   /// @brief target coordinates
-  std::vector<std::tr1::array<double,psurfaceDimworld> >   tarc_;
+  std::vector<std::array<double,psurfaceDimworld> >   tarc_;
 
 
   /* topologic information for domain and target */
 
   /// @ brief domain indices (internal copy)
-  std::vector<std::tr1::array<int,dim+1> >         domi_;
+  std::vector<std::array<int,dim+1> >         domi_;
 
   /// @brief target indices (internal copy)
-  std::vector<std::tr1::array<int,dim+1> >         tari_;
+  std::vector<std::array<int,dim+1> >         tari_;
 
 
   /* members associated with the merged grid */
