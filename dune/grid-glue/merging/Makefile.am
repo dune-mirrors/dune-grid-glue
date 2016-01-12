@@ -9,7 +9,6 @@ merging_HEADERS = computeintersection.hh \
                   overlappingmerge.hh \
                   overlappingmerge.cc \
                   psurfacemerge.hh \
-                  psurfacemerge.cc \
                   simplexintersection.cc \
                   standardmerge.hh
 
