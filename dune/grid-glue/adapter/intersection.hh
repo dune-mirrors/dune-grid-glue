@@ -443,7 +443,7 @@ namespace Dune {
 
       /*   F U N C T I O N A L I T Y   */
 
-      /** \brief Return entity on the inside of this intersection.
+      /** \brief Return element on the inside of this intersection.
        */
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
       InsideEntity
@@ -457,7 +457,7 @@ namespace Dune {
                  IntersectionDataView<P0,P1,I>::index(*i_, parentId));
       }
 
-      /** \brief Return entity on the outside of this intersection.
+      /** \brief Return element on the outside of this intersection.
        */
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
       OutsideEntity
@@ -477,14 +477,14 @@ namespace Dune {
         throw Dune::NotImplemented();
       }
 
-      /** \brief Geometric information about this intersection in local coordinates of the inside() entity.
+      /** \brief Geometric information about this intersection in local coordinates of the inside() element.
        */
       const InsideLocalGeometry& geometryInInside(unsigned int parentId = 0) const
       {
         return IntersectionDataView<P0,P1,I>::localGeometry(*i_, parentId);
       }
 
-      /** \brief Geometric information about this intersection in local coordinates of the outside() entity.
+      /** \brief Geometric information about this intersection in local coordinates of the outside() element.
        */
       const OutsideLocalGeometry& geometryInOutside(unsigned int parentId = 0) const
       {
