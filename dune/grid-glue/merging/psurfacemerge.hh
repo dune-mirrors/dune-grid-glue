@@ -14,6 +14,8 @@
 #ifndef DUNE_GRIDGLUE_MERGING_PSURFACEMERGE_HH
 #define DUNE_GRIDGLUE_MERGING_PSURFACEMERGE_HH
 
+#warning PSurfaceMerge is deprecated. Please use ContactMerge or OverlappingMerge instead.
+
 #include <memory>
 
 #include <dune/common/shared_ptr.hh>
