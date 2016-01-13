@@ -103,9 +103,9 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
     std::vector<FieldVector<T,dim2> > g2local(n_intersectionnodes);
 
     // compute the intersection nodes
-    bool b = IntersectionComputation<CM>::computeIntersection(scaledGrid1ElementCorners,
-                                                              scaledGrid2ElementCorners,
-                                                              SX,SY,scaledP);
+    IntersectionComputation<CM>::computeIntersection(scaledGrid1ElementCorners,
+                                                     scaledGrid2ElementCorners,
+                                                     SX,SY,scaledP);
 
     // Dirty workaround - rescale the result (part 2/2)
     P.resize(scaledP.size());

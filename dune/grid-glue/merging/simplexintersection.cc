@@ -723,16 +723,7 @@ public:
         SX.resize(2);
         SY.resize(4);
 
-        int s1[6],s2[6],fi[4][3];
         int ci,np;
-
-        s1[0]= 0 ; s1[1]= 0 ; s1[2]= 0 ; s1[3]= 1 ; s1[4]= 1 ; s1[5]= 2 ;   // faces touching each line
-        s2[0]= 1 ; s2[1]= 2 ; s2[2]= 3 ; s2[3]= 2 ; s2[4]= 3 ; s2[5]= 3 ;
-
-        fi[0][0] = 0; fi[0][1] = 1; fi[0][2] = 2; // edge indices of each face
-        fi[1][0] = 0; fi[1][1] = 3; fi[1][2] = 4;
-        fi[2][0] = 1; fi[2][1] = 3; fi[2][2] = 5;
-        fi[3][0] = 2; fi[3][1] = 4; fi[3][2] = 5;
 
         std::vector<FieldVector<T,dimWorld> > pni(1);
 
