@@ -39,6 +39,8 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
                                                unsigned int grid2Index,
                                                std::vector<RemoteSimplicialIntersection>& intersections)
 {
+    using std::min;
+
     this->counter++;
     intersections.clear();
 
@@ -66,6 +68,25 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
     Geometry1 grid1Geometry(grid1ElementType, grid1ElementCorners);
     Geometry2 grid2Geometry(grid2ElementType, grid2ElementCorners);
 
+    // Dirty workaround for the intersection computation scaling problem (part 1/2)
+    std::vector<Dune::FieldVector<T,dimworld> > scaledGrid1ElementCorners(grid1ElementCorners.size());
+    std::vector<Dune::FieldVector<T,dimworld> > scaledGrid2ElementCorners(grid2ElementCorners.size());
+
+    // the scaling parameter is the length minimum of the lengths of the first edge in the grid1 geometry
+    // and the first edge in the grid2 geometry
+    T scaling = min((grid1ElementCorners[0] - grid1ElementCorners[1]).two_norm(),
+            (grid2ElementCorners[0] - grid2ElementCorners[1]).two_norm());
+
+    // scale the coordinates according to scaling parameter
+    for (unsigned int i = 0; i < grid1ElementCorners.size(); ++i) {
+        scaledGrid1ElementCorners[i] = grid1ElementCorners[i];
+        scaledGrid1ElementCorners[i] *= (1.0/scaling);
+    }
+    for (unsigned int i = 0; i < grid2ElementCorners.size(); ++i) {
+        scaledGrid2ElementCorners[i] = grid2ElementCorners[i];
+        scaledGrid2ElementCorners[i] *= (1.0/scaling);
+    }
+
     // get size_type for all the vectors we are using
     typedef typename std::vector<Empty>::size_type size_type;
 
@@ -73,14 +94,25 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
     const size_type n_intersectionnodes = dimis+1;
     size_type i;
 
-    std::vector<FieldVector<T,dimworld> >  P(0);
+    std::vector<FieldVector<T,dimworld> >  scaledP(0), P(0);
     std::vector<std::vector<int> >          H,SX(1<<dim1),SY(1<<dim2);
     FieldVector<T,dimworld>                centroid;
+    // local grid1 coordinates of the intersections
     std::vector<FieldVector<T,dim1> > g1local(n_intersectionnodes);
+    // local grid2 coordinates of the intersections
     std::vector<FieldVector<T,dim2> > g2local(n_intersectionnodes);
 
     // compute the intersection nodes
-    bool b = IntersectionComputation<CM>::computeIntersection(grid1ElementCorners,grid2ElementCorners,SX,SY,P);
+    bool b = IntersectionComputation<CM>::computeIntersection(scaledGrid1ElementCorners,
+                                                              scaledGrid2ElementCorners,
+                                                              SX,SY,scaledP);
+
+    // Dirty workaround - rescale the result (part 2/2)
+    P.resize(scaledP.size());
+    for (unsigned int i = 0; i < scaledP.size(); ++i) {
+        P[i] = scaledP[i];
+        P[i] *= scaling;
+    }
 
     for (size_type i = 0; i < neighborIntersects1.size(); ++i) {
         if (i < SX.size())

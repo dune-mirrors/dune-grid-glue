@@ -5,6 +5,7 @@ TESTPROGS = \
     computecyclicordertest     \
     mixeddimcouplingtest       \
     mixeddimoverlappingtest    \
+    mixeddimscalingtest        \
     multivectortest            \
     nonoverlappingcouplingtest \
     overlappingcouplingtest    \
@@ -48,6 +49,7 @@ nonoverlappingcouplingtest_mpi_LDADD = $(LDADD) $(DUNEMPILIBS)
 endif
 mixeddimcouplingtest_SOURCES = mixeddimcouplingtest.cc
 mixeddimoverlappingtest_SOURCES = mixeddimoverlappingtest.cc
+mixeddimscalingtest_SOURCES = mixeddimscalingtest.cc
 multivectortest_SOURCES = multivectortest.cc
 overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
