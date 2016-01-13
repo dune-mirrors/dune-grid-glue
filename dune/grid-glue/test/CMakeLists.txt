@@ -8,6 +8,7 @@ set(TESTS
  computecyclicordertest
  mixeddimcouplingtest
  mixeddimoverlappingtest
+ mixeddimscalingtest
  multivectortest
  nonoverlappingcouplingtest
  overlappingcouplingtest
@@ -18,6 +19,7 @@ add_executable(callmergertwicetest callmergertwicetest.cc)
 add_executable(computecyclicordertest computecyclicordertest.cc)
 add_executable(mixeddimcouplingtest mixeddimcouplingtest.cc)
 add_executable(mixeddimoverlappingtest mixeddimoverlappingtest.cc)
+add_executable(mixeddimscalingtest mixeddimscalingtest.cc)
 add_executable(multivectortest multivectortest.cc)
 add_executable(nonoverlappingcouplingtest nonoverlappingcouplingtest.cc)
 set_property(TARGET nonoverlappingcouplingtest
@@ -52,6 +54,7 @@ set(SOURCES
   couplingtest.hh
   mixeddimcouplingtest.cc
   mixeddimoverlappingtest.cc
+  mixeddimscalingtest.cc
   multivectortest.cc
   nonoverlappingcouplingtest.cc
   overlappingcouplingtest.cc)
