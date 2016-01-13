@@ -28,12 +28,10 @@ Major changes in dune-grid-glue v2.4.0
 * Support for the range-based for statement has been added.  It is
   possible to iterate over all intersections of a `GridGlue` object by
   code like
-
   ```
   GridGlue<...> glue;
   for (const auto& in : intersections(glue)) ...;
   ```
-
   See the documentation for further details.
 
 * `PSurfaceMerge` has been replaced by a wrapper around `ContactMerge` and
