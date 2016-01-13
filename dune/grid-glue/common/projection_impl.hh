@@ -398,7 +398,7 @@ Projection<Coordinate>
 
         /* Intersection is feasible. Store it. */
         auto& intersection = m_edge_intersections[m_number_of_edge_intersections++];
-        intersection = { {edgex, edgey}, {local_x, local_y} };
+        intersection = { {{edgex, edgey}}, {{local_x, local_y}} };
       }
       catch(const Dune::FMatrixError&) {
         /* Edges might be parallel, ignore and continue with next edge */

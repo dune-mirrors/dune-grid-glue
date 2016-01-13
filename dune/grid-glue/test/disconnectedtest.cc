@@ -95,10 +95,10 @@ bool testDisconnected(const std::string& name, MyMerger& merger)
 
   typedef Dune::GridGlue::Codim1Extractor<GridView> Extractor;
   const Extractor::Predicate predicate = make_z_plane_predicate(1.0);
-  std::array<Extractor, 2> extractors{
+  std::array<Extractor, 2> extractors{{
     Extractor(grids[0]->leafGridView(), predicate),
     Extractor(grids[1]->leafGridView(), predicate),
-  };
+  }};
   for (unsigned i(0); i < extractors.size(); ++i) {
     auto n = extractors[i].nCoords();
     if (n != 8) {

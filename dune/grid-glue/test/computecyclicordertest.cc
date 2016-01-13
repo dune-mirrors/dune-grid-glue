@@ -42,7 +42,7 @@ testComputeCyclicOrder()
       local[0] = 0.75; local[1] = 1;
       break;
     }
-    corners.push_back(Corner{local, local});
+    corners.push_back(Corner{{local, local}});
   }
 
   Local center(0);
