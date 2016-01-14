@@ -360,10 +360,6 @@ void test2d1dCoupling(double slice=0.0)
 
 int main(int argc, char *argv[]) try
 {
-#if !HAVE_PSURFACE
-  exit(77); // Test is skipped, if PSurface is not present
-#endif
-
   Dune::MPIHelper::instance(argc, argv);
 
   // /////////////////////////////////////////////////////////////

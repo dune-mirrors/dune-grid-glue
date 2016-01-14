@@ -173,7 +173,6 @@ void callMergerTwice(Dune::GridGlue::Merger<ctype, dim, dim, dimworld> * merger)
 int main ()
 {
 
-#if HAVE_PSURFACE
   {
     typedef Dune::GridGlue::PSurfaceMerge<1,1,double> Merger;
     Merger merger;
@@ -197,8 +196,5 @@ int main ()
     Merger merger;
     callMergerTwice(&merger);
   }
-#else
-  exit(77); // Test is skipped, if PSurface is not present
-#endif
 
 }
