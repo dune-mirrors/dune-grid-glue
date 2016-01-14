@@ -47,14 +47,3 @@ foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegridglue" ${DUNE_LIBS})
   add_test(${_exe} ${_exe})
 endforeach(_exe ${TESTS})
-
-set(SOURCES
-  callmergertwicetest.cc
-  communicationtest.hh
-  couplingtest.hh
-  mixeddimcouplingtest.cc
-  mixeddimoverlappingtest.cc
-  mixeddimscalingtest.cc
-  multivectortest.cc
-  nonoverlappingcouplingtest.cc
-  overlappingcouplingtest.cc)
