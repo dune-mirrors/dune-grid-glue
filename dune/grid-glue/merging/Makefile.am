@@ -1,3 +1,5 @@
+EXTRA_DIST = CMakeLists.txt
+
 # These libraries do not need other libraries besides lcommon and lgrid
 mergingdir = $(includedir)/dune/grid-glue/merging
 merging_HEADERS = computeintersection.hh \
