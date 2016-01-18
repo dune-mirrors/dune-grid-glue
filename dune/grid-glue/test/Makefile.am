@@ -55,6 +55,7 @@ overlappingcouplingtest_SOURCES = overlappingcouplingtest.cc
 overlappingcouplingtest_CPPFLAGS = $(AM_CPPFLAGS) -frounding-math
 projectiontest_SOURCES = projectiontest.cc
 
+noinst_HEADERS = communicationtest.hh couplingtest.hh
 EXTRA_DIST = CMakeLists.txt
 
 include $(top_srcdir)/am/global-rules
