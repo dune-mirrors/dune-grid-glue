@@ -1,8 +1,15 @@
 
 # we need the module file to be able to build via dunecontrol
-EXTRA_DIST=dune.module \
+EXTRA_DIST= \
+  CHANGELOG.md \
+  CHANGES \
   CMakeLists.txt \
-  config.h.cmake
+  COPYING \
+  README.md \
+  TODO \
+  config.h.cmake \
+  dune-grid-glue.pc.in \
+  dune.module
 
 SUBDIRS = m4 dune doc lib
 
