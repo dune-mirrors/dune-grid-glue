@@ -1,5 +1,7 @@
 #install headers
 install(FILES
+  computeintersection.hh
+  computeintersection.cc
   conformingmerge.hh
   contactmerge.cc
   contactmerge.hh
@@ -7,7 +9,7 @@ install(FILES
   overlappingmerge.cc
   overlappingmerge.hh
   psurfacemerge.hh
-  standardmerge.cc
+  simplexintersection.cc
   standardmerge.hh
   DESTINATION include/dune/grid-glue/merging)
 
