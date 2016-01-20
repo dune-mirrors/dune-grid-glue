@@ -2,7 +2,6 @@
 # we need the module file to be able to build via dunecontrol
 EXTRA_DIST= \
   CHANGELOG.md \
-  CHANGES \
   CMakeLists.txt \
   COPYING \
   README.md \
