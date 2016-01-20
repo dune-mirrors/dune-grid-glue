@@ -18,7 +18,7 @@ Major changes in dune-grid-glue v2.4.0
 --------------------------------------
 
 * This is the first release that supports version 2.4 of the DUNE core modules.
-  The older 2.2 and 2.3 releases are also still supported.
+  The older 2.3 release is also still supported.
 
 * `dune-grid-glue` now requires C++11 support.
 
