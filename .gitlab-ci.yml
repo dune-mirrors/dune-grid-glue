@@ -2,8 +2,8 @@
 dune:2.3--gcc:
   image: duneci/dune:2.3
   script:
-  - dunecontrol --current all
-  - dunecontrol --current make check
+  - dunecontrol --current --use-cmake all
+  - dunecontrol --current --use-cmake make check
 
 dune:2.4--gcc:
   image: duneci/dune:2.4
