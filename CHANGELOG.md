@@ -1,3 +1,11 @@
+Changes in dune-grid-glue v2.5.0
+================================
+
+Incompatible changes in dune-grid-glue v2.5.0
+---------------------------------------------
+
+* The autotools-based build system has been removed.
+
 Changes in dune-grid-glue v2.4.0
 ================================
 
