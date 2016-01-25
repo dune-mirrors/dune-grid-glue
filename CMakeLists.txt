@@ -24,8 +24,6 @@ dune_project()
 add_subdirectory("dune")
 add_subdirectory("doc")
 #add_subdirectory("examples")
-add_subdirectory("lib")
-add_subdirectory("m4")
 
 # finalize the dune project, e.g. generating config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
