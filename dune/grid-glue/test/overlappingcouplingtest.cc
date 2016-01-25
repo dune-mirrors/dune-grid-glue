@@ -9,11 +9,7 @@
 #ifdef HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
-#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
 #include <dune/common/parallel/mpihelper.hh>
-#else
-#include <dune/common/mpihelper.hh>
-#endif
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
 #if HAVE_HYBRIDTESTGRIDS

@@ -27,11 +27,7 @@
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
 #include <dune/geometry/multilineargeometry.hh>
-#else
-#include <dune/geometry/genericgeometry/geometry.hh>
-#endif
 
 namespace Dune {
 
@@ -82,14 +78,9 @@ public:
 public:
 
   // transformations
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
   // We don't need the caching, but the uncached MultiLinearGeometry is not defined at all vertices
   typedef Dune::CachedMultiLinearGeometry<ctype, dim-codim, dimworld> Geometry;
   typedef Dune::CachedMultiLinearGeometry<ctype, dim-codim, dim>      LocalGeometry;
-#else
-  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dimworld> > Geometry;
-  typedef Dune::GenericGeometry::BasicGeometry<dim-codim, Dune::GenericGeometry::DefaultGeometryTraits<ctype,dim-codim,dim> > LocalGeometry;
-#endif
 
 protected:
   /************************** PRIVATE SUBCLASSES **********************/
@@ -171,11 +162,7 @@ protected:
 
     unsigned int nCorners() const
     {
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
       return Dune::ReferenceElements<ctype, dim-codim>::general(geometryType_).size(dim-codim);
-#else
-      return Dune::GenericReferenceElements<ctype, dim-codim>::general(geometryType_).size(dim-codim);
-#endif
     }
 
     /// @brief the index of the parent element (from index set)
@@ -477,13 +464,8 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   const auto& elmt = *elmtPtr;
 #endif
   const Dune::GeometryType celltype = elmt.type();
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
   const Dune::ReferenceElement<ctype, dim> & re =
     Dune::ReferenceElements<ctype, dim>::general(celltype);
-#else
-  const Dune::GenericReferenceElement<ctype, dim> & re =
-    Dune::GenericReferenceElements<ctype, dim>::general(celltype);
-#endif
   for (unsigned int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = re.position(face.corners[i].num,dim);
 

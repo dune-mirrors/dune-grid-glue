@@ -3,11 +3,7 @@
 #include <config.h>
 
 #include <dune/common/version.hh>
-#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
 #include <dune/common/parallel/mpihelper.hh>
-#else
-#include <dune/common/mpihelper.hh>
-#endif
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/geometrygrid.hh>
@@ -98,13 +94,8 @@ int main(int argc, char** argv)
   const DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(grid0.leafGridView(), domdesc);
   TarExtractor tarEx(grid1.leafGridView(), tardesc);
-#else
-  DomExtractor domEx(grid0.leafView(), domdesc);
-  TarExtractor tarEx(grid1.leafView(), tardesc);
-#endif
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // The following code is out-commented, because the test functionality

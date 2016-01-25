@@ -143,13 +143,8 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
   this->counter++;
 
   // A few consistency checks
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
   assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
   assert((unsigned int)(Dune::ReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
-#else
-  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid1ElementType).size(dim)) == grid1ElementCorners.size());
-  assert((unsigned int)(Dune::GenericReferenceElements<T,dim>::general(grid2ElementType).size(dim)) == grid2ElementCorners.size());
-#endif
   // any intersection we may find will be the entire elements.
   neighborIntersects1.reset();
   neighborIntersects2.reset();
@@ -186,11 +181,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
   //   Set up the new remote intersection
   // ////////////////////////////////////////////////////////////
 
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
   const Dune::ReferenceElement<T,dim>& refElement = Dune::ReferenceElements<T,dim>::general(grid1ElementType);
-#else
-  const Dune::GenericReferenceElement<T,dim>& refElement = Dune::GenericReferenceElements<T,dim>::general(grid1ElementType);
-#endif
 
   /** \todo Currently the RemoteIntersections have to be simplices */
   if (grid1ElementType.isSimplex()) {

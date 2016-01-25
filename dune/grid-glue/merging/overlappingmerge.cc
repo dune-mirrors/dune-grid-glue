@@ -47,13 +47,8 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
     typedef SimplexMethod<dimworld,dim1,dim2,T> CM;
 
 #ifndef NDEBUG
-#  if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
     const Dune::ReferenceElement<T,dim1>& refElement1 = Dune::ReferenceElements<T,dim1>::general(grid1ElementType);
     const Dune::ReferenceElement<T,dim2>& refElement2 = Dune::ReferenceElements<T,dim2>::general(grid2ElementType);
-#  else
-    const Dune::GenericReferenceElement<T,dim1>& refElement1 = Dune::GenericReferenceElements<T,dim1>::general(grid1ElementType);
-    const Dune::GenericReferenceElement<T,dim2>& refElement2 = Dune::GenericReferenceElements<T,dim2>::general(grid2ElementType);
-#  endif
 
     // A few consistency checks
     assert((unsigned int)(refElement1.size(dim1)) == grid1ElementCorners.size());

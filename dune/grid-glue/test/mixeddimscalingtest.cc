@@ -3,11 +3,7 @@
 #include <config.h>
 
 #include <dune/common/version.hh>
-#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
 #include <dune/common/parallel/mpihelper.hh>
-#else
-#include <dune/common/mpihelper.hh>
-#endif
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/yaspgrid.hh>
 
@@ -98,13 +94,8 @@ bool doTest(double scale)
   const DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(grid0.leafGridView(), domdesc);
   TarExtractor tarEx(grid1.leafGridView(), tardesc);
-#else
-  DomExtractor domEx(grid0.leafGridView(), domdesc);
-  TarExtractor tarEx(grid1.leafGridView(), tardesc);
-#endif
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // The following code is out-commented, because the test functionality

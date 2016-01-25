@@ -6,11 +6,7 @@
 
 #include <dune/common/version.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_COMMON,2,3)
 #include <dune/common/parallel/mpihelper.hh>
-#else
-#include <dune/common/mpihelper.hh>
-#endif
 #include <iostream>
 
 #include <dune/common/fvector.hh>
@@ -38,11 +34,7 @@ makeVerticalFacePredicate(double sliceCoord)
   using Element = typename GridView::Traits::template Codim<0>::Entity;
   auto predicate = [sliceCoord](const Element& element, unsigned int face) -> bool {
     const int dim = GridView::dimension;
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
     const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(element.type());
-#else
-    const Dune::GenericReferenceElement<double,dim>& refElement = Dune::GenericReferenceElements<double, dim>::general(element.type());
-#endif
 
     int numVertices = refElement.size(face, 1, dim);
 
@@ -107,13 +99,8 @@ void testMatchingCubeGrids()
   const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(1);
   const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(1);
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
-#else
-  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
-#endif
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
@@ -193,13 +180,8 @@ void testNonMatchingCubeGrids()
   const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(1);
   const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(1);
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
   TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
-#else
-  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
-#endif
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
@@ -281,14 +263,9 @@ public:
 
   std::shared_ptr<GridType> generate()
   {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
     std::array<int,dim> elements;
     std::fill(elements.begin(), elements.end(), 2);
     std::bitset<dim> periodic(0);
-#else
-    FieldVector<int, dim> elements(2);
-    FieldVector<bool,dim> periodic(false);
-#endif
     FieldVector<double,dim> size(1);
     int overlap = 1;
     double shift = 0.0;
@@ -341,13 +318,8 @@ void testParallelCubeGrids()
   const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(slice);
   const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(slice);
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,3)
   DomExtractor domEx(cubeGrid0->levelGridView(0), domdesc);
   TarExtractor tarEx(cubeGrid1->levelGridView(0), tardesc);
-#else
-  DomExtractor domEx(cubeGrid0->levelView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1->levelView(0), tardesc);
-#endif
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface

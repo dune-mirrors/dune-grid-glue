@@ -17,13 +17,8 @@
 #include "adapter/gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
 
-#if DUNE_VERSION_NEWER_REV(DUNE_COMMON,2,3,0)
 #include <dune/common/parallel/mpitraits.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
-#else
-#include <dune/common/mpitraits.hh>
-#include <dune/common/mpicollectivecommunication.hh>
-#endif
 #include <dune/common/parallel/indexset.hh>
 #include <dune/common/parallel/plocalindex.hh>
 #include <dune/common/parallel/remoteindices.hh>

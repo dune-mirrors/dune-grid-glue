@@ -13,11 +13,7 @@
 
 #include <dune/common/version.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
 #include <dune/geometry/affinegeometry.hh>
-#else
-#include <dune/grid-glue/common/simplexgeometry.hh>
-#endif
 #include <dune/grid-glue/gridglue.hh>
 
 #define ONLY_SIMPLEX_INTERSECTIONS
@@ -52,7 +48,6 @@ namespace Dune {
       /** \brief Dimension of the intersection */
       enum { mydim = (dim0<dim1) ? dim0 : dim1 };
 
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
       typedef AffineGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
       Grid0LocalGeometry;
       typedef AffineGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimensionworld>
@@ -61,16 +56,6 @@ namespace Dune {
       Grid1LocalGeometry;
       typedef AffineGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimensionworld>
       Grid1Geometry;
-#else
-      typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
-      Grid0LocalGeometry;
-      typedef SimplexGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimensionworld>
-      Grid0Geometry;
-      typedef SimplexGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimension>
-      Grid1LocalGeometry;
-      typedef SimplexGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimensionworld>
-      Grid1Geometry;
-#endif
 
       typedef typename GridGlue::Grid0View::IndexSet::IndexType Grid0IndexType;
       typedef typename GridGlue::Grid1View::IndexSet::IndexType Grid1IndexType;
@@ -612,11 +597,7 @@ namespace Dune {
        */
       GlobalCoordinate centerUnitOuterNormal () const
       {
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,3)
         return unitOuterNormal(ReferenceElements<ctype,mydim>::general(type()).position(0,0));
-#else
-        return unitOuterNormal(GenericReferenceElements<ctype,mydim>::general(type()).position(0,0));
-#endif
       }
 
       /**
