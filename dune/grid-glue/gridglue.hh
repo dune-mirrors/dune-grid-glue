@@ -123,11 +123,6 @@ public:
   /** \brief Grid 0 type */
   typedef typename Grid0View::Grid Grid0;
 
-  /** \brief Grid 0 type
-      \deprecated please use typedef Grid0
-   */
-  typedef Grid0 DomainGridType DUNE_DEPRECATED;
-
   /** \brief Coupling patch of grid 0 */
   typedef P0 Grid0Patch;
 
@@ -146,11 +141,6 @@ public:
 
   /** \brief Grid 1 type */
   typedef typename Grid1View::Grid Grid1;
-
-  /** \brief Grid 1 type
-      \deprecated please use typedef Grid0
-   */
-  typedef Grid1 TargetGridType DUNE_DEPRECATED;
 
   /** \brief Coupling patch of grid 1 */
   typedef P1 Grid1Patch;
@@ -188,66 +178,26 @@ public:
   /** \brief The type of the Grid0 elements */
   typedef typename Grid0View::Traits::template Codim<0>::Entity Grid0Element;
 
-  /** \brief The type of the Grid0 elements
-      \deprecated please use Grid0Element
-   */
-  typedef typename Grid0View::Traits::template Codim<0>::Entity DomainElement DUNE_DEPRECATED;
-
   /** \brief Pointer type to Grid0 elements */
   typedef typename Grid0View::Traits::template Codim<0>::EntityPointer Grid0ElementPtr;
-
-  /** \brief Pointer type to Grid0 elements
-      \deprecated please use Grid0ElementPtr
-   */
-  typedef typename Grid0View::Traits::template Codim<0>::EntityPointer DomainElementPtr DUNE_DEPRECATED;
 
   /** \brief The type of the Grid0 vertices */
   typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::Entity Grid0Vertex;
 
-  /** \brief The type of the Grid0 vertices
-      \deprecated please use Grid0ElementPtr
-   */
-  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::Entity DomainVertex DUNE_DEPRECATED;
-
   /** \brief Pointer type to Grid0 vertices */
   typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::EntityPointer Grid0VertexPtr;
-
-  /** \brief Pointer type to Grid0 vertices
-      \deprecated please use Grid0VertexPtr
-   */
-  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::EntityPointer DomainVertexPtr DUNE_DEPRECATED;
 
   /** \brief The type of the Grid1 elements */
   typedef typename Grid1View::Traits::template Codim<0>::Entity Grid1Element;
 
-  /** \brief The type of the Grid1 elements
-      \deprecated please use Grid1Element
-   */
-  typedef typename Grid1View::Traits::template Codim<0>::Entity TargetElement DUNE_DEPRECATED;
-
   /** \brief Pointer type to Grid1 elements */
   typedef typename Grid1View::Traits::template Codim<0>::EntityPointer Grid1ElementPtr;
-
-  /** \brief Pointer type to Grid1 elements
-      \deprecated please use Grid1ElementPtr
-   */
-  typedef typename Grid1View::Traits::template Codim<0>::EntityPointer TargetElementPtr DUNE_DEPRECATED;
 
   /** \brief The type of the Grid1 vertices */
   typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::Entity Grid1Vertex;
 
-  /** \brief The type of the Grid1 vertices
-      \deprecated please use Grid1Vertex
-   */
-  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::Entity TargetVertex DUNE_DEPRECATED;
-
   /** \brief Pointer type to Grid1 vertices */
   typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::EntityPointer Grid1VertexPtr;
-
-  /** \brief Pointer type to Grid1 vertices
-      \deprecated please use Grid1VertexPtr
-   */
-  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::EntityPointer TargetVertexPtr DUNE_DEPRECATED;
 
   /** \brief Instance of a Merger */
   typedef Dune::GridGlue::Merger<ctype,
