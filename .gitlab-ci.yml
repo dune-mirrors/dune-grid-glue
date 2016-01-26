@@ -1,0 +1,30 @@
+---
+dune:2.3--autotools:
+  image: duneci/dune:2.3
+  script:
+  - dunecontrol --current --no-cmake all
+  - dunecontrol --current --no-cmake make check
+
+dune:2.3--cmake:
+  image: duneci/dune:2.3
+  script:
+  - dunecontrol --current --use-cmake all
+  - dunecontrol --current --use-cmake make test
+
+dune:2.4--autotools:
+  image: duneci/dune:2.4
+  script:
+  - dunecontrol --current --no-cmake all
+  - dunecontrol --current --no-cmake make check
+
+dune:2.4--cmake:
+  image: duneci/dune:2.4
+  script:
+  - dunecontrol --current --use-cmake all
+  - dunecontrol --current --use-cmake make test
+
+dune:2.4--clang:
+  image: duneci/dune:2.4
+  script:
+  - CMAKE_FLAGS="-DCMAKE_CXX_COMPILER=/usr/bin/clang++" dunecontrol --current all
+  - dunecontrol --current make test
