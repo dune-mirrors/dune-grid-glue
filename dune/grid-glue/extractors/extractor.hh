@@ -60,11 +60,9 @@ public:
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
   typedef Dune::FieldVector<ctype, dim>                            LocalCoords;
 
-  typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
   typedef typename Vertex::EntitySeed VertexSeed;
 
-  typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef typename Element::EntitySeed ElementSeed;
   typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;

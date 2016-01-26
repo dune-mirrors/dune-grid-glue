@@ -178,26 +178,14 @@ public:
   /** \brief The type of the Grid0 elements */
   typedef typename Grid0View::Traits::template Codim<0>::Entity Grid0Element;
 
-  /** \brief Pointer type to Grid0 elements */
-  typedef typename Grid0View::Traits::template Codim<0>::EntityPointer Grid0ElementPtr;
-
   /** \brief The type of the Grid0 vertices */
   typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::Entity Grid0Vertex;
-
-  /** \brief Pointer type to Grid0 vertices */
-  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::EntityPointer Grid0VertexPtr;
 
   /** \brief The type of the Grid1 elements */
   typedef typename Grid1View::Traits::template Codim<0>::Entity Grid1Element;
 
-  /** \brief Pointer type to Grid1 elements */
-  typedef typename Grid1View::Traits::template Codim<0>::EntityPointer Grid1ElementPtr;
-
   /** \brief The type of the Grid1 vertices */
   typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::Entity Grid1Vertex;
-
-  /** \brief Pointer type to Grid1 vertices */
-  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::EntityPointer Grid1VertexPtr;
 
   /** \brief Instance of a Merger */
   typedef Dune::GridGlue::Merger<ctype,

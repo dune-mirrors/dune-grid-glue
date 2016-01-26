@@ -44,9 +44,7 @@ public:
   using Extractor<GV,0>::dimworld;
   typedef typename Extractor<GV,0>::IndexType IndexType;
 
-  typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
-  typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef std::function<bool(const Element&, unsigned int subentity)> Predicate;
 

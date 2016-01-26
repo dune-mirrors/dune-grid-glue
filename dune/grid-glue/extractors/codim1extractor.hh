@@ -55,9 +55,7 @@ public:
   typedef typename GV::Grid::ctype ctype;
   typedef Dune::FieldVector<ctype, dimworld>                       Coords;
 
-  typedef typename GV::Traits::template Codim<dim>::EntityPointer VertexPtr;
   typedef typename GV::Traits::template Codim<dim>::Entity Vertex;
-  typedef typename GV::Traits::template Codim<0>::EntityPointer ElementPtr;
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef std::function<bool(const Element&, unsigned int subentity)> Predicate;
 

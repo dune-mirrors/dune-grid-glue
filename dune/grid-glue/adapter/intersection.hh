@@ -389,10 +389,7 @@ namespace Dune {
       typedef typename Traits::ctype ctype;
 
       typedef typename InsideGridView::Traits::template Codim<0>::Entity InsideEntity;
-      typedef typename InsideGridView::Traits::template Codim<0>::EntityPointer InsideEntityPointer;
-
       typedef typename OutsideGridView::Traits::template Codim<0>::Entity OutsideEntity;
-      typedef typename OutsideGridView::Traits::template Codim<0>::EntityPointer OutsideEntityPointer;
 
       typedef typename Traits::LocalCoordinate LocalCoordinate;
       typedef typename Traits::GlobalCoordinate GlobalCoordinate;
