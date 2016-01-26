@@ -12,7 +12,6 @@ Installation
 ------------
 
 `dune-grid-glue` requires the DUNE core modules, version 2.3 or later.
-In addition the [psurface library](https://github.com/psurface/psurface) is supported as an optional merger backend.
 
 Please see the [general instructions for building DUNE modules](https://www.dune-project.org/doc/installation-notes.html) for detailed instructions on how to build the module.
 

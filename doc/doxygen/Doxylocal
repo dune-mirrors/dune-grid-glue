@@ -9,5 +9,4 @@ EXAMPLE_PATTERNS       += *.dgf
 IMAGE_PATH             +=
 PREDEFINED             += DOXYGEN \
                          HAVE_MPI:=1 \
-                         HAVE_PSURFACE:=1 \
                          "DUNE_DEPRECATED:=/** \deprecated */"
