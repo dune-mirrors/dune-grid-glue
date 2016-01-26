@@ -8,7 +8,6 @@
 #include <iostream>
 
 #include <dune/common/fvector.hh>
-#include <dune/grid/sgrid.hh>
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/geometrygrid.hh>
 #include <dune/geometry/quadraturerules.hh>
@@ -70,18 +69,19 @@ void testMatchingCubeGrids()
   //   Make two cube grids
   // ///////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType;
+  using GridType = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim> >;
 
-  FieldVector<int, dim> elements(1);
+  std::array<int, dim> elements;
+  elements.fill(1);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
-  GridType cubeGrid0(elements, lower, upper);
+  GridType cubeGrid0(lower, upper, elements);
 
   lower[0] += 1;
   upper[0] += 1;
 
-  GridType cubeGrid1(elements, lower, upper);
+  GridType cubeGrid1(lower, upper, elements);
 
 
   // ////////////////////////////////////////
@@ -150,19 +150,20 @@ void testNonMatchingCubeGrids()
   //   Make two cube grids
   // ///////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType;
+  using GridType = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim> >;
 
-  FieldVector<int, dim> elements(2);
+  std::array<int, dim> elements;
+  elements.fill(2);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
-  GridType cubeGrid0(elements, lower, upper);
+  GridType cubeGrid0(lower, upper, elements);
 
-  elements = 4;
+  elements.fill(4);
   lower[0] += 1;
   upper[0] += 1;
 
-  GridType cubeGrid1(elements, lower, upper);
+  GridType cubeGrid1(lower, upper, elements);
 
 
   // ////////////////////////////////////////
@@ -229,22 +230,23 @@ class MeshGenerator
 public:
   MeshGenerator(bool b) : tar(b) {};
 
-  typedef SGrid<dim,dim> GridType;
+  using GridType = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim> >;
 
   std::shared_ptr<GridType> generate()
   {
-    FieldVector<int, dim> elements(2);
+    std::array<int, dim> elements;
+    elements.fill(2);
     FieldVector<double,dim> lower(0);
     FieldVector<double,dim> upper(1);
 
     if (tar)
     {
-      elements = 4;
+      elements.fill(4);
       lower[0] += 1;
       upper[0] += 1;
     }
 
-    return std::make_shared<GridType>(elements, lower, upper);
+    return std::make_shared<GridType>(lower, upper, elements);
   }
 };
 

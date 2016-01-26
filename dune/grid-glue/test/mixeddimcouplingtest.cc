@@ -6,8 +6,8 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/fvector.hh>
-#include <dune/grid/sgrid.hh>
 #include <dune/grid/geometrygrid.hh>
+#include <dune/grid/yaspgrid.hh>
 #include <dune/geometry/quadraturerules.hh>
 
 #include <dune/grid-glue/extractors/codim0extractor.hh>
@@ -72,6 +72,20 @@ public:
   }
 };
 
+template<int dim, int dimw, typename ctype = double>
+struct Embedding
+  : AnalyticalCoordFunction<ctype, dim, dimw, Embedding<dim, dimw, ctype> >
+{
+  static_assert(dimw >= dim, "Embeddings are only possible into a higher-dimensional space");
+
+  void evaluate(const Dune::FieldVector<ctype, dim>& x, Dune::FieldVector<ctype, dimw>& y) const
+  {
+    y = ctype(0);
+    for (unsigned i = 0; i < dim; ++i)
+      y[i] = x[i];
+  }
+};
+
 template <int dim>
 void test1d2dCouplingMatchingDimworld()
 {
@@ -81,21 +95,26 @@ void test1d2dCouplingMatchingDimworld()
   //   Make a cube grid and a 1d grid
   // ///////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType2d;
+  using GridType2d = Dune::YaspGrid<dim>;
 
-  FieldVector<int, dim> elements(1);
-  FieldVector<double,dim> lower(0);
+  std::array<int, dim> elements;
+  elements.fill(1);
   FieldVector<double,dim> upper(1);
 
-  GridType2d cubeGrid0(elements, lower, upper);
+  GridType2d cubeGrid0(upper, elements);
 
-  typedef SGrid<dim-1,dim> GridType1d;
+  using GridType1d_ = Dune::YaspGrid<dim-1>;
 
-  FieldVector<int, dim-1> elements1d(1);
-  FieldVector<double,dim-1> lower1d(0);
+  std::array<int, dim-1> elements1d;
+  elements1d.fill(1);
   FieldVector<double,dim-1> upper1d(1);
 
-  GridType1d cubeGrid1(elements1d, lower1d, upper1d);
+  GridType1d_ cubeGrid1_(upper1d, elements1d);
+
+  using Embedding1 = Embedding<dim-1, dim>;
+  using GridType1d = Dune::GeometryGrid<GridType1d_, Embedding1>;
+  Embedding1 embedding1;
+  GridType1d cubeGrid1(cubeGrid1_, embedding1);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
@@ -144,21 +163,26 @@ void test2d1dCouplingMatchingDimworld()
   //   Make a cube grid and a 1d grid
   // ///////////////////////////////////////
 
-  typedef SGrid<dim-1,dim> GridType1d;
+  using GridType1d_ = Dune::YaspGrid<dim-1>;
 
-  FieldVector<int, dim-1> elements1d(1);
-  FieldVector<double,dim-1> lower1d(0);
+  std::array<int, dim-1> elements1d;
+  elements1d.fill(1);
   FieldVector<double,dim-1> upper1d(1);
 
-  GridType1d cubeGrid0(elements1d, lower1d, upper1d);
+  GridType1d_ cubeGrid0_(upper1d, elements1d);
 
-  typedef SGrid<dim,dim> GridType2d;
+  using Embedding0 = Embedding<dim-1, dim>;
+  using GridType1d = Dune::GeometryGrid<GridType1d_, Embedding0>;
+  Embedding0 embedding0;
+  GridType1d cubeGrid0(cubeGrid0_, embedding0);
 
-  FieldVector<int, dim> elements(1);
-  FieldVector<double,dim> lower(0);
+  using GridType2d = Dune::YaspGrid<dim>;
+
+  std::array<int, dim> elements;
+  elements.fill(1);
   FieldVector<double,dim> upper(1);
 
-  GridType2d cubeGrid1(elements, lower, upper);
+  GridType2d cubeGrid1(upper, elements);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
@@ -206,23 +230,23 @@ void test1d2dCoupling(double slice=0.0)
   //   Make a cube grid and a 1d grid
   // ///////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType2d;
+  using GridType2d = Dune::YaspGrid<dim>;
 
-  FieldVector<int, dim> elements(1);
-  FieldVector<double,dim> lower(0);
+  std::array<int, dim> elements;
+  elements.fill(1);
   FieldVector<double,dim> upper(1);
 
-  GridType2d cubeGrid0(elements, lower, upper);
+  GridType2d cubeGrid0(upper, elements);
 
-  typedef SGrid<dim-1,dim-1> GridType1d;
+  using GridType1d = Dune::YaspGrid<dim-1>;
 
-  FieldVector<int, dim-1> elements1d(1);
-  FieldVector<double,dim-1> lower1d(0);
+  std::array<int, dim-1> elements1d;
+  elements1d.fill(1);
   FieldVector<double,dim-1> upper1d(1);
 
   typedef GeometryGrid<GridType1d, MixedDimTrafo<dim-1,dim,double> > LiftedGridType;
 
-  GridType1d cubeGrid1_in(elements1d, lower1d, upper1d);
+  GridType1d cubeGrid1_in(upper1d, elements1d);
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
 
@@ -275,27 +299,27 @@ void test2d1dCoupling(double slice=0.0)
   //   Make a cube grid and a 1d grid
   // ///////////////////////////////////////
 
-  typedef SGrid<dim-1,dim-1> GridType1d;
+  using GridType1d = Dune::YaspGrid<dim-1>;
 
-  FieldVector<int, dim-1> elements1d(1);
-  FieldVector<double,dim-1> lower1d(0);
+  std::array<int, dim-1> elements1d;
+  elements1d.fill(1);
   FieldVector<double,dim-1> upper1d(1);
 
   typedef GeometryGrid<GridType1d, MixedDimTrafo<dim-1,dim,double> > LiftedGridType;
 
-  GridType1d cubeGrid0_in(elements1d, lower1d, upper1d);
+  GridType1d cubeGrid0_in(upper1d, elements1d);
 
   MixedDimTrafo<dim-1,dim,double> trafo(slice);   // transform dim-1 to dim
 
   LiftedGridType cubeGrid0(cubeGrid0_in, trafo);
 
-  typedef SGrid<dim,dim> GridType2d;
+  using GridType2d = Dune::YaspGrid<dim>;
 
-  FieldVector<int, dim> elements(1);
-  FieldVector<double,dim> lower(0);
+  std::array<int, dim> elements;
+  elements.fill(1);
   FieldVector<double,dim> upper(1);
 
-  GridType2d cubeGrid1(elements, lower, upper);
+  GridType2d cubeGrid1(upper, elements);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface

@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 #ifdef HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
@@ -47,18 +47,19 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
   //   Make two cube grids that are slightly shifted wrt each other
   // /////////////////////////////////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType;
+  using GridType = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim> >;
 
-  FieldVector<int, dim> elements(10);
+  std::array<int, dim> elements;
+  elements.fill(10);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
-  GridType grid0(elements, lower, upper);
+  GridType grid0(lower, upper, elements);
 
   lower += gridOffset;
   upper += gridOffset;
 
-  GridType grid1(elements, lower, upper);
+  GridType grid1(lower, upper, elements);
 
 
   // ////////////////////////////////////////
@@ -103,18 +104,19 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
   //   Make two cube grids that are slightly shifted wrt each other
   // /////////////////////////////////////////////////////////////////
 
-  typedef SGrid<dim,dim> GridType;
+  using GridType = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim> >;
 
-  FieldVector<int, dim> elements(10);
+  std::array<int, dim> elements;
+  elements.fill(10);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
-  GridType grid0(elements, lower, upper);
+  GridType grid0(lower, upper, elements);
 
   lower += gridOffset;
   upper += gridOffset;
 
-  GridType grid1(elements, lower, upper);
+  GridType grid1(lower, upper, elements);
 
 
   // ////////////////////////////////////////

@@ -3,9 +3,8 @@
 #include <config.h>
 
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/grid/utility/structuredgridfactory.hh>
-#include <dune/grid/sgrid.hh>
 #include <dune/grid/geometrygrid.hh>
+#include <dune/grid/yaspgrid.hh>
 
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/gridglue.hh>
@@ -58,24 +57,24 @@ int main(int argc, char** argv)
   //   Make a 2d unit cube grid and a 1d grid embedded in 2d
   // /////////////////////////////////////////////////////////
 
-  typedef SGrid<dim0,dim0> Grid0;
+  using Grid0 = Dune::YaspGrid<dim0>;
 
-  FieldVector<int, dim0> elements0(2);
-  FieldVector<double, dim0> lower0(0);
+  std::array<int, dim0> elements0;
+  elements0.fill(2);
   FieldVector<double, dim0> upper0(1);
 
-  Grid0 grid0(elements0, lower0, upper0);
+  Grid0 grid0(upper0, elements0);
 
-  typedef SGrid<dim1,dim1> Grid1;
+  using Grid1 = Dune::YaspGrid<dim1>;
 
-  FieldVector<int, dim1> elements1(2);
-  FieldVector<double, dim1> lower1(0);
+  std::array<int, dim1> elements1;
+  elements1.fill(2);
   FieldVector<double, dim1> upper1(1);
 
   typedef MixedDimTrafo<dim1, dimworld, double> Transformation;
   typedef GeometryGrid<Grid1, Transformation> LiftedGrid;
 
-  Grid1 cubeGrid1_in(elements1, lower1, upper1);
+  Grid1 cubeGrid1_in(upper1, elements1);
 
   Transformation trafo;   // transform dim-1 to dim
   LiftedGrid grid1(cubeGrid1_in, trafo);
