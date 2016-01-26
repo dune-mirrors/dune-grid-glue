@@ -43,14 +43,8 @@ make_z_plane_predicate(double z)
 {
   return [z](const Element& element, unsigned int subentity) -> bool {
     using std::abs;
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     const auto geometry = element.template subEntity<1>(subentity).geometry();
     const auto global = geometry.center();
-#else
-    const auto& ref = Dune::ReferenceElements<Grid::ctype, GridView::dimension>::general(element.type());
-    const auto local = ref.template geometry<codim>(subentity).center();
-    const auto global = element.geometry().global(local);
-#endif
     const auto epsilon = std::numeric_limits<Element::Geometry::ctype>::epsilon();
     return abs(global[GridView::dimensionworld-1] - z) < epsilon;
   };

@@ -2,7 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#include <dune/common/version.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/yaspgrid.hh>

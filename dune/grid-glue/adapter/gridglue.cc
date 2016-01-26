@@ -515,20 +515,12 @@ void GridGlue<P0, P1>::mergePatches(
       GlobalId gid(patch0rank, patch1rank, i);
       if (it.grid0local_)
       {
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
         Dune::PartitionType ptype = patch0_->element(it.grid0indices_[0]).partitionType();
-#else
-        Dune::PartitionType ptype = patch0_->element(it.grid0indices_[0])->partitionType();
-#endif
         patch0_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
       if (it.grid1local_)
       {
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
         Dune::PartitionType ptype = patch1_->element(it.grid1indices_[0]).partitionType();
-#else
-        Dune::PartitionType ptype = patch1_->element(it.grid1indices_[0])->partitionType();
-#endif
         patch1_is_.add (gid, LocalIndex(offset+i, ptype) );
       }
     }

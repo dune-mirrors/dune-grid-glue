@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/version.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
@@ -375,21 +374,13 @@ public:
    * @param index the index of the face
    * @return a reference to the element's stored pointer
    */
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
   Element
-#else
-  ElementPtr
-#endif
   element(unsigned int index) const
   {
     if (index >= subEntities_.size())
       DUNE_THROW(Dune::GridError, "invalid face index");
     const ElementSeed seed = (elmtInfo_.find(subEntities_[index].parent))->second->p;
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     return grid().entity(seed);
-#else
-    return grid().entityPointer(seed);
-#endif
   }
 
 #if 1
@@ -399,21 +390,13 @@ public:
    * @param index the index of the coordinate
    * @return a reference to the vertex' stored pointer
    */
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
   Vertex
-#else
-  VertexPtr
-#endif
   vertex(unsigned int index) const
   {
     if (index >= coords_.size())
       DUNE_THROW(Dune::GridError, "invalid coordinate index");
     const VertexSeed seed = (vtxInfo_.find(coords_[index].vtxindex))->second->p;
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     return grid().entity(seed);
-#else
-    return grid().entityPointer(seed);
-#endif
   }
 #endif
 
@@ -457,12 +440,7 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
 
   // get reference element
   const auto elmtseed = elmtInfo_.find(face.parent)->second->p;
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
   const auto elmt = grid().entity(elmtseed);
-#else
-  const auto elmtPtr = grid().entityPointer(elmtseed);
-  const auto& elmt = *elmtPtr;
-#endif
   const Dune::GeometryType celltype = elmt.type();
   const Dune::ReferenceElement<ctype, dim> & re =
     Dune::ReferenceElements<ctype, dim>::general(celltype);

@@ -28,15 +28,8 @@ bool testIntersection(const IntersectionIt & rIIt)
   const Dune::QuadratureRule<double, dim>& quad = Dune::QuadratureRules<double, dim>::rule(rIIt->type(), 3);
 
   for (unsigned int l=0; l<quad.size(); l++) {
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     const auto inside = rIIt->inside();
     const auto outside = rIIt->outside();
-#else
-    const auto insidePtr = rIIt->inside();
-    const auto& inside = *insidePtr;
-    const auto outsidePtr = rIIt->outside();
-    const auto& outside = *outsidePtr;
-#endif
 
     Dune::FieldVector<double, dim> quadPos = quad[l].position();
 
@@ -159,13 +152,9 @@ void testCoupling(const GlueType& glue)
     {
       if (rIIt->self() && rIIt->neighbor())
       {
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
         const auto index0 = view0mapper.index(rIIt->inside());
         const auto index1 = view1mapper.index(rIIt->outside());
-#else
-        const auto index0 = view0mapper.map(*rIIt->inside());
-        const auto index1 = view1mapper.map(*rIIt->outside());
-#endif
+
         countInside0[index0]++;
         countOutside1[index1]++;
         success = success && testIntersection(rIIt);
@@ -184,13 +173,9 @@ void testCoupling(const GlueType& glue)
     {
       if (rIIt->self() && rIIt->neighbor())
       {
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
         const auto index1 = view1mapper.index(rIIt->inside());
         const auto index0 = view0mapper.index(rIIt->outside());
-#else
-        const auto index1 = view1mapper.map(*rIIt->inside());
-        const auto index0 = view0mapper.map(*rIIt->outside());
-#endif
+
         countInside1[index1]++;
         countOutside0[index0]++;
         success = success && testIntersection(rIIt);

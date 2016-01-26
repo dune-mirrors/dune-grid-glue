@@ -11,8 +11,6 @@
 
 #include <memory>
 
-#include <dune/common/version.hh>
-
 #include <dune/geometry/affinegeometry.hh>
 #include <dune/grid-glue/gridglue.hh>
 
@@ -430,11 +428,7 @@ namespace Dune {
 
       /** \brief Return element on the inside of this intersection.
        */
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
       InsideEntity
-#else
-      InsideEntityPointer
-#endif
       inside(unsigned int parentId = 0) const
       {
         assert(self());
@@ -444,11 +438,7 @@ namespace Dune {
 
       /** \brief Return element on the outside of this intersection.
        */
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4) || DOXYGEN
       OutsideEntity
-#else
-      OutsideEntityPointer
-#endif
       outside(unsigned int parentId = 0) const
       {
         assert(neighbor());

@@ -4,8 +4,6 @@
 
 #include <array>
 
-#include <dune/common/version.hh>
-
 #include <dune/common/parallel/mpihelper.hh>
 #include <iostream>
 

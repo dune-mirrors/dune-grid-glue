@@ -23,7 +23,6 @@
 #include <dune/common/bitsetvector.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/common/timer.hh>
-#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/grid.hh>

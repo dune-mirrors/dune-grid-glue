@@ -10,7 +10,6 @@
 
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/multilineargeometry.hh>

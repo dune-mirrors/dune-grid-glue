@@ -124,11 +124,7 @@ void Codim0Extractor<GV>::update(const Predicate& predicate)
   {
     const auto& elmt = *elit;
     const auto geometry = elmt.geometry();
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     IndexType eindex = this->cellMapper_.index(elmt);
-#else
-    IndexType eindex = this->cellMapper_.map(elmt);
-#endif
 
     // only do sth. if this element is "interesting"
     // implicit cast is done automatically
@@ -137,11 +133,7 @@ void Codim0Extractor<GV>::update(const Predicate& predicate)
       // add an entry to the element info map, the index will be set properly later
       this->elmtInfo_[eindex] = new ElementInfo(element_index, elmt, 1);
 
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
       unsigned int numCorners = elmt.subEntities(dim);
-#else
-      unsigned int numCorners = elmt.template count<dim>();
-#endif
       unsigned int vertex_indices[numCorners];       // index in global vector
       unsigned int vertex_numbers[numCorners];       // index in parent entity
 
@@ -151,12 +143,7 @@ void Codim0Extractor<GV>::update(const Predicate& predicate)
         vertex_numbers[i] = i;
 
         // get the vertex pointer and the index from the index set
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
         const Vertex vertex = elit->template subEntity<dim>(vertex_numbers[i]);
-#else
-        const VertexPtr vertexPtr = elit->template subEntity<dim>(vertex_numbers[i]);
-        const Vertex &vertex = *vertexPtr;
-#endif
         IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
 
         // if the vertex is not yet inserted in the vertex info map
@@ -261,12 +248,7 @@ void Codim0Extractor<GV>::update(const Predicate& predicate)
     current->vtxindex = it1->first;
     // store the vertex' coordinates under the associated index
     // in the coordinates array
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     const auto vtx = this->grid().entity(it1->second->p);
-#else
-    const auto vtxPtr = this->grid().entityPointer(it1->second->p);
-    const auto& vtx = *vtxPtr;
-#endif
     current->coord = vtx.geometry().corner(0);
   }
 

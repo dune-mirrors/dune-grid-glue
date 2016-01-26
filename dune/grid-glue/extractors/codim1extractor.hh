@@ -164,11 +164,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
       {
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
         eindex = this->cellMapper_.index(elmt);
-#else
-        eindex = this->cellMapper_.map(elmt);
-#endif
         this->elmtInfo_[eindex] = new ElementInfo(simplex_index, elmt, 0);
 
         // now add the faces in ascending order of their indices
@@ -208,12 +204,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
               int vertex_number = refElement.subEntity(is->indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
               const Vertex vertex = elit->template subEntity<dim>(vertex_number);
-#else
-              const VertexPtr vertexPtr = elit->template subEntity<dim>(vertex_number);
-              const Vertex& vertex = *vertexPtr;
-#endif
               cornerCoords[i] = vertex.geometry().corner(0);
 
               IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
@@ -286,12 +277,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
               vertex_numbers[i] = refElement.subEntity(is->indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
               const Vertex vertex = elit->template subEntity<dim>(vertex_numbers[i]);
-#else
-              const VertexPtr vertexPtr = elit->template subEntity<dim>(vertex_numbers[i]);
-              const Vertex &vertex = *vertexPtr;
-#endif
               cornerCoords[i] = vertex.geometry().corner(0);
 
               IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
@@ -401,12 +387,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
     current->vtxindex = it1->first;
     // store the vertex' coordinates under the associated index
     // in the coordinates array
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 4)
     const auto vtx = this->grid().entity(it1->second->p);
-#else
-    const auto vtxPtr = this->grid().entityPointer(it1->second->p);
-    const auto& vtx = *vtxPtr;
-#endif
     current->coord = vtx.geometry().corner(0);
   }
 

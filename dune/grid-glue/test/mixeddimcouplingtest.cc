@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-#include <dune/common/version.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/fvector.hh>
 #include <dune/grid/sgrid.hh>

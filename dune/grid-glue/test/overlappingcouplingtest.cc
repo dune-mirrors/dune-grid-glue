@@ -4,7 +4,6 @@
 
 #include <memory>
 
-#include <dune/common/version.hh>
 #include <dune/grid/sgrid.hh>
 #ifdef HAVE_UG
 #include <dune/grid/uggrid.hh>
