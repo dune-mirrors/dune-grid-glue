@@ -71,17 +71,14 @@ public:
 } /* namespace Implementation */
 #endif
 
-template<int dim, int dimworld, typename T = double, typename = void>
-class PSurfaceMerge;
-
 /** \brief Standard implementation of the SurfaceMerge concept using the psurface library.
 
    \tparam dim Grid dimension of the coupling grids.  Must be the same for both sides
    \tparam dimworld  Dimension of the world coordinates.  Must be equal to dim or to dim+1
    \tparam T Type used for coordinates
  */
-template<int dim, int dimworld, typename T>
-class PSurfaceMerge<dim, dimworld, T>
+template<int dim, int dimworld, typename T = double>
+class PSurfaceMerge
   : public ContactMerge<dimworld, T>
 {
   using Base = ContactMerge<dimworld, T>;
