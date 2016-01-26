@@ -18,7 +18,6 @@
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/gridglue.hh>
 
-#include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/merging/conformingmerge.hh>
 #include <dune/grid-glue/merging/overlappingmerge.hh>
 
@@ -273,26 +272,6 @@ int main(int argc, char** argv) try
 #if HAVE_UG && HAVE_HYBRIDTESTGRIDS
   testHybridGridsUG<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
 #endif
-
-  // //////////////////////////////////////////////////////////
-  //   Test with the PSurfaceMerge implementation
-  // //////////////////////////////////////////////////////////
-#if HAVE_PSURFACE
-  PSurfaceMerge<1,1,double> psurfaceMerge1d;
-  PSurfaceMerge<2,2,double> psurfaceMerge2d;
-
-  testCubeGrids<1>(psurfaceMerge1d, FieldVector<double,1>(0.05));
-  testCubeGrids<2>(psurfaceMerge2d, FieldVector<double,2>(0.05));
-
-  testSimplexGrids<1>(psurfaceMerge1d, FieldVector<double,1>(0.05));
-#if HAVE_UG
-  testSimplexGridsUG(psurfaceMerge2d, FieldVector<double,2>(0.05));
-#endif
-#if HAVE_UG && HAVE_HYBRIDTESTGRIDS
-  testHybridGridsUG<2>(psurfaceMerge2d, FieldVector<double,2>(0.05));
-#endif
-#endif
-
 
   // //////////////////////////////////////////////////////////
   //   Test with the ConformingMerge implementation

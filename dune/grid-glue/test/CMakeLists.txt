@@ -43,7 +43,6 @@ if(UG_FOUND)
 endif()
 
 foreach(_exe ${TESTS})
-  add_dune_psurface_flags(${_exe})
   target_link_libraries(${_exe} "dunegridglue" ${DUNE_LIBS})
   add_test(${_exe} ${_exe})
 endforeach(_exe ${TESTS})

@@ -12,7 +12,7 @@
 
 #include <dune/grid-glue/extractors/codim0extractor.hh>
 #include <dune/grid-glue/extractors/codim1extractor.hh>
-#include <dune/grid-glue/merging/psurfacemerge.hh>
+#include <dune/grid-glue/merging/contactmerge.hh>
 #include <dune/grid-glue/gridglue.hh>
 
 #include <dune/grid-glue/test/couplingtest.hh>
@@ -135,8 +135,8 @@ void test1d2dCouplingMatchingDimworld()
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
+  Dune::GridGlue::ContactMerge<dim, double> merger;
+  merger.minNormalAngle(0.0);
 
   GlueType glue(domEx, tarEx, &merger);
 
@@ -150,7 +150,6 @@ void test1d2dCouplingMatchingDimworld()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#endif
 }
 
 
@@ -203,8 +202,8 @@ void test2d1dCouplingMatchingDimworld()
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
+  Dune::GridGlue::ContactMerge<dim, double> merger;
+  merger.minNormalAngle(0.0);
 
   GlueType glue(domEx, tarEx, &merger);
 
@@ -218,7 +217,6 @@ void test2d1dCouplingMatchingDimworld()
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#endif
 }
 
 
@@ -272,8 +270,8 @@ void test1d2dCoupling(double slice=0.0)
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
+  Dune::GridGlue::ContactMerge<dim, double> merger;
+  merger.minNormalAngle(0.0);
 
   GlueType glue(domEx, tarEx, &merger);
 
@@ -287,7 +285,6 @@ void test1d2dCoupling(double slice=0.0)
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#endif
 }
 
 
@@ -340,8 +337,8 @@ void test2d1dCoupling(double slice=0.0)
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-#if HAVE_PSURFACE
-  PSurfaceMerge<dim-1,dim,double> merger;
+  Dune::GridGlue::ContactMerge<dim, double> merger;
+  merger.minNormalAngle(0.0);
 
   GlueType glue(domEx, tarEx, &merger);
 
@@ -355,7 +352,6 @@ void test2d1dCoupling(double slice=0.0)
   // ///////////////////////////////////////////
 
   testCoupling(glue);
-#endif
 }
 
 int main(int argc, char *argv[]) try

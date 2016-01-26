@@ -24,9 +24,6 @@
 #include <dune/grid-glue/gridglue.hh>
 #include <dune/grid-glue/merging/merger.hh>
 #include <dune/grid-glue/merging/contactmerge.hh>
-#if HAVE_PSURFACE
-#  include <dune/grid-glue/merging/psurfacemerge.hh>
-#endif
 
 const int dim = 3;
 const int codim = 1;
@@ -127,12 +124,6 @@ int main()
     merger.enableFallback(true);
     pass &= testDisconnected("ContactMerge", merger);
   }
-#if HAVE_PSURFACE
-  {
-    Dune::GridGlue::PSurfaceMerge<dim-codim, dim> merger;
-    pass &= testDisconnected("PSurfaceMerge", merger);
-  }
-#endif
 
   return pass ? 0 : 1;
 }

@@ -14,7 +14,6 @@
 
 #include <dune/grid-glue/extractors/codim1extractor.hh>
 
-#include <dune/grid-glue/merging/psurfacemerge.hh>
 #include <dune/grid-glue/merging/contactmerge.hh>
 #include <dune/grid-glue/gridglue.hh>
 
@@ -102,26 +101,6 @@ void testMatchingCubeGrids()
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-#if HAVE_PSURFACE
-  // Testing with PSurfaceMerge
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  SurfaceMergeImpl merger;
-  GlueType glue(domEx, tarEx, &merger);
-
-  glue.build();
-
-  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
-  assert(glue.size() > 0);
-
-  // ///////////////////////////////////////////
-  //   Test the coupling
-  // ///////////////////////////////////////////
-
-  testCoupling(glue);
-  testCommunication(glue);
-#endif
-
   // Testing with ContactMerge
   typedef ContactMerge<dim,double> ContactMergeImpl;
 
@@ -183,25 +162,6 @@ void testNonMatchingCubeGrids()
   TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
-
-#if HAVE_PSURFACE
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  SurfaceMergeImpl merger;
-  GlueType glue(domEx, tarEx, &merger);
-
-  glue.build();
-
-  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
-  assert(glue.size() > 0);
-
-  // ///////////////////////////////////////////
-  //   Test the coupling
-  // ///////////////////////////////////////////
-
-  testCoupling(glue);
-  testCommunication(glue);
-#endif
 
   // Testing with ContactMerge
   typedef ContactMerge<dim,double> ContactMergeImpl;
@@ -327,25 +287,6 @@ void testParallelCubeGrids()
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-#if HAVE_PSURFACE
-  // Test using PSurfaceMerge
-  typedef PSurfaceMerge<dim-1,dim,double> SurfaceMergeImpl;
-
-  SurfaceMergeImpl merger;
-  GlueType glue(domEx, tarEx, &merger);
-
-  glue.build();
-
-  std::cout << "Gluing successful, " << glue.size() << " remote intersections found!" << std::endl;
-  assert(glue.size() > 0);
-
-  // ///////////////////////////////////////////
-  //   Test the coupling
-  // ///////////////////////////////////////////
-
-  testCoupling(glue);
-  testCommunication(glue);
-#endif
   // Testing with ContactMerge
   typedef ContactMerge<dim,double> ContactMergeImpl;
 

@@ -5,7 +5,8 @@
 #include <iostream>
 
 #include <dune/grid-glue/gridglue.hh>
-#include <dune/grid-glue/merging/psurfacemerge.hh>
+#include <dune/grid-glue/merging/contactmerge.hh>
+#include <dune/grid-glue/merging/overlappingmerge.hh>
 
 template <class ctype, int dimworld>
 Dune::FieldVector<ctype,dimworld> makeVec(double c)
@@ -174,25 +175,25 @@ int main ()
 {
 
   {
-    typedef Dune::GridGlue::PSurfaceMerge<1,1,double> Merger;
+    using Merger = Dune::GridGlue::OverlappingMerge<1, 1, 1, double>;
     Merger merger;
     callMergerTwice(&merger);
   }
 
   {
-    typedef Dune::GridGlue::PSurfaceMerge<1,2,double> Merger;
+    using Merger = Dune::GridGlue::ContactMerge<2, double>;
     Merger merger;
     callMergerTwice(&merger);
   }
 
   {
-    typedef Dune::GridGlue::PSurfaceMerge<2,2,double> Merger;
+    using Merger = Dune::GridGlue::OverlappingMerge<2, 2, 2, double>;
     Merger merger;
     callMergerTwice(&merger);
   }
 
   {
-    typedef Dune::GridGlue::PSurfaceMerge<2,3,double> Merger;
+    using Merger = Dune::GridGlue::ContactMerge<3, double>;
     Merger merger;
     callMergerTwice(&merger);
   }
