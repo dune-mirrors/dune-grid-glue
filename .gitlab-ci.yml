@@ -5,8 +5,14 @@ dune:2.4--gcc:
   - dunecontrol --current all
   - dunecontrol --current make test
 
-dune:2.4--clang:
+dune:git--gcc:
   image: duneci/dune:2.4
+  script:
+  - dunecontrol --current all
+  - dunecontrol --current make test
+
+dune:git--clang:
+  image: duneci/dune:git
   script:
   - CMAKE_FLAGS="-DCMAKE_CXX_COMPILER=/usr/bin/clang++" dunecontrol --current all
   - dunecontrol --current make test
