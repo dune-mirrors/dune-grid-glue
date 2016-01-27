@@ -5,13 +5,13 @@
 
 #include <dune/common/tuples.hh>
 #include <dune/common/tupleutility.hh>
-#include <dune/common/typetraits.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/typetraits.hh>
 #include <vector>
 
 #include <iostream>
 #include <cassert>
+#include <type_traits>
 
 namespace Dune {
 
@@ -72,8 +72,8 @@ namespace Dune {
   template< typename T >
   struct MultiDataProxy
   {
-    typedef MultiDataProxy<typename remove_const<T>::type> MutableProxy;
-    typedef MultiDataProxy<const typename remove_const<T>::type> ConstProxy;
+    typedef MultiDataProxy<typename std::remove_const<T>::type> MutableProxy;
+    typedef MultiDataProxy<const typename std::remove_const<T>::type> ConstProxy;
     T & _vectors;
 
     int pos;
@@ -101,12 +101,12 @@ namespace Dune {
 
     // access
     template <size_t N>
-    typename TypeTraits<typename tuple_element<N,T>::type>::ReferredType::reference
+    typename std::remove_reference<typename tuple_element<N,T>::type>::type::reference
     get() {
       return Dune::get<N>(_vectors)[pos];
     }
     template <size_t N>
-    typename TypeTraits<typename tuple_element<N,T>::type>::ReferredType::const_reference
+    typename std::remove_reference<typename tuple_element<N,T>::type>::type::const_reference
     get() const {
       return Dune::get<N>(_vectors)[pos];
     }
@@ -139,8 +139,8 @@ namespace Dune {
     public Dune::BidirectionalIteratorFacade< MultiVectorIterator<T>,
         MultiDataProxy<T> >
   {
-    // friend class MultiVectorIterator<typename remove_const<C>::type, typename remove_const<T>::type >;
-    // friend class TestIterator<const typename remove_const<C>::type, const typename remove_const<T>::type >;
+    // friend class MultiVectorIterator<typename std::remove_const<C>::type, typename std::remove_const<T>::type >;
+    // friend class TestIterator<const typename std::remove_const<C>::type, const typename std::remove_const<T>::type >;
   public:
     mutable MultiDataProxy<T> data;
 

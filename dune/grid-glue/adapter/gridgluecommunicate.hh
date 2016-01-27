@@ -8,6 +8,8 @@
    @brief Describes the parallel communication interface class for Dune::GridGlue
  */
 
+#include <type_traits>
+
 #include <dune/common/bartonnackmanifcheck.hh>
 #include <dune/common/parallel/communicator.hh>
 #include <dune/grid/common/datahandleif.hh>
@@ -150,7 +152,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(std::is_same<DT,Y>::value, "DataType mismatch");
         a[i++] = data;
       }
 
@@ -158,7 +160,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(std::is_same<DT,Y>::value, "DataType mismatch");
         data = a[j++];
       }
 

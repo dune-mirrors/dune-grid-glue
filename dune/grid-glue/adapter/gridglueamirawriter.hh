@@ -8,7 +8,7 @@
 
 #include <fstream>
 #include <sstream>
-#include <dune/common/typetraits.hh>
+#include <type_traits>
 
 namespace Dune {
 namespace GridGlue {
@@ -30,7 +30,7 @@ class GridGlueAmiraWriter
 
     fgrid.open(filename.c_str());
 
-    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename std::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
     const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
 

@@ -21,10 +21,10 @@
 
 #include <fstream>
 #include <iomanip>
+#include <type_traits>
 #include <vector>
 
 #include <dune/common/classname.hh>
-#include <dune/common/typetraits.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
 
@@ -48,8 +48,8 @@ class GridGlueVtkWriter
 
     fgrid.open(filename.c_str());
 
-    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
-    typedef typename Dune::conditional<(side==0), typename Glue::Grid0Patch, typename Glue::Grid1Patch>::type Extractor;
+    typedef typename std::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename std::conditional<(side==0), typename Glue::Grid0Patch, typename Glue::Grid1Patch>::type Extractor;
 
     typedef typename GridView::ctype ctype;
 
@@ -182,8 +182,8 @@ class GridGlueVtkWriter
 
     fmerged.open(filename.c_str());
 
-    typedef typename Dune::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
-    typedef typename Dune::conditional<(side==0),
+    typedef typename std::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    typedef typename std::conditional<(side==0),
         typename Glue::Grid0IntersectionIterator,
         typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
 
