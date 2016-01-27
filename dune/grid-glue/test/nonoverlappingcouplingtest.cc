@@ -237,10 +237,11 @@ public:
     }
 
     HostGridType * hostgridp = new HostGridType(
+      size, elements, periodic, overlap
 #if HAVE_MPI
-      MPI_COMM_WORLD,
-#endif // HAVE_MPI
-      size, elements, periodic, overlap);
+      , MPI_COMM_WORLD
+#endif
+      );
     ShiftTrafo<dim,double> * trafop = new ShiftTrafo<dim,double>(shift);
     return std::make_shared<GridType>(*hostgridp, *trafop);
   }
