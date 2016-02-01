@@ -350,12 +350,12 @@ int main(int argc, char *argv[]) try
   std::cout << "============================================================\n";
 
   // 3d Tests
+#if ! HAVE_MPI
   typedef MeshGenerator<3,false>  Seq3d;
   typedef MeshGenerator<3,true>   Par3d;
 
   // Test two unit cubes
   std::cout << "==== 3D hybrid =============================================\n";
-#if ! HAVE_MPI
   testMatchingCubeGrids<3>();
   std::cout << "============================================================\n";
   testNonMatchingCubeGrids<3>();
