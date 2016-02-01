@@ -10,39 +10,6 @@
 
 using Dune::GridGlue::Projection;
 
-/* helper function for dune 2.3 where FieldVector cannot be constructed from an initializer list */
-template<unsigned n>
-std::array<Dune::FieldVector<double, n>, n>
-toArray(const std::initializer_list<const std::initializer_list<double> >& list)
-{
-  std::array<Dune::FieldVector<double, n>, n> v;
-
-  std::size_t i = 0;
-  for (const auto& ii : list) {
-    std::size_t j = 0;
-    for (const auto& jj : ii) {
-      v[i][j] = jj;
-      ++j;
-    }
-    ++i;
-  }
-
-  return v;
-}
-
-template<unsigned n>
-Dune::FieldVector<double, n>
-toV(const std::initializer_list<double>& list)
-{
-  Dune::FieldVector<double, n> v;
-  std::size_t i = 0;
-
-  for (const auto& xi : list)
-    v[i++] = xi;
-
-  return v;
-}
-
 bool
 test_project_simple()
 {
@@ -55,12 +22,12 @@ test_project_simple()
   using Corners = std::array<V, 3>;
   using Normals = Corners;
 
-  const Corners c0 = toArray<3>({{0, 0, 0}, {1, 0, 0}, {0, 1, 0}});
-  const Corners c1 = toArray<3>({{0, 0, 1}, {1, 0, 1}, {0, 1, 1}});
+  const Corners c0{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0}}};
+  const Corners c1{{{0, 0, 1}, {1, 0, 1}, {0, 1, 1}}};
   const auto& corners = std::tie(c0, c1);
 
-  const Normals n0 = toArray<3>({{0, 0, 1}, {0, 0, 1}, {0, 0, 1}});
-  const Normals n1 = toArray<3>({{0, 0, -1}, {0, 0, -1}, {0, 0, -1}});
+  const Normals n0{{{0, 0, 1}, {0, 0, 1}, {0, 0, 1}}};
+  const Normals n1{{{0, 0, -1}, {0, 0, -1}, {0, 0, -1}}};
   const auto& normals = std::tie(n0, n1);
 
   P p;
@@ -74,7 +41,7 @@ test_project_simple()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({{0, 0, 1}, {1, 0, 1}, {0, 1, 1}});
+    const Corners expected{{{0, 0, 1}, {1, 0, 1}, {0, 1, 1}}};
     const auto& images = get<0>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
@@ -94,7 +61,7 @@ test_project_simple()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({{0, 0, 1}, {1, 0, 1}, {0, 1, 1}});
+    const Corners expected{{{0, 0, 1}, {1, 0, 1}, {0, 1, 1}}};
     const auto& images = get<1>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
@@ -131,14 +98,14 @@ test_project_simple2()
   using Corners = std::array<V, 3>;
   using Normals = Corners;
 
-  const Corners c0 = toArray<3>({{0, 0, 0}, {1, 0, 0}, {0, 1, 0}});
-  const Corners c1 = toArray<3>({{0, 0, 1}, {2, 0, 1}, {0, 2, 1}});
+  const Corners c0{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0}}};
+  const Corners c1{{{0, 0, 1}, {2, 0, 1}, {0, 2, 1}}};
   const auto& corners = std::tie(c0, c1);
 
-  Normals n0 = toArray<3>({{0, 0, 1}, {1, 0, 1}, {0, 1, 1}});
+  Normals n0{{{0, 0, 1}, {1, 0, 1}, {0, 1, 1}}};
   for (auto& n : n0)
     n /= n.two_norm();
-  Normals n1 = toArray<3>({{0, 0, -1}, {-1, 0, -1}, {0, -1, -1}});
+  Normals n1{{{0, 0, -1}, {-1, 0, -1}, {0, -1, -1}}};
   for (auto& n : n1)
     n /= n.two_norm();
   const auto& normals = std::tie(n0, n1);
@@ -154,7 +121,7 @@ test_project_simple2()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({{0, 0, 1}, {1, 0, sqrt(2.)}, {0, 1, sqrt(2.)}});
+    const Corners expected{{{0, 0, 1}, {1, 0, sqrt(2.)}, {0, 1, sqrt(2.)}}};
     const auto& images = get<0>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
@@ -174,7 +141,7 @@ test_project_simple2()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({{0, 0, 1}, {1, 0, sqrt(2.)}, {0, 1, sqrt(2.)}});
+    const Corners expected{{{0, 0, 1}, {1, 0, sqrt(2.)}, {0, 1, sqrt(2.)}}};
     const auto& images = get<1>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
@@ -213,12 +180,12 @@ test_project3()
   using Corners = std::array<V, 3>;
   using Normals = Corners;
 
-  const Corners c0 = toArray<3>({{2.85, 4., 3.}, {2.85, 5., 3.}, {1.9, 5., 3.}});
-  const Corners c1 = toArray<3>({{2., 4.38091, 3.61115}, {-0.6, 4.38091, 3.61115}, {2., 5.08885, 4.31909}});
+  const Corners c0{{{2.85, 4., 3.}, {2.85, 5., 3.}, {1.9, 5., 3.}}};
+  const Corners c1{{{2., 4.38091, 3.61115}, {-0.6, 4.38091, 3.61115}, {2., 5.08885, 4.31909}}};
   const auto& corners = std::tie(c0, c1);
 
-  const Normals n0 = toArray<3>({{0., 0., 1.}, {0., 0., 1.}, {0., 0., 1.}});
-  const Normals n1 = toArray<3>({{0., 0.587785, -0.809017}, {0., 0.62962, -0.776903}, {0., 0.809017, -0.587785}});
+  const Normals n0{{{0., 0., 1.}, {0., 0., 1.}, {0., 0., 1.}}};
+  const Normals n1{{{0., 0.587785, -0.809017}, {0., 0.62962, -0.776903}, {0., 0.809017, -0.587785}}};
   const auto& normals = std::tie(n0, n1);
 
   P p;
@@ -232,11 +199,11 @@ test_project3()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({
+    const Corners expected{{
         {-0.326923, -0.538054, 0.23024},
         {-0.326923, 0.874495, 1.23024},
         {0.0384615, 0.874495, 1.23024}
-    });
+    }};
     const auto& images = get<0>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-5)) {
@@ -256,11 +223,11 @@ test_project3()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({
+    const Corners expected{{
       {-0.513827, 0.894737, 0.494431},
       {-3.25067, 3.63158, 0.474804},
       {0.194113, 0.894737, 0.775341}
-    });
+    }};
     const auto& images = get<1>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-5)) {
@@ -286,13 +253,13 @@ test_project3()
                   << "; expected: 1 and 1" << std::endl;
         pass = false;
       }
-      const V expected0 = toV<3>({0, 0.894737, 1.12498});
+      const V expected0{0, 0.894737, 1.12498};
       if (!((in.local[0] - expected0).infinity_norm() < 1e-5)) {
         std::cout << "ERROR: test_project3: edge intersection 0 at local[0] = "
                   << in.local[0] << "; expected: " << expected0 << std::endl;
         pass = false;
       }
-      const V expected1 = toV<3>({0, 0.725806, 0.736697});
+      const V expected1{0, 0.725806, 0.736697};
       if (!((in.local[1] - expected1).infinity_norm() < 1e-5)) {
         std::cout << "ERROR: test_project3: edge intersection 0 at local[1] = "
                   << in.local[1] << "; expected: " << expected1 << std::endl;
@@ -307,13 +274,13 @@ test_project3()
                   << "; expected: 2 and 1" << std::endl;
         pass = false;
       }
-      const V expected0 = toV<3>({0.105263, 0.894737, 1.23024});
+      const V expected0{0.105263, 0.894737, 1.23024};
       if (!((in.local[0] - expected0).infinity_norm() < 1e-5)) {
         std::cout << "ERROR: test_project3: edge intersection 1 at local[0] = "
                   << in.local[0] << "; expected: " << expected0 << std::endl;
         pass = false;
       }
-      const V expected1 = toV<3>({0, 0.874495, 0.761376});
+      const V expected1{0, 0.874495, 0.761376};
       if (!((in.local[1] - expected1).infinity_norm() < 1e-5)) {
         std::cout << "ERROR: test_project3: edge intersection 1 at local[1] = "
                   << in.local[1] << "; expected: " << expected1 << std::endl;
@@ -343,13 +310,13 @@ test_project4()
   using Corners = std::array<V, 3>;
   using Normals = Corners;
 
-  const Corners c0 = toArray<3>({{3.3226, 4.41838, 2.5606}, {3.56991, 4.60089, 2.67132},{3.58641, 4.42509, 2.56724}});
-  const Corners c1 = toArray<3>({{3.53965, -0.313653, 3.39551},{4.06013, -0.311809, 3.39505},{3.54027, -0.434644, 3.61669}});
+  const Corners c0{{{3.3226, 4.41838, 2.5606}, {3.56991, 4.60089, 2.67132},{3.58641, 4.42509, 2.56724}}};
+  const Corners c1{{{3.53965, -0.313653, 3.39551},{4.06013, -0.311809, 3.39505},{3.54027, -0.434644, 3.61669}}};
 
   const auto& corners = std::tie(c0, c1);
 
-  const Normals n0 = toArray<3>({{-0.00668383, -0.480515, 0.876961},{-0.00186939, -0.440971, 0.897519},{-0.00727575, -0.477334, 0.878692}});
-  const Normals n1 = toArray<3>({{0.00296167, -0.872357, -0.48886},{0.0032529,-0.87389, -0.486112},{0.00375284, -0.877906, -0.478818}});
+  const Normals n0{{{-0.00668383, -0.480515, 0.876961},{-0.00186939, -0.440971, 0.897519},{-0.00727575, -0.477334, 0.878692}}};
+  const Normals n1{{{0.00296167, -0.872357, -0.48886},{0.0032529,-0.87389, -0.486112},{0.00375284, -0.877906, -0.478818}}};
   const auto& normals = std::tie(n0, n1);
 
   P p;
@@ -396,12 +363,12 @@ test_project_overlap()
   using Corners = std::array<V, 3>;
   using Normals = Corners;
 
-  const Corners c0 = toArray<3>({{0, 0, 1}, {1, 0, 1}, {0, 4, -1}});
-  const Corners c1 = toArray<3>({{0, 0, 0}, {1, 0, 0}, {0, 1, 0}});
+  const Corners c0{{{0, 0, 1}, {1, 0, 1}, {0, 4, -1}}};
+  const Corners c1{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0}}};
   const auto& corners = std::tie(c0, c1);
 
-  const Normals n0 = toArray<3>({{0, 0, -1}, {0, 0, -1}, {0, 0, -1}});
-  const Normals n1 = toArray<3>({{0, 0, 1}, {0, 0, 1}, {0, 0, 1}});
+  const Normals n0{{{0, 0, -1}, {0, 0, -1}, {0, 0, -1}}};
+  const Normals n1{{{0, 0, 1}, {0, 0, 1}, {0, 0, 1}}};
   const auto& normals = std::tie(n0, n1);
 
   P p(0.0);
@@ -415,7 +382,7 @@ test_project_overlap()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({{0, 0, 1}, {1, 0, 1}, {0, 4, -1}});
+    const Corners expected{{{0, 0, 1}, {1, 0, 1}, {0, 4, -1}}};
     const auto& images = get<0>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
@@ -435,7 +402,7 @@ test_project_overlap()
       pass = false;
     }
 
-    const Corners expected = toArray<3>({{0, 0, 1}, {1, 0, 1}, {0, 0.25, 0.5}});
+    const Corners expected{{{0, 0, 1}, {1, 0, 1}, {0, 0.25, 0.5}}};
     const auto& images = get<1>(p.images());
     for (unsigned i = 0; i < images.size(); ++i) {
       if (!((images[i] - expected[i]).infinity_norm() < 1e-8)) {
