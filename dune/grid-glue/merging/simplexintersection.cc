@@ -723,14 +723,12 @@ public:
         SX.resize(2);
         SY.resize(4);
 
-        int ci,np;
-
         std::vector<FieldVector<T,dimWorld> > pni(1);
 
         bool b = false;
 
         // check whether the corners of the segment are contained in the tetrahedron
-        for (ci = 0; ci < 2; ++ ci) {
+        for (unsigned int ci = 0; ci < 2; ++ ci) {
 
             pni[0] = X[ci];
             if(SimplexMethod<dimWorld,0,3,T>::computeIntersectionPoints(pni,Y,hSX,hSY,surfPts)) {
@@ -748,23 +746,23 @@ public:
         unsigned int faces[4] = {0,3,2,1};
         // check whether tetrahedron faces intersect with segment
         std::vector<FieldVector<T,dimWorld> > triangle(3);
-        for (ci = 0; ci < 4; ++ci) { // iterate over all faces
+        for (unsigned int ci = 0; ci < 4; ++ci) { // iterate over all faces
             triangle[0] = Y[ci];
             triangle[1] = Y[(ci+1)%4];
             triangle[2] = Y[(ci+2)%4];
 
             if (SimplexMethod<dimWorld,1,2,T>::computeIntersectionPoints(X,triangle,hSX,hSY,surfPts)) { // seg - triangle intersection
                 std::vector<int> indices(surfPts.size());
-                for (np = 0; np < surfPts.size(); ++np) {
+                for (unsigned int np = 0; np < surfPts.size(); ++np) {
                     int k = insertPoint(surfPts[np],P);
                     indices[np]=k;
                     SY[faces[ci]].push_back(k);
                 }
 
                 // hSX[*] is nonempty if the intersection point is on an edge of the current face of Y
-                for (np = 0; np < hSX[0].size(); ++np)
+                for (unsigned int np = 0; np < hSX[0].size(); ++np)
                     SX[0].push_back(indices[hSX[0][np]]);
-                for (np = 0; np < hSX[1].size(); ++np)
+                for (unsigned int np = 0; np < hSX[1].size(); ++np)
                     SX[0].push_back(indices[hSX[1][np]]);
 
                 b = true;
@@ -818,7 +816,6 @@ public:
         SY.resize(3);
 
         bool b = false;
-        int ni,np,k;
 
         std::vector<FieldVector<T,dimWorld> > edge(2);
         std::vector<FieldVector<T,dimWorld> > surfPts;
@@ -827,7 +824,7 @@ public:
 
         unsigned int faces[3] = {0,2,1};
 
-        for (ni = 0; ni < 3; ++ni) {
+        for (unsigned int ni = 0; ni < 3; ++ni) {
             // check whether the faces of triangle Y intersect the triangle X
             edge[0] = Y[ni];
             edge[1] = Y[(ni+1)%3];
@@ -836,8 +833,8 @@ public:
 
                 indices.resize(surfPts.size());
                 // add intersections of edges of Y with triangle X
-                for (np = 0; np < surfPts.size(); ++np) {
-                    k = insertPoint(surfPts[np],P);
+                for (unsigned int np = 0; np < surfPts.size(); ++np) {
+                    int k = insertPoint(surfPts[np],P);
                     indices[np] = k;
                     SY[faces[ni]].push_back(k); // add edge data
                 }
@@ -856,8 +853,8 @@ public:
 
                 indices.resize(surfPts.size());
                 // add intersections of edges of X with triangle Y
-                for (np = 0; np < surfPts.size(); ++np) {
-                    k = insertPoint(surfPts[np],P);
+                for (unsigned int np = 0; np < surfPts.size(); ++np) {
+                    int k = insertPoint(surfPts[np],P);
                     indices[np] = k;
                     SX[faces[ni]].push_back(k); // add edge data
                 }

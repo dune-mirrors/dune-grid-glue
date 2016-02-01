@@ -162,7 +162,7 @@ template<class V>
 inline int insertPoint(const V p, std::vector<V>& P)
 {
     double eps= 1e-8;     // tolerance for identical nodes
-    int k=0 ;
+    std::size_t k=0 ;
 
     if (P.size()>0) {
 
