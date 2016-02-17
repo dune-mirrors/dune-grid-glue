@@ -12,6 +12,7 @@
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
+#include <dune/common/promotiontraits.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include "adapter/gridgluecommunicate.hh"
@@ -168,9 +169,9 @@ public:
   };
 
   /** \brief The type used for coordinates
-      \todo maybe use traits class to decide which has more precision (Grid0View::ctype or Grid1View::ctype) and then take this one
    */
-  typedef typename Grid0View::ctype ctype;
+  typedef typename PromotionTraits<typename Grid0View::ctype,
+                                   typename Grid1View::ctype>::PromotedType ctype;
 
   /** \brief The type used for coordinate vectors */
   typedef Dune::FieldVector<ctype, dimworld>                   Coords;
