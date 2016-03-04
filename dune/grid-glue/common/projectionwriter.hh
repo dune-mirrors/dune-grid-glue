@@ -40,6 +40,19 @@ void write(const Projection<Coordinate>& projection,
            const Corners& corners,
            const Normals& normals,
            const std::string& filename);
+/**
+ * \brief Print information about the projection to std::cout stream
+ *
+ * This method is mainly intended to be used for debugging.
+ *
+ * \param projection projection result
+ * \param corners corners of the projected triangles
+ * \param normals normals of the projected triangles
+ */
+template<typename Coordinate, typename Corners, typename Normals>
+void print(const Projection<Coordinate>& projection,
+           const Corners& corners,
+           const Normals& normals);
 
 } /* namespace GridGlue */
 } /* namespace Dune */

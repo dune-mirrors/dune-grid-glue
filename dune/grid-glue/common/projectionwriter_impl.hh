@@ -134,5 +134,24 @@ void write(const Projection<Coordinate>& projection,
   write(projection, corners, normals, out);
 }
 
+template<typename Coordinate, typename Corners, typename Normals>
+void print(const Projection<Coordinate>& projection,
+           const Corners& corners,
+           const Normals& normals)
+{
+  using namespace ProjectionWriterImplementation;
+
+  std::cout << "Side 0 corners and images:\n";
+  write_points<0>(projection, corners, std::cout);
+  std::cout << "Side 1 corners and images:\n";
+  write_points<1>(projection, corners, std::cout);
+  std::cout << "Side 0 normals and projected normals:\n";
+  write_normals<0>(projection, normals, std::cout);
+  std::cout << "Side 1 normals and projected normals:\n";
+  write_normals<1>(projection, normals, std::cout);
+  std::cout << projection.numberOfEdgeIntersections() << " edge intersections:\n";
+  write_edge_intersection_points(projection, corners, std::cout);
+}
+
 } /* namespace GridGlue */
 } /* namespace Dune */
