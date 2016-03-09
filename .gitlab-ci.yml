@@ -6,7 +6,7 @@ dune:2.4--gcc:
   - dunecontrol --current make test
 
 dune:git--gcc:
-  image: duneci/dune:2.4
+  image: duneci/dune:git
   script:
   - dunecontrol --current all
   - dunecontrol --current make test
