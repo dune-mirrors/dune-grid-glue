@@ -166,11 +166,11 @@ void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<do
   std::fill(elements.begin(), elements.end(), 10);
 
   StructuredGridFactory<GridType> factory;
-  shared_ptr<GridType> grid0 = factory.createSimplexGrid(lowerLeft, upperRight, elements);
+  std::shared_ptr<GridType> grid0 = factory.createSimplexGrid(lowerLeft, upperRight, elements);
 
   lowerLeft  += gridOffset;
   upperRight += gridOffset;
-  shared_ptr<GridType> grid1 = factory.createSimplexGrid(lowerLeft, upperRight, elements);
+  std::shared_ptr<GridType> grid1 = factory.createSimplexGrid(lowerLeft, upperRight, elements);
 
   // ////////////////////////////////////////
   //   Set up an overlapping coupling

@@ -77,7 +77,7 @@ namespace Dune {
       /**
        * Embedding of intersection into local grid0 entity coordinates.
        */
-      std::vector<shared_ptr<Grid0LocalGeometry> >  grid0localgeom_;
+      std::vector<std::shared_ptr<Grid0LocalGeometry> >  grid0localgeom_;
       /**
        * Global intersection geometry on grid0 side.
        *
@@ -85,11 +85,11 @@ namespace Dune {
        * entity as stored in grid0localgeom_ and that entities global
        * geometry g.
        */
-      shared_ptr<Grid0Geometry>       grid0geom_;
+      std::shared_ptr<Grid0Geometry>       grid0geom_;
       /**
        * Embedding of intersection into local grid1 entity coordinates.
        */
-      std::vector<shared_ptr<Grid1LocalGeometry> >  grid1localgeom_;
+      std::vector<std::shared_ptr<Grid1LocalGeometry> >  grid1localgeom_;
       /**
        * Global intersection geometry on grid1 side.
        *
@@ -97,7 +97,7 @@ namespace Dune {
        * entity as stored in grid1localgeom_ and that entities global
        * geometry g.
        */
-      shared_ptr<Grid1Geometry>       grid1geom_;
+      std::shared_ptr<Grid1Geometry>       grid1geom_;
 
     };
 
@@ -166,7 +166,7 @@ namespace Dune {
     #else
     #error Not Implemented
     #endif
-              grid0localgeom_[par] = make_shared<Grid0LocalGeometry>(type, corners_element_local);
+              grid0localgeom_[par] = std::make_shared<Grid0LocalGeometry>(type, corners_element_local);
 
               // Add world geometry only for 0th parent
               if (par == 0) {
@@ -180,7 +180,7 @@ namespace Dune {
                   corners_global[i]        = grid0WorldGeometry.global(corners_subEntity_local[i]);
                 }
 
-                grid0geom_      = make_shared<Grid0Geometry>(type, corners_global);
+                grid0geom_      = std::make_shared<Grid0Geometry>(type, corners_global);
               }
             }
         }
@@ -219,7 +219,7 @@ namespace Dune {
     #else
     #error Not Implemented
     #endif
-              grid1localgeom_[par] = make_shared<Grid1LocalGeometry>(type, corners_element_local);
+              grid1localgeom_[par] = std::make_shared<Grid1LocalGeometry>(type, corners_element_local);
 
               // Add world geomety only for 0th parent
               if (par == 0) {
@@ -233,7 +233,7 @@ namespace Dune {
                   corners_global[i]        = grid1WorldGeometry.global(corners_subEntity_local[i]);
                 }
 
-                grid1geom_      = make_shared<Grid1Geometry>(type, corners_global);
+                grid1geom_      = std::make_shared<Grid1Geometry>(type, corners_global);
               }
             }
         }
