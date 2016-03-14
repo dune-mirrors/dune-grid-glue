@@ -10,6 +10,7 @@
 #ifndef DUNE_GRIDGLUE_GRIDGLUE_HH
 #define DUNE_GRIDGLUE_GRIDGLUE_HH
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/promotiontraits.hh>
@@ -291,7 +292,19 @@ public:
    * @param merger The merger object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
+  DUNE_DEPRECATED_MSG("Please use a std::shared_ptr for patches and merger")
   GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger);
+
+  /**
+   * @brief constructor
+   *
+   * Initializes components but does not "glue" the surfaces. The surfaces
+   * are extracted from the grids here though.
+   * @param gp0 the grid0 patch
+   * @param gp1 the grid1 patch
+   * @param merger The merger object that is used to compute the merged grid. This class has
+   * to be a model of the SurfaceMergeConcept.
+   */
   GridGlue(const std::shared_ptr<const Grid0Patch> gp0, const std::shared_ptr<const Grid1Patch> gp1, const std::shared_ptr<Merger> merger);
 
   /*   G E T T E R S   */
