@@ -16,11 +16,13 @@
 #include <algorithm>
 #include <limits>
 #include <memory>
+#include <functional>
 
 #include <dune/common/fvector.hh>
 #include <dune/common/function.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/bitsetvector.hh>
+#include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/grid.hh>
 
@@ -58,9 +60,45 @@ public:
     /// @brief the coordinate type used in this interface
     typedef Dune::FieldVector<T, dim>  LocalCoords;
 
+   /**
+     * @brief Construct merger given overlap and possible projection directions.
+     *
+     * @param allowedOverlap Allowed overlap of the surfaces
+     * @param domainDirections Projection direction field for the first surface that differ from the defualt normal field
+     * @param targetDirections Projection direction field for the second surface that differ from the default normal field
+     */
+    DUNE_DEPRECATED_MSG("Please use a std::function<FieldVector(FieldVector)> to prescribe non-default projections")
+    ContactMerge(const T allowedOverlap,
+            const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections,
+            const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections)
+        : overlap_(allowedOverlap)
+    {
+        if (domainDirections) {
+            domainDirections_ = [domainDirections](const WorldCoords& in) {
+                WorldCoords out;
+                domainDirections->evaluate(in,out);
+                return out;
+            };
+        }
+        if (targetDirections) {
+            targetDirections_ = [targetDirections](const WorldCoords& in) {
+                WorldCoords out;
+                targetDirections->evaluate(in,out);
+                return out;
+            };
+        }
+    }
+
+    /**
+     * @brief Construct merger given overlap and possible projection directions.
+     *
+     * @param allowedOverlap Allowed overlap of the surfaces
+     * @param domainDirections Projection direction field for the first surface that differ from the defualt normal field
+     * @param targetDirections Projection direction field for the second surface that differ from the default normal field
+     */
     ContactMerge(const T allowedOverlap=T(0),
-            const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections = NULL,
-            const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections = NULL)
+                 std::function<WorldCoords(WorldCoords)> domainDirections=nullptr,
+                 std::function<WorldCoords(WorldCoords)> targetDirections=nullptr)
         : domainDirections_(domainDirections), targetDirections_(targetDirections),
           overlap_(allowedOverlap)
     {}
@@ -71,15 +109,42 @@ public:
      * The matching of the geometries offers the possibility to specify a function for
      * the exact evaluation of domain surface normals. If no such function is specified
      * (default) normals are interpolated.
-     * @param value the new function (or NULL to unset the function)
+     * @param value the new function (or nullptr to unset the function)
      */
+    inline
+    void setSurfaceDirections(std::function<WorldCoords(WorldCoords)> domainDirections,
+                              std::function<WorldCoords(WorldCoords)> targetDirections)
+    {
+        domainDirections_ = domainDirections;
+        targetDirections_ = targetDirections;
+        this->valid = false;
+    }
+
+    /**
+     * @brief Set surface direction functions
+     *
+     * The matching of the geometries offers the possibility to specify a function for
+     * the exact evaluation of domain surface normals. If no such function is specified
+     * (default) normals are interpolated.
+     * @param value the new function (or nullptr to unset the function)
+     */
+    DUNE_DEPRECATED_MSG("Please use a std::function<FieldVector(FieldVector)> to prescribe non-default projections")
     inline
     void setSurfaceDirections(const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections,
                               const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections)
     {
-            domainDirections_ = domainDirections;
-            targetDirections_ = targetDirections;
-            this->valid = false;
+        domainDirections_ = [domainDirections](const WorldCoords& in) {
+            WorldCoords out;
+            domainDirections->evaluate(in,out);
+            return out;
+        };
+
+        targetDirections_ = [targetDirections](const WorldCoords& in) {
+            WorldCoords out;
+            targetDirections->evaluate(in,out);
+            return out;
+        };
+        this->valid = false;
     }
 
     //! Set the allowed overlap of the surfaces.
@@ -119,7 +184,7 @@ private:
     /** \brief Vector field on the domain surface which prescribes the direction
       in which the domain surface is projected onto the target surface
      */
-    const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections_;
+    std::function<WorldCoords(WorldCoords)> domainDirections_;
     std::vector<WorldCoords> nodalDomainDirections_;
 
     /** \brief Vector field on the target surface which prescribes a 'forward'
@@ -130,7 +195,7 @@ private:
       (e.g. because it is not properly oriented), they can be given
       explicitly through the targetDirections field.
      */
-    const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections_;
+    std::function<WorldCoords(WorldCoords)> targetDirections_;
     std::vector<WorldCoords> nodalTargetDirections_;
 
     //! Allow some overlap, i.e. also look in the negative projection directions

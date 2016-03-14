@@ -288,7 +288,7 @@ void ContactMerge<dimworld, T>::setupNodalDirections(const std::vector<WorldCoor
         // Sample the provided analytical contact direction field
         nodalDomainDirections_.resize(coords1.size());
         for (size_t i=0; i<coords1.size(); i++)
-            domainDirections_->evaluate(coords1[i], nodalDomainDirections_[i]);
+            nodalDomainDirections_[i] = domainDirections_(coords1[i]);
     } else
         computeOuterNormalField(coords1,elements1,elementTypes1, nodalDomainDirections_);
 
@@ -297,7 +297,7 @@ void ContactMerge<dimworld, T>::setupNodalDirections(const std::vector<WorldCoor
         // Sample the provided analytical target direction field
         nodalTargetDirections_.resize(coords2.size());
         for (size_t i=0; i<coords2.size(); i++)
-            targetDirections_->evaluate(coords2[i], nodalTargetDirections_[i]);
+            nodalTargetDirections_[i] = targetDirections_(coords2[i]);
     } else
         computeOuterNormalField(coords2,elements2,elementTypes2, nodalTargetDirections_);
 }

@@ -6,6 +6,9 @@ Incompatible changes in dune-grid-glue v2.5.0
 
 * The autotools-based build system has been removed.
 
+* Non-default projection directions in ContactMerge are now set and stored via
+  std::function instead of Dune::VirtualFunction.
+
 Changes in dune-grid-glue v2.4.0
 ================================
 
