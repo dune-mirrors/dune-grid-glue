@@ -74,21 +74,18 @@ public:
         : overlap_(allowedOverlap)
     {
         if (domainDirections) {
-        auto dD = [domainDirections](const WorldCoords& in) {
-            WorldCoords out;
-            domainDirections->evaluate(in,out);
-            return out;
-        };
-        domainDirections_ =  dD;
+            domainDirections_ = [domainDirections](const WorldCoords& in) {
+                WorldCoords out;
+                domainDirections->evaluate(in,out);
+                return out;
+            };
         }
-
         if (targetDirections) {
-            auto tD = [targetDirections](const WorldCoords& in) {
+            targetDirections_ = [targetDirections](const WorldCoords& in) {
                 WorldCoords out;
                 targetDirections->evaluate(in,out);
                 return out;
             };
-            targetDirections_ =  tD;
         }
     }
 
@@ -136,19 +133,17 @@ public:
     void setSurfaceDirections(const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections,
                               const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections)
     {
-        auto dD = [domainDirections](const WorldCoords& in) {
+        domainDirections_ = [domainDirections](const WorldCoords& in) {
             WorldCoords out;
             domainDirections->evaluate(in,out);
             return out;
         };
-        domainDirections_ =  dD;
 
-        auto tD = [targetDirections](const WorldCoords& in) {
+        targetDirections_ = [targetDirections](const WorldCoords& in) {
             WorldCoords out;
             targetDirections->evaluate(in,out);
             return out;
         };
-        targetDirections_ =  tD;
         this->valid = false;
     }
 
