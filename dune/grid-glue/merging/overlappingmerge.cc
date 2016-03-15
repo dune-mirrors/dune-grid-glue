@@ -57,8 +57,8 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
 
     // Make generic geometries representing the grid1- and grid2 element.
     // this eases computation of local coordinates.
-    typedef CachedMultiLinearGeometry<T,dim1,dimworld> Geometry1;
-    typedef CachedMultiLinearGeometry<T,dim2,dimworld> Geometry2;
+    typedef MultiLinearGeometry<T,dim1,dimworld> Geometry1;
+    typedef MultiLinearGeometry<T,dim2,dimworld> Geometry2;
 
     Geometry1 grid1Geometry(grid1ElementType, grid1ElementCorners);
     Geometry2 grid2Geometry(grid2ElementType, grid2ElementCorners);

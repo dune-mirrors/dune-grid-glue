@@ -75,9 +75,8 @@ public:
 public:
 
   // transformations
-  // We don't need the caching, but the uncached MultiLinearGeometry is not defined at all vertices
-  typedef Dune::CachedMultiLinearGeometry<ctype, dim-codim, dimworld> Geometry;
-  typedef Dune::CachedMultiLinearGeometry<ctype, dim-codim, dim>      LocalGeometry;
+  typedef Dune::MultiLinearGeometry<ctype, dim-codim, dimworld> Geometry;
+  typedef Dune::MultiLinearGeometry<ctype, dim-codim, dim>      LocalGeometry;
 
 protected:
   /************************** PRIVATE SUBCLASSES **********************/
