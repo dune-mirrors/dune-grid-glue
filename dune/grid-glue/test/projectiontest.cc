@@ -351,6 +351,66 @@ test_project4()
   return pass;
 }
 
+
+bool
+test_project5()
+{
+  using std::get;
+  using std::sqrt;
+
+  bool pass = true;
+
+  typedef Dune::FieldVector<double, 3> V;
+  typedef Projection<V> P;
+  using Corners = std::array<V, 3>;
+  using Normals = Corners;
+
+  const Corners c0{{{1.91, 0.82, 4}, {1.71388, 0.831652, 4.01554}, {1.91, 0.972786, 3.90557}}};
+  const Corners c1{{{0, 0, 0}, {0, 0, 3}, {0, 1.5, 3}}};
+  const auto& corners = std::tie(c0, c1);
+
+  Normals n0{{{0.00368949, -0.588605, -0.808412}, {-0.18944, -0.577784, -0.793901}, {0.00330402, -0.435137, -0.900358}}};
+  for (auto& n : n0)
+    n /= n.two_norm();
+
+  Normals n1{{{-0.57735, -0.57735, -0.57735}, {-0.408248, -0.408248, 0.816497}, {-0.707107, 0, 0.707107}}};
+  for (auto& n : n1)
+    n /= n.two_norm();
+  const auto& normals = std::tie(n0, n1);
+
+  P p(0.2,-0.1);
+  p.project(corners, normals);
+
+  /* Check image */
+  {
+    const auto& success0 = get<0>(p.success());
+    if (success0.any()) {
+      std::cout << "ERROR: test_project5: all Phi(x_i) should be outside of the image triangle" << std::endl;
+      pass = false;
+    }
+  }
+
+  /* Check preimage */
+  {
+    const auto& success = get<1>(p.success());
+    if (success.any()) {
+      std::cout << "ERROR: test_project5: all Phi^{-1}(y_i) should be outside of the preimage triangle" << std::endl;
+      pass = false;
+    }
+  }
+
+  /* No edge intersections. */
+  if (p.numberOfEdgeIntersections() != 0) {
+    std::cout << "ERROR: test_project5: there were unexpected edge intersections" << std::endl;
+    pass = false;
+  }
+
+  if (!pass)
+    write(p, corners, normals, "projectiontest_project_5.vtk");
+
+  return pass;
+}
+
 bool
 test_project_overlap()
 {
@@ -434,6 +494,7 @@ int main()
   pass = pass && test_project_simple2();
   pass = pass && test_project3();
   pass = pass && test_project4();
+  pass = pass && test_project5();
   pass = pass && test_project_overlap();
 
   return pass ? 0 : 1;
