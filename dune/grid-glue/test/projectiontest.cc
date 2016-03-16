@@ -431,7 +431,7 @@ test_project_overlap()
   const Normals n1{{{0, 0, 1}, {0, 0, 1}, {0, 0, 1}}};
   const auto& normals = std::tie(n0, n1);
 
-  P p(0.0);
+  P p(0.5);
   p.project(corners, normals);
 
   /* Check image */
