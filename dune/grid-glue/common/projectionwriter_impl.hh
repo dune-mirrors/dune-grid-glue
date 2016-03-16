@@ -143,8 +143,12 @@ void print(const Projection<Coordinate>& projection,
 
   std::cout << "Side 0 corners and images:\n";
   write_points<0>(projection, corners, std::cout);
+  std::cout << "Side 0 success:\n";
+  write_success<0>(projection, std::cout);
   std::cout << "Side 1 corners and images:\n";
   write_points<1>(projection, corners, std::cout);
+  std::cout << "Side 1 success:\n";
+  write_success<1>(projection, std::cout);
   std::cout << "Side 0 normals and projected normals:\n";
   write_normals<0>(projection, normals, std::cout);
   std::cout << "Side 1 normals and projected normals:\n";
