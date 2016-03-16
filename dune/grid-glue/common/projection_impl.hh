@@ -206,6 +206,12 @@ Projection<Coordinate>
       /* Solving gave us -δ as the term is "-δ nᵢ". */
       y[dim-1] *= Field(-1);
 
+      if(y[dim-1] < -2*m_overlap-m_epsilon) {
+          success.set(i,false);
+          m_projection_valid = false;
+          return;
+      }
+
       const bool feasible = projectionFeasible(origin[i], origin_normals[i], y, target, target_normals);
       success.set(i, feasible);
     }
