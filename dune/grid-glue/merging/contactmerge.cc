@@ -178,43 +178,24 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     std::vector<int> ordering;
     computeCyclicOrder(polytopeCorners,center[0],ordering);
 
-    // improve triangluation by dividing quadrilaterals into two triangles
-    if (nPolyCorners==dim+2) {
-
-        for (int i=0; i<3; i+=2) {
-            typename Base::RemoteSimplicialIntersection intersect;
-            intersect.grid1Entities_[0] = grid1Index;
-            intersect.grid2Entities_[0] = grid2Index;
-
-            for (int j=0;j<dim+1; j++) {
-                intersect.grid1Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][0];
-                intersect.grid2Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][1];
-            }
-
-            intersections.push_back(intersect);
-        }
-        return;
-    }
-
     //////////////////////////////////////
     // Add intersections
     ////////////////////////////////
 
-      //  std::cout<<"Add intersection: "<<polytopeCorners.size()<<"\n";
-    for (size_t i=0; i<polytopeCorners.size(); i++) {
+    for (size_t i=1; i<polytopeCorners.size()-1; i++) {
 
         typename Base::RemoteSimplicialIntersection intersect;
         intersect.grid1Entities_[0] = grid1Index;
         intersect.grid2Entities_[0] = grid2Index;
 
         for (int j=0;j<dim; j++) {
-            intersect.grid1Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][0];
-            intersect.grid2Local_[0][j]=polytopeCorners[ordering[(i+j)%nPolyCorners]][1];
+            intersect.grid1Local_[0][j]=polytopeCorners[ordering[i+j]][0];
+            intersect.grid2Local_[0][j]=polytopeCorners[ordering[i+j]][1];
         }
 
-        // last corner is the center for all intersections
-        intersect.grid1Local_[0][dim]=center[0];
-        intersect.grid2Local_[0][dim]=center[1];
+        // last corner is the first for all intersections
+        intersect.grid1Local_[0][dim]=polytopeCorners[ordering[0]][0];
+        intersect.grid2Local_[0][dim]=polytopeCorners[ordering[0]][1];
 
         intersections.push_back(intersect);
     }
