@@ -129,16 +129,16 @@ void test1d2dCouplingMatchingDimworld()
   const typename DomExtractor::Predicate domdesc = makeHorizontalFacePredicate<DomGridView>(0);
   const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
-  tarEx.positiveNormalDirection() = (slice == 0.0);
+  auto domEx = std::make_shared<DomExtractor>(cubeGrid0.levelGridView(0), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(cubeGrid1.levelGridView(0), tardesc);
+  tarEx->positiveNormalDirection() = (slice == 0.0);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-  Dune::GridGlue::ContactMerge<dim, double> merger;
-  merger.minNormalAngle(0.0);
+  auto merger = std::make_shared< Dune::GridGlue::ContactMerge<dim, double> >();
+  merger->minNormalAngle(0.0);
 
-  GlueType glue(domEx, tarEx, &merger);
+  GlueType glue(domEx, tarEx, merger);
 
   glue.build();
 
@@ -196,16 +196,16 @@ void test2d1dCouplingMatchingDimworld()
   const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const typename TarExtractor::Predicate tardesc = makeHorizontalFacePredicate<TarGridView>(0);
 
-  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
-  domEx.positiveNormalDirection() = (slice == 0.0);
+  auto domEx = std::make_shared<DomExtractor>(cubeGrid0.levelGridView(0), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(cubeGrid1.levelGridView(0), tardesc);
+  domEx->positiveNormalDirection() = (slice == 0.0);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-  Dune::GridGlue::ContactMerge<dim, double> merger;
-  merger.minNormalAngle(0.0);
+  auto merger = std::make_shared< Dune::GridGlue::ContactMerge<dim, double> >();
+  merger->minNormalAngle(0.0);
 
-  GlueType glue(domEx, tarEx, &merger);
+  GlueType glue(domEx, tarEx, merger);
 
   glue.build();
 
@@ -264,16 +264,16 @@ void test1d2dCoupling(double slice=0.0)
   const typename DomExtractor::Predicate domdesc = makeHorizontalFacePredicate<DomGridView>(slice);
   const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-  DomExtractor domEx(cubeGrid0.levelView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelView(0), tardesc);
-  tarEx.positiveNormalDirection() = (slice == 0.0);
+  auto domEx = std::make_shared<DomExtractor>(cubeGrid0.levelView(0), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(cubeGrid1.levelView(0), tardesc);
+  tarEx->positiveNormalDirection() = (slice == 0.0);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-  Dune::GridGlue::ContactMerge<dim, double> merger;
-  merger.minNormalAngle(0.0);
+  auto merger = std::make_shared< Dune::GridGlue::ContactMerge<dim, double> >();
+  merger->minNormalAngle(0.0);
 
-  GlueType glue(domEx, tarEx, &merger);
+  GlueType glue(domEx, tarEx, merger);
 
   glue.build();
 
@@ -331,16 +331,16 @@ void test2d1dCoupling(double slice=0.0)
   const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const typename TarExtractor::Predicate tardesc = makeHorizontalFacePredicate<TarGridView>(slice);
 
-  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
-  domEx.positiveNormalDirection() = (slice == 0.0);
+  auto domEx = std::make_shared<DomExtractor>(cubeGrid0.levelGridView(0), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(cubeGrid1.levelGridView(0), tardesc);
+  domEx->positiveNormalDirection() = (slice == 0.0);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-  Dune::GridGlue::ContactMerge<dim, double> merger;
-  merger.minNormalAngle(0.0);
+  auto merger = std::make_shared< Dune::GridGlue::ContactMerge<dim, double> >();
+  merger->minNormalAngle(0.0);
 
-  GlueType glue(domEx, tarEx, &merger);
+  GlueType glue(domEx, tarEx, merger);
 
   glue.build();
 

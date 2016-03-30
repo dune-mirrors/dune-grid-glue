@@ -39,7 +39,7 @@ makeTruePredicate()
 }
 
 template <int dim>
-void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
+void testCubeGrids(std::shared_ptr< Merger<double,dim,dim,dim> > merger, const FieldVector<double,dim>& gridOffset)
 {
 
   // /////////////////////////////////////////////////////////////////
@@ -74,12 +74,12 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
   const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-  DomExtractor domEx(grid0.leafGridView(), domdesc);
-  TarExtractor tarEx(grid1.leafGridView(), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(grid0.leafGridView(), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(grid1.leafGridView(), tardesc);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
-  GlueType glue(domEx, tarEx, &merger);
+  GlueType glue(domEx, tarEx, merger);
 
   glue.build();
 
@@ -96,7 +96,7 @@ void testCubeGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,
 
 
 template <int dim>
-void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
+void testSimplexGrids(std::shared_ptr< Merger<double,dim,dim,dim> > merger, const FieldVector<double,dim>& gridOffset)
 {
 
   // /////////////////////////////////////////////////////////////////
@@ -131,10 +131,10 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
   const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-  DomExtractor domEx(grid0.leafGridView(), domdesc);
-  TarExtractor tarEx(grid1.leafGridView(), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(grid0.leafGridView(), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(grid1.leafGridView(), tardesc);
 
-  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
+  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, merger);
 
   glue.build();
 
@@ -152,7 +152,7 @@ void testSimplexGrids(Merger<double,dim,dim,dim>& merger, const FieldVector<doub
 
 #if HAVE_UG
 template <int dim>
-void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
+void testSimplexGridsUG(std::shared_ptr< Merger<double,dim,dim,dim> > merger, const FieldVector<double,dim>& gridOffset)
 {
   // /////////////////////////////////////////////////////////////////
   //   Make two triangle grids that are slightly shifted wrt each other
@@ -185,10 +185,10 @@ void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<do
   const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-  DomExtractor domEx(grid0->leafGridView(), domdesc);
-  TarExtractor tarEx(grid1->leafGridView(), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(grid0->leafGridView(), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(grid1->leafGridView(), tardesc);
 
-  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
+  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, merger);
 
   glue.build();
 
@@ -206,7 +206,7 @@ void testSimplexGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<do
 
 #if HAVE_UG && HAVE_HYBRIDTESTGRIDS
 template <int dim>
-void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<double,dim>& gridOffset)
+void testHybridGridsUG(std::shared_ptr< Merger<double,dim,dim,dim> > merger, const FieldVector<double,dim>& gridOffset)
 {
   // /////////////////////////////////////////////////////////////////////////
   //   Create the hybrid test grid from dune-grid twice and shift it once
@@ -232,10 +232,10 @@ void testHybridGridsUG(Merger<double,dim,dim,dim>& merger, const FieldVector<dou
   const typename DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const typename TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-  DomExtractor domEx(grid0->leafGridView(), domdesc);
-  TarExtractor tarEx(grid1->leafGridView(), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(grid0->leafGridView(), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(grid1->leafGridView(), tardesc);
 
-  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, &merger);
+  Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> glue(domEx, tarEx, merger);
 
   glue.build();
 
@@ -259,8 +259,8 @@ int main(int argc, char** argv) try
   // //////////////////////////////////////////////////////////
   //   Test with the OverlappingMerge implementation
   // //////////////////////////////////////////////////////////
-  OverlappingMerge<1,1,1,double> overlappingMerge1d;
-  OverlappingMerge<2,2,2,double> overlappingMerge2d;
+  auto overlappingMerge1d = std::make_shared< OverlappingMerge<1,1,1,double> >();
+  auto overlappingMerge2d = std::make_shared< OverlappingMerge<2,2,2,double> >();
 
   testCubeGrids<1>(overlappingMerge1d, FieldVector<double,1>(0.05));
   testCubeGrids<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
@@ -277,9 +277,9 @@ int main(int argc, char** argv) try
   //   Test with the ConformingMerge implementation
   // //////////////////////////////////////////////////////////
 
-  ConformingMerge<1,1,double> conformingMerge1d;
-  ConformingMerge<2,2,double> conformingMerge2d;
-  ConformingMerge<3,3,double> conformingMerge3d;
+  auto conformingMerge1d = std::make_shared< ConformingMerge<1,1,double> >();
+  auto conformingMerge2d = std::make_shared< ConformingMerge<2,2,double> >();
+  auto conformingMerge3d = std::make_shared< ConformingMerge<3,3,double> >();
 
   testCubeGrids<1>(conformingMerge1d, FieldVector<double,1>(0));
   testCubeGrids<2>(conformingMerge2d, FieldVector<double,2>(0));

@@ -96,16 +96,16 @@ void testMatchingCubeGrids()
   const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(1);
   const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(1);
 
-  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(cubeGrid0.levelGridView(0), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(cubeGrid1.levelGridView(0), tardesc);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // Testing with ContactMerge
   typedef ContactMerge<dim,double> ContactMergeImpl;
 
-  ContactMergeImpl contactMerger(0.01);
-  GlueType contactGlue(domEx, tarEx, &contactMerger);
+  auto contactMerger = std::make_shared<ContactMergeImpl>(0.01);
+  GlueType contactGlue(domEx, tarEx, contactMerger);
 
   contactGlue.build();
 
@@ -158,16 +158,16 @@ void testNonMatchingCubeGrids()
   const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(1);
   const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(1);
 
-  DomExtractor domEx(cubeGrid0.levelGridView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1.levelGridView(0), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(cubeGrid0.levelGridView(0), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(cubeGrid1.levelGridView(0), tardesc);
 
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // Testing with ContactMerge
   typedef ContactMerge<dim,double> ContactMergeImpl;
 
-  ContactMergeImpl contactMerger(0.01);
-  GlueType contactGlue(domEx, tarEx, &contactMerger);
+  auto contactMerger = std::make_shared<ContactMergeImpl>(0.01);
+  GlueType contactGlue(domEx, tarEx, contactMerger);
 
   contactGlue.build();
 
@@ -279,8 +279,8 @@ void testParallelCubeGrids()
   const typename DomExtractor::Predicate domdesc = makeVerticalFacePredicate<DomGridView>(slice);
   const typename TarExtractor::Predicate tardesc = makeVerticalFacePredicate<TarGridView>(slice);
 
-  DomExtractor domEx(cubeGrid0->levelGridView(0), domdesc);
-  TarExtractor tarEx(cubeGrid1->levelGridView(0), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(cubeGrid0->levelGridView(0), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(cubeGrid1->levelGridView(0), tardesc);
 
   // ////////////////////////////////////////
   //   Set up coupling at their interface
@@ -291,8 +291,8 @@ void testParallelCubeGrids()
   // Testing with ContactMerge
   typedef ContactMerge<dim,double> ContactMergeImpl;
 
-  ContactMergeImpl contactMerger(0.01);
-  GlueType contactGlue(domEx, tarEx, &contactMerger);
+  auto contactMerger = std::make_shared<ContactMergeImpl>(0.01);
+  GlueType contactGlue(domEx, tarEx, contactMerger);
 
   contactGlue.build();
 

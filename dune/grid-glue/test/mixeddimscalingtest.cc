@@ -93,14 +93,14 @@ bool doTest(double scale)
   const DomExtractor::Predicate domdesc = makeTruePredicate<DomGridView>();
   const TarExtractor::Predicate tardesc = makeTruePredicate<TarGridView>();
 
-  DomExtractor domEx(grid0.leafGridView(), domdesc);
-  TarExtractor tarEx(grid1.leafGridView(), tardesc);
+  auto domEx = std::make_shared<DomExtractor>(grid0.leafGridView(), domdesc);
+  auto tarEx = std::make_shared<TarExtractor>(grid1.leafGridView(), tardesc);
   typedef Dune::GridGlue::GridGlue<DomExtractor,TarExtractor> GlueType;
 
   // The following code is out-commented, because the test functionality
   // doesn't actually work yet.
-  OverlappingMerge<dim0, dim1, dimworld> merger;
-  GlueType glue(domEx, tarEx, &merger);
+  auto merger = std::make_shared< OverlappingMerge<dim0, dim1, dimworld> >();
+  GlueType glue(domEx, tarEx, merger);
 
   glue.build();
 

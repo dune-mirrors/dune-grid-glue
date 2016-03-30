@@ -66,7 +66,7 @@ void insertCube(GridFactory& factory, unsigned int& vertex, const Vector& offset
   factory.insertElement(type, vertices);
 }
 
-bool testDisconnected(const std::string& name, MyMerger& merger)
+bool testDisconnected(const std::string& name, std::shared_ptr<MyMerger> merger)
 {
   std::cout << "TEST: " << name << std::endl
             << "===================" << std::endl;
@@ -86,12 +86,12 @@ bool testDisconnected(const std::string& name, MyMerger& merger)
 
   typedef Dune::GridGlue::Codim1Extractor<GridView> Extractor;
   const Extractor::Predicate predicate = make_z_plane_predicate(1.0);
-  std::array<Extractor, 2> extractors{{
-    Extractor(grids[0]->leafGridView(), predicate),
-    Extractor(grids[1]->leafGridView(), predicate),
+  std::array<std::shared_ptr<Extractor>, 2> extractors{{
+      std::make_shared<Extractor>(grids[0]->leafGridView(), predicate),
+      std::make_shared<Extractor>(grids[1]->leafGridView(), predicate),
   }};
   for (unsigned i(0); i < extractors.size(); ++i) {
-    auto n = extractors[i].nCoords();
+    auto n = extractors[i]->nCoords();
     if (n != 8) {
       std::cerr << "FAIL: Extracted patch on grid " << i << " has " << n << " coordinates (expected 8)" << std::endl;
       pass = false;
@@ -99,7 +99,7 @@ bool testDisconnected(const std::string& name, MyMerger& merger)
   }
 
   typedef Dune::GridGlue::GridGlue<Extractor, Extractor> Glue;
-  Glue glue(extractors[0], extractors[1], &merger);
+  Glue glue(extractors[0], extractors[1], merger);
   glue.build();
   if (glue.size() != 4) {
     std::cerr << "FAIL: " << glue.size() << " remote intersections found (expected 4)." << std::endl;
@@ -120,8 +120,8 @@ int main()
   bool pass(true);
 
   {
-    Dune::GridGlue::ContactMerge<dim> merger(0.0);
-    merger.enableFallback(true);
+    auto merger = std::make_shared< Dune::GridGlue::ContactMerge<dim> >(0.0);
+    merger->enableFallback(true);
     pass &= testDisconnected("ContactMerge", merger);
   }
 
