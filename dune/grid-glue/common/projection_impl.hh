@@ -175,10 +175,13 @@ Projection<Coordinate>
    */
   std::array<Coordinate, dim-1> directions;
   std::array<Field, dim-1> scales;
+  /* estimator for the diameter of the target face */
+  Field scaleSum(0);
   for (unsigned i = 0; i < dim-1; ++i) {
     directions[i] = target[i+1] - target[0];
     scales[i] = directions[i].infinity_norm();
     directions[i] /= scales[i];
+    scaleSum += scales[i];
   }
 
   for (unsigned i = 0; i < dim-1; ++i) {
@@ -205,6 +208,19 @@ Projection<Coordinate>
         y[j] /= scales[j];
       /* Solving gave us -δ as the term is "-δ nᵢ". */
       y[dim-1] *= Field(-1);
+
+      /* If the forward projection is too far in the wrong direction
+       * then this might result in artificial inverse projections or
+       * edge intersections. To prevent these wrong cases but not
+       * dismiss feasible intersections, the projection is dismissed
+       * if the forward projection is further than two times the
+       * approximate diameter of the image triangle.
+       */
+      if(y[dim-1] < -2*scaleSum) {
+          success.set(i,false);
+          m_projection_valid = false;
+          return;
+      }
 
       const bool feasible = projectionFeasible(origin[i], origin_normals[i], y, target, target_normals);
       success.set(i, feasible);
