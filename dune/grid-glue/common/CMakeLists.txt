@@ -1,5 +1,7 @@
 #install headers
 install(FILES
+  areawriter.hh
+  areawriter_impl.hh
   crossproduct.hh
   multivector.hh
   projection.hh
