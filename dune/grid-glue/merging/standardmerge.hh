@@ -172,7 +172,7 @@ public:
              );
 
 
-  /*   Q U E S T I O N I N G   T H E   M E R G E D   G R I D   */
+  /*   P R O B I N G   T H E   M E R G E D   G R I D   */
 
   /// @brief get the number of simplices in the merged grid
   /// The indices are then in 0..nSimplices()-1

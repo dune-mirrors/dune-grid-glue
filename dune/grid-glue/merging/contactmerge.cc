@@ -102,7 +102,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     const Dune::ReferenceElement<T,dim>& ref2 = Dune::ReferenceElements<T,dim>::general(grid2ElementType);
     for (int i=0; i<ref2.size(1); i++) {
 
-        // if all face corners hit the the other element then
+        // if all face corners hit the other element then
         // the neighbor might also intersect
 
         bool intersects(true);
@@ -116,7 +116,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     const Dune::ReferenceElement<T,dim>& ref1 = Dune::ReferenceElements<T,dim>::general(grid1ElementType);
     for (int i=0; i<ref1.size(1); i++) {
 
-        // if all face corners hit the the other element then
+        // if all face corners hit the other element then
         // the neighbor might also intersect
 
         bool intersects(true);

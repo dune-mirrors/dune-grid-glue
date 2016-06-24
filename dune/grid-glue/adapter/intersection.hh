@@ -64,7 +64,7 @@ namespace Dune {
       /** \brief Default Constructor */
       IntersectionData() : grid0local_(false), grid1local_(false) {}
 
-      /*   M E M B E R   V A R  I A B L E S   */
+      /*   M E M B E R   V A R I A B L E S   */
 
       /// @brief index of this intersection after GridGlue interface
       IndexType index_;
