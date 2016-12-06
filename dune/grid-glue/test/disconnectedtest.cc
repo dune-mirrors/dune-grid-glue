@@ -15,6 +15,7 @@
 #include <limits>
 #include <memory>
 
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/gridfactory.hh>
@@ -115,8 +116,10 @@ bool testDisconnected(const std::string& name, std::shared_ptr<MyMerger> merger)
   return pass;
 }
 
-int main()
+int main(int argc, char** argv)
 {
+  Dune::MPIHelper::instance(argc, argv);
+
   bool pass(true);
 
   {
