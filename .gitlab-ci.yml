@@ -1,18 +1,12 @@
 ---
 dune:2.5--gcc:
   image: duneci/dune:2.5
-  script:
-  - dunecontrol --current all
-  - dunecontrol --current make test
+  script: duneci-standard-test
 
 dune:git--gcc:
   image: duneci/dune:git
-  script:
-  - dunecontrol --current all
-  - dunecontrol --current make test
+  script: duneci-standard-test
 
 dune:git--clang:
   image: duneci/dune:git
-  script:
-  - CMAKE_FLAGS="-DCMAKE_CXX_COMPILER=/usr/bin/clang++" dunecontrol --current all
-  - dunecontrol --current make test
+  script: duneci-standard-test --opts=/duneci/opts.clang
