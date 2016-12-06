@@ -21,6 +21,8 @@ include(DuneMacros)
 # start a dune project with information from dune.module
 dune_project()
 
+dune_register_package_flags(LIBRARIES dunegridglue)
+
 add_subdirectory("dune")
 add_subdirectory("doc")
 add_subdirectory("examples")
