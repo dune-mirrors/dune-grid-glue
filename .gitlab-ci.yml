@@ -1,6 +1,6 @@
 ---
-dune:2.4--gcc:
-  image: duneci/dune:2.4
+dune:2.5--gcc:
+  image: duneci/dune:2.5
   script:
   - dunecontrol --current all
   - dunecontrol --current make test
