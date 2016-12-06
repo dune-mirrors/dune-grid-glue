@@ -1,48 +1,13 @@
-if(MPI_C_FOUND)
-  set(MPI_PROGRAMS nonoverlappingcouplingtest_mpi)
-endif(MPI_C_FOUND)
-
-# tests where program to build and program to run are equal
-set(TESTS
- callmergertwicetest
- computecyclicordertest
- mixeddimcouplingtest
- mixeddimoverlappingtest
- mixeddimscalingtest
- multivectortest
- nonoverlappingcouplingtest
- overlappingcouplingtest
- projectiontest
- ${MPI_PROGRAMS})
-
-add_executable(callmergertwicetest callmergertwicetest.cc)
-add_executable(computecyclicordertest computecyclicordertest.cc)
-add_executable(mixeddimcouplingtest mixeddimcouplingtest.cc)
-add_executable(mixeddimoverlappingtest mixeddimoverlappingtest.cc)
-add_executable(mixeddimscalingtest mixeddimscalingtest.cc)
-add_executable(multivectortest multivectortest.cc)
-add_executable(nonoverlappingcouplingtest nonoverlappingcouplingtest.cc)
-set_property(TARGET nonoverlappingcouplingtest
-  APPEND PROPERTY COMPILE_DEFINITIONS "CALL_MERGER_TWICE")
-add_executable(overlappingcouplingtest overlappingcouplingtest.cc)
-set_property(TARGET overlappingcouplingtest
-  APPEND PROPERTY COMPILE_FLAGS "-frounding-math")
-add_executable(projectiontest projectiontest.cc)
-
-if(MPI_C_FOUND)
-  add_executable(nonoverlappingcouplingtest_mpi nonoverlappingcouplingtest.cc)
-  set_property(TARGET nonoverlappingcouplingtest_mpi
-    APPEND PROPERTY COMPILE_F "WRITE_TO_VTK")
-  add_dune_mpi_flags(nonoverlappingcouplingtest_mpi)
-endif(MPI_C_FOUND)
-
-if(UG_FOUND)
-  add_executable(disconnectedtest disconnectedtest.cc)
-  add_dune_ug_flags(disconnectedtest)
-  list(APPEND TESTS disconnectedtest)
-endif()
-
-foreach(_exe ${TESTS})
-  target_link_libraries(${_exe} "dunegridglue" ${DUNE_LIBS})
-  add_test(${_exe} ${_exe})
-endforeach(_exe ${TESTS})
+dune_add_test(SOURCES callmergertwicetest.cc)
+dune_add_test(SOURCES computecyclicordertest.cc)
+dune_add_test(SOURCES disconnectedtest.cc)
+dune_add_test(SOURCES mixeddimcouplingtest.cc)
+dune_add_test(SOURCES mixeddimoverlappingtest.cc)
+dune_add_test(SOURCES mixeddimscalingtest.cc)
+dune_add_test(SOURCES multivectortest.cc)
+dune_add_test(SOURCES nonoverlappingcouplingtest.cc
+              COMPILE_DEFINITIONS "CALL_MERGER_TWICE")
+dune_add_test(SOURCES overlappingcouplingtest.cc
+              COMPILE_DEFINITIONS "HAVE_UG_PARALLEL=${HAVE_UG_PARALLEL}"
+              COMPILE_FLAGS "-frounding-math")
+dune_add_test(SOURCES projectiontest.cc)
