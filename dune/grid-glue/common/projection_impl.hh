@@ -364,6 +364,13 @@ Projection<Coordinate>
       const auto ykyl = ys[k] - ys[l];
       const auto ykpxi = ys[k] - pxi;
 
+      /* If edges are parallel then the intersection is already computed by vertex projections. */
+      bool parallel = true;
+      for (unsigned h=0; h<3; h++)
+        parallel &= std::abs(ykyl[(h+1)%3]*pxjpxi[(h+2)%3] - ykyl[(h+2)%3]*pxjpxi[(h+1)%3])<1e-14;
+      if (parallel)
+        continue;
+
       Matrix mat;
       Vector rhs, z;
 
