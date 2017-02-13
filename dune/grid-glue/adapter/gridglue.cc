@@ -249,6 +249,8 @@ void GridGlue<P0, P1>::build()
   if (patch0entities.size() > 0 && patch1entities.size() > 0)
     mergePatches(patch0coords, patch0entities, patch0types, myrank,
                  patch1coords, patch1entities, patch1types, myrank);
+  else // set size correctly if projection is empty
+    index__sz = 0;
 
 #ifdef CALL_MERGER_TWICE
   if (patch0entities.size() > 0 && patch1entities.size() > 0)
