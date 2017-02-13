@@ -60,6 +60,8 @@ public:
     /// @brief the coordinate type used in this interface
     typedef Dune::FieldVector<T, dim>  LocalCoords;
 
+    /// @brief Type of the projection, closest point or outer normal projection
+    enum ProjectionType {OUTER_NORMAL, CLOSEST_POINT};
    /**
      * @brief Construct merger given overlap and possible projection directions.
      *
@@ -98,9 +100,20 @@ public:
      */
     ContactMerge(const T allowedOverlap=T(0),
                  std::function<WorldCoords(WorldCoords)> domainDirections=nullptr,
-                 std::function<WorldCoords(WorldCoords)> targetDirections=nullptr)
+                 std::function<WorldCoords(WorldCoords)> targetDirections=nullptr,
+                 ProjectionType type = OUTER_NORMAL)
         : domainDirections_(domainDirections), targetDirections_(targetDirections),
-          overlap_(allowedOverlap)
+          overlap_(allowedOverlap), type_(type)
+    {}
+
+    /**
+     * @brief Construct merger given overlap and type of the projection
+     * @param allowedOverlap Allowed overlap of the surfacs
+     * @param type Type of the projection
+     */
+    ContactMerge(const T allowedOverlap, ProjectionType type)
+        : overlap_(allowedOverlap),
+          type_(type)
     {}
 
     /**
@@ -200,6 +213,9 @@ private:
 
     //! Allow some overlap, i.e. also look in the negative projection directions
     T overlap_;
+
+    //! The type of the projection, i.e. closest point projection or outer normal
+    ProjectionType type_;
 
     /**
      * See Projection::m_max_normal_product
