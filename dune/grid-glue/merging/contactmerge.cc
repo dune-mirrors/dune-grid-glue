@@ -40,18 +40,28 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
         directions1[i] = nodalDomainDirections_[this->grid1ElementCorners_[grid1Index][i]];
 
     // The grid2 projection directions
-    // These are only needed in a check for validity of the projection and they should be chosen
-    // to be some outer pointing directions, e.g. outer normals
     std::vector<WorldCoords> directions2(nCorners2);
     for (size_t i=0; i<directions2.size(); i++)
         directions2[i] = nodalTargetDirections_[this->grid2ElementCorners_[grid2Index][i]];
+
+    // The difference between the closest point projection and the normal projection is just the ordering
+    // of the involved surfaces. The closest point projection is done along the outer normal field of grid2
+    // (due to being a best approximation) and the outer normal projection is using the outer normal field
+    // of grid1 instead.
+    std::array<decltype(std::cref(grid1ElementCorners)),2> cornersRef ={std::cref(grid1ElementCorners), std::cref(grid2ElementCorners)};
+    std::array<decltype(std::cref(directions1)),2> directionsRef ={std::cref(directions1), std::cref(directions2)};
+    std::array<Dune::GeometryType,2> elementTypes = {grid1ElementType, grid2ElementType};
+
+    // Determine which is the grid we use for outer normal projection
+    const size_t domGrid = (type_==ProjectionType::OUTER_NORMAL) ? 0 : 1;
+    const size_t tarGrid = (type_==ProjectionType::OUTER_NORMAL) ? 1 : 0;
 
     /////////////////////////////////////////////////////
     //  Compute all corners of the intersection polytope
     /////////////////////////////////////////////////////
 
-    const auto corners = std::tie(grid1ElementCorners, grid2ElementCorners);
-    const auto normals = std::tie(directions1, directions2);
+    const auto corners = std::tie(cornersRef[domGrid].get(),cornersRef[tarGrid].get());
+    const auto normals = std::tie(directionsRef[domGrid].get(), directionsRef[tarGrid].get());
     Projection<WorldCoords> p(overlap_, maxNormalProduct_);
     p.project(corners, normals);
 
@@ -62,9 +72,9 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
       for (unsigned i = 0; i < dimworld; ++i) {
         if (success[i]) {
           std::array<LocalCoords, 2> corner;
-          corner[0] = localCornerCoords(i, grid1ElementType);
+          corner[domGrid] = localCornerCoords(i, elementTypes[domGrid]);
           for (unsigned j = 0; j < dim; ++j)
-            corner[1][j] = images[i][j];
+            corner[tarGrid][j] = images[i][j];
           polytopeCorners.push_back(corner);
         }
       }
@@ -78,8 +88,8 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
         if (success[i]) {
           std::array<LocalCoords, 2> corner;
           for (unsigned j = 0; j < dim; ++j)
-            corner[0][j] = preimages[i][j];
-          corner[1] = localCornerCoords(i, grid2ElementType);
+            corner[domGrid][j] = preimages[i][j];
+          corner[tarGrid] = localCornerCoords(i, elementTypes[tarGrid]);
           polytopeCorners.push_back(corner);
         }
       }
@@ -91,47 +101,48 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
         std::array<LocalCoords, 2> corner;
         const auto& local = p.edgeIntersections()[i].local;
         for (unsigned j = 0; j < dim; ++j) {
-          corner[0][j] = local[0][j];
-          corner[1][j] = local[1][j];
+          corner[domGrid][j] = local[0][j];
+          corner[tarGrid][j] = local[1][j];
         }
         polytopeCorners.push_back(corner);
       }
     }
 
     // check which neighbors might also intersect
-    const Dune::ReferenceElement<T,dim>& ref2 = Dune::ReferenceElements<T,dim>::general(grid2ElementType);
-    for (int i=0; i<ref2.size(1); i++) {
+    std::array<decltype(std::ref(neighborIntersects1)),2> neighborIntersectsRef = {std::ref(neighborIntersects1), std::ref(neighborIntersects2)};
+    const auto& refTar = Dune::ReferenceElements<T,dim>::general(elementTypes[tarGrid]);
+    for (int i=0; i<refTar.size(1); i++) {
 
         // if all face corners hit the the other element then
         // the neighbor might also intersect
 
         bool intersects(true);
-        for (int k=0; k<ref2.size(i,1,dim); k++)
-            intersects &= get<1>(p.success())[ref2.subEntity(i,1,k,dim)];
+        for (int k=0; k<refTar.size(i,1,dim); k++)
+            intersects &= get<1>(p.success())[refTar.subEntity(i,1,k,dim)];
 
         if (intersects)
-            neighborIntersects2[i] = true;
+            neighborIntersectsRef[tarGrid].get()[i] = true;
     }
 
-    const Dune::ReferenceElement<T,dim>& ref1 = Dune::ReferenceElements<T,dim>::general(grid1ElementType);
-    for (int i=0; i<ref1.size(1); i++) {
+    const auto& refDom = Dune::ReferenceElements<T,dim>::general(elementTypes[domGrid]);
+    for (int i=0; i<refDom.size(1); i++) {
 
         // if all face corners hit the the other element then
         // the neighbor might also intersect
 
         bool intersects(true);
-        for (int k=0; k<ref1.size(i,1,dim); k++)
-            intersects &= get<0>(p.success())[ref1.subEntity(i,1,k,dim)];
+        for (int k=0; k<refDom.size(i,1,dim); k++)
+            intersects &= get<0>(p.success())[refDom.subEntity(i,1,k,dim)];
 
         if (intersects)
-            neighborIntersects1[i] = true;
+            neighborIntersectsRef[domGrid].get()[i] = true;
     }
 
     // Compute the edge intersections
     for (unsigned i = 0; i < p.numberOfEdgeIntersections(); ++i) {
       const auto& edge = p.edgeIntersections()[i].edge;
-      neighborIntersects1[edge[0]] = true;
-      neighborIntersects2[edge[1]] = true;
+      neighborIntersects1[edge[domGrid]] = true;
+      neighborIntersects2[edge[tarGrid]] = true;
     }
 
     // remove possible doubles

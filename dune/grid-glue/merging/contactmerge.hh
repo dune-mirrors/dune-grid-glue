@@ -60,35 +60,8 @@ public:
     /// @brief the coordinate type used in this interface
     typedef Dune::FieldVector<T, dim>  LocalCoords;
 
-   /**
-     * @brief Construct merger given overlap and possible projection directions.
-     *
-     * @param allowedOverlap Allowed overlap of the surfaces
-     * @param domainDirections Projection direction field for the first surface that differ from the defualt normal field
-     * @param targetDirections Projection direction field for the second surface that differ from the default normal field
-     */
-    DUNE_DEPRECATED_MSG("Please use a std::function<FieldVector(FieldVector)> to prescribe non-default projections")
-    ContactMerge(const T allowedOverlap,
-            const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections,
-            const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections)
-        : overlap_(allowedOverlap)
-    {
-        if (domainDirections) {
-            domainDirections_ = [domainDirections](const WorldCoords& in) {
-                WorldCoords out;
-                domainDirections->evaluate(in,out);
-                return out;
-            };
-        }
-        if (targetDirections) {
-            targetDirections_ = [targetDirections](const WorldCoords& in) {
-                WorldCoords out;
-                targetDirections->evaluate(in,out);
-                return out;
-            };
-        }
-    }
-
+    /// @brief Type of the projection, closest point or outer normal projection
+    enum ProjectionType {OUTER_NORMAL, CLOSEST_POINT};
     /**
      * @brief Construct merger given overlap and possible projection directions.
      *
@@ -98,9 +71,20 @@ public:
      */
     ContactMerge(const T allowedOverlap=T(0),
                  std::function<WorldCoords(WorldCoords)> domainDirections=nullptr,
-                 std::function<WorldCoords(WorldCoords)> targetDirections=nullptr)
+                 std::function<WorldCoords(WorldCoords)> targetDirections=nullptr,
+                 ProjectionType type = OUTER_NORMAL)
         : domainDirections_(domainDirections), targetDirections_(targetDirections),
-          overlap_(allowedOverlap)
+          overlap_(allowedOverlap), type_(type)
+    {}
+
+    /**
+     * @brief Construct merger given overlap and type of the projection
+     * @param allowedOverlap Allowed overlap of the surfacs
+     * @param type Type of the projection
+     */
+    ContactMerge(const T allowedOverlap, ProjectionType type)
+        : overlap_(allowedOverlap),
+          type_(type)
     {}
 
     /**
@@ -117,33 +101,6 @@ public:
     {
         domainDirections_ = domainDirections;
         targetDirections_ = targetDirections;
-        this->valid = false;
-    }
-
-    /**
-     * @brief Set surface direction functions
-     *
-     * The matching of the geometries offers the possibility to specify a function for
-     * the exact evaluation of domain surface normals. If no such function is specified
-     * (default) normals are interpolated.
-     * @param value the new function (or nullptr to unset the function)
-     */
-    DUNE_DEPRECATED_MSG("Please use a std::function<FieldVector(FieldVector)> to prescribe non-default projections")
-    inline
-    void setSurfaceDirections(const Dune::VirtualFunction<WorldCoords,WorldCoords>* domainDirections,
-                              const Dune::VirtualFunction<WorldCoords,WorldCoords>* targetDirections)
-    {
-        domainDirections_ = [domainDirections](const WorldCoords& in) {
-            WorldCoords out;
-            domainDirections->evaluate(in,out);
-            return out;
-        };
-
-        targetDirections_ = [targetDirections](const WorldCoords& in) {
-            WorldCoords out;
-            targetDirections->evaluate(in,out);
-            return out;
-        };
         this->valid = false;
     }
 
@@ -200,6 +157,9 @@ private:
 
     //! Allow some overlap, i.e. also look in the negative projection directions
     T overlap_;
+
+    //! The type of the projection, i.e. closest point projection or outer normal
+    ProjectionType type_;
 
     /**
      * See Projection::m_max_normal_product

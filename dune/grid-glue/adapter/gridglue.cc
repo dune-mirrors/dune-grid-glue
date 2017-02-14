@@ -9,6 +9,8 @@
 
 #include "../common/multivector.hh"
 
+#include <dune/common/unused.hh>
+
 /** \todo Implement MPI Status check with exception handling */
 #define CheckMPIStatus(A,B) {}
 
@@ -79,7 +81,8 @@ namespace {
     )
   {
     // mpi status stuff
-    int result = 0;
+    int result DUNE_UNUSED;
+    result = 0;
     MPI_Status status;
     typedef MPITypeInfo<T> Info;
     // alloc buffer
@@ -249,6 +252,8 @@ void GridGlue<P0, P1>::build()
   if (patch0entities.size() > 0 && patch1entities.size() > 0)
     mergePatches(patch0coords, patch0entities, patch0types, myrank,
                  patch1coords, patch1entities, patch1types, myrank);
+  else // set size correctly if projection is empty
+    index__sz = 0;
 
 #ifdef CALL_MERGER_TWICE
   if (patch0entities.size() > 0 && patch1entities.size() > 0)
@@ -259,7 +264,7 @@ void GridGlue<P0, P1>::build()
 #if HAVE_MPI
 
   // status variables of communication
-  int mpi_result;
+  int mpi_result DUNE_UNUSED;
   MPI_Status mpi_status;
 
 #ifdef DEBUG_GRIDGLUE_PARALLELMERGE
