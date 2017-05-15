@@ -7,8 +7,6 @@
 #include <iterator>
 #include "../gridglue.hh"
 
-#include "../common/multivector.hh"
-
 #include <dune/common/unused.hh>
 
 /** \todo Implement MPI Status check with exception handling */
