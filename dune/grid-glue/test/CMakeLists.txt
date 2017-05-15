@@ -11,7 +11,6 @@ dune_add_test(SOURCES disconnectedtest.cc
 dune_add_test(SOURCES mixeddimcouplingtest.cc)
 dune_add_test(SOURCES mixeddimoverlappingtest.cc)
 dune_add_test(SOURCES mixeddimscalingtest.cc)
-dune_add_test(SOURCES multivectortest.cc)
 dune_add_test(SOURCES nonoverlappingcouplingtest.cc
               COMPILE_DEFINITIONS "CALL_MERGER_TWICE")
 dune_add_test(SOURCES overlappingcouplingtest.cc
