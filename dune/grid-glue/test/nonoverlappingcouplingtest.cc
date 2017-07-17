@@ -5,6 +5,7 @@
 #include <array>
 
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/stdstreams.hh>
 #include <iostream>
 
 #include <dune/common/fvector.hh>
