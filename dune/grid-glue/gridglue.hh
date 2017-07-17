@@ -15,6 +15,7 @@
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/promotiontraits.hh>
 #include <dune/common/shared_ptr.hh>
+#include <dune/common/stdstreams.hh>
 
 #include "adapter/gridgluecommunicate.hh"
 #include <dune/grid-glue/merging/merger.hh>
