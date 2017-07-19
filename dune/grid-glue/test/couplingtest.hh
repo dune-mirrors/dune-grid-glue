@@ -7,6 +7,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/version.hh>
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
@@ -94,10 +95,17 @@ template <class GlueType>
 void testCoupling(const GlueType& glue)
 {
   bool success = true;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
+  using View0Mapper = Dune::MultipleCodimMultipleGeomTypeMapper<typename GlueType::Grid0View>;
+  using View1Mapper = Dune::MultipleCodimMultipleGeomTypeMapper<typename GlueType::Grid1View>;
+  View0Mapper view0mapper(glue.template gridView<0>(), Dune::mcmgElementLayout());
+  View1Mapper view1mapper(glue.template gridView<1>(), Dune::mcmgElementLayout());
+#else
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, Dune::MCMGElementLayout > View0Mapper;
   typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, Dune::MCMGElementLayout > View1Mapper;
   View0Mapper view0mapper(glue.template gridView<0>());
   View1Mapper view1mapper(glue.template gridView<1>());
+#endif
 
   std::vector<unsigned int> countInside0(view0mapper.size());
   std::vector<unsigned int> countOutside1(view1mapper.size());

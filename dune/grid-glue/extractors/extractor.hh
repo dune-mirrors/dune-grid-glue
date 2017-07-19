@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/version.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
@@ -69,7 +70,11 @@ public:
 
   typedef std::vector<unsigned int>                                VertexVector;
 
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> CellMapper;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
+  using CellMapper = MultipleCodimMultipleGeomTypeMapper<GridView>;
+#else
+  using CellMapper = MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout>;
+#endif
   // typedef typename CellMapper::IndexType                               IndexType;
   typedef int IndexType;
 public:
@@ -221,7 +226,12 @@ public:
    * @param gv the grid view object to work with
    */
   Extractor(const GV& gv)
-    :  gv_(gv), cellMapper_(gv)
+    :  gv_(gv)
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
+    , cellMapper_(gv, mcmgElementLayout())
+#else
+    , cellMapper_(gv)
+#endif
   {}
 
   /** \brief Destructor frees allocated memory */
