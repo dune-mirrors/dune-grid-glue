@@ -78,24 +78,6 @@ public:
   /**
    * @brief Constructor
    * @param gv the grid view object to work with
-   * @param descr a predicate to mark entities for extraction (unary functor returning bool)
-   */
-  DUNE_DEPRECATED_MSG("Please use a std::function<bool(const Element&, unsigned int)> in favor of the ExtractorPredicate.")
-  Codim1Extractor(const GV& gv, const ExtractorPredicate<GV,1>& descr)
-    :  Extractor<GV,1>(gv)
-  {
-    std::cout << "This is Codim1Extractor on a <" << dim
-              << "," << dimworld << "> grid!"
-              << std::endl;
-    const auto predicate = [&](const Element& element, unsigned int subentity) -> bool {
-      return descr.contains(element, subentity);
-    };
-    update(predicate);
-  }
-
-  /**
-   * @brief Constructor
-   * @param gv the grid view object to work with
    * @param predicate a predicate to mark entities for extraction (unary functor returning bool)
    */
   Codim1Extractor(const GV& gv, const Predicate& predicate)
