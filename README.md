@@ -25,7 +25,7 @@ Publications
 ------------
 
 * [P. Bastian, G. Buse, O. Sander: Infrastructure for the Coupling of Dune Grids, In 'Proceedings of ENUMATH 2009', Springer, 2010, pp. 107-114](https://dx.doi.org/10.1007/978-3-642-11795-4_10)
-* C. Engwer, S. Müthing, Concepts for flexible parallel multi-domain simulations, In 'Domain Decomposition Methods in Science and Engineering XXII', Springer (to be published)
+* [C. Engwer, S. Müthing: Concepts for flexible parallel multi-domain simulations, In 'Domain Decomposition Methods in Science and Engineering XXII', Springer](https://dx.doi.org/10.1007/978-3-319-18827-0_17)
 
 License
 -------
