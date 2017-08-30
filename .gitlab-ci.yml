@@ -2,11 +2,14 @@
 dune:2.5--gcc:
   image: duneci/dune:2.5
   script: duneci-standard-test
+  tags: [duneci]
 
 dune:git--gcc:
   image: duneci/dune:git
   script: duneci-standard-test
+  tags: [duneci]
 
 dune:git--clang:
   image: duneci/dune:git
   script: duneci-standard-test --opts=/duneci/opts.clang
+  tags: [duneci]
