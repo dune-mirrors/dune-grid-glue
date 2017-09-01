@@ -2,6 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <array>
 #include <memory>
 
 #include <dune/grid/yaspgrid.hh>
@@ -162,7 +163,7 @@ void testSimplexGridsUG(std::shared_ptr< Merger<double,dim,dim,dim> > merger, co
 
   FieldVector<double,dim> lowerLeft(0);
   FieldVector<double,dim> upperRight(1);
-  array<unsigned int, dim> elements;
+  std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 10);
 
   StructuredGridFactory<GridType> factory;
