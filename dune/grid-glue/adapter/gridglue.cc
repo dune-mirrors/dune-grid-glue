@@ -159,13 +159,6 @@ namespace Dune {
 namespace GridGlue {
 
 template<typename P0, typename P1>
-GridGlue<P0, P1>::GridGlue(const Grid0Patch& gp0, const Grid1Patch& gp1, Merger* merger) :
-  GridGlue(Dune::stackobject_to_shared_ptr(gp0), Dune::stackobject_to_shared_ptr(gp1), Dune::stackobject_to_shared_ptr(*merger))
-{
-  /* Nothing. */
-}
-
-template<typename P0, typename P1>
 GridGlue<P0, P1>::GridGlue(const std::shared_ptr<const Grid0Patch> gp0, const std::shared_ptr<const Grid1Patch> gp1, const std::shared_ptr<Merger> merger)
   : patch0_(gp0), patch1_(gp1), merger_(merger)
 {

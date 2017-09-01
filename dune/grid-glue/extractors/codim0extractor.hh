@@ -25,7 +25,6 @@
 #include <dune/grid/common/mcmgmapper.hh>
 
 #include "extractor.hh"
-#include "extractorpredicate.hh"
 
 namespace Dune {
 

@@ -19,7 +19,6 @@
 #define DUNE_GRIDGLUE_EXTRACTORS_CODIM1EXTRACTOR_HH
 
 #include "extractor.hh"
-#include "extractorpredicate.hh"
 
 #include <deque>
 #include <functional>
