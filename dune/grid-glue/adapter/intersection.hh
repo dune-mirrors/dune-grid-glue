@@ -12,6 +12,7 @@
 #include <memory>
 
 #include <dune/geometry/affinegeometry.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/grid-glue/gridglue.hh>
 
 #define ONLY_SIMPLEX_INTERSECTIONS
