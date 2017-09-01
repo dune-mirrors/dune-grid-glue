@@ -422,7 +422,7 @@ computeNeighborsPerElement(const std::vector<Dune::GeometryType>& gridElementTyp
     elementNeighbors[i].resize(Dune::ReferenceElements<T,gridDim>::general(gridElementTypes[i]).size(1), -1);
 
   for (size_t i=0; i<gridElementTypes.size(); i++) { //iterate over all elements
-    const Dune::ReferenceElement<T,gridDim>& refElement = Dune::ReferenceElements<T,gridDim>::general(gridElementTypes[i]);
+    const auto& refElement = Dune::ReferenceElements<T,gridDim>::general(gridElementTypes[i]);
 
     for (size_t j=0; j<(size_t)refElement.size(1); j++) { // iterate over all faces of the element
 

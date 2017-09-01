@@ -27,7 +27,7 @@ makeHorizontalFacePredicate(double sliceCoord)
   using Element = typename GridView::Traits::template Codim<0>::Entity;
   auto predicate = [sliceCoord](const Element& element, unsigned int face) -> bool {
     const int dim = GridView::dimension;
-    const Dune::ReferenceElement<double,dim>& refElement = Dune::ReferenceElements<double, dim>::general(element.type());
+    const auto& refElement = Dune::ReferenceElements<double, dim>::general(element.type());
 
     int numVertices = refElement.size(face, 1, dim);
 

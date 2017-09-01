@@ -206,7 +206,7 @@ private:
     //! Compute local coordinates of a corner
     static LocalCoords localCornerCoords(int i, const Dune::GeometryType& gt)
     {
-        const Dune::ReferenceElement<T,dim>& ref = Dune::ReferenceElements<T,dim>::general(gt);
+        const auto& ref = Dune::ReferenceElements<T,dim>::general(gt);
         return ref.position(i,dim);
     }
 

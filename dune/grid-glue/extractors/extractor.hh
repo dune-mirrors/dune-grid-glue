@@ -449,8 +449,7 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   const auto elmtseed = elmtInfo_.find(face.parent)->second->p;
   const auto elmt = grid().entity(elmtseed);
   const Dune::GeometryType celltype = elmt.type();
-  const Dune::ReferenceElement<ctype, dim> & re =
-    Dune::ReferenceElements<ctype, dim>::general(celltype);
+  const auto& re = Dune::ReferenceElements<ctype, dim>::general(celltype);
   for (unsigned int i = 0; i < subEntities_[index].nCorners(); ++i)
     corners[i] = re.position(face.corners[i].num,dim);
 

@@ -154,7 +154,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
           if (!is->boundary() or !predicate(elmt, is->indexInInside()))
             continue;
 
-          const Dune::ReferenceElement<ctype, dim>& refElement = Dune::ReferenceElements<ctype, dim>::general(gt);
+          const auto& refElement = Dune::ReferenceElements<ctype, dim>::general(gt);
           // get the corner count of this face
           const int face_corners = refElement.size(is->indexInInside(), 1, dim);
 

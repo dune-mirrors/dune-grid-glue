@@ -181,7 +181,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
   //   Set up the new remote intersection
   // ////////////////////////////////////////////////////////////
 
-  const Dune::ReferenceElement<T,dim>& refElement = Dune::ReferenceElements<T,dim>::general(grid1ElementType);
+  const auto& refElement = Dune::ReferenceElements<T,dim>::general(grid1ElementType);
 
   /** \todo Currently the RemoteIntersections have to be simplices */
   if (grid1ElementType.isSimplex()) {
