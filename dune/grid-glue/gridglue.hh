@@ -304,7 +304,7 @@ public:
    * @param merger The merger object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
-  GridGlue(const std::shared_ptr< const GridPatch<0> > gp0, const std::shared_ptr< const GridPatch<1> > gp1, const std::shared_ptr<Merger> merger);
+  GridGlue(const std::shared_ptr< const GridPatch<0> >& gp0, const std::shared_ptr< const GridPatch<1> >& gp1, const std::shared_ptr<Merger>& merger);
 
   /*   G E T T E R S   */
 

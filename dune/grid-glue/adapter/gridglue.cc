@@ -159,7 +159,7 @@ namespace Dune {
 namespace GridGlue {
 
 template<typename P0, typename P1>
-GridGlue<P0, P1>::GridGlue(const std::shared_ptr< const GridPatch<0> > gp0, const std::shared_ptr< const GridPatch<1> > gp1, const std::shared_ptr<Merger> merger)
+GridGlue<P0, P1>::GridGlue(const std::shared_ptr< const GridPatch<0> >& gp0, const std::shared_ptr< const GridPatch<1> >& gp1, const std::shared_ptr<Merger>& merger)
   : patches_{gp0, gp1}, merger_(merger)
 {
 #if HAVE_MPI
