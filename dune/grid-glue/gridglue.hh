@@ -442,11 +442,11 @@ public:
       int rsz = size() * 10;
 
       // allocate send/receive buffer
-      DataType* sendbuffer = new DataType[ssz];
-      DataType* receivebuffer = new DataType[rsz];
+      auto sendbuffer = std::make_unique<DataType[]>(ssz);
+      auto receivebuffer = std::make_unique<DataType[]>(rsz);
 
       // gather
-      Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer);
+      Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer.get());
       for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
       {
         /*
@@ -479,7 +479,7 @@ public:
         receivebuffer[i] = sendbuffer[i];
 
       // scatter
-      Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer);
+      Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer.get());
       for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
       {
         /*
@@ -504,10 +504,6 @@ public:
                          data.size(*rit));
         }
       }
-
-      // cleanup pointers
-      delete[] sendbuffer;
-      delete[] receivebuffer;
     }
   }
 
