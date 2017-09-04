@@ -35,12 +35,6 @@
 namespace Dune {
 namespace GridGlue {
 
-/** Document the relation between the old grid names and the new numbering */
-enum GridOrdering {
-  Domain = 0,
-  Target = 1
-};
-
 // forward declarations
 template<typename P0, typename P1>
 class GridGlue;
