@@ -96,13 +96,13 @@ void testCoupling(const GlueType& glue)
 {
   bool success = true;
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
-  using View0Mapper = Dune::MultipleCodimMultipleGeomTypeMapper<typename GlueType::Grid0View>;
-  using View1Mapper = Dune::MultipleCodimMultipleGeomTypeMapper<typename GlueType::Grid1View>;
+  using View0Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<0> >;
+  using View1Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<1> >;
   View0Mapper view0mapper(glue.template gridView<0>(), Dune::mcmgElementLayout());
   View1Mapper view1mapper(glue.template gridView<1>(), Dune::mcmgElementLayout());
 #else
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid0View, Dune::MCMGElementLayout > View0Mapper;
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::Grid1View, Dune::MCMGElementLayout > View1Mapper;
+  using View0Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<0>, Dune::MCMGElementLayout >;
+  using View1Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<1>, Dune::MCMGElementLayout >;
   View0Mapper view0mapper(glue.template gridView<0>());
   View1Mapper view1mapper(glue.template gridView<1>());
 #endif
@@ -118,9 +118,7 @@ void testCoupling(const GlueType& glue)
 
   {
     size_t count = 0;
-    typename GlueType::Grid0IntersectionIterator rIIt    = glue.template ibegin<0>();
-    typename GlueType::Grid0IntersectionIterator rIEndIt = glue.template iend<0>();
-    for (; rIIt!=rIEndIt; ++rIIt) count ++;
+    for (auto rIIt = glue.template ibegin<0>(); rIIt != glue.template iend<0>(); ++rIIt) count ++;
     typename GlueType::IndexSet is = glue.indexSet();
     if(is.size() != glue.size())
       DUNE_THROW(Dune::Exception,
@@ -129,7 +127,7 @@ void testCoupling(const GlueType& glue)
       DUNE_THROW(Dune::Exception,
         "Inconsistent size information: indexSet.size() " << is.size() << " != iterator count " << count);
     std::vector<bool> visited(count, false);
-    for (rIIt = glue.template ibegin<0>(); rIIt!=rIEndIt; ++rIIt) {
+    for (auto rIIt = glue.template ibegin<0>(); rIIt != glue.template iend<0>(); ++rIIt) {
       size_t idx = is.index(*rIIt);
       if(idx >= count)
         DUNE_THROW(Dune::Exception,
@@ -154,9 +152,7 @@ void testCoupling(const GlueType& glue)
   // ///////////////////////////////////////
 
   {
-    typename GlueType::Grid0IntersectionIterator rIIt    = glue.template ibegin<0>();
-    typename GlueType::Grid0IntersectionIterator rIEndIt = glue.template iend<0>();
-    for (; rIIt!=rIEndIt; ++rIIt)
+    for (auto rIIt = glue.template ibegin<0>(); rIIt != glue.template iend<0>(); ++rIIt)
     {
       if (rIIt->self() && rIIt->neighbor())
       {
@@ -175,9 +171,7 @@ void testCoupling(const GlueType& glue)
   // ///////////////////////////////////////
 
   {
-    typename GlueType::Grid1IntersectionIterator rIIt    = glue.template ibegin<1>();
-    typename GlueType::Grid1IntersectionIterator rIEndIt = glue.template iend<1>();
-    for (; rIIt!=rIEndIt; ++rIIt)
+    for (auto rIIt = glue.template ibegin<1>(); rIIt != glue.template iend<1>(); ++rIIt)
     {
       if (rIIt->self() && rIIt->neighbor())
       {

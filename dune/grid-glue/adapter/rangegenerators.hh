@@ -72,7 +72,7 @@ const Reverse<true> reversed = {};
 } /* namespace */
 
 template<typename P0, typename P1, bool reverse = false>
-IteratorRange<typename GridGlueView<P0, P1, reverse ? 1 : 0>::IntersectionIterator>
+IteratorRange< typename GridGlue<P0, P1>::template IntersectionIterator<reverse ? 1 : 0> >
 intersections(const GridGlue<P0, P1>& glue, const Reverse<reverse>& = {})
 {
   const static int side = reverse ? 1 : 0;
