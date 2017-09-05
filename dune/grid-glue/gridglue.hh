@@ -117,24 +117,26 @@ public:
   using Grid0Patch DUNE_DEPRECATED_MSG("please use GridPatch<0> instead") = GridPatch<0>;
 
   template<int side>
-  static constexpr auto griddim = GridPatch<side>::dim;
+  static constexpr auto griddim()
+    { return GridPatch<side>::dim; }
 
   template<int side>
-  static constexpr auto griddimworld = GridPatch<side>::dimworld;
+  static constexpr auto griddimworld()
+    { return GridPatch<side>::dimworld; }
 
   /** \brief dimension of the grid 0 extractor */
-  DUNE_DEPRECATED_MSG("please use griddim<0> instead")
-  static constexpr auto grid0dim = griddim<0>;
+  DUNE_DEPRECATED_MSG("please use griddim<0>() instead")
+  static constexpr auto grid0dim = griddim<0>();
 
-  DUNE_DEPRECATED_MSG("please use griddim<0> instead")
-  static constexpr auto domdim = griddim<0>;
+  DUNE_DEPRECATED_MSG("please use griddim<0>() instead")
+  static constexpr auto domdim = griddim<0>();
 
   /** \brief world dimension of the grid 0 extractor */
-  DUNE_DEPRECATED_MSG("please use griddimworld<0> instead")
-  static constexpr auto grid0dimworld = griddimworld<0>;
+  DUNE_DEPRECATED_MSG("please use griddimworld<0>() instead")
+  static constexpr auto grid0dimworld = griddimworld<0>();
 
-  DUNE_DEPRECATED_MSG("please use griddimworld<0> instead")
-  static constexpr auto domdimworld = griddimworld<0>;
+  DUNE_DEPRECATED_MSG("please use griddimworld<0>() instead")
+  static constexpr auto domdimworld = griddimworld<0>();
 
   /** \brief GridView of grid 1 (aka target grid) */
   using Grid1View DUNE_DEPRECATED_MSG("please use GridView<0> instead") = GridView<1>;
@@ -149,23 +151,23 @@ public:
   typedef unsigned int IndexType;
 
   /** \brief dimension of the grid 1 extractor */
-  DUNE_DEPRECATED_MSG("please use griddim<1> instead")
-  static constexpr auto grid1dim = griddim<1>;
+  DUNE_DEPRECATED_MSG("please use griddim<1>() instead")
+  static constexpr auto grid1dim = griddim<1>();
 
-  DUNE_DEPRECATED_MSG("please use griddim<1> instead")
-  static constexpr auto tardim = griddim<1>;
+  DUNE_DEPRECATED_MSG("please use griddim<1>() instead")
+  static constexpr auto tardim = griddim<1>();
 
   /** \brief world dimension of the grid 1 extractor */
-  DUNE_DEPRECATED_MSG("please use griddimworld<1> instead")
-  static constexpr auto grid1dimworld = griddimworld<1>;
+  DUNE_DEPRECATED_MSG("please use griddimworld<1>() instead")
+  static constexpr auto grid1dimworld = griddimworld<1>();
 
-  DUNE_DEPRECATED_MSG("please use griddimworld<1> instead")
-  static constexpr auto tardimworld = griddimworld<1>;
+  DUNE_DEPRECATED_MSG("please use griddimworld<1>() instead")
+  static constexpr auto tardimworld = griddimworld<1>();
 
   /** \brief export the world dimension
    * This is the maximum of the extractors' world dimensions.
    */
-  static constexpr auto dimworld = std::max((int)griddimworld<0>, (int)griddimworld<1>);
+  static constexpr int dimworld = std::max((int)griddimworld<0>(), (int)griddimworld<1>());
 
   /** \brief The type used for coordinates
    */

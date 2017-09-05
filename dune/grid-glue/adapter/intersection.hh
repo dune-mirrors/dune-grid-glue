@@ -44,11 +44,11 @@ namespace Dune {
     private:
       // intermediate quantities
       template<int side>
-      static constexpr int dim = GridGlue::template GridView<side>::Grid::dimension - GridGlue::template GridPatch<side>::codim;
+      static constexpr int dim() { return GridGlue::template GridView<side>::Grid::dimension - GridGlue::template GridPatch<side>::codim; }
 
     public:
       /** \brief Dimension of the intersection */
-      static constexpr int mydim = std::min(dim<0>, dim<1>);
+      static constexpr int mydim = std::min(dim<0>(), dim<1>());
 
       template<int side>
       using GridLocalGeometry = AffineGeometry<
@@ -161,7 +161,7 @@ namespace Dune {
       static constexpr int elementdim = GridGlue::template GridView<side>::template Codim<0>::Geometry::mydimension;
 
       // coordinates within the subentity that contains the remote intersection
-      std::array<Dune::FieldVector< ctype, dim<side> >, nSimplexCorners> corners_subEntity_local;
+      std::array<Dune::FieldVector< ctype, dim<side>() >, nSimplexCorners> corners_subEntity_local;
 
       for (unsigned int par = 0; par < n_parents; ++par) {
         for (int i = 0; i < nSimplexCorners; ++i)
