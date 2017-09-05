@@ -9,8 +9,11 @@
 #ifndef DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH
 #define DUNE_GRIDGLUE_ADAPTER_INTERSECTION_HH
 
+#include <algorithm>
 #include <memory>
+#include <tuple>
 
+#include <dune/common/deprecated.hh>
 #include <dune/geometry/affinegeometry.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid-glue/gridglue.hh>
@@ -36,333 +39,221 @@ namespace Dune {
       typedef typename GridGlue::IndexType IndexType;
 
       /** \brief Dimension of the world space of the intersection */
-      enum { coorddim = GridGlue::dimworld };
+      static constexpr int coorddim = GridGlue::dimworld;
 
     private:
       // intermediate quantities
-      static const int dim0 = GridGlue::Grid0View::Grid::dimension - GridGlue::Grid0Patch::codim;
-      static const int dim1 = GridGlue::Grid1View::Grid::dimension - GridGlue::Grid1Patch::codim;
+      template<int side>
+      static constexpr int dim() { return GridGlue::template GridView<side>::Grid::dimension - GridGlue::template GridPatch<side>::codim; }
 
     public:
       /** \brief Dimension of the intersection */
-      enum { mydim = (dim0<dim1) ? dim0 : dim1 };
+      static constexpr int mydim = dim<0>() < dim<1>() ? dim<0>() : dim<1>();
 
-      typedef AffineGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimension>
-      Grid0LocalGeometry;
-      typedef AffineGeometry<typename GridGlue::Grid0View::ctype, mydim, GridGlue::Grid0View::dimensionworld>
-      Grid0Geometry;
-      typedef AffineGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimension>
-      Grid1LocalGeometry;
-      typedef AffineGeometry<typename GridGlue::Grid1View::ctype, mydim, GridGlue::Grid1View::dimensionworld>
-      Grid1Geometry;
+      template<int side>
+      using GridLocalGeometry = AffineGeometry<
+        typename GridGlue::template GridView<side>::ctype, mydim, GridGlue::template GridView<side>::dimension>;
 
-      typedef typename GridGlue::Grid0View::IndexSet::IndexType Grid0IndexType;
-      typedef typename GridGlue::Grid1View::IndexSet::IndexType Grid1IndexType;
+      using Grid0LocalGeometry DUNE_DEPRECATED_MSG("please use GridLocalGeometry<0> instead") = GridLocalGeometry<0>;
+      using Grid1LocalGeometry DUNE_DEPRECATED_MSG("please use GridLocalGeometry<1> instead") = GridLocalGeometry<1>;
+
+      template<int side>
+      using GridGeometry = AffineGeometry<
+        typename GridGlue::template GridView<side>::ctype, mydim, GridGlue::template GridView<side>::dimensionworld>;
+
+      using Grid0Geometry DUNE_DEPRECATED_MSG("please use GridGeometry<0> instead") = GridGeometry<0>;
+      using Grid1Geometry DUNE_DEPRECATED_MSG("please use GridGeometry<1> instead") = GridGeometry<1>;
+
+      template<int side>
+      using GridIndexType = typename GridGlue::template GridView<side>::IndexSet::IndexType;
+
+      using Grid0IndexType DUNE_DEPRECATED_MSG("please use GridIndexType<0> instead") = GridIndexType<0>;
+      using Grid1IndexType DUNE_DEPRECATED_MSG("please use GridIndexType<1> instead") = GridIndexType<1>;
 
       /** \brief Constructor the n'th IntersectionData of a given GridGlue */
       IntersectionData(const GridGlue& glue, unsigned int mergeindex, unsigned int offset, bool grid0local, bool grid1local);
 
       /** \brief Default Constructor */
-      IntersectionData() : grid0local_(false), grid1local_(false) {}
+      IntersectionData()
+        {
+          std::get<0>(sideData_).gridlocal = false;
+          std::get<1>(sideData_).gridlocal = false;
+        }
+
+      /* Accessor Functions */
+
+      template<int side>
+      const GridLocalGeometry<side>& localGeometry(unsigned int parentId = 0) const
+        { return *std::get<side>(sideData_).gridlocalgeom[parentId]; }
+
+      template<int side>
+      const GridGeometry<side>& geometry() const
+        { return *std::get<side>(sideData_).gridgeom; }
+
+      template<int side>
+      bool local() const
+        { return std::get<side>(sideData_).gridlocal; }
+
+      template<int side>
+      IndexType index(unsigned int parentId = 0) const
+        { return std::get<side>(sideData_).gridindices[parentId]; }
+
+      template<int side>
+      IndexType parents() const
+        { return std::get<side>(sideData_).gridindices.size(); }
+
+    private:
+      template<int side>
+      void initializeGeometry(const GridGlue& glue, unsigned mergeindex);
 
       /*   M E M B E R   V A R  I A B L E S   */
 
+    public:
       /// @brief index of this intersection after GridGlue interface
       IndexType index_;
 
-      bool grid0local_;              //!< true if the associated grid0 entity is local
-      std::vector<Grid0IndexType> grid0indices_;    //!< indices of the associated local grid0 entity
-      bool grid1local_;              //!< true if the associated grid1 entity is local
-      std::vector<Grid1IndexType> grid1indices_;    //!< indices of the associated local grid1 entity
+    private:
+      template<int side>
+      struct SideData {
+        /** \brief true if the associated grid entity is local */
+        bool gridlocal;
 
-      /**
-       * Embedding of intersection into local grid0 entity coordinates.
-       */
-      std::vector<std::shared_ptr<Grid0LocalGeometry> >  grid0localgeom_;
-      /**
-       * Global intersection geometry on grid0 side.
-       *
-       * This is the same as g∘i for the first embedding i into a grid0
-       * entity as stored in grid0localgeom_ and that entities global
-       * geometry g.
-       */
-      std::shared_ptr<Grid0Geometry>       grid0geom_;
-      /**
-       * Embedding of intersection into local grid1 entity coordinates.
-       */
-      std::vector<std::shared_ptr<Grid1LocalGeometry> >  grid1localgeom_;
-      /**
-       * Global intersection geometry on grid1 side.
-       *
-       * This is the same as g∘i for the first embedding i into a grid1
-       * entity as stored in grid1localgeom_ and that entities global
-       * geometry g.
-       */
-      std::shared_ptr<Grid1Geometry>       grid1geom_;
+        /** \brief indices of the associated local grid entity */
+        std::vector< GridIndexType<side> > gridindices;
 
+        /** \brief embedding of intersection into local grid entity coordinates */
+        std::vector< std::shared_ptr< GridLocalGeometry<side> > > gridlocalgeom;
+
+        /**
+         * global intersection geometry on grid `side` side.
+         *
+         * This is the same as g∘i for the first embedding i into a grid
+         * entity as stored in gridlocalgeom and that entities global
+         * geometry g.
+         */
+        std::shared_ptr< GridGeometry<side> > gridgeom;
+      };
+
+      std::tuple< SideData<0>, SideData<1> > sideData_;
     };
+
+    template<typename P0, typename P1>
+    template<int side>
+    void IntersectionData<P0, P1>::initializeGeometry(const GridGlue& glue, unsigned mergeindex)
+    {
+      auto& data = std::get<side>(sideData_);
+
+      const unsigned n_parents = glue.merger_->template parents<side>(mergeindex);
+
+      // init containers
+      data.gridindices.resize(n_parents);
+      data.gridlocalgeom.resize(n_parents);
+
+      // default values
+      data.gridindices[0] = 0;
+
+      static constexpr int nSimplexCorners = mydim + 1;
+      using ctype = typename GridGlue::ctype;
+
+      // initialize the local and the global geometries of grid `side`
+
+      // compute the coordinates of the subface's corners in codim 0 entity local coordinates
+      static constexpr int elementdim = GridGlue::template GridView<side>::template Codim<0>::Geometry::mydimension;
+
+      // coordinates within the subentity that contains the remote intersection
+      std::array<Dune::FieldVector< ctype, dim<side>() >, nSimplexCorners> corners_subEntity_local;
+
+      for (unsigned int par = 0; par < n_parents; ++par) {
+        for (int i = 0; i < nSimplexCorners; ++i)
+          corners_subEntity_local[i] = glue.merger_->template parentLocal<side>(mergeindex, i, par);
+
+        // Coordinates of the remote intersection corners wrt the element coordinate system
+        std::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
+
+        if (data.gridlocal) {
+          data.gridindices[par] = glue.merger_->template parent<side>(mergeindex,par);
+
+          typename GridGlue::template GridPatch<side>::LocalGeometry
+            gridLocalGeometry = glue.template patch<side>().geometryLocal(data.gridindices[par]);
+          for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
+            corners_element_local[i] = gridLocalGeometry.global(corners_subEntity_local[i]);
+          }
+
+          // set the corners of the local geometry
+#ifdef ONLY_SIMPLEX_INTERSECTIONS
+          Dune::GeometryType type(Dune::GeometryType::simplex, mydim);
+#else
+#error Not Implemented
+#endif
+          data.gridlocalgeom[par] = std::make_shared< GridLocalGeometry<side> >(type, corners_element_local);
+
+          // Add world geometry only for 0th parent
+          if (par == 0) {
+            typename GridGlue::template GridPatch<side>::Geometry
+              gridWorldGeometry = glue.template patch<side>().geometry(data.gridindices[par]);
+
+            // world coordinates of the remote intersection corners
+            std::array<Dune::FieldVector<ctype, GridGlue::template GridView<side>::dimensionworld>, nSimplexCorners> corners_global;
+
+            for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
+              corners_global[i]        = gridWorldGeometry.global(corners_subEntity_local[i]);
+            }
+
+            data.gridgeom = std::make_shared< GridGeometry<side> >(type, corners_global);
+          }
+        }
+      }
+    }
 
     //! \todo move this functionality to GridGlue
     template<typename P0, typename P1>
     IntersectionData<P0, P1>::IntersectionData(const GridGlue& glue, unsigned int mergeindex, unsigned int offset,
                                                bool grid0local, bool grid1local)
-      : index_(mergeindex+offset),
-        grid0local_(grid0local),
-        grid1local_(grid1local)
+      : index_(mergeindex+offset)
     {
-      unsigned int n_grid0Parents = glue.merger_->template parents<0>(mergeindex);
-      unsigned int n_grid1Parents = glue.merger_->template parents<1>(mergeindex);
-
-      assert (0 <= n_grid0Parents || 0 <= n_grid1Parents);
-
-      // init containers
-      grid0indices_.resize(n_grid0Parents);
-      grid0localgeom_.resize(n_grid0Parents);
-
-      grid1indices_.resize(n_grid1Parents);
-      grid1localgeom_.resize(n_grid1Parents);
-
-      // default values
-      grid0indices_[0] = 0;
-      grid1indices_[0] = 0;
-
-      typedef typename GridGlue::ctype ctype;
-
-      // Number of corners of the intersection
-      const int nSimplexCorners = mydim + 1;
-
       // if an invalid index is given do not proceed!
       // (happens when the parent GridGlue initializes the "end"-Intersection)
       assert (0 <= mergeindex || mergeindex < glue.index__sz);
 
-      // initialize the local and the global geometries of grid0
-      {
-        // compute the coordinates of the subface's corners in codim 0 entity local coordinates
-        const int elementdim = GridGlue::Grid0View::template Codim<0>::Geometry::mydimension;
+      const unsigned n_grid0Parents = glue.merger_->template parents<0>(mergeindex);
+      const unsigned n_grid1Parents = glue.merger_->template parents<1>(mergeindex);
 
-        // coordinates within the subentity that contains the remote intersection
-        std::array<Dune::FieldVector<ctype, dim0>, nSimplexCorners> corners_subEntity_local;
+      assert (0 <= n_grid0Parents || 0 <= n_grid1Parents);
 
-        for (unsigned int par = 0; par < n_grid0Parents; ++par) {
-            for (int i = 0; i < nSimplexCorners; ++i)
-              corners_subEntity_local[i] = glue.merger_->template parentLocal<0>(mergeindex, i, par);
+      std::get<0>(sideData_).gridlocal = grid0local;
+      std::get<1>(sideData_).gridlocal = grid1local;
 
-            // Coordinates of the remote intersection corners wrt the element coordinate system
-            std::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
-
-            if (grid0local)
-            {
-              grid0indices_[par] = glue.merger_->template parent<0>(mergeindex,par);
-
-              typename GridGlue::Grid0Patch::LocalGeometry
-              grid0LocalGeometry = glue.template patch<0>().geometryLocal(grid0indices_[par]);
-              typename GridGlue::Grid0Patch::Geometry grid0WorldGeometry1 =  glue.template patch<0>().geometry(grid0indices_[par]);
-              for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
-                corners_element_local[i] = grid0LocalGeometry.global(corners_subEntity_local[i]);
-              }
-
-              // set the corners of the local geometry
-    #ifdef ONLY_SIMPLEX_INTERSECTIONS
-              Dune::GeometryType type(Dune::GeometryType::simplex, mydim);
-    #else
-    #error Not Implemented
-    #endif
-              grid0localgeom_[par] = std::make_shared<Grid0LocalGeometry>(type, corners_element_local);
-
-              // Add world geometry only for 0th parent
-              if (par == 0) {
-                typename GridGlue::Grid0Patch::Geometry
-                grid0WorldGeometry = glue.template patch<0>().geometry(grid0indices_[par]);
-
-                // world coordinates of the remote intersection corners
-                std::array<Dune::FieldVector<ctype, GridGlue::Grid0View::dimensionworld>, nSimplexCorners> corners_global;
-
-                for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
-                  corners_global[i]        = grid0WorldGeometry.global(corners_subEntity_local[i]);
-                }
-
-                grid0geom_      = std::make_shared<Grid0Geometry>(type, corners_global);
-              }
-            }
-        }
-      }
-
-      // do the same for the local and the global geometry of grid1
-      {
-        // compute the coordinates of the subface's corners in codim 0 entity local coordinates
-        const int elementdim = GridGlue::Grid1View::template Codim<0>::Geometry::mydimension;
-
-        // coordinates within the subentity that contains the remote intersection
-        std::array<Dune::FieldVector<ctype, dim1>, nSimplexCorners> corners_subEntity_local;
-
-        for (unsigned int par = 0; par < n_grid1Parents; ++par) {
-
-            for (int i = 0; i < nSimplexCorners; ++i)
-              corners_subEntity_local[i] = glue.merger_->template parentLocal<1>(mergeindex, i, par);
-
-            // Coordinates of the remote intersection corners wrt the element coordinate system
-            std::array<Dune::FieldVector<ctype, elementdim>, nSimplexCorners> corners_element_local;
-
-            if (grid1local)
-            {
-              grid1indices_[par] = glue.merger_->template parent<1>(mergeindex, par);
-
-              typename GridGlue::Grid1Patch::LocalGeometry
-              grid1LocalGeometry = glue.template patch<1>().geometryLocal(grid1indices_[par]);
-
-              for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
-                corners_element_local[i] = grid1LocalGeometry.global(corners_subEntity_local[i]);
-              }
-
-              // set the corners of the geometries
-    #ifdef ONLY_SIMPLEX_INTERSECTIONS
-              Dune::GeometryType type(Dune::GeometryType::simplex, mydim);
-    #else
-    #error Not Implemented
-    #endif
-              grid1localgeom_[par] = std::make_shared<Grid1LocalGeometry>(type, corners_element_local);
-
-              // Add world geomety only for 0th parent
-              if (par == 0) {
-                typename GridGlue::Grid1Patch::Geometry
-                grid1WorldGeometry = glue.template patch<1>().geometry(grid1indices_[par]);
-
-                // world coordinates of the remote intersection corners
-                std::array<Dune::FieldVector<ctype, GridGlue::Grid1View::dimensionworld>, nSimplexCorners> corners_global;
-
-                for (std::size_t i=0; i<corners_subEntity_local.size(); i++) {
-                  corners_global[i]        = grid1WorldGeometry.global(corners_subEntity_local[i]);
-                }
-
-                grid1geom_      = std::make_shared<Grid1Geometry>(type, corners_global);
-              }
-            }
-        }
-      }
+      initializeGeometry<0>(glue, mergeindex);
+      initializeGeometry<1>(glue, mergeindex);
     }
 
     /**
        @brief
        @todo doc me
      */
-    template<typename P0, typename P1, int P>
-    struct IntersectionDataView;
-
-    template<typename P0, typename P1>
-    struct IntersectionDataView<P0, P1, 0>
-    {
-      typedef const typename IntersectionData<P0,P1>::Grid0LocalGeometry LocalGeometry;
-      typedef const typename IntersectionData<P0,P1>::Grid0Geometry Geometry;
-      typedef const typename IntersectionData<P0,P1>::Grid0IndexType IndexType;
-      static LocalGeometry& localGeometry(const IntersectionData<P0,P1> & i, unsigned int parentId = 0)
-      {
-          return *i.grid0localgeom_[parentId];
-      }
-      static Geometry& geometry(const IntersectionData<P0,P1> & i)
-      {
-          return *i.grid0geom_;
-      }
-      static bool local(const IntersectionData<P0,P1> & i)
-      {
-          return i.grid0local_;
-      }
-      static IndexType index(const IntersectionData<P0,P1> & i, unsigned int parentId = 0)
-      {
-          return i.grid0indices_[parentId];
-      }
-      static IndexType parents(const IntersectionData<P0,P1> & i)
-      {
-          return i.grid0indices_.size();
-      }
-    };
-
-    template<typename P0, typename P1>
-    struct IntersectionDataView<P0, P1, 1>
-    {
-      typedef const typename IntersectionData<P0,P1>::Grid1LocalGeometry LocalGeometry;
-      typedef const typename IntersectionData<P0,P1>::Grid1Geometry Geometry;
-      typedef const typename IntersectionData<P0,P1>::Grid1IndexType IndexType;
-      static LocalGeometry& localGeometry(const IntersectionData<P0,P1> & i, unsigned int parentId = 0)
-      {
-          return *i.grid1localgeom_[parentId];
-      }
-      static Geometry& geometry(const IntersectionData<P0,P1> & i)
-      {
-          return *i.grid1geom_;
-      }
-      static IndexType local(const IntersectionData<P0,P1> & i)
-      {
-          return i.grid1local_;
-      }
-      static IndexType index(const IntersectionData<P0,P1> & i, unsigned int parentId = 0)
-      {
-          return i.grid1indices_[parentId];
-      }
-      static IndexType parents(const IntersectionData<P0,P1> & i)
-      {
-          return i.grid1indices_.size();
-      }
-    };
-
-    /**
-       @brief
-       @todo doc me
-     */
     template<typename P0, typename P1, int inside, int outside>
-    struct IntersectionTraits;
-
-    template<typename P0, typename P1>
-    struct IntersectionTraits<P0,P1,0,1>
+    struct IntersectionTraits
     {
-      typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
-      typedef Dune::GridGlue::IntersectionData<P0,P1> IntersectionData;
+      using GridGlue = ::Dune::GridGlue::GridGlue<P0, P1>;
+      using IntersectionData = Dune::GridGlue::IntersectionData<P0, P1>;
 
-      typedef typename GridGlue::Grid0View InsideGridView;
-      typedef typename GridGlue::Grid1View OutsideGridView;
+      using InsideGridView = typename GridGlue::template GridView<inside>;
+      using OutsideGridView = typename GridGlue::template GridView<outside>;
 
-      typedef const typename IntersectionData::Grid0LocalGeometry InsideLocalGeometry;
-      typedef const typename IntersectionData::Grid1LocalGeometry OutsideLocalGeometry;
-      typedef const typename IntersectionData::Grid0Geometry Geometry;
-      typedef const typename IntersectionData::Grid1Geometry OutsideGeometry;
+      using InsideLocalGeometry = const typename IntersectionData::template GridLocalGeometry<inside>;
+      using OutsideLocalGeometry = const typename IntersectionData::template GridLocalGeometry<outside>;
 
-      enum {
-        coorddim = IntersectionData::coorddim,
-        mydim = IntersectionData::mydim,
-        insidePatch = 0,
-        outsidePatch = 1
-      };
+      using Geometry = const typename IntersectionData::template GridGeometry<inside>;
+      using OutsideGeometry = const typename IntersectionData::template GridGeometry<outside>;
 
-      typedef typename GridGlue::ctype ctype;
-      typedef Dune::FieldVector<ctype, mydim>      LocalCoordinate;
-      typedef Dune::FieldVector<ctype, coorddim>   GlobalCoordinate;
-    };
+      static constexpr auto coorddim = IntersectionData::coorddim;
+      static constexpr auto mydim = IntersectionData::mydim;
+      static constexpr int insidePatch = inside;
+      static constexpr int outsidePatch = outside;
 
-    template<typename P0, typename P1>
-    struct IntersectionTraits<P0,P1,1,0>
-    {
-      typedef ::Dune::GridGlue::GridGlue<P0, P1> GridGlue;
-      typedef Dune::GridGlue::IntersectionData<P0,P1> IntersectionData;
-
-      typedef typename GridGlue::Grid1View InsideGridView;
-      typedef typename GridGlue::Grid0View OutsideGridView;
-
-      typedef const typename IntersectionData::Grid1LocalGeometry InsideLocalGeometry;
-      typedef const typename IntersectionData::Grid0LocalGeometry OutsideLocalGeometry;
-      typedef const typename IntersectionData::Grid1Geometry Geometry;
-      typedef const typename IntersectionData::Grid0Geometry OutsideGeometry;
-      typedef const typename IntersectionData::Grid1IndexType InsideIndexType;
-      typedef const typename IntersectionData::Grid0IndexType OutsideIndexType;
-
-      enum {
-        coorddim = IntersectionData::coorddim,
-        mydim = IntersectionData::mydim,
-        insidePatch = 1,
-        outsidePatch = 0
-      };
-
-      typedef typename GridGlue::ctype ctype;
-      typedef Dune::FieldVector<ctype, mydim>      LocalCoordinate;
-      typedef Dune::FieldVector<ctype, coorddim>   GlobalCoordinate;
+      using ctype = typename GridGlue::ctype;
+      using LocalCoordinate = Dune::FieldVector<ctype, mydim>;
+      using GlobalCoordinate = Dune::FieldVector<ctype, coorddim>;
     };
 
     /** @brief The intersection of two entities of the two patches of a GridGlue
@@ -395,17 +286,17 @@ namespace Dune {
       typedef typename Traits::LocalCoordinate LocalCoordinate;
       typedef typename Traits::GlobalCoordinate GlobalCoordinate;
 
-      enum {
-        /** \brief Dimension of the world space of the intersection */
-        coorddim = Traits::coorddim,
-        /** \brief Dimension of the intersection */
-        mydim = Traits::mydim,
-        /** \brief document the inside & outside patch */
-        //! @{
-        insidePatch = Traits::insidePatch,
-        outsidePatch = Traits::outsidePatch
-                       //! @}
-      };
+      /** \brief dimension of the world space of the intersection */
+      static constexpr auto coorddim = Traits::coorddim;
+
+      /** \brief dimension of the intersection */
+      static constexpr auto mydim = Traits::mydim;
+
+      /** \brief inside patch */
+      static constexpr int insidePatch = Traits::insidePatch;
+
+      /** \brief outside patch */
+      static constexpr int outsidePatch = Traits::outsidePatch;
 
       // typedef unsigned int IndexType;
 
@@ -413,7 +304,7 @@ namespace Dune {
       /**
        * \brief codimension of the intersection with respect to the world dimension
        */
-      const static int codimensionWorld = coorddim - mydim;
+      static constexpr int codimensionWorld = coorddim - mydim;
 
     public:
       /*   C O N S T R U C T O R S   */
@@ -430,8 +321,7 @@ namespace Dune {
       inside(unsigned int parentId = 0) const
       {
         assert(self());
-        return glue_->template patch<I>().element(
-                 IntersectionDataView<P0,P1,I>::index(*i_, parentId));
+        return glue_->template patch<I>().element(i_->template index<I>(parentId));
       }
 
       /** \brief Return element on the outside of this intersection.
@@ -440,8 +330,7 @@ namespace Dune {
       outside(unsigned int parentId = 0) const
       {
         assert(neighbor());
-        return glue_->template patch<O>().element(
-                 IntersectionDataView<P0,P1,O>::index(*i_, parentId));
+        return glue_->template patch<O>().element(i_->template index<O>(parentId));
       }
 
       /** \brief Return true if intersection is conforming */
@@ -454,14 +343,14 @@ namespace Dune {
        */
       const InsideLocalGeometry& geometryInInside(unsigned int parentId = 0) const
       {
-        return IntersectionDataView<P0,P1,I>::localGeometry(*i_, parentId);
+        return i_->template localGeometry<I>(parentId);
       }
 
       /** \brief Geometric information about this intersection in local coordinates of the outside() element.
        */
       const OutsideLocalGeometry& geometryInOutside(unsigned int parentId = 0) const
       {
-        return IntersectionDataView<P0,P1,O>::localGeometry(*i_, parentId);
+        return i_->template localGeometry<O>(parentId);
       }
 
       /** \brief Geometric information about this intersection as part of the inside grid.
@@ -472,7 +361,7 @@ namespace Dune {
        */
       const Geometry& geometry() const
       {
-        return IntersectionDataView<P0,P1,I>::geometry(*i_);
+        return i_->template geometry<I>();
       }
 
       /** \brief Geometric information about this intersection as part of the outside grid.
@@ -483,7 +372,7 @@ namespace Dune {
        */
       const OutsideGeometry& geometryOutside() const // DUNE_DEPRECATED
       {
-        return IntersectionDataView<P0,P1,O>::geometry(*i_);
+        return i_->template geometry<O>();
       }
 
       /** \brief Type of reference element for this intersection */
@@ -501,16 +390,16 @@ namespace Dune {
       /** \brief For parallel computations: Return true if inside() entity exists locally */
       bool self() const
       {
-        return IntersectionDataView<P0,P1,I>::local(*i_);
+        return i_->template local<I>();
       }
 
       /** \brief Return number of embeddings into local grid0 (grid1) entities. */
       size_t neighbor(unsigned int g = 0) const
       {
-          if (g == 0 && IntersectionDataView<P0,P1,O>::local(*i_)) {
-            return IntersectionDataView<P0,P1,O>::parents(*i_);
-          } else if (g == 1  && IntersectionDataView<P0,P1,I>::local(*i_)) {
-            return IntersectionDataView<P0,P1,I>::parents(*i_);
+          if (g == 0 && i_->template local<O>()) {
+            return i_->template parents<O>();
+          } else if (g == 1 && i_->template local<I>()) {
+            return i_->template parents<I>();
           }
           return 0;
       }
@@ -519,16 +408,14 @@ namespace Dune {
       int indexInInside(unsigned int parentId = 0) const
       {
         assert(self());
-        return glue_->template patch<I>().indexInInside(
-                 IntersectionDataView<P0,P1,I>::index(*i_, parentId));
+        return glue_->template patch<I>().indexInInside(i_->template index<I>(parentId));
       }
 
       /** \brief Local number of codim 1 entity in outside() Entity where intersection is contained in. */
       int indexInOutside(unsigned int parentId = 0) const
       {
         assert(neighbor());
-        return glue_->template patch<O>().indexInInside(
-                 IntersectionDataView<P0,P1,O>::index(*i_, parentId));
+        return glue_->template patch<O>().indexInInside(i_->template index<O>(parentId));
       }
 
       /** \brief Return an outer normal (length not necessarily 1)

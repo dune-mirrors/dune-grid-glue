@@ -30,7 +30,7 @@ class GridGlueAmiraWriter
 
     fgrid.open(filename.c_str());
 
-    typedef typename std::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
+    using GridView = typename Glue::template GridView<side>;
     const int dim = GridView::dimension;
     const int domdimw = GridView::dimensionworld;
 

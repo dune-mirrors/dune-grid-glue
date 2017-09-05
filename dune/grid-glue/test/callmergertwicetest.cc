@@ -32,7 +32,7 @@ struct setupGrid {};
 
 template<>
 struct setupGrid<1> {
-  enum { dim = 1 };
+  static constexpr int dim = 1;
   template<int dimworld, class ctype>
   static
   void fill(std::vector<Dune::FieldVector<ctype,dimworld> > & grid1_coords,
@@ -76,7 +76,7 @@ struct setupGrid<1> {
 
 template<>
 struct setupGrid<2> {
-  enum { dim = 2 };
+  static constexpr int dim = 2;
   template<int dimworld, class ctype>
   static
   void fill(std::vector<Dune::FieldVector<ctype,dimworld> > & grid1_coords,

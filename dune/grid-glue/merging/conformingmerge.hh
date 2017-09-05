@@ -193,7 +193,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
       intersections.back().grid2Local_[0][i] = refElement.position(other[i],dim);
     }
 
-  } else if (grid1ElementType.isQuadrilateral()) {
+  } else if (dim == 2 && grid1ElementType.isQuadrilateral()) {
 
     // split the quadrilateral into two triangles
     const unsigned int subVertices[2][3] = {{0,1,3}, {0,3,2}};

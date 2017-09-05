@@ -10,6 +10,10 @@
 #ifndef DUNE_GRIDGLUE_GRIDGLUE_HH
 #define DUNE_GRIDGLUE_GRIDGLUE_HH
 
+#include <memory>
+#include <tuple>
+#include <type_traits>
+
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
@@ -31,12 +35,6 @@
 namespace Dune {
 namespace GridGlue {
 
-/** Document the relation between the old grid names and the new numbering */
-enum GridOrdering {
-  Domain = 0,
-  Target = 1
-};
-
 // forward declarations
 template<typename P0, typename P1>
 class GridGlue;
@@ -52,33 +50,6 @@ class IntersectionIterator;
 
 template<typename P0, typename P1>
 class IntersectionIndexSet;
-
-template<typename P0, typename P1, int P>
-struct GridGlueView;
-
-template<typename P0, typename P1>
-struct GridGlueView<P0,P1,0>
-{
-  typedef P0 Patch;
-  typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> IntersectionIterator;
-  typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
-  static const P0& patch(const GridGlue<P0,P1>& g)
-  {
-    return *g.patch0_;
-  }
-};
-
-template<typename P0, typename P1>
-struct GridGlueView<P0,P1,1>
-{
-  typedef P1 Patch;
-  typedef Dune::GridGlue::IntersectionIterator<P0,P1,1,0> IntersectionIterator;
-  typedef typename Patch::GridView::template Codim<0>::Entity GridElement;
-  static const P1& patch(const GridGlue<P0,P1>& g)
-  {
-    return *g.patch1_;
-  }
-};
 
 /**
  * @class GridGlue
@@ -102,8 +73,6 @@ private:
   friend class IntersectionIterator<P0,P1,0,1>;
   friend class IntersectionIterator<P0,P1,1,0>;
   friend class IntersectionIndexSet<P0,P1>;
-  friend struct GridGlueView<P0,P1,0>;
-  friend struct GridGlueView<P0,P1,1>;
 
   /*   P R I V A T E   T Y P E S   */
 
@@ -120,80 +89,112 @@ public:
 
   /*   P U B L I C   T Y P E S   A N D   C O N S T A N T S   */
 
+  /** coupling patch of grid <code>side</code> */
+  template<int side>
+  using GridPatch = std::conditional_t<side == 0, P0, std::conditional_t<side == 1, P1, void>>;
+
+  /** GridView of grid <code>side</code> */
+  template<int side>
+  using GridView = typename GridPatch<side>::GridView;
+
+  /** Grid type of grid <code>side</code> */
+  template<int side>
+  using Grid = typename GridView<side>::Grid;
+
   /** \brief GridView of grid 0 (aka domain grid) */
-  typedef typename P0::GridView Grid0View;
+  using Grid0View DUNE_DEPRECATED_MSG("please use GridView<0> instead") = GridView<0>;
 
   /** \brief Grid 0 type */
-  typedef typename Grid0View::Grid Grid0;
+  using Grid0 DUNE_DEPRECATED_MSG("please use Grid<0> instead") = Grid<0>;
 
   /** \brief Coupling patch of grid 0 */
-  typedef P0 Grid0Patch;
+  using Grid0Patch DUNE_DEPRECATED_MSG("please use GridPatch<0> instead") = GridPatch<0>;
 
-  /** \brief Dimension of the grid 0 extractor */
-  enum {
-    /** \brief Dimension of the grid 0 extractor */
-    grid0dim = Grid0Patch::dim,
-    domdim = Grid0Patch::dim,
-    /** \brief World dimension of the grid 0 extractor */
-    grid0dimworld = Grid0Patch::dimworld,
-    domdimworld = Grid0Patch::dimworld
-  };
+  template<int side>
+  static constexpr auto griddim()
+    { return GridPatch<side>::dim; }
+
+  template<int side>
+  static constexpr auto griddimworld()
+    { return GridPatch<side>::dimworld; }
+
+  /** \brief dimension of the grid 0 extractor */
+  DUNE_DEPRECATED_MSG("please use griddim<0>() instead")
+  static constexpr auto grid0dim = griddim<0>();
+
+  DUNE_DEPRECATED_MSG("please use griddim<0>() instead")
+  static constexpr auto domdim = griddim<0>();
+
+  /** \brief world dimension of the grid 0 extractor */
+  DUNE_DEPRECATED_MSG("please use griddimworld<0>() instead")
+  static constexpr auto grid0dimworld = griddimworld<0>();
+
+  DUNE_DEPRECATED_MSG("please use griddimworld<0>() instead")
+  static constexpr auto domdimworld = griddimworld<0>();
 
   /** \brief GridView of grid 1 (aka target grid) */
-  typedef typename P1::GridView Grid1View;
+  using Grid1View DUNE_DEPRECATED_MSG("please use GridView<0> instead") = GridView<1>;
 
   /** \brief Grid 1 type */
-  typedef typename Grid1View::Grid Grid1;
+  using Grid1 DUNE_DEPRECATED_MSG("please use Grid<1> instead") = Grid<1>;
 
   /** \brief Coupling patch of grid 1 */
-  typedef P1 Grid1Patch;
+  using Grid1Patch DUNE_DEPRECATED_MSG("please use GridPatch<1> instead") = GridPatch<1>;
 
   /** \todo */
   typedef unsigned int IndexType;
 
-  /** \brief Dimension of the grid 1 extractor */
-  enum {
-    /** \brief Dimension of the grid 1 extractor */
-    tardim = Grid1Patch::dim,
-    grid1dim = Grid1Patch::dim,
-    /** \brief World dimension of the grid 1 extractor */
-    tardimworld = Grid1Patch::dimworld,
-    grid1dimworld = Grid1Patch::dimworld
-  };
+  /** \brief dimension of the grid 1 extractor */
+  DUNE_DEPRECATED_MSG("please use griddim<1>() instead")
+  static constexpr auto grid1dim = griddim<1>();
 
+  DUNE_DEPRECATED_MSG("please use griddim<1>() instead")
+  static constexpr auto tardim = griddim<1>();
 
-  /** \brief export the world dimension */
-  enum {
-    /** \brief export the world dimension :
-        maximum of the two extractor world dimensions */
-    dimworld = ((int)Grid0Patch::dimworld > (int)Grid1Patch::dimworld) ? (int)Grid0Patch::dimworld : (int)Grid1Patch::dimworld
+  /** \brief world dimension of the grid 1 extractor */
+  DUNE_DEPRECATED_MSG("please use griddimworld<1>() instead")
+  static constexpr auto grid1dimworld = griddimworld<1>();
 
-  };
+  DUNE_DEPRECATED_MSG("please use griddimworld<1>() instead")
+  static constexpr auto tardimworld = griddimworld<1>();
+
+  /** \brief export the world dimension
+   * This is the maximum of the extractors' world dimensions.
+   */
+  static constexpr int dimworld = (int)griddimworld<0>() > (int)griddimworld<1>() ? (int)griddimworld<0>() : (int)griddimworld<1>();
 
   /** \brief The type used for coordinates
    */
-  typedef typename PromotionTraits<typename Grid0View::ctype,
-                                   typename Grid1View::ctype>::PromotedType ctype;
+  typedef typename PromotionTraits<typename GridView<0>::ctype,
+                                   typename GridView<1>::ctype>::PromotedType ctype;
 
   /** \brief The type used for coordinate vectors */
   typedef Dune::FieldVector<ctype, dimworld>                   Coords;
 
+  /** \brief type of grid elements on side <code>side</code> */
+  template<int side>
+  using GridElement = typename GridView<side>::Traits::template Codim<0>::Entity;
+
+  /** \brief type of grid vertices on side <code>side</code> */
+  template<int side>
+  using GridVertex = typename GridView<side>::Traits::template Codim<Grid<side>::dimension>::Entity;
+
   /** \brief The type of the Grid0 elements */
-  typedef typename Grid0View::Traits::template Codim<0>::Entity Grid0Element;
+  using Grid0Element DUNE_DEPRECATED_MSG("please use GridElement<0> instead") = GridElement<0>;
 
   /** \brief The type of the Grid0 vertices */
-  typedef typename Grid0View::Traits::template Codim<Grid0::dimension>::Entity Grid0Vertex;
+  using Grid0Vertex DUNE_DEPRECATED_MSG("please use GridVertex<0> instead") = GridVertex<0>;
 
   /** \brief The type of the Grid1 elements */
-  typedef typename Grid1View::Traits::template Codim<0>::Entity Grid1Element;
+  using Grid1Element DUNE_DEPRECATED_MSG("please use GridElement<1> instead") = GridElement<1>;
 
   /** \brief The type of the Grid1 vertices */
-  typedef typename Grid1View::Traits::template Codim<Grid1::dimension>::Entity Grid1Vertex;
+  using Grid1Vertex DUNE_DEPRECATED_MSG("please use GridVertex<1> instead") = GridVertex<1>;
 
   /** \brief Instance of a Merger */
   typedef Dune::GridGlue::Merger<ctype,
-      Grid0::dimension - Grid0Patch::codim,
-      Grid1::dimension - Grid1Patch::codim,
+      Grid<0>::dimension - GridPatch<0>::codim,
+      Grid<1>::dimension - GridPatch<1>::codim,
       dimworld> Merger;
 
   /** \brief Type of remote intersection objects */
@@ -203,21 +204,25 @@ public:
   typedef Dune::GridGlue::IntersectionIndexSet<P0,P1> IndexSet;
 
   /** \brief Type of the iterator that iterates over remove intersections */
+  template<int side>
+  using IntersectionIterator = Dune::GridGlue::IntersectionIterator<P0, P1, side, (side+1) % 2>;
 
   /** \todo Please doc me! */
-  typedef Dune::GridGlue::IntersectionIterator<P0,P1,0,1> Grid0IntersectionIterator;
+  using Grid0IntersectionIterator DUNE_DEPRECATED_MSG("please use IntersectionIterator<0> instead") = IntersectionIterator<0>;
+
   /** \todo Please doc me! */
-  typedef Dune::GridGlue::IntersectionIterator<P0,P1,1,0> Grid1IntersectionIterator;
+  using Grid1IntersectionIterator DUNE_DEPRECATED_MSG("please use IntersectionIterator<1> instead") = IntersectionIterator<1>;
 
 private:
 
   /*   M E M B E R   V A R I A B L E S   */
 
-  /// @brief the patch0 description
-  const std::shared_ptr<const Grid0Patch> patch0_;
+  using GridPatches = std::tuple<
+      const std::shared_ptr< const GridPatch<0> >,
+      const std::shared_ptr< const GridPatch<1> >
+    >;
 
-  /// @brief the patch1 description
-  const std::shared_ptr<const Grid1Patch> patch1_;
+  const GridPatches patches_;
 
   /// @brief the surface merging utility
   const std::shared_ptr<Merger> merger_;
@@ -293,15 +298,15 @@ public:
    * @param merger The merger object that is used to compute the merged grid. This class has
    * to be a model of the SurfaceMergeConcept.
    */
-  GridGlue(const std::shared_ptr<const Grid0Patch> gp0, const std::shared_ptr<const Grid1Patch> gp1, const std::shared_ptr<Merger> merger);
+  GridGlue(const std::shared_ptr< const GridPatch<0> >& gp0, const std::shared_ptr< const GridPatch<1> >& gp1, const std::shared_ptr<Merger>& merger);
 
   /*   G E T T E R S   */
 
   /** \todo Please doc me! */
   template<int P>
-  const typename GridGlueView<P0,P1,P>::Patch & patch() const
+  const GridPatch<P>& patch() const
   {
-    return GridGlueView<P0,P1,P>::patch(*this);
+    return *std::get<P>(patches_);
   }
 
   /**
@@ -309,9 +314,9 @@ public:
    * @return the object
    */
   template<int P>
-  const typename GridGlueView<P0,P1,P>::Patch::GridView & gridView() const
+  const GridView<P>& gridView() const
   {
-    return GridGlueView<P0,P1,P>::patch(*this).gridView();
+    return std::get<P>(patches_)->gridView();
   }
 
 
@@ -328,9 +333,9 @@ public:
    * @return the iterator
    */
   template<int I>
-  typename GridGlueView<P0,P1,I>::IntersectionIterator ibegin() const
+  IntersectionIterator<I> ibegin() const
   {
-    return typename GridGlueView<P0,P1,I>::IntersectionIterator(this, 0);
+    return {this, 0};
   }
 
 
@@ -341,9 +346,9 @@ public:
    * @return the iterator
    */
   template<int I>
-  typename GridGlueView<P0,P1,I>::IntersectionIterator iend() const
+  IntersectionIterator<I> iend() const
   {
-    return typename GridGlueView<P0,P1,I>::IntersectionIterator(this, index__sz);
+    return {this, index__sz};
   }
 
 
@@ -437,16 +442,12 @@ public:
       int rsz = size() * 10;
 
       // allocate send/receive buffer
-      DataType* sendbuffer = new DataType[ssz];
-      DataType* receivebuffer = new DataType[rsz];
-
-      // iterators
-      Grid0IntersectionIterator rit = ibegin<0>();
-      Grid0IntersectionIterator ritend = iend<0>();
+      auto sendbuffer = std::make_unique<DataType[]>(ssz);
+      auto receivebuffer = std::make_unique<DataType[]>(rsz);
 
       // gather
-      Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer);
-      for (; rit != ritend; ++rit)
+      Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer.get());
+      for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
       {
         /*
            we need to have to variants depending on the communication direction.
@@ -478,8 +479,8 @@ public:
         receivebuffer[i] = sendbuffer[i];
 
       // scatter
-      Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer);
-      for (rit = ibegin<0>(); rit != ritend; ++rit)
+      Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer.get());
+      for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
       {
         /*
            we need to have to variants depending on the communication direction.
@@ -503,10 +504,6 @@ public:
                          data.size(*rit));
         }
       }
-
-      // cleanup pointers
-      delete[] sendbuffer;
-      delete[] receivebuffer;
     }
   }
 

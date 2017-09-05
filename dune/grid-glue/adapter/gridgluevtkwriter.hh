@@ -48,8 +48,8 @@ class GridGlueVtkWriter
 
     fgrid.open(filename.c_str());
 
-    typedef typename std::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
-    typedef typename std::conditional<(side==0), typename Glue::Grid0Patch, typename Glue::Grid1Patch>::type Extractor;
+    using GridView = typename Glue::template GridView<side>;
+    using Extractor = typename Glue::template GridPatch<side>;
 
     typedef typename GridView::ctype ctype;
 
@@ -182,10 +182,8 @@ class GridGlueVtkWriter
 
     fmerged.open(filename.c_str());
 
-    typedef typename std::conditional<(side==0), typename Glue::Grid0View, typename Glue::Grid1View>::type GridView;
-    typedef typename std::conditional<(side==0),
-        typename Glue::Grid0IntersectionIterator,
-        typename Glue::Grid1IntersectionIterator>::type RemoteIntersectionIterator;
+    using GridView = typename Glue::template GridView<side>;
+    using RemoteIntersectionIterator = typename Glue::template IntersectionIterator<side>;
 
     typedef typename GridView::ctype ctype;
 
@@ -201,7 +199,7 @@ class GridGlueVtkWriter
 
     // WRITE POINTS
     // ----------------
-    typedef typename Glue::Grid0Patch Extractor;
+    using Extractor = typename Glue::template GridPatch<0>;
     std::vector<typename Extractor::Coords> coords;
     glue.template patch<side>().getCoords(coords);
 

@@ -43,7 +43,7 @@ template <class GlueType>
 void testCommunication (const GlueType& glue)
 {
   typedef typename GlueType::ctype ctype;
-  enum { dimw = GlueType::dimworld };
+  static constexpr int dimw = GlueType::dimworld;
   CheckGlobalCoordDataHandle<ctype, dimw> dh;
   glue.communicate(dh, Dune::All_All_Interface, Dune::ForwardCommunication);
   glue.communicate(dh, Dune::All_All_Interface, Dune::BackwardCommunication);
