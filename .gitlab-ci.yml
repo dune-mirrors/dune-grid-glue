@@ -1,15 +1,32 @@
 ---
-dune:2.5--gcc:
-  image: duneci/dune:2.5
+before_script:
+  - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
+  - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
+  - duneci-install-module https://gitlab.dune-project.org/staging/dune-uggrid.git
+  - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
+
+# We use a custom opts file as some tests require the sequential version
+# of dune-uggrid.
+
+dune:2.5  gcc:4.9:
+  image: duneci/base:8
   script: duneci-standard-test
+  variables:
+    DUNECI_OPTS:   $CI_PROJECT_DIR/opts.gcc
+    DUNECI_BRANCH: releases/2.5
+    DUNECI_BRANCH_AUTO: 0
   tags: [duneci]
 
-dune:git--gcc:
-  image: duneci/dune:git
+dune:master  gcc:
+  image: duneci/base:10
   script: duneci-standard-test
+  variables:
+    DUNECI_OPTS:   $CI_PROJECT_DIR/opts.gcc
   tags: [duneci]
 
-dune:git--clang:
-  image: duneci/dune:git
-  script: duneci-standard-test --opts=/duneci/opts.clang
+dune:master  clang:3.8:
+  image: duneci/base:9
+  script: duneci-standard-test
+  variables:
+    DUNECI_OPTS:   $CI_PROJECT_DIR/opts.clang
   tags: [duneci]

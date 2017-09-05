@@ -12,6 +12,8 @@ dune_add_test(SOURCES mixeddimcouplingtest.cc)
 dune_add_test(SOURCES mixeddimoverlappingtest.cc)
 dune_add_test(SOURCES mixeddimscalingtest.cc)
 dune_add_test(SOURCES nonoverlappingcouplingtest.cc
+              MPI_RANKS 1 2 4
+              TIMEOUT 300
               COMPILE_DEFINITIONS "CALL_MERGER_TWICE")
 dune_add_test(SOURCES overlappingcouplingtest.cc
               COMPILE_DEFINITIONS "HAVE_UG_PARALLEL=${HAVE_UG_PARALLEL}"
