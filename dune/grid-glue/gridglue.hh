@@ -167,7 +167,7 @@ public:
   /** \brief export the world dimension
    * This is the maximum of the extractors' world dimensions.
    */
-  static constexpr int dimworld = std::max((int)griddimworld<0>(), (int)griddimworld<1>());
+  static constexpr int dimworld = (int)griddimworld<0>() > (int)griddimworld<1>() ? (int)griddimworld<0>() : (int)griddimworld<1>();
 
   /** \brief The type used for coordinates
    */

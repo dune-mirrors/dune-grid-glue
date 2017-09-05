@@ -48,7 +48,7 @@ namespace Dune {
 
     public:
       /** \brief Dimension of the intersection */
-      static constexpr int mydim = std::min(dim<0>(), dim<1>());
+      static constexpr int mydim = dim<0>() < dim<1>() ? dim<0>() : dim<1>();
 
       template<int side>
       using GridLocalGeometry = AffineGeometry<
