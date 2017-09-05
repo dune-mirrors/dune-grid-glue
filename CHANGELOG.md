@@ -1,3 +1,25 @@
+Changes in dune-grid-glue v2.6.0
+================================
+
+Major changes in dune-grid-glue v2.6.0
+--------------------------------------
+
+* Constants and type aliases including the "side" in their names like
+    `Grid0View` have been deprecated in favor of template constexpr
+    functions or template aliases.  Old code like
+
+    ```c++
+    using Glue = Dune::GridGlue::GridGlue<...>;
+    ... Glue::grid0dim ...
+    ... Glue::Grid1View ...
+    ```
+    should be replaced by
+    ```c++
+    using Glue = Dune::GridGlue::GridGlue<...>;
+    ... Glue::griddim<0>() ...
+    ... Glue::GridView<1> ...
+    ```
+
 Changes in dune-grid-glue v2.5.0
 ================================
 
