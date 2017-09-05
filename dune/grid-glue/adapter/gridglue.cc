@@ -648,7 +648,7 @@ void GridGlue<P0, P1>::communicate(
 
     // gather
     Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer.get());
-    for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
+    for (const auto& in : intersections(*this))
     {
       /*
          we need to have to variants depending on the communication direction.
@@ -658,9 +658,9 @@ void GridGlue<P0, P1>::communicate(
         /*
            dir : Forward (grid0 -> grid1)
          */
-        if (rit->self())
+        if (in.self())
         {
-          data.gather(gatherbuffer, rit->inside(), *rit);
+          data.gather(gatherbuffer, in.inside(), in);
         }
       }
       else         // (dir == Dune::BackwardCommunication)
@@ -668,9 +668,9 @@ void GridGlue<P0, P1>::communicate(
         /*
            dir : Backward (grid1 -> grid0)
          */
-        if (rit->neighbor())
+        if (in.neighbor())
         {
-          data.gather(gatherbuffer, rit->outside(), rit->flip());
+          data.gather(gatherbuffer, in.outside(), in.flip());
         }
       }
     }
@@ -681,7 +681,7 @@ void GridGlue<P0, P1>::communicate(
 
     // scatter
     Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer.get());
-    for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
+    for (const auto& in : intersections(*this))
     {
       /*
          we need to have to variants depending on the communication direction.
@@ -691,18 +691,18 @@ void GridGlue<P0, P1>::communicate(
         /*
            dir : Forward (grid0 -> grid1)
          */
-        if (rit->neighbor())
-          data.scatter(scatterbuffer, rit->outside(), rit->flip(),
-                       data.size(*rit));
+        if (in.neighbor())
+          data.scatter(scatterbuffer, in.outside(), in.flip(),
+                       data.size(in));
       }
       else         // (dir == Dune::BackwardCommunication)
       {
         /*
            dir : Backward (grid1 -> grid0)
          */
-        if (rit->self())
-          data.scatter(scatterbuffer, rit->inside(), *rit,
-                       data.size(*rit));
+        if (in.self())
+          data.scatter(scatterbuffer, in.inside(), in,
+                       data.size(in));
       }
     }
   }
