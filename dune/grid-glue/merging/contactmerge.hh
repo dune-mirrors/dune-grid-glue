@@ -41,7 +41,7 @@ template<int dimworld, typename T = double>
 class ContactMerge
 : public StandardMerge<T,dimworld-1,dimworld-1,dimworld>
 {
-    enum {dim = dimworld-1};
+    static constexpr int dim = dimworld-1;
 
     static_assert( dim==1 || dim==2,
             "ContactMerge yet only handles the cases dim==1 and dim==2!");

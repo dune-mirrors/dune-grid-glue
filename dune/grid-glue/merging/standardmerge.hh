@@ -79,10 +79,10 @@ protected:
   struct RemoteSimplicialIntersection
   {
     /** \brief Dimension of this intersection */
-    enum {intersectionDim = (grid1Dim<grid2Dim) ? grid1Dim : grid2Dim};
+    static constexpr int intersectionDim = grid1Dim < grid2Dim ? grid1Dim : grid2Dim;
 
     /** \brief Number of vertices of the intersection (it's a simplex) */
-    enum {nVertices = intersectionDim + 1};
+    static constexpr int nVertices = intersectionDim + 1;
 
     /** \brief Default constructor */
     RemoteSimplicialIntersection()

@@ -45,14 +45,11 @@ class Extractor
 
 public:
 
-  enum {dimworld = GV::dimensionworld};
-  enum {dim      = GV::dimension};
-  enum {codim    = cd};
+  static constexpr auto dimworld = GV::dimensionworld;
+  static constexpr auto dim      = GV::dimension;
+  static constexpr auto codim    = cd;
 
-  enum
-  {
-    cube_corners = 1 << (dim-codim)
-  };
+  static constexpr int cube_corners = 1 << (dim-codim);
 
   typedef GV GridView;
   typedef typename GridView::Grid Grid;

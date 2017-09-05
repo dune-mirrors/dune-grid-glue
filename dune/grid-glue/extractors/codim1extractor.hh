@@ -44,10 +44,7 @@ public:
   typedef typename Extractor<GV,1>::IndexType IndexType;
 
   /// @brief compile time number of corners of surface simplices
-  enum
-  {
-    simplex_corners = dim
-  };
+  static constexpr int simplex_corners = dim;
 
   typedef GV GridView;
 
