@@ -365,147 +365,7 @@ public:
    */
   template<class DataHandleImp, class DataTypeImp>
   void communicate (Dune::GridGlue::CommDataHandle<DataHandleImp,DataTypeImp> & data,
-                    Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const
-  {
-    typedef Dune::GridGlue::CommDataHandle<DataHandleImp,DataTypeImp> DataHandle;
-    typedef typename DataHandle::DataType DataType;
-
-#if HAVE_MPI
-
-    if (mpicomm_ != MPI_COMM_SELF)
-    {
-      /*
-       * P A R A L L E L   V E R S I O N
-       */
-      // setup communication interfaces
-      Dune::dinfo << "GridGlue: parallel communication" << std::endl;
-      typedef Dune::EnumItem <Dune::PartitionType, Dune::InteriorEntity> InteriorFlags;
-      typedef Dune::EnumItem <Dune::PartitionType, Dune::OverlapEntity>  OverlapFlags;
-      typedef Dune::EnumRange <Dune::PartitionType, Dune::InteriorEntity, Dune::GhostEntity>  AllFlags;
-      Dune::Interface interface;
-      assert(remoteIndices_.isSynced());
-      switch (iftype)
-      {
-      case Dune::InteriorBorder_InteriorBorder_Interface :
-        interface.build (remoteIndices_, InteriorFlags(), InteriorFlags() );
-        break;
-      case Dune::InteriorBorder_All_Interface :
-        if (dir == Dune::ForwardCommunication)
-          interface.build (remoteIndices_, InteriorFlags(), AllFlags() );
-        else
-          interface.build (remoteIndices_, AllFlags(), InteriorFlags() );
-        break;
-      case Dune::Overlap_OverlapFront_Interface :
-        interface.build (remoteIndices_, OverlapFlags(), OverlapFlags() );
-        break;
-      case Dune::Overlap_All_Interface :
-        if (dir == Dune::ForwardCommunication)
-          interface.build (remoteIndices_, OverlapFlags(), AllFlags() );
-        else
-          interface.build (remoteIndices_, AllFlags(), OverlapFlags() );
-        break;
-      case Dune::All_All_Interface :
-        interface.build (remoteIndices_, AllFlags(), AllFlags() );
-        break;
-      default :
-        DUNE_THROW(Dune::NotImplemented, "GridGlue::communicate for interface " << iftype << " not implemented");
-      }
-
-      // setup communication info (class needed to tunnel all info to the operator)
-      typedef Dune::GridGlue::CommInfo<GridGlue,DataHandleImp,DataTypeImp> CommInfo;
-      CommInfo commInfo;
-      commInfo.dir = dir;
-      commInfo.gridglue = this;
-      commInfo.data = &data;
-
-      // create communicator
-      Dune::BufferedCommunicator bComm ;
-      bComm.template build< CommInfo >(commInfo, commInfo, interface);
-
-      // do communication
-      // choose communication direction.
-      if (dir == Dune::ForwardCommunication)
-        bComm.forward< Dune::GridGlue::ForwardOperator >(commInfo, commInfo);
-      else
-        bComm.backward< Dune::GridGlue::BackwardOperator >(commInfo, commInfo);
-    }
-    else
-#endif // HAVE_MPI
-    {
-      /*
-       * S E Q U E N T I A L   V E R S I O N
-       */
-      Dune::dinfo << "GridGlue: sequential fallback communication" << std::endl;
-
-      // get comm buffer size
-      int ssz = size() * 10;       // times data per intersection
-      int rsz = size() * 10;
-
-      // allocate send/receive buffer
-      auto sendbuffer = std::make_unique<DataType[]>(ssz);
-      auto receivebuffer = std::make_unique<DataType[]>(rsz);
-
-      // gather
-      Dune::GridGlue::StreamingMessageBuffer<DataType> gatherbuffer(sendbuffer.get());
-      for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
-      {
-        /*
-           we need to have to variants depending on the communication direction.
-         */
-        if (dir == Dune::ForwardCommunication)
-        {
-          /*
-             dir : Forward (grid0 -> grid1)
-           */
-          if (rit->self())
-          {
-            data.gather(gatherbuffer, rit->inside(), *rit);
-          }
-        }
-        else         // (dir == Dune::BackwardCommunication)
-        {
-          /*
-             dir : Backward (grid1 -> grid0)
-           */
-          if (rit->neighbor())
-          {
-            data.gather(gatherbuffer, rit->outside(), rit->flip());
-          }
-        }
-      }
-
-      assert(ssz == rsz);
-      for (int i=0; i<ssz; i++)
-        receivebuffer[i] = sendbuffer[i];
-
-      // scatter
-      Dune::GridGlue::StreamingMessageBuffer<DataType> scatterbuffer(receivebuffer.get());
-      for (auto rit = ibegin<0>(); rit != iend<0>(); ++rit)
-      {
-        /*
-           we need to have to variants depending on the communication direction.
-         */
-        if (dir == Dune::ForwardCommunication)
-        {
-          /*
-             dir : Forward (grid0 -> grid1)
-           */
-          if (rit->neighbor())
-            data.scatter(scatterbuffer, rit->outside(), rit->flip(),
-                         data.size(*rit));
-        }
-        else         // (dir == Dune::BackwardCommunication)
-        {
-          /*
-             dir : Backward (grid1 -> grid0)
-           */
-          if (rit->self())
-            data.scatter(scatterbuffer, rit->inside(), *rit,
-                         data.size(*rit));
-        }
-      }
-    }
-  }
+                    Dune::InterfaceType iftype, Dune::CommunicationDirection dir) const;
 
   /*
    * @brief return an IndexSet mapping from Intersection to IndexType
@@ -539,12 +399,12 @@ public:
 } // end namespace GridGlue
 } // end namespace Dune
 
+#include "adapter/rangegenerators.hh"
+
 #include "adapter/gridglue.cc"
 
 #include "adapter/intersection.hh"
 #include "adapter/intersectioniterator.hh"
 #include "adapter/intersectionindexset.hh"
-
-#include "adapter/rangegenerators.hh"
 
 #endif // DUNE_GRIDGLUE_GRIDGLUE_HH
