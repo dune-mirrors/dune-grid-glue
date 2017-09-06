@@ -55,11 +55,6 @@ public:
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef std::function<bool(const Element&, unsigned int subentity)> Predicate;
 
-  static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
-  typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
-
-  typedef typename GV::IntersectionIterator IsIter;
-
   // import typedefs from base class
   typedef typename Extractor<GV,1>::SubEntityInfo SubEntityInfo;
   typedef typename Extractor<GV,1>::ElementInfo ElementInfo;
@@ -129,14 +124,12 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
     std::deque<SubEntityInfo> temp_faces;
 
     // iterate over interior codim 0 elements on the grid
-    for (ElementIter elit = this->gv_.template begin<0, PType>();
-         elit != this->gv_.template end<0, PType>(); ++elit)
+    for (const auto& elmt : elements(this->gv_, Partitions::interior))
     {
-      const auto& elmt = *elit;
       Dune::GeometryType gt = elmt.type();
 
       // if some face is part of the surface add it!
-      if (elit->hasBoundaryIntersections())
+      if (elmt.hasBoundaryIntersections())
       {
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
@@ -145,15 +138,15 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
-        for (IsIter is = this->gv_.ibegin(elmt); is != this->gv_.iend(elmt); ++is)
+        for (const auto& in : intersections(this->gv_, elmt))
         {
           // Stop only at selected boundary faces
-          if (!is->boundary() or !predicate(elmt, is->indexInInside()))
+          if (!in.boundary() or !predicate(elmt, in.indexInInside()))
             continue;
 
           const auto& refElement = Dune::ReferenceElements<ctype, dim>::general(gt);
           // get the corner count of this face
-          const int face_corners = refElement.size(is->indexInInside(), 1, dim);
+          const int face_corners = refElement.size(in.indexInInside(), 1, dim);
 
           // now we only have to care about the 3D case, i.e. a triangle face can be
           // inserted directly whereas a quadrilateral face has to be divided into two triangles
@@ -168,7 +161,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
             this->elmtInfo_[eindex]->faces++;
 
             // add a new face to the temporary collection
-            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
+            temp_faces.push_back(SubEntityInfo(eindex, in.indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
 
             std::vector<FieldVector<ctype,dimworld> > cornerCoords(face_corners);
@@ -177,10 +170,10 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
             for (int i = 0; i < face_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              int vertex_number = refElement.subEntity(is->indexInInside(), 1, i, dim);
+              int vertex_number = refElement.subEntity(in.indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
-              const Vertex vertex = elit->template subEntity<dim>(vertex_number);
+              const Vertex vertex = elmt.template subEntity<dim>(vertex_number);
               cornerCoords[i] = vertex.geometry().corner(0);
 
               IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
@@ -211,7 +204,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
             // have the wrong orientation.  We want them to be oriented such that all boundary edges
             // point in the counterclockwise direction.  Therefore, we check the orientation of the
             // new face and possibly switch the two vertices.
-            FieldVector<ctype,dimworld> realNormal = is->centerUnitOuterNormal();
+            FieldVector<ctype,dimworld> realNormal = in.centerUnitOuterNormal();
 
             // Compute segment normal
             FieldVector<ctype,dimworld> reconstructedNormal;
@@ -250,10 +243,10 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
             for (int i = 0; i < cube_corners; ++i)
             {
               // get the number of the vertex in the parent element
-              vertex_numbers[i] = refElement.subEntity(is->indexInInside(), 1, i, dim);
+              vertex_numbers[i] = refElement.subEntity(in.indexInInside(), 1, i, dim);
 
               // get the vertex pointer and the index from the index set
-              const Vertex vertex = elit->template subEntity<dim>(vertex_numbers[i]);
+              const Vertex vertex = elmt.template subEntity<dim>(vertex_numbers[i]);
               cornerCoords[i] = vertex.geometry().corner(0);
 
               IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
@@ -282,7 +275,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
             // of a Dune quadrilateral, i.e. the triangles are given by 0 1 2 and 3 2 1
 
             // add a new face to the temporary collection for the first tri
-            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
+            temp_faces.push_back(SubEntityInfo(eindex, in.indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
             temp_faces.back().corners[0].idx = vertex_indices[0];
             temp_faces.back().corners[1].idx = vertex_indices[1];
@@ -296,7 +289,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
             // have the wrong orientation.  We want the triangle vertices on counterclockwise order,
             // when viewed from the outside of the grid. Therefore, we check the orientation of the
             // new face and possibly switch two vertices.
-            FieldVector<ctype,dimworld> realNormal = is->centerUnitOuterNormal();
+            FieldVector<ctype,dimworld> realNormal = in.centerUnitOuterNormal();
 
             // Compute segment normal
             FieldVector<ctype,dimworld> reconstructedNormal = crossProduct(cornerCoords[1] - cornerCoords[0],
@@ -308,7 +301,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
 
 
             // add a new face to the temporary collection for the second tri
-            temp_faces.push_back(SubEntityInfo(eindex, is->indexInInside(),
+            temp_faces.push_back(SubEntityInfo(eindex, in.indexInInside(),
                                                Dune::GeometryType(Dune::GeometryType::simplex,dim-codim)));
             temp_faces.back().corners[0].idx = vertex_indices[3];
             temp_faces.back().corners[1].idx = vertex_indices[2];

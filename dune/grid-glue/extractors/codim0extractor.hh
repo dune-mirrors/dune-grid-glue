@@ -47,9 +47,6 @@ public:
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef std::function<bool(const Element&, unsigned int subentity)> Predicate;
 
-  static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
-  typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
-
   // import typedefs from base class
   typedef typename Extractor<GV,0>::SubEntityInfo SubEntityInfo;
   typedef typename Extractor<GV,0>::ElementInfo ElementInfo;
@@ -99,10 +96,8 @@ void Codim0Extractor<GV>::update(const Predicate& predicate)
   std::deque<SubEntityInfo> temp_faces;
 
   // iterate over all codim 0 elements on the grid
-  for (ElementIter elit = this->gv_.template begin<0, PType>();
-       elit != this->gv_.template end<0, PType>(); ++elit)
+  for (const auto& elmt : elements(this->gv_, Partitions::interior))
   {
-    const auto& elmt = *elit;
     const auto geometry = elmt.geometry();
     IndexType eindex = this->cellMapper_.index(elmt);
 
@@ -123,7 +118,7 @@ void Codim0Extractor<GV>::update(const Predicate& predicate)
         vertex_numbers[i] = i;
 
         // get the vertex pointer and the index from the index set
-        const Vertex vertex = elit->template subEntity<dim>(vertex_numbers[i]);
+        const Vertex vertex = elmt.template subEntity<dim>(vertex_numbers[i]);
         IndexType vindex = this->gv_.indexSet().template index<dim>(vertex);
 
         // if the vertex is not yet inserted in the vertex info map

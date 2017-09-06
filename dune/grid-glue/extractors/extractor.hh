@@ -63,7 +63,6 @@ public:
 
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef typename Element::EntitySeed ElementSeed;
-  typedef typename GV::Traits::template Codim<0>::Iterator ElementIter;
 
   typedef std::vector<unsigned int>                                VertexVector;
 
