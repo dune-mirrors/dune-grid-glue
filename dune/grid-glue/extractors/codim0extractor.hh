@@ -47,9 +47,6 @@ public:
   typedef typename GV::Traits::template Codim<0>::Entity Element;
   typedef std::function<bool(const Element&, unsigned int subentity)> Predicate;
 
-  static const Dune::PartitionIteratorType PType = Dune::Interior_Partition;
-  typedef typename GV::Traits::template Codim<0>::template Partition<PType>::Iterator ElementIter;
-
   // import typedefs from base class
   typedef typename Extractor<GV,0>::SubEntityInfo SubEntityInfo;
   typedef typename Extractor<GV,0>::ElementInfo ElementInfo;
