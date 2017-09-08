@@ -228,7 +228,7 @@ private:
   const std::shared_ptr<Merger> merger_;
 
   /// @brief number of intersections
-  IndexType index__sz;
+  IndexType index__sz = 0;
 
 #if HAVE_MPI
   /// @brief MPI_Comm which this GridGlue is working on
