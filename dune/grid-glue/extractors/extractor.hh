@@ -181,8 +181,8 @@ protected:
   };
 
 
-  typedef std::map<IndexType, ElementInfo* >  ElementInfoMap;
-  typedef std::map<IndexType, VertexInfo* >   VertexInfoMap;
+  typedef std::map<IndexType, ElementInfo>  ElementInfoMap;
+  typedef std::map<IndexType, VertexInfo>   VertexInfoMap;
 
   /************************** MEMBER VARIABLES ************************/
 
@@ -251,15 +251,6 @@ public:
       subEntities_.swap(dummy);
     }
 
-    // first free all manually allocated vertex/element info items...
-    for (typename VertexInfoMap::iterator it = vtxInfo_.begin();
-         it != vtxInfo_.end(); ++it)
-      if (it->second != NULL)
-        delete it->second;
-    for (typename ElementInfoMap::iterator it = elmtInfo_.begin();
-         it != elmtInfo_.end(); ++it)
-      if (it->second != NULL)
-        delete it->second;
     // ...then clear the maps themselves, too
     vtxInfo_.clear();
     elmtInfo_.clear();
@@ -332,8 +323,8 @@ public:
       return false;
     }
     // the iterator is valid, fill the out params
-    first = it->second->idx;
-    count = it->second->faces;
+    first = it->second.idx;
+    count = it->second.faces;
     return true;
   }
 
@@ -382,7 +373,7 @@ public:
   {
     if (index >= subEntities_.size())
       DUNE_THROW(Dune::GridError, "invalid face index");
-    const ElementSeed seed = (elmtInfo_.find(subEntities_[index].parent))->second->p;
+    const ElementSeed seed = (elmtInfo_.find(subEntities_[index].parent))->second.p;
     return grid().entity(seed);
   }
 
@@ -398,7 +389,7 @@ public:
   {
     if (index >= coords_.size())
       DUNE_THROW(Dune::GridError, "invalid coordinate index");
-    const VertexSeed seed = (vtxInfo_.find(coords_[index].vtxindex))->second->p;
+    const VertexSeed seed = (vtxInfo_.find(coords_[index].vtxindex))->second.p;
     return grid().entity(seed);
   }
 #endif
@@ -442,7 +433,7 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   Dune::GeometryType facetype = subEntities_[index].geometryType_;
 
   // get reference element
-  const auto elmtseed = elmtInfo_.find(face.parent)->second->p;
+  const auto elmtseed = elmtInfo_.find(face.parent)->second.p;
   const auto elmt = grid().entity(elmtseed);
   const Dune::GeometryType celltype = elmt.type();
   const auto& re = Dune::ReferenceElements<ctype, dim>::general(celltype);
