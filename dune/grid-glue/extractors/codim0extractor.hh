@@ -30,6 +30,9 @@ namespace Dune {
 
   namespace GridGlue {
 
+/**
+ * extractor for codim-0 entities (elements)
+ */
 template<typename GV>
 class Codim0Extractor : public Extractor<GV,0>
 {
