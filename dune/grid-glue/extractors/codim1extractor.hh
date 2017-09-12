@@ -232,7 +232,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
           }
           case 4 :
           {
-            assert(dim == 3);
+            assert(dim == 3 && cube_corners == 4);
             // we have a quadrilateral here
             std::array<unsigned int, 4> vertex_indices;
             std::array<unsigned int, 4> vertex_numbers;
