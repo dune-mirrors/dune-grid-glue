@@ -215,18 +215,17 @@ void Codim0Extractor<GV>::update(const Predicate& predicate)
 
   // now first write the array with the coordinates...
   this->coords_.resize(this->vtxInfo_.size());
-  typename VertexInfoMap::const_iterator it1 = this->vtxInfo_.begin();
-  for (; it1 != this->vtxInfo_.end(); ++it1)
+  for (const auto& vinfo : this->vtxInfo_)
   {
     // get a pointer to the associated info object
-    CoordinateInfo* current = &this->coords_[it1->second.idx];
+    CoordinateInfo* current = &this->coords_[vinfo.second.idx];
     // store this coordinates index // NEEDED?
-    current->index = it1->second.idx;
+    current->index = vinfo.second.idx;
     // store the vertex' index for the index2vertex mapping
-    current->vtxindex = it1->first;
+    current->vtxindex = vinfo.first;
     // store the vertex' coordinates under the associated index
     // in the coordinates array
-    const auto vtx = this->grid().entity(it1->second.p);
+    const auto vtx = this->grid().entity(vinfo.second.p);
     current->coord = vtx.geometry().corner(0);
   }
 
