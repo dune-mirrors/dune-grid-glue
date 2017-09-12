@@ -20,6 +20,7 @@
 
 #include "extractor.hh"
 
+#include <array>
 #include <deque>
 #include <functional>
 
@@ -233,8 +234,8 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
           {
             assert(dim == 3);
             // we have a quadrilateral here
-            unsigned int vertex_indices[4];
-            unsigned int vertex_numbers[4];
+            std::array<unsigned int, 4> vertex_indices;
+            std::array<unsigned int, 4> vertex_numbers;
 
             // register the additional face(s) (2 simplices)
             this->elmtInfo_.at(eindex).faces += 2;
