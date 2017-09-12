@@ -20,6 +20,7 @@
 
 #include "extractor.hh"
 
+#include <array>
 #include <deque>
 #include <functional>
 
@@ -30,6 +31,9 @@ namespace Dune {
 
   namespace GridGlue {
 
+/**
+ * extractor for codim-1 entities (facets)
+ */
 template<typename GV>
 class Codim1Extractor : public Extractor<GV,1>
 {
@@ -134,7 +138,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
         // add an entry to the element info map, the index will be set properly later,
         // whereas the number of faces is already known
         eindex = this->cellMapper_.index(elmt);
-        this->elmtInfo_[eindex] = new ElementInfo(simplex_index, elmt, 0);
+        this->elmtInfo_.emplace(eindex, ElementInfo(simplex_index, elmt, 0));
 
         // now add the faces in ascending order of their indices
         // (we are only talking about 1-4 faces here, so O(n^2) is ok!)
@@ -158,7 +162,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
             // we have a simplex here
 
             // register the additional face(s)
-            this->elmtInfo_[eindex]->faces++;
+            this->elmtInfo_.at(eindex).faces++;
 
             // add a new face to the temporary collection
             temp_faces.push_back(SubEntityInfo(eindex, in.indexInInside(),
@@ -187,7 +191,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
               if (vimit == this->vtxInfo_.end())
               {
                 // insert into the map
-                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vertex);
+                this->vtxInfo_.emplace(vindex, VertexInfo(vertex_index, vertex));
                 // remember the vertex as a corner of the current face in temp_faces
                 temp_faces.back().corners[i].idx = vertex_index;
                 // increase the current index
@@ -196,7 +200,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
               else
               {
                 // only insert the index into the simplices array
-                temp_faces.back().corners[i].idx = vimit->second->idx;
+                temp_faces.back().corners[i].idx = vimit->second.idx;
               }
             }
 
@@ -228,13 +232,13 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
           }
           case 4 :
           {
-            assert(dim == 3);
+            assert(dim == 3 && cube_corners == 4);
             // we have a quadrilateral here
-            unsigned int vertex_indices[4];
-            unsigned int vertex_numbers[4];
+            std::array<unsigned int, 4> vertex_indices;
+            std::array<unsigned int, 4> vertex_numbers;
 
             // register the additional face(s) (2 simplices)
-            this->elmtInfo_[eindex]->faces += 2;
+            this->elmtInfo_.at(eindex).faces += 2;
 
             std::array<FieldVector<ctype,dimworld>, 4> cornerCoords;
 
@@ -257,7 +261,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
               if (vimit == this->vtxInfo_.end())
               {
                 // insert into the map
-                this->vtxInfo_[vindex] = new VertexInfo(vertex_index, vertex);
+                this->vtxInfo_.emplace(vindex, VertexInfo(vertex_index, vertex));
                 // remember this vertex' index
                 vertex_indices[i] = vertex_index;
                 // increase the current index
@@ -266,7 +270,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
               else
               {
                 // only remember the vertex' index
-                vertex_indices[i] = vimit->second->idx;
+                vertex_indices[i] = vimit->second.idx;
               }
             }
 
@@ -349,14 +353,14 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
   for (; it1 != this->vtxInfo_.end(); ++it1)
   {
     // get a pointer to the associated info object
-    CoordinateInfo* current = &this->coords_[it1->second->idx];
+    CoordinateInfo* current = &this->coords_[it1->second.idx];
     // store this coordinates index // NEEDED?
-    current->index = it1->second->idx;
+    current->index = it1->second.idx;
     // store the vertex' index for the index2vertex mapping
     current->vtxindex = it1->first;
     // store the vertex' coordinates under the associated index
     // in the coordinates array
-    const auto vtx = this->grid().entity(it1->second->p);
+    const auto vtx = this->grid().entity(it1->second.p);
     current->coord = vtx.geometry().corner(0);
   }
 

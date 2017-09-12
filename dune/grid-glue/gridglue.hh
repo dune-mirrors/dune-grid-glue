@@ -228,7 +228,7 @@ private:
   const std::shared_ptr<Merger> merger_;
 
   /// @brief number of intersections
-  IndexType index__sz;
+  IndexType index__sz = 0;
 
 #if HAVE_MPI
   /// @brief MPI_Comm which this GridGlue is working on
@@ -332,7 +332,7 @@ public:
    *
    * @return the iterator
    */
-  template<int I>
+  template<int I = 0>
   IntersectionIterator<I> ibegin() const
   {
     return {this, 0};
@@ -345,7 +345,7 @@ public:
    *
    * @return the iterator
    */
-  template<int I>
+  template<int I = 0>
   IntersectionIterator<I> iend() const
   {
     return {this, index__sz};

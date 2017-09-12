@@ -240,11 +240,11 @@ namespace Dune {
       using InsideGridView = typename GridGlue::template GridView<inside>;
       using OutsideGridView = typename GridGlue::template GridView<outside>;
 
-      using InsideLocalGeometry = const typename IntersectionData::template GridLocalGeometry<inside>;
-      using OutsideLocalGeometry = const typename IntersectionData::template GridLocalGeometry<outside>;
+      using InsideLocalGeometry = typename IntersectionData::template GridLocalGeometry<inside>;
+      using OutsideLocalGeometry = typename IntersectionData::template GridLocalGeometry<outside>;
 
-      using Geometry = const typename IntersectionData::template GridGeometry<inside>;
-      using OutsideGeometry = const typename IntersectionData::template GridGeometry<outside>;
+      using Geometry = typename IntersectionData::template GridGeometry<inside>;
+      using OutsideGeometry = typename IntersectionData::template GridGeometry<outside>;
 
       static constexpr auto coorddim = IntersectionData::coorddim;
       static constexpr auto mydim = IntersectionData::mydim;
