@@ -66,7 +66,7 @@ public:
      * @brief Construct merger given overlap and possible projection directions.
      *
      * @param allowedOverlap Allowed overlap of the surfaces
-     * @param domainDirections Projection direction field for the first surface that differ from the defualt normal field
+     * @param domainDirections Projection direction field for the first surface that differ from the default normal field
      * @param targetDirections Projection direction field for the second surface that differ from the default normal field
      */
     ContactMerge(const T allowedOverlap=T(0),
