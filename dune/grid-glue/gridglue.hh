@@ -332,7 +332,7 @@ public:
    *
    * @return the iterator
    */
-  template<int I>
+  template<int I = 0>
   IntersectionIterator<I> ibegin() const
   {
     return {this, 0};
@@ -345,7 +345,7 @@ public:
    *
    * @return the iterator
    */
-  template<int I>
+  template<int I = 0>
   IntersectionIterator<I> iend() const
   {
     return {this, index__sz};
