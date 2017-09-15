@@ -148,9 +148,18 @@ protected:
   struct SubEntityInfo
   {
     SubEntityInfo()
+    /*
+     * TODO: move default value of `geometryType_` to member declaration
+     * when removing support for older dune-geometry
+     */
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
+      : geometryType_(GeometryTypes::simplex(dim-codim))
+      {}
+#else
     {
       geometryType_.makeSimplex(dim-codim);
     }
+#endif
 
     SubEntityInfo(IndexType parent_, unsigned int num_in_parent_,
                   const Dune::GeometryType& geometryType)
