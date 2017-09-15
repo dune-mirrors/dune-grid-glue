@@ -84,7 +84,9 @@ private:
 
 public:
 
-  ConformingMerge(T tolerance = 1E-4) :
+  static constexpr T default_tolerance = 1e-4;
+
+  ConformingMerge(T tolerance = default_tolerance) :
     tolerance_(tolerance)
   {}
 
@@ -128,6 +130,8 @@ private:
 
 };
 
+template<int dim, int dimworld, typename T>
+constexpr T ConformingMerge<dim, dimworld, T>::default_tolerance;
 
 template<int dim, int dimworld, typename T>
 void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::GeometryType& grid1ElementType,
