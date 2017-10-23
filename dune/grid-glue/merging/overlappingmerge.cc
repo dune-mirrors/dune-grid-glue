@@ -130,7 +130,7 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
             g2local[i] = grid2Geometry.local(P[i]);
         }
 
-        intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+        intersections.emplace_back(grid1Index, grid2Index);
         for (i = 0; i < n_intersectionnodes; ++i) {
             intersections.back().grid1Local_[0][i] = g1local[i];
             intersections.back().grid2Local_[0][i] = g2local[i];
@@ -172,7 +172,7 @@ void OverlappingMerge<dim1,dim2,dimworld, T>::computeIntersections(const Dune::G
                     g2local[j] = grid2Geometry.local(global[j]);
                 }
 
-                intersections.push_back(RemoteSimplicialIntersection(grid1Index,grid2Index));
+                intersections.emplace_back(grid1Index,grid2Index);
                 for (size_type j = 0; j < n_intersectionnodes; ++j) {
                     intersections.back().grid1Local_[0][j] = g1local[j];
                     intersections.back().grid2Local_[0][j] = g2local[j];

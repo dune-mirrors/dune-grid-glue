@@ -58,8 +58,8 @@ struct setupGrid<1> {
     grid1_elements.push_back(1);
     grid1_elements.push_back(1);
     grid1_elements.push_back(2);
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
 
     grid2_coords.push_back(makeVec<ctype, dimworld>(0));
     grid2_coords.push_back(makeVec<ctype, dimworld>(3));
@@ -69,8 +69,8 @@ struct setupGrid<1> {
     grid2_elements.push_back(1);
     grid2_elements.push_back(1);
     grid2_elements.push_back(2);
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
   }
 };
 
@@ -107,8 +107,8 @@ struct setupGrid<2> {
     grid1_elements.push_back(3);
     grid1_elements.push_back(2);
     grid1_elements.push_back(1);
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
 
     grid2_coords.push_back(makeVec<ctype, dimworld>(0,0));
     grid2_coords.push_back(makeVec<ctype, dimworld>(0,1));
@@ -121,8 +121,8 @@ struct setupGrid<2> {
     grid2_elements.push_back(2);
     grid2_elements.push_back(0);
     grid2_elements.push_back(3);
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
   }
 };
 

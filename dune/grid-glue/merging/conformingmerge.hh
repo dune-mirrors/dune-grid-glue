@@ -190,7 +190,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
   /** \todo Currently the RemoteIntersections have to be simplices */
   if (grid1ElementType.isSimplex()) {
 
-    intersections.push_back(RemoteSimplicialIntersection(grid1Index, grid2Index));
+    intersections.emplace_back(grid1Index, grid2Index);
 
     for (int i=0; i<refElement.size(dim); i++) {
       intersections.back().grid1Local_[0][i] = refElement.position(i,dim);
