@@ -84,6 +84,8 @@ struct setupGrid<1> {
   }
 };
 
+constexpr int setupGrid<1>::dim;
+
 template<>
 struct setupGrid<2> {
   static constexpr int dim = 2;
@@ -145,6 +147,8 @@ struct setupGrid<2> {
 #endif
   }
 };
+
+constexpr int setupGrid<2>::dim;
 
 /*
    we split the grid0 and grid1 side into different subdomains and
