@@ -58,8 +58,13 @@ struct setupGrid<1> {
     grid1_elements.push_back(1);
     grid1_elements.push_back(1);
     grid1_elements.push_back(2);
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
+    grid1_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+    grid1_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+#else
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+#endif
 
     grid2_coords.push_back(makeVec<ctype, dimworld>(0));
     grid2_coords.push_back(makeVec<ctype, dimworld>(3));
@@ -69,10 +74,17 @@ struct setupGrid<1> {
     grid2_elements.push_back(1);
     grid2_elements.push_back(1);
     grid2_elements.push_back(2);
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
+    grid2_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+    grid2_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+#else
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+#endif
   }
 };
+
+constexpr int setupGrid<1>::dim;
 
 template<>
 struct setupGrid<2> {
@@ -107,8 +119,13 @@ struct setupGrid<2> {
     grid1_elements.push_back(3);
     grid1_elements.push_back(2);
     grid1_elements.push_back(1);
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid1_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
+    grid1_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+    grid1_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+#else
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid1_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+#endif
 
     grid2_coords.push_back(makeVec<ctype, dimworld>(0,0));
     grid2_coords.push_back(makeVec<ctype, dimworld>(0,1));
@@ -121,10 +138,17 @@ struct setupGrid<2> {
     grid2_elements.push_back(2);
     grid2_elements.push_back(0);
     grid2_elements.push_back(3);
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
-    grid2_element_types.push_back(Dune::GeometryType(Dune::GeometryType::simplex, dim));
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
+    grid2_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+    grid2_element_types.emplace_back(Dune::GeometryTypes::simplex(dim));
+#else
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+    grid2_element_types.emplace_back(Dune::GeometryType::simplex, dim);
+#endif
   }
 };
+
+constexpr int setupGrid<2>::dim;
 
 /*
    we split the grid0 and grid1 side into different subdomains and

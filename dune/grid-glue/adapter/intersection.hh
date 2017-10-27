@@ -14,6 +14,7 @@
 #include <tuple>
 
 #include <dune/common/deprecated.hh>
+#include <dune/common/version.hh>
 #include <dune/geometry/affinegeometry.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid-glue/gridglue.hh>
@@ -181,7 +182,11 @@ namespace Dune {
 
           // set the corners of the local geometry
 #ifdef ONLY_SIMPLEX_INTERSECTIONS
-          Dune::GeometryType type(Dune::GeometryType::simplex, mydim);
+#  if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
+          const Dune::GeometryType type = Dune::GeometryTypes::simplex(mydim);
+#  else
+          const Dune::GeometryType type(Dune::GeometryType::simplex, mydim);
+#  endif
 #else
 #error Not Implemented
 #endif
@@ -379,8 +384,12 @@ namespace Dune {
       Dune::GeometryType type() const
       {
         #ifdef ONLY_SIMPLEX_INTERSECTIONS
+        #  if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
+        return Dune::GeometryTypes::simplex(mydim);
+        #  else
         static const Dune::GeometryType type(Dune::GeometryType::simplex, mydim);
         return type;
+        #  endif
         #else
         #error Not Implemented
         #endif
