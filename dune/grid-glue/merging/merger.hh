@@ -162,19 +162,6 @@ public:
   }
 
   /**
-   * @brief get the merged grid simplices refining a given grid-n simplex
-   * @tparam n specify which grid (grid1/grid2: 0/1)
-   * @param idx index of grid-n simplex
-   * @param indices will be resized first and then filled with the refining simplices
-   * @return TRUE <=> given simplex could be matched and is part of the merged grid
-   */
-  template<int n>
-  bool simplexRefined(unsigned int idx, std::vector<unsigned int>& indices) const
-  {
-    return GridTraits<n>::Policy::simplexRefined(*this, idx, indices);
-  }
-
-  /**
    * @brief get the grid-n parent's simplex local coordinates for a particular merged grid simplex corner
    * (parent's index can be obtained via "parent<n>")
    * @tparam n specify which grid
