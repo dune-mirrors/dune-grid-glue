@@ -73,9 +73,8 @@ public:
 
 protected:
 
-  bool valid;
 
-  StandardMerge() : valid(false) {}
+  bool valid = false;
 
   struct RemoteSimplicialIntersection
   {
