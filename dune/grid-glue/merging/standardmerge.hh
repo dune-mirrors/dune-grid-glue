@@ -225,28 +225,28 @@ private:
    * @param idx index of the merged grid simplex
    * @return amount of parent simplices
    */
-  unsigned int grid1Parents(unsigned int idx) const;
+  unsigned int grid1Parents(unsigned int idx) const final;
 
   /**
    * @brief get number of grid2 parents to the intersection idx
    * @param idx index of the merged grid simplex
    * @return amount of parent simplices
    */
-  unsigned int grid2Parents(unsigned int idx) const;
+  unsigned int grid2Parents(unsigned int idx) const final;
 
   /**
    * @brief get index of grid1 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid1 parent simplex
    */
-  unsigned int grid1Parent(unsigned int idx, unsigned int parId = 0) const;
+  unsigned int grid1Parent(unsigned int idx, unsigned int parId = 0) const final;
 
   /**
    * @brief get index of grid2 parent simplex for given merged grid simplex
    * @param idx index of the merged grid simplex
    * @return index of the grid2 parent simplex
    */
-  unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const;
+  unsigned int grid2Parent(unsigned int idx, unsigned int parId = 0) const final;
 
 
   /*   G E O M E T R I C A L   I N F O R M A T I O N   */
@@ -258,7 +258,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid1 simplex
    */
-  Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
+  Grid1Coords grid1ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const final;
 
   /**
    * @brief get the grid2 parent's simplex local coordinates for a particular merged grid simplex corner
@@ -267,7 +267,7 @@ private:
    * @param corner the index of the simplex' corner
    * @return local coordinates in parent grid2 simplex
    */
-  Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const;
+  Grid2Coords grid2ParentLocal(unsigned int idx, unsigned int corner, unsigned int parId = 0) const final;
 
   /**
    * Do a brute-force search to find one pair of intersecting elements
