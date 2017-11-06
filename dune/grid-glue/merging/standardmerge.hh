@@ -53,6 +53,7 @@ template<class T, int grid1Dim, int grid2Dim, int dimworld>
 class StandardMerge
   : public Merger<T,grid1Dim,grid2Dim,dimworld>
 {
+  using Base = Merger<T, grid1Dim, grid2Dim, dimworld>;
 
 public:
 
@@ -62,13 +63,13 @@ public:
   typedef T ctype;
 
   /// @brief Type used for local coordinates on the grid1 side
-  typedef typename Merger<T,grid1Dim,grid2Dim,dimworld>::Grid1Coords Grid1Coords;
+  using Grid1Coords = typename Base::Grid1Coords;
 
   /// @brief Type used for local coordinates on the grid2 side
-  typedef typename Merger<T,grid1Dim,grid2Dim,dimworld>::Grid2Coords Grid2Coords;
+  using Grid2Coords = typename Base::Grid2Coords;
 
   /// @brief the coordinate type used in this interface
-  typedef Dune::FieldVector<T, dimworld>  WorldCoords;
+  using WorldCoords = typename Base::WorldCoords;
 
 protected:
 
