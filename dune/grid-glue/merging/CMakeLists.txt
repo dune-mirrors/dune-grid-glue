@@ -5,6 +5,7 @@ install(FILES
   conformingmerge.hh
   contactmerge.cc
   contactmerge.hh
+  intersectionlist.hh
   merger.hh
   overlappingmerge.cc
   overlappingmerge.hh

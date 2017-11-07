@@ -51,7 +51,7 @@ public:
   {}
 
 protected:
-  typedef typename StandardMerge<T,dim1,dim2,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
+  typedef typename StandardMerge<T,dim1,dim2,dimworld>::SimplicialIntersection SimplicialIntersection;
 
   /** \brief Compute the intersection between two overlapping elements
 
@@ -72,7 +72,7 @@ protected:
                            const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
                            std::bitset<(1<<dim2)>& neighborIntersects2,
                            unsigned int grid2Index,
-                           std::vector<RemoteSimplicialIntersection>& intersections);
+                           std::vector<SimplicialIntersection>& intersections);
 
 private:
   bool inPlane(std::vector<FieldVector<T,dimworld> >& points);

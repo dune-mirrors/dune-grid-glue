@@ -135,7 +135,7 @@ public:
     }
 
 protected:
-  typedef typename StandardMerge<T,dimworld-1,dimworld-1,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
+  typedef typename StandardMerge<T,dimworld-1,dimworld-1,dimworld>::SimplicialIntersection SimplicialIntersection;
 
 private:
     /** \brief Vector field on the domain surface which prescribes the direction
@@ -178,7 +178,7 @@ private:
             const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
             std::bitset<(1<<dim)>& neighborIntersects2,
             unsigned int grid2Index,
-            std::vector<RemoteSimplicialIntersection>& intersections);
+            std::vector<SimplicialIntersection>& intersections);
 
     /**
       * @copydoc StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build
