@@ -123,7 +123,8 @@ namespace Dune {
         std::vector< GridIndexType<side> > gridindices;
 
         /** \brief embedding of intersection into local grid entity coordinates */
-        std::vector< std::shared_ptr< GridLocalGeometry<side> > > gridlocalgeom;
+        /* TODO [C++17 or DUNE-2.6]: use std::optional */
+        std::vector< std::unique_ptr< GridLocalGeometry<side> > > gridlocalgeom;
 
         /**
          * global intersection geometry on grid `side` side.
@@ -132,7 +133,8 @@ namespace Dune {
          * entity as stored in gridlocalgeom and that entities global
          * geometry g.
          */
-        std::shared_ptr< GridGeometry<side> > gridgeom;
+        /* TODO [C++17 or DUNE-2.6]: use std::optional */
+        std::unique_ptr< GridGeometry<side> > gridgeom;
       };
 
       std::tuple< SideData<0>, SideData<1> > sideData_;
@@ -190,7 +192,7 @@ namespace Dune {
 #else
 #error Not Implemented
 #endif
-          data.gridlocalgeom[par] = std::make_shared< GridLocalGeometry<side> >(type, corners_element_local);
+          data.gridlocalgeom[par] = std::make_unique< GridLocalGeometry<side> >(type, corners_element_local);
 
           // Add world geometry only for 0th parent
           if (par == 0) {
@@ -204,7 +206,7 @@ namespace Dune {
               corners_global[i]        = gridWorldGeometry.global(corners_subEntity_local[i]);
             }
 
-            data.gridgeom = std::make_shared< GridGeometry<side> >(type, corners_global);
+            data.gridgeom = std::make_unique< GridGeometry<side> >(type, corners_global);
           }
         }
       }
