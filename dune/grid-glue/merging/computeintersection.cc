@@ -9,11 +9,11 @@ namespace GridGlue {
 //****************************************************************************************
 
 template<class CM>
-bool IntersectionComputation<CM>::computeIntersection(const std::vector<V> X,
-                                const std::vector<V> Y,
-                                std::vector<std::vector<int> >& SX,
-                                std::vector<std::vector<int> >& SY,
-                                std::vector<V>& P) {
+bool IntersectionComputation<CM>::computeIntersection(const std::vector<V>& X,
+                                                      const std::vector<V>& Y,
+                                                      std::vector<std::vector<int> >& SX,
+                                                      std::vector<std::vector<int> >& SY,
+                                                      std::vector<V>& P) {
 
     std::vector<std::vector<unsigned int> > subElementsX, subElementsY;
     std::vector<std::vector<int> > faceIdsX, faceIdsY;
@@ -68,10 +68,10 @@ bool IntersectionComputation<CM>::computeIntersection(const std::vector<V> X,
 template<class CM>
 void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,3>,
                                                std::integral_constant<int,3>,
-                                               const V centroid,
-                                               const std::vector<std::vector<int> > SX,
-                                               const std::vector<std::vector<int> > SY,
-                                               const std::vector<V>  P,
+                                               const V& centroid,
+                                               const std::vector<std::vector<int> >& SX,
+                                               const std::vector<std::vector<int> >& SY,
+                                               const std::vector<V>&  P,
                                                std::vector<std::vector<int> >& H)
 {
     int n_facesX = SX.size();
@@ -156,10 +156,10 @@ void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,3>,
 template<class CM>
 void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,2>,
                                                std::integral_constant<int,2>,
-                                               const V centroid,
-                                               const std::vector<std::vector<int> > SX,
-                                               const std::vector<std::vector<int> > SY,
-                                               const std::vector<V>  P,
+                                               const V& centroid,
+                                               const std::vector<std::vector<int> >& SX,
+                                               const std::vector<std::vector<int> >& SY,
+                                               const std::vector<V>&  P,
                                                std::vector<std::vector<int> >& H)
 {
     H.clear();
@@ -177,10 +177,10 @@ void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,2>,
 template<class CM>
 void IntersectionComputation<CM>::orderPoints_(std::integral_constant<int,2>,
                                                std::integral_constant<int,3>,
-                                               const V centroid,
-                                               const std::vector<std::vector<int> > SX,
-                                               const std::vector<std::vector<int> > SY,
-                                               const std::vector<V>  P,
+                                               const V& centroid,
+                                               const std::vector<std::vector<int> >& SX,
+                                               const std::vector<std::vector<int> >& SY,
+                                               const std::vector<V>&  P,
                                                std::vector<std::vector<int> >& H)
 {
     H.clear();
@@ -204,8 +204,8 @@ void IntersectionComputation<CM>::removeDuplicates(std::vector<int> & p)
 }
 
 template<class CM>
-bool IntersectionComputation<CM>::newFace3D(const std::vector<int> id,
-                                            const std::vector<std::vector<int> > H)
+bool IntersectionComputation<CM>::newFace3D(const std::vector<int>& id,
+                                            const std::vector<std::vector<int> >& H)
 {
     // get size_type for all the vectors we are using
     typedef typename std::vector<Empty>::size_type size_type;
@@ -240,9 +240,9 @@ bool IntersectionComputation<CM>::newFace3D(const std::vector<int> id,
 
 template<class CM>
 void IntersectionComputation<CM>::orderPointsCC(std::integral_constant<int,3>,
-                                                const V centroid,
+                                                const V& centroid,
                                                 std::vector<int>& id,
-                                                const std::vector<V> P)
+                                                const std::vector<V>& P)
 {
     typedef typename std::vector<Empty>::size_type size_type;
 
@@ -300,9 +300,9 @@ void IntersectionComputation<CM>::orderPointsCC(std::integral_constant<int,3>,
 
 template<class CM>
 void IntersectionComputation<CM>::orderPointsCC(std::integral_constant<int,2>,
-                                                const V centroid,
+                                                const V& centroid,
                                                 std::vector<int>& id,
-                                                const  std::vector<V> P)
+                                                const  std::vector<V>& P)
 {
     typedef typename std::vector<Empty>::size_type size_type;
 

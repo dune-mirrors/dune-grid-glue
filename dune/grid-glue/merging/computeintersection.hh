@@ -54,8 +54,8 @@ public:
      * @param P the intersection points
      * @return true if enough intersection points were found to define at least one intersection element
      */
-    static bool computeIntersection(const std::vector<V> X,
-                                    const std::vector<V> Y,
+    static bool computeIntersection(const std::vector<V>& X,
+                                    const std::vector<V>& Y,
                                     std::vector<std::vector<int> >& SX,
                                     std::vector<std::vector<int> >& SY,
                                     std::vector<V>& P);
@@ -70,10 +70,10 @@ public:
      * @param H ordered list of P indices
      */
     template<int isDim, int dW>
-    static void orderPoints(const V centroid,
-                            const std::vector<std::vector<int> > SX,
-                            const std::vector<std::vector<int> > SY,
-                            const std::vector<V> P,
+    static void orderPoints(const V& centroid,
+                            const std::vector<std::vector<int> >& SX,
+                            const std::vector<std::vector<int> >& SY,
+                            const std::vector<V>& P,
                             std::vector<std::vector<int> >& H)
     {
         if (isDim > 1)
@@ -84,45 +84,45 @@ public:
 private:
     static void orderPoints_(std::integral_constant<int,1>,
                              std::integral_constant<int,1>,
-                             const V centroid,
-                             const std::vector<std::vector<int> > SX,
-                             const std::vector<std::vector<int> > SY,
-                             const std::vector<V> P,
+                             const V& centroid,
+                             const std::vector<std::vector<int> >& SX,
+                             const std::vector<std::vector<int> >& SY,
+                             const std::vector<V>& P,
                              std::vector<std::vector<int> >& H) {}
     static void orderPoints_(std::integral_constant<int,1>,
                              std::integral_constant<int,2>,
-                             const V centroid,
-                             const std::vector<std::vector<int> > SX,
-                             const std::vector<std::vector<int> > SY,
-                             const std::vector<V> P,
+                             const V& centroid,
+                             const std::vector<std::vector<int> >& SX,
+                             const std::vector<std::vector<int> >& SY,
+                             const std::vector<V>& P,
                              std::vector<std::vector<int> >& H) {}
     static void orderPoints_(std::integral_constant<int,1>,
                              std::integral_constant<int,3>,
-                             const V centroid,
-                             const std::vector<std::vector<int> > SX,
-                             const std::vector<std::vector<int> > SY,
-                             const std::vector<V> P,
+                             const V& centroid,
+                             const std::vector<std::vector<int> >& SX,
+                             const std::vector<std::vector<int> >& SY,
+                             const std::vector<V>& P,
                              std::vector<std::vector<int> >& H) {}
     static void orderPoints_(std::integral_constant<int,2>,
                              std::integral_constant<int,2>,
-                             const V centroid,
-                             const std::vector<std::vector<int> > SX,
-                             const std::vector<std::vector<int> > SY,
-                             const std::vector<V> P,
+                             const V& centroid,
+                             const std::vector<std::vector<int> >& SX,
+                             const std::vector<std::vector<int> >& SY,
+                             const std::vector<V>& P,
                              std::vector<std::vector<int> >& H);
     static void orderPoints_(std::integral_constant<int,2>,
                              std::integral_constant<int,3>,
-                             const V centroid,
-                             const std::vector<std::vector<int> > SX,
-                             const std::vector<std::vector<int> > SY,
-                             const std::vector<V> P,
+                             const V& centroid,
+                             const std::vector<std::vector<int> >& SX,
+                             const std::vector<std::vector<int> >& SY,
+                             const std::vector<V>& P,
                              std::vector<std::vector<int> >& H);
     static void orderPoints_(std::integral_constant<int,3>,
                              std::integral_constant<int,3>,
-                             const V centroid,
-                             const std::vector<std::vector<int> > SX,
-                             const std::vector<std::vector<int> > SY,
-                             const std::vector<V> P,
+                             const V& centroid,
+                             const std::vector<std::vector<int> >& SX,
+                             const std::vector<std::vector<int> >& SY,
+                             const std::vector<V>& P,
                              std::vector<std::vector<int> > & H);
 
     /**
@@ -133,13 +133,13 @@ private:
      * @param P the point list
      */
     static void orderPointsCC(std::integral_constant<int,2>,
-                              const V centroid,
+                              const V& centroid,
                               std::vector<int> &id,
-                              const std::vector<V> P);
+                              const std::vector<V>& P);
     static void orderPointsCC(std::integral_constant<int,3>,
-                              const V centroid,
+                              const V& centroid,
                               std::vector<int> &id,
-                              const std::vector<V> P);
+                              const std::vector<V>& P);
 
     /**
      * @brief Removes duplicate entries from the vector p.
@@ -154,8 +154,8 @@ private:
      * @param H
      * @return true if the index set is contained in H
      */
-    static bool newFace3D(const std::vector<int> id,
-                          const std::vector<std::vector<int> > H);
+    static bool newFace3D(const std::vector<int>& id,
+                          const std::vector<std::vector<int> >& H);
 };
 
 template<class V>
