@@ -123,7 +123,8 @@ namespace Dune {
         std::vector< GridIndexType<side> > gridindices;
 
         /** \brief embedding of intersection into local grid entity coordinates */
-        std::vector< std::shared_ptr< GridLocalGeometry<side> > > gridlocalgeom;
+        /* TODO [C++17 or DUNE-2.6]: use std::optional */
+        std::vector< std::unique_ptr< GridLocalGeometry<side> > > gridlocalgeom;
 
         /**
          * global intersection geometry on grid `side` side.
@@ -132,7 +133,8 @@ namespace Dune {
          * entity as stored in gridlocalgeom and that entities global
          * geometry g.
          */
-        std::shared_ptr< GridGeometry<side> > gridgeom;
+        /* TODO [C++17 or DUNE-2.6]: use std::optional */
+        std::unique_ptr< GridGeometry<side> > gridgeom;
       };
 
       std::tuple< SideData<0>, SideData<1> > sideData_;
@@ -190,7 +192,7 @@ namespace Dune {
 #else
 #error Not Implemented
 #endif
-          data.gridlocalgeom[par] = std::make_shared< GridLocalGeometry<side> >(type, corners_element_local);
+          data.gridlocalgeom[par] = std::make_unique< GridLocalGeometry<side> >(type, corners_element_local);
 
           // Add world geometry only for 0th parent
           if (par == 0) {
@@ -204,7 +206,7 @@ namespace Dune {
               corners_global[i]        = gridWorldGeometry.global(corners_subEntity_local[i]);
             }
 
-            data.gridgeom = std::make_shared< GridGeometry<side> >(type, corners_global);
+            data.gridgeom = std::make_unique< GridGeometry<side> >(type, corners_global);
           }
         }
       }
@@ -219,11 +221,6 @@ namespace Dune {
       // if an invalid index is given do not proceed!
       // (happens when the parent GridGlue initializes the "end"-Intersection)
       assert (0 <= mergeindex || mergeindex < glue.index__sz);
-
-      const unsigned n_grid0Parents = glue.merger_->template parents<0>(mergeindex);
-      const unsigned n_grid1Parents = glue.merger_->template parents<1>(mergeindex);
-
-      assert (0 <= n_grid0Parents || 0 <= n_grid1Parents);
 
       std::get<0>(sideData_).gridlocal = grid0local;
       std::get<1>(sideData_).gridlocal = grid1local;

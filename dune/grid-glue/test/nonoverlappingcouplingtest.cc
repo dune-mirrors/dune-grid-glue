@@ -72,7 +72,7 @@ void testMatchingCubeGrids()
   using GridType = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim> >;
 
   std::array<int, dim> elements;
-  elements.fill(4);
+  elements.fill(8);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
@@ -133,13 +133,13 @@ void testNonMatchingCubeGrids()
   using GridType = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim> >;
 
   std::array<int, dim> elements;
-  elements.fill(4);
+  elements.fill(8);
   FieldVector<double,dim> lower(0);
   FieldVector<double,dim> upper(1);
 
   GridType cubeGrid0(lower, upper, elements);
 
-  elements.fill(8);
+  elements.fill(10);
   lower[0] += 1;
   upper[0] += 1;
 
@@ -196,13 +196,13 @@ public:
   std::shared_ptr<GridType> generate()
   {
     std::array<int, dim> elements;
-    elements.fill(4);
+    elements.fill(8);
     FieldVector<double,dim> lower(0);
     FieldVector<double,dim> upper(1);
 
     if (tar)
     {
-      elements.fill(8);
+      elements.fill(10);
       lower[0] += 1;
       upper[0] += 1;
     }
@@ -225,7 +225,7 @@ public:
   std::shared_ptr<GridType> generate()
   {
     std::array<int,dim> elements;
-    std::fill(elements.begin(), elements.end(), 4);
+    std::fill(elements.begin(), elements.end(), 8);
     std::bitset<dim> periodic(0);
     FieldVector<double,dim> size(1);
     int overlap = 1;
@@ -233,7 +233,7 @@ public:
 
     if (tar)
     {
-      std::fill(elements.begin(), elements.end(), 8);
+      std::fill(elements.begin(), elements.end(), 10);
       shift = 1.0;
     }
 

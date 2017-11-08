@@ -239,9 +239,6 @@ public:
 #endif
   {}
 
-  /** \brief Destructor frees allocated memory */
-  ~Extractor();
-
   /*  F U N C T I O N A L I T Y  */
 
   /**
@@ -382,7 +379,7 @@ public:
   {
     if (index >= subEntities_.size())
       DUNE_THROW(Dune::GridError, "invalid face index");
-    const ElementSeed seed = (elmtInfo_.find(subEntities_[index].parent))->second.p;
+    const ElementSeed seed = elmtInfo_.at(subEntities_[index].parent).p;
     return grid().entity(seed);
   }
 
@@ -398,7 +395,7 @@ public:
   {
     if (index >= coords_.size())
       DUNE_THROW(Dune::GridError, "invalid coordinate index");
-    const VertexSeed seed = (vtxInfo_.find(coords_[index].vtxindex))->second.p;
+    const VertexSeed seed = vtxInfo_.at(coords_[index].vtxindex).p;
     return grid().entity(seed);
   }
 #endif
@@ -410,13 +407,6 @@ public:
   LocalGeometry geometryLocal(unsigned int index) const;
 
 };
-
-
-template<typename GV, int cd>
-Extractor<GV,cd>::~Extractor()
-{
-  clear();
-}
 
 
 /** \brief Get World geometry of the extracted face */
@@ -442,7 +432,7 @@ typename Extractor<GV,cd>::LocalGeometry Extractor<GV,cd>::geometryLocal(unsigne
   Dune::GeometryType facetype = subEntities_[index].geometryType_;
 
   // get reference element
-  const auto elmtseed = elmtInfo_.find(face.parent)->second.p;
+  const auto elmtseed = elmtInfo_.at(face.parent).p;
   const auto elmt = grid().entity(elmtseed);
   const Dune::GeometryType celltype = elmt.type();
   const auto& re = Dune::ReferenceElements<ctype, dim>::general(celltype);

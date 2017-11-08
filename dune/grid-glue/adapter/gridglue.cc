@@ -479,10 +479,7 @@ void GridGlue<P0, P1>::mergePatches(
   // append to intersections list
   intersections_.resize(merger_->nSimplices() + offset + 1);
   for (unsigned int i = 0; i < merger_->nSimplices(); ++i)
-  {
-    IntersectionData data(*this, i, offset, patch0local, patch1local);
-    intersections_[offset+i] = data;
-  }
+    intersections_[offset + i] = IntersectionData(*this, i, offset, patch0local, patch1local);
 
   index__sz = intersections_.size() - 1;
 
