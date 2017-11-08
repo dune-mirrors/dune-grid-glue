@@ -5,19 +5,19 @@ namespace Dune {
 namespace GridGlue {
 
 template <int dimworld, typename T>
-inline void simplexSubdivision(std::integral_constant<int,0>,const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+inline void simplexSubdivision(std::integral_constant<int,0>,const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                                                      std::vector<std::vector<unsigned int> >& subElements,
                                                                      std::vector<std::vector<int> >& faceIds);
 template <int dimworld, typename T>
-inline void simplexSubdivision(std::integral_constant<int,1>,const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+inline void simplexSubdivision(std::integral_constant<int,1>,const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                                                      std::vector<std::vector<unsigned int> >& subElements,
                                                                      std::vector<std::vector<int> >& faceIds);
 template <int dimworld, typename T>
-inline void simplexSubdivision(std::integral_constant<int,2>,const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+inline void simplexSubdivision(std::integral_constant<int,2>,const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                                                      std::vector<std::vector<unsigned int> >& subElements,
                                                                      std::vector<std::vector<int> >& faceIds);
 template <int dimworld, typename T>
-inline void simplexSubdivision(std::integral_constant<int,3>,const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+inline void simplexSubdivision(std::integral_constant<int,3>,const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                                                      std::vector<std::vector<unsigned int> >& subElements,
                                                                      std::vector<std::vector<int> >& faceIds);
 
@@ -34,8 +34,8 @@ public:
     static const int grid2Dimension = dim2;
     static const int intersectionDimension = dim2;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -43,7 +43,7 @@ public:
         return SimplexMethod<dimWorld,dim2,dim1,T>::computeIntersectionPoints(Y, X, SY, SX, P);
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -51,7 +51,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -74,8 +74,8 @@ public:
     static const int intersectionDimension = 0;
 
     static bool computeIntersectionPoints(
-            const std::vector<FieldVector<T,dimWorld> >   X,
-            const std::vector<FieldVector<T,dimWorld> >   Y,
+            const std::vector<FieldVector<T,dimWorld> >&   X,
+            const std::vector<FieldVector<T,dimWorld> >&   Y,
             std::vector<std::vector<int> >         & SX,
             std::vector<std::vector<int> >         & SY,
             std::vector<FieldVector<T,dimWorld> > & P)
@@ -99,7 +99,7 @@ public:
         return false;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -107,7 +107,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -129,8 +129,8 @@ public:
     static const int grid2Dimension = 1;
     static const int intersectionDimension = 0;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                                          const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                                          const std::vector<FieldVector<T,dimWorld> >&   Y,
                                           std::vector<std::vector<int> >         & SX,
                                           std::vector<std::vector<int> >         & SY,
                                           std::vector<FieldVector<T,dimWorld> > & P)
@@ -176,7 +176,7 @@ public:
         return false;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -184,7 +184,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -206,8 +206,8 @@ public:
     static const int grid2Dimension = 2;
     static const int intersectionDimension = 0;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -257,7 +257,7 @@ public:
         return false;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -265,7 +265,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -286,8 +286,8 @@ public:
     static const int grid2Dimension = 3;
     static const int intersectionDimension = 0;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -327,7 +327,7 @@ public:
         return true;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -335,7 +335,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -355,8 +355,8 @@ public:
     static const int grid2Dimension = 1;
     static const int intersectionDimension = 1;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -537,7 +537,7 @@ public:
         return false;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -545,7 +545,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -565,8 +565,8 @@ public:
     static const int grid2Dimension = 2;
     static const int intersectionDimension = 1;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -679,7 +679,7 @@ public:
         return false ;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -687,7 +687,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -707,8 +707,8 @@ public:
     static const int grid2Dimension = 3;
     static const int intersectionDimension = 1;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -774,7 +774,7 @@ public:
         return b;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -782,7 +782,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -802,8 +802,8 @@ public:
     static const int grid2Dimension = 2;
     static const int intersectionDimension = 2;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -870,7 +870,7 @@ public:
         return b;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -878,7 +878,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -898,8 +898,8 @@ public:
     static const int grid2Dimension = 3;
     static const int intersectionDimension = 2;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -978,7 +978,7 @@ public:
         return b;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -986,7 +986,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -1005,8 +1005,8 @@ public:
     static const int grid2Dimension = 3;
     static const int intersectionDimension = 3;
 
-    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >   X,
-                 const std::vector<FieldVector<T,dimWorld> >   Y,
+    static bool computeIntersectionPoints(const std::vector<FieldVector<T,dimWorld> >&   X,
+                 const std::vector<FieldVector<T,dimWorld> >&   Y,
                  std::vector<std::vector<int> >         & SX,
                  std::vector<std::vector<int> >         & SY,
                  std::vector<FieldVector<T,dimWorld> > & P)
@@ -1122,7 +1122,7 @@ public:
         return b;
     }
 
-    static void grid1_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid1_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -1130,7 +1130,7 @@ public:
                                        elementCorners,subElements, faceIds);
     }
 
-    static void grid2_subdivisions(const std::vector<Vector> elementCorners,
+    static void grid2_subdivisions(const std::vector<Vector>& elementCorners,
                                    std::vector<std::vector<unsigned int> >& subElements,
                                    std::vector<std::vector<int> >& faceIds)
     {
@@ -1141,7 +1141,7 @@ public:
 
 template <int dimworld, typename T>
 inline void simplexSubdivision(std::integral_constant<int,0>,
-                               const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+                               const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                std::vector<std::vector<unsigned int> >& subElements,
                                std::vector<std::vector<int> >& faceIds)
 {
@@ -1153,7 +1153,7 @@ inline void simplexSubdivision(std::integral_constant<int,0>,
 
 template <int dimworld, typename T>
 inline void simplexSubdivision(std::integral_constant<int,1>,
-                               const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+                               const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                std::vector<std::vector<unsigned int> >& subElements,
                                std::vector<std::vector<int> >& faceIds)
 {
@@ -1169,7 +1169,7 @@ inline void simplexSubdivision(std::integral_constant<int,1>,
 
 template <int dimworld, typename T>
 inline void simplexSubdivision(std::integral_constant<int,2>,
-                               const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+                               const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                std::vector<std::vector<unsigned int> >& subElements,
                                std::vector<std::vector<int> >& faceIds)
 {
@@ -1211,7 +1211,7 @@ inline void simplexSubdivision(std::integral_constant<int,2>,
 
 template <int dimworld, typename T>
 inline void simplexSubdivision(std::integral_constant<int,3>,
-                               const std::vector<Dune::FieldVector<T, dimworld> > elementCorners,
+                               const std::vector<Dune::FieldVector<T, dimworld> >& elementCorners,
                                std::vector<std::vector<unsigned int> >& subElements,
                                std::vector<std::vector<int> >& faceIds)
 {
