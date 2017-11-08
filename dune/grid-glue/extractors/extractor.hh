@@ -239,9 +239,6 @@ public:
 #endif
   {}
 
-  /** \brief Destructor frees allocated memory */
-  ~Extractor();
-
   /*  F U N C T I O N A L I T Y  */
 
   /**
@@ -410,13 +407,6 @@ public:
   LocalGeometry geometryLocal(unsigned int index) const;
 
 };
-
-
-template<typename GV, int cd>
-Extractor<GV,cd>::~Extractor()
-{
-  clear();
-}
 
 
 /** \brief Get World geometry of the extracted face */
