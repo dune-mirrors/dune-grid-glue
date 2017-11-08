@@ -66,7 +66,7 @@ private:
   /// @brief maximum distance between two matched points in the mapping
   T tolerance_;
 
-  typedef typename StandardMerge<T,dim,dim,dimworld>::RemoteSimplicialIntersection RemoteSimplicialIntersection;
+  typedef typename StandardMerge<T,dim,dim,dimworld>::SimplicialIntersection SimplicialIntersection;
 
   /** \brief Compute the intersection between two overlapping elements
 
@@ -80,7 +80,7 @@ private:
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
                                    std::bitset<(1<<dim)>& neighborIntersects2,
                                    unsigned int grid2Index,
-                                   std::vector<RemoteSimplicialIntersection>& intersections);
+                                   std::vector<SimplicialIntersection>& intersections);
 
 public:
 
@@ -103,7 +103,7 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
                                                             const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
                                                             std::bitset<(1<<dim)>& neighborIntersects2,
                                                             unsigned int grid2Index,
-                                                            std::vector<RemoteSimplicialIntersection>& intersections)
+                                                            std::vector<SimplicialIntersection>& intersections)
 {
   this->counter++;
 
@@ -148,14 +148,14 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
 
   const auto& refElement = Dune::ReferenceElements<T,dim>::general(grid1ElementType);
 
-  /** \todo Currently the RemoteIntersections have to be simplices */
+  /** \todo Currently the Intersections have to be simplices */
   if (grid1ElementType.isSimplex()) {
 
     intersections.emplace_back(grid1Index, grid2Index);
 
     for (int i=0; i<refElement.size(dim); i++) {
-      intersections.back().grid1Local_[0][i] = refElement.position(i,dim);
-      intersections.back().grid2Local_[0][i] = refElement.position(other[i],dim);
+      intersections.back().corners0[0][i] = refElement.position(i,dim);
+      intersections.back().corners1[0][i] = refElement.position(other[i],dim);
     }
 
   } else if (dim == 2 && grid1ElementType.isQuadrilateral()) {
@@ -165,11 +165,11 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
 
     for (int i=0; i<2; i++) {
 
-      RemoteSimplicialIntersection newSimplicialIntersection(grid1Index, grid2Index);
+      SimplicialIntersection newSimplicialIntersection(grid1Index, grid2Index);
 
       for (int j=0; j<dim+1; j++) {
-        newSimplicialIntersection.grid1Local_[0][j] = refElement.position(subVertices[i][j],dim);
-        newSimplicialIntersection.grid2Local_[0][j] = refElement.position(subVertices[i][other[j]],dim);
+        newSimplicialIntersection.corners0[0][j] = refElement.position(subVertices[i][j],dim);
+        newSimplicialIntersection.corners1[0][j] = refElement.position(subVertices[i][other[j]],dim);
       }
 
       intersections.push_back(newSimplicialIntersection);
@@ -179,16 +179,16 @@ void ConformingMerge<dim, dimworld, T>::computeIntersections(const Dune::Geometr
   } else if (grid1ElementType.isHexahedron()) {
 
     // split the hexahedron into five tetrahedra
-    // This can be removed if ever we allow RemoteIntersections that are not simplices
+    // This can be removed if ever we allow Intersections that are not simplices
     const unsigned int subVertices[5][4] = {{0,1,3,5}, {0,3,2,6}, {4,5,0,6}, {6,7,6,3}, {6,0,5,3}};
 
     for (int i=0; i<5; i++) {
 
-      RemoteSimplicialIntersection newSimplicialIntersection(grid1Index, grid2Index);
+      SimplicialIntersection newSimplicialIntersection(grid1Index, grid2Index);
 
       for (int j=0; j<dim+1; j++) {
-        newSimplicialIntersection.grid1Local_[0][j] = refElement.position(subVertices[i][j],dim);
-        newSimplicialIntersection.grid2Local_[0][j] = refElement.position(subVertices[i][other[j]],dim);
+        newSimplicialIntersection.corners0[0][j] = refElement.position(subVertices[i][j],dim);
+        newSimplicialIntersection.corners1[0][j] = refElement.position(subVertices[i][other[j]],dim);
       }
 
       intersections.push_back(newSimplicialIntersection);

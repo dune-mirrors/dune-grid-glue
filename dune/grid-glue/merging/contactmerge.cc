@@ -16,7 +16,7 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
                                    const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
                                    std::bitset<(1<<dim)>& neighborIntersects2,
                                    unsigned int grid2Index,
-                                   std::vector<RemoteSimplicialIntersection>& intersections)
+                                   std::vector<SimplicialIntersection>& intersections)
 {
     using std::get;
 
@@ -159,13 +159,11 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
     if (nPolyCorners==dim+1) {
 
      //   std::cout<<"Add intersection: 1\n";
-        typename Base::RemoteSimplicialIntersection intersect;
-        intersect.grid1Entities_[0] = grid1Index;
-        intersect.grid2Entities_[0] = grid2Index;
+        typename Base::SimplicialIntersection intersect(grid1Index, grid2Index);
 
         for (int j=0;j<dim+1; j++) {
-            intersect.grid1Local_[0][j]=polytopeCorners[j][0];
-            intersect.grid2Local_[0][j]=polytopeCorners[j][1];
+            intersect.corners0[0][j]=polytopeCorners[j][0];
+            intersect.corners1[0][j]=polytopeCorners[j][1];
         }
         intersections.push_back(intersect);
 
@@ -195,18 +193,16 @@ void ContactMerge<dimworld, T>::computeIntersections(const Dune::GeometryType& g
 
     for (size_t i=1; i<polytopeCorners.size()-1; i++) {
 
-        typename Base::RemoteSimplicialIntersection intersect;
-        intersect.grid1Entities_[0] = grid1Index;
-        intersect.grid2Entities_[0] = grid2Index;
+        typename Base::SimplicialIntersection intersect(grid1Index, grid2Index);
 
         for (int j=0;j<dim; j++) {
-            intersect.grid1Local_[0][j]=polytopeCorners[ordering[i+j]][0];
-            intersect.grid2Local_[0][j]=polytopeCorners[ordering[i+j]][1];
+            intersect.corners0[0][j]=polytopeCorners[ordering[i+j]][0];
+            intersect.corners1[0][j]=polytopeCorners[ordering[i+j]][1];
         }
 
         // last corner is the first for all intersections
-        intersect.grid1Local_[0][dim]=polytopeCorners[ordering[0]][0];
-        intersect.grid2Local_[0][dim]=polytopeCorners[ordering[0]][1];
+        intersect.corners0[0][dim]=polytopeCorners[ordering[0]][0];
+        intersect.corners1[0][dim]=polytopeCorners[ordering[0]][1];
 
         intersections.push_back(intersect);
     }
