@@ -222,11 +222,6 @@ namespace Dune {
       // (happens when the parent GridGlue initializes the "end"-Intersection)
       assert (0 <= mergeindex || mergeindex < glue.index__sz);
 
-      const unsigned n_grid0Parents = glue.merger_->template parents<0>(mergeindex);
-      const unsigned n_grid1Parents = glue.merger_->template parents<1>(mergeindex);
-
-      assert (0 <= n_grid0Parents || 0 <= n_grid1Parents);
-
       std::get<0>(sideData_).gridlocal = grid0local;
       std::get<1>(sideData_).gridlocal = grid1local;
 
