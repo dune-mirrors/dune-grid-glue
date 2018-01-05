@@ -124,10 +124,6 @@ namespace {
 
     unsigned int patch0coords, patch0entities, patch0types,
                  patch1coords, patch1entities, patch1types;
-
-    unsigned int maxCoords() const { return std::max(patch0coords, patch1coords); }
-    unsigned int maxEntities() const { return std::max(patch0entities, patch1entities); }
-    unsigned int maxTypes() const { return std::max(patch0types, patch1types); }
   };
 }
 #endif // HAVE_MPI
