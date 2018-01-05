@@ -244,14 +244,6 @@ void GridGlue<P0, P1>::build()
     std::cout << myrank << " maxPatchSizes " << "done" << std::endl;
 #endif
 
-    // reallocate vectors to ensure sufficient buffer size for communication
-    patch0coords.reserve ( maxPatchSizes.patch0coords );
-    patch0entities.reserve ( maxPatchSizes.patch0entities );
-    patch0types.reserve ( maxPatchSizes.patch0types );
-    patch1coords.reserve ( maxPatchSizes.patch1coords );
-    patch1entities.reserve ( maxPatchSizes.patch1entities );
-    patch1types.reserve ( maxPatchSizes.patch1types );
-
     // allocate receiving buffers with maxsize to ensure sufficient buffer size for communication
     std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( maxPatchSizes.patch0coords );
     std::vector<unsigned int> remotePatch0entities ( maxPatchSizes.patch0entities );
@@ -261,18 +253,12 @@ void GridGlue<P0, P1>::build()
     std::vector<Dune::GeometryType> remotePatch1types ( maxPatchSizes.patch1types );
 
     // copy local patches to remote patch buffers
-    remotePatch0coords.clear();
-    std::copy(patch0coords.begin(), patch0coords.end(), std::back_inserter(remotePatch0coords));
-    remotePatch0entities.clear();
-    std::copy(patch0entities.begin(), patch0entities.end(), std::back_inserter(remotePatch0entities));
-    remotePatch0types.clear();
-    std::copy(patch0types.begin(), patch0types.end(), std::back_inserter(remotePatch0types));
-    remotePatch1coords.clear();
-    std::copy(patch1coords.begin(), patch1coords.end(), std::back_inserter(remotePatch1coords));
-    remotePatch1entities.clear();
-    std::copy(patch1entities.begin(), patch1entities.end(), std::back_inserter(remotePatch1entities));
-    remotePatch1types.clear();
-    std::copy(patch1types.begin(), patch1types.end(), std::back_inserter(remotePatch1types));
+    remotePatch0coords   = patch0coords;
+    remotePatch0entities = patch0entities;
+    remotePatch0types    = patch0types;
+    remotePatch1coords   = patch1coords;
+    remotePatch1entities = patch1entities;
+    remotePatch1types    = patch1types;
 
     // allocate second set of receiving buffers necessary for async communication
     std::vector<Dune::FieldVector<ctype, dimworld> > nextPatch0coords ( maxPatchSizes.patch0coords );
