@@ -77,38 +77,29 @@ namespace {
     int rightrank,
     int leftrank,
     MPI_Comm comm,
-    MPI_Request r_send,
-    MPI_Request r_recv
+    MPI_Request& r_send,
+    MPI_Request& r_recv
     )
   {
     // mpi status stuff
     int result DUNE_UNUSED;
     result = 0;
-    MPI_Status status;
     typedef MPITypeInfo<T> Info;
-    // alloc buffer
-    unsigned int tmpsize = tmp.size();
-    tmp.resize(leftsize);
-    // send data
-    // int rank; MPI_Comm_rank(comm, &rank);
-    // std::cout << rank << " send " << data.size() << " to " << rightrank << std::endl;
-    // std::cout << rank << " recv " << tmp.size() << " from " << leftrank << std::endl;
-    // send
+    // resize next buffer to maximum size
+    next.resize(next.capacity());
+    // send data (explicitly send data.size elements)
     result =
       MPI_Isend(
         &(data[0]), Info::size*data.size(), Info::getType(), rightrank, tag,
-        comm);
-    // receive
+        comm, &r_send);
+    // receive up to maximum size. The acutal size is stored in the status
     result =
       MPI_Irecv(
-        &(tmp[0]),  Info::size*tmp.size(),  Info::getType(), leftrank,  tag,
-        comm, &status);
-    // check result
-    CheckMPIStatus(result, status);
-    // swap buffers
-    data.swap(tmp);
-    // resize tmp buffer
-    tmp.resize(tmpsize);
+        &(next[0]),  Info::size*next.size(),  Info::getType(), leftrank,  tag,
+        comm, &r_recv);
+    // // check result
+    // MPI_Status status;
+    // CheckMPIStatus(result, status);
   }
 
   /** \brief struct to simplify communication of the patch data sizes */
