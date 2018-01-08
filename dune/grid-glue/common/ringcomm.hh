@@ -9,6 +9,7 @@
 #include <mpi.h>
 #include <functional>
 
+#include <dune/common/fvector.hh>
 #include <dune/common/hybridutilities.hh>
 #include <dune/common/std/utility.hh>
 #include <dune/common/std/apply.hh>
@@ -28,16 +29,16 @@ namespace {
     static const int tag = 1234560;
   };
 
-  // template<typename K, int N>
-  // struct MPITypeInfo< Dune::FieldVector<K,N> >
-  // {
-  //   static const unsigned int size = N;
-  //   static inline MPI_Datatype getType()
-  //   {
-  //     return Dune::MPITraits<K>::getType();
-  //   }
-  //   static const int tag = 1234561;
-  // };
+  template<typename K, int N>
+  struct MPITypeInfo< Dune::FieldVector<K,N> >
+  {
+    static const unsigned int size = N;
+    static inline MPI_Datatype getType()
+    {
+      return Dune::MPITraits<K>::getType();
+    }
+    static const int tag = 1234561;
+  };
 
   template<>
   struct MPITypeInfo< unsigned int >
@@ -69,7 +70,8 @@ namespace {
     typedef MPITypeInfo<T> Info;
     int sz;
     MPI_Get_count(&status, Info::getType(), &sz);
-    data.resize(sz);
+    assert(sz%Info::size == 0);
+    data.resize(sz/Info::size);
   }
 
   /**
@@ -183,7 +185,7 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
     // copy local data to receiving buffer
     {
       [](std::initializer_list<auto>){}(
-        { (std::get<Indices>(remotedata) = data)... });
+        { (std::get<Indices>(remotedata) = data).size()... });
     }
 
     // allocate second set of receiving buffers necessary for async communication
@@ -208,7 +210,8 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
       std::cout << myrank << ": next = " << nextrank << std::endl;
 
       // send remote data to right neighbor and receive from left neighbor
-      std::array<MPI_Request,2*N> requests;
+      std::array<MPI_Request,N> requests_send;
+      std::array<MPI_Request,N> requests_recv;
 
       int tag = 12345678;
       Dune::Hybrid::forEach(indices,
@@ -218,16 +221,17 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
             std::get<i>(nextdata),
             tag+i,
             rightrank, leftrank, mpicomm,
-            requests[2*i],
-            requests[2*i+1]);
+            requests_send[i],
+            requests_recv[i]);
         });
 
       // apply operator
       op(remoterank,std::get<Indices>(remotedata)...);
 
       // wait for communication to finalize
-      std::array<MPI_Status,2*N> status;
-      MPI_Waitall(2*N,&requests[0],&status[0]);
+      std::array<MPI_Status,N> status_send;
+      std::array<MPI_Status,N> status_recv;
+      MPI_Waitall(N,&requests_recv[0],&status_recv[0]);
 
       // we finished receiving from nextrank and thus remoterank = nextrank
       remoterank = nextrank;
@@ -236,8 +240,10 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
       // and resize vectors
       Dune::Hybrid::forEach(indices,
         [&](auto i){
-          MPI_SetVectorSize(std::get<i>(nextdata),status[2*i+1]);
+          MPI_SetVectorSize(std::get<i>(nextdata),status_recv[i]);
         });
+
+      MPI_Waitall(N,&requests_send[0],&status_send[0]);
 
       // swap the communication buffers
       std::swap(remotedata,nextdata);

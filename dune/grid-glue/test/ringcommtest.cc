@@ -40,14 +40,16 @@ int main(int argc, char *argv[]) try
 
   std::vector<bool> seen(mpihelper.size(), false);
   std::vector<int> data1({mpihelper.rank(), 1, 2, 3});
-  std::vector<int> data2(mpihelper.rank()+1, 0);
+  using Vec = Dune::FieldVector<double,2>;
+  std::vector<Vec> data2(1000*(mpihelper.rank()+1), Vec(0.0));
   auto op =
-    [&](int remote, const std::vector<int>&v1, const std::vector<int>&v2){
+    [&](int remote, const std::vector<int>&v1,
+      const std::vector<Vec>&v2){
       std::cout << rank << " received " << v1[0] << "/" << v2.size()
                 << " from " << remote
                 << std::endl;
       assert(v1[0] == remote);
-      assert(v2.size() == remote+1);
+      assert(v2.size() == 1000*(remote+1));
       seen[remote] = true;
   };
 
