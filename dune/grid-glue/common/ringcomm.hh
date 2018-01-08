@@ -113,14 +113,56 @@ namespace {
     // MPI_Status status;
     // CheckMPIStatus(result, status);
   }
-
-  template<typename T>
-  using ptr_t = T*;
 }
+
+template<typename T>
+using ptr_t = T*;
 #endif // HAVE_MPI
 
 namespace Dune {
 namespace Parallel {
+
+  namespace Impl {
+    /* these helper structs are needed as long as we still support
+       C++11, as we can't use variadic lambdas */
+    template<typename... Args>
+    struct call_MPI_SendVectorInRing
+    {
+      std::tuple<Args...> & remotedata;
+      std::tuple<Args...> & nextdata;
+      int & tag;
+      int & rightrank;
+      int & leftrank;
+      MPI_Comm & mpicomm;
+      std::array<MPI_Request,sizeof...(Args)> & requests_send;
+      std::array<MPI_Request,sizeof...(Args)> & requests_recv;
+
+      template<typename I>
+      void operator()(I i)
+      {
+        MPI_SendVectorInRing(
+          std::get<i>(remotedata),
+          std::get<i>(nextdata),
+          tag+i,
+          rightrank, leftrank, mpicomm,
+          requests_send[i],
+          requests_recv[i]);
+      }
+    };
+    template<typename... Args>
+    struct call_MPI_SetVectorSize
+    {
+      std::tuple<Args...> & nextdata;
+      std::array<MPI_Status,sizeof...(Args)> & status_recv;
+
+      template<typename I>
+      void operator()(I i)
+      {
+        MPI_SetVectorSize(std::get<i>(nextdata),status_recv[i]);
+      }
+    };
+
+  }
 
 template<typename OP, std::size_t... Indices, typename... Args>
 void MPI_AllApply_impl(MPI_Comm mpicomm,
@@ -134,8 +176,6 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
 #if HAVE_MPI
   MPI_Comm_rank(mpicomm, &myrank);
   MPI_Comm_size(mpicomm, &commsize);
-  // status variables of communication
-  int mpi_result;
 #endif // HAVE_MPI
 
   if (commsize > 1)
@@ -145,33 +185,24 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
 #endif
 
     // get data sizes
-    std::array<unsigned int, N> size({ (unsigned int)data.size()... });
+    std::array<unsigned int, N> size({ ((unsigned int)data.size())... });
 
     // communicate max data size
     std::array<unsigned int, N> maxSize;
-    mpi_result = MPI_Allreduce(&size, &maxSize,
+    MPI_Allreduce(&size, &maxSize,
       size.size(), MPI_UNSIGNED, MPI_MAX, mpicomm);
-    CheckMPIStatus(mpi_result, 0);
 #ifdef DEBUG_GRIDGLUE_PARALLELMERGE
     std::cout << myrank << " maxSize " << "done... " << std::endl;
 #endif
 
     // allocate receiving buffers with maxsize to ensure sufficient buffer size for communication
-    std::tuple<Args...> remotedata { maxSize[Indices]... };
+    std::tuple<Args...> remotedata { Args(maxSize[Indices])... };
 
     // copy local data to receiving buffer
-    {
-      std::tuple<const Args&...> datatuple = { data... };
-      remotedata = datatuple;
-      // Dune::Hybrid::forEach(indices,
-      //   [&](auto i){
-      //     assert(std::get<i>(remotedata).capacity() == maxSize[i]);
-      //     assert(std::get<i>(remotedata).size() == std::get<i>(dataptr).size());
-      //   });
-    }
+    remotedata = std::tie(data...);
 
     // allocate second set of receiving buffers necessary for async communication
-    std::tuple<Args...> nextdata { maxSize[Indices]... };
+    std::tuple<Args...> nextdata { Args(maxSize[Indices])... };
 
     // communicate data in the ring
     int rightrank  = (myrank + 1 + commsize) % commsize;
@@ -197,15 +228,23 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
 
       int tag = 12345678;
       Dune::Hybrid::forEach(indices,
-        [&](auto i){
-          MPI_SendVectorInRing(
-            std::get<i>(remotedata),
-            std::get<i>(nextdata),
-            tag+i,
-            rightrank, leftrank, mpicomm,
-            requests_send[i],
-            requests_recv[i]);
-        });
+        // [&](auto i){
+        //   MPI_SendVectorInRing(
+        //     std::get<i>(remotedata),
+        //     std::get<i>(nextdata),
+        //     tag+i,
+        //     rightrank, leftrank, mpicomm,
+        //     requests_send[i],
+        //     requests_recv[i]);
+        // });
+        Impl::call_MPI_SendVectorInRing<Args...>({
+            remotedata,
+              nextdata,
+              tag,
+              rightrank, leftrank, mpicomm,
+              requests_send,
+              requests_recv
+              }));
 
       // apply operator
       op(remoterank,std::get<Indices>(remotedata)...);
@@ -221,9 +260,12 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
       // get current data sizes
       // and resize vectors
       Dune::Hybrid::forEach(indices,
-        [&](auto i){
-          MPI_SetVectorSize(std::get<i>(nextdata),status_recv[i]);
-        });
+        // [&](auto i){
+        //   MPI_SetVectorSize(std::get<i>(nextdata),status_recv[i]);
+        // });
+        Impl::call_MPI_SetVectorSize<Args...>({
+            nextdata, status_recv
+          }));
 
       MPI_Waitall(N,&requests_send[0],&status_send[0]);
 
