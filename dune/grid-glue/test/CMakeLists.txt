@@ -5,6 +5,7 @@ else()
 endif()
 
 dune_add_test(SOURCES callmergertwicetest.cc)
+dune_add_test(SOURCES ringcommtest.cc)
 dune_add_test(SOURCES computecyclicordertest.cc)
 dune_add_test(SOURCES disconnectedtest.cc
               CMAKE_GUARD UG_FOUND "NOT HAVE_UG_PARALLEL")
