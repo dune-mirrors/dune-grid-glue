@@ -6,6 +6,7 @@
 #include <vector>
 #include <iterator>
 #include "../gridglue.hh"
+#include "../common/ringcomm.hh"
 
 #include <dune/common/unused.hh>
 
@@ -14,42 +15,6 @@
 
 #if HAVE_MPI
 namespace {
-  template<typename T>
-  struct MPITypeInfo {};
-
-  template<>
-  struct MPITypeInfo< int >
-  {
-    static const unsigned int size = 1;
-    static inline MPI_Datatype getType()
-    {
-      return MPI_INT;
-    }
-    static const int tag = 1234560;
-  };
-
-  template<typename K, int N>
-  struct MPITypeInfo< Dune::FieldVector<K,N> >
-  {
-    static const unsigned int size = N;
-    static inline MPI_Datatype getType()
-    {
-      return Dune::MPITraits<K>::getType();
-    }
-    static const int tag = 1234561;
-  };
-
-  template<>
-  struct MPITypeInfo< unsigned int >
-  {
-    static const unsigned int size = 1;
-    static inline MPI_Datatype getType()
-    {
-      return MPI_UNSIGNED;
-    }
-    static const int tag = 1234562;
-  };
-
   template<>
   struct MPITypeInfo< Dune::GeometryType >
   {
@@ -59,82 +24,6 @@ namespace {
       return Dune::MPITraits< Dune::GeometryType >::getType();
     }
     static const int tag = 1234563;
-  };
-
-  template<typename T>
-  void MPI_SetVectorSize(
-    std::vector<T> & data,
-    MPI_Status & status)
-  {
-    typedef MPITypeInfo<T> Info;
-    int sz;
-    MPI_Get_count(&status, Info::getType(), &sz);
-    data.resize(sz);
-  }
-
-  /**
-     Send std::vector<T> in the ring
-
-     \return a pair of MPI_Request, as this operation is asynchroneous
-     * data is sent to rankright
-     * from rankleft tmp is received and swapped with data
-
-   */
-  template<typename T>
-  void MPI_SendVectorInRing(
-    std::vector<T> & data,
-    std::vector<T> & next,
-    int tag,
-    int rightrank,
-    int leftrank,
-    MPI_Comm comm,
-    MPI_Request& r_send,
-    MPI_Request& r_recv
-    )
-  {
-    // mpi status stuff
-    int result DUNE_UNUSED;
-    result = 0;
-    typedef MPITypeInfo<T> Info;
-    // resize next buffer to maximum size
-    next.resize(next.capacity());
-    // send data (explicitly send data.size elements)
-    result =
-      MPI_Isend(
-        &(data[0]), Info::size*data.size(), Info::getType(), rightrank, tag,
-        comm, &r_send);
-    // receive up to maximum size. The acutal size is stored in the status
-    result =
-      MPI_Irecv(
-        &(next[0]),  Info::size*next.size(),  Info::getType(), leftrank,  tag,
-        comm, &r_recv);
-    // // check result
-    // MPI_Status status;
-    // CheckMPIStatus(result, status);
-  }
-
-  /** \brief struct to simplify communication of the patch data sizes */
-  struct PatchSizes
-  {
-    PatchSizes() :
-      patch0coords(0), patch0entities(0), patch0types(0),
-      patch1coords(0), patch1entities(0), patch1types(0) {}
-
-    //! initialize patch sizes
-    PatchSizes(unsigned int c0, unsigned int e0, unsigned int t0,
-               unsigned int c1, unsigned int e1, unsigned int t1) :
-      patch0coords(c0), patch0entities(e0), patch0types(t0),
-      patch1coords(c1), patch1entities(e1), patch1types(t1) {}
-
-    //! initialize patch sizes using the data containers
-    template<typename C, typename E, typename T>
-    PatchSizes(const C & c0, const E &  e0, const T & t0,
-               const C & c1, const E & e1, const T & t1) :
-      patch0coords(c0.size()), patch0entities(e0.size()), patch0types(t0.size()),
-      patch1coords(c1.size()), patch1entities(e1.size()), patch1types(t1.size()) {}
-
-    unsigned int patch0coords, patch0entities, patch0types,
-                 patch1coords, patch1entities, patch1types;
   };
 }
 #endif // HAVE_MPI
@@ -226,202 +115,31 @@ void GridGlue<P0, P1>::build()
   // we start with an empty set
   index__sz = 0;
 
-#if HAVE_MPI
-
-  // status variables of communication
-  int mpi_result DUNE_UNUSED;
-  MPI_Status mpi_status;
-
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-  std::cout << myrank << " Comm Size" << commsize << std::endl;
-#endif
-
-  if (commsize > 1)
-  {
-    // get patch sizes
-    PatchSizes patchSizes (patch0coords, patch0entities, patch0types,
-                           patch1coords, patch1entities, patch1types);
-
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-    std::cout << myrank << " Start Communication" << std::endl;
-#endif
-
-    // communicate max patch size
-    PatchSizes maxPatchSizes;
-    mpi_result = MPI_Allreduce(&patchSizes, &maxPatchSizes,
-                               6, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
-    CheckMPIStatus(mpi_result, 0);
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-    std::cout << myrank << " maxPatchSizes " << "done" << std::endl;
-#endif
-
-    // allocate receiving buffers with maxsize to ensure sufficient buffer size for communication
-    std::vector<Dune::FieldVector<ctype, dimworld> > remotePatch0coords ( maxPatchSizes.patch0coords );
-    std::vector<unsigned int> remotePatch0entities ( maxPatchSizes.patch0entities );
-    std::vector<Dune::GeometryType> remotePatch0types ( maxPatchSizes.patch0types );
-    std::vector<Dune::FieldVector<ctype,dimworld> > remotePatch1coords ( maxPatchSizes.patch1coords );
-    std::vector<unsigned int> remotePatch1entities ( maxPatchSizes.patch1entities );
-    std::vector<Dune::GeometryType> remotePatch1types ( maxPatchSizes.patch1types );
-
-    // copy local patches to remote patch buffers
-    remotePatch0coords   = patch0coords;
-    remotePatch0entities = patch0entities;
-    remotePatch0types    = patch0types;
-    remotePatch1coords   = patch1coords;
-    remotePatch1entities = patch1entities;
-    remotePatch1types    = patch1types;
-
-    // allocate second set of receiving buffers necessary for async communication
-    std::vector<Dune::FieldVector<ctype, dimworld> > nextPatch0coords ( maxPatchSizes.patch0coords );
-    std::vector<unsigned int> nextPatch0entities ( maxPatchSizes.patch0entities );
-    std::vector<Dune::GeometryType> nextPatch0types ( maxPatchSizes.patch0types );
-    std::vector<Dune::FieldVector<ctype,dimworld> > nextPatch1coords ( maxPatchSizes.patch1coords );
-    std::vector<unsigned int> nextPatch1entities ( maxPatchSizes.patch1entities );
-    std::vector<Dune::GeometryType> nextPatch1types ( maxPatchSizes.patch1types );
-
-    // communicate patches in the ring
-    int rightrank  = (myrank + 1 + commsize) % commsize;
-    int leftrank   = (myrank - 1 + commsize) % commsize;
-
-    constexpr int tag0coords = 101;
-    constexpr int tag0entities = 102;
-    constexpr int tag0types = 103;
-    constexpr int tag1coords = 104;
-    constexpr int tag1entities = 105;
-    constexpr int tag1types = 106;
-
-    int mergingrank = myrank;
-
-    for (int i=1; i<commsize; i++)
+  auto op =
+    [&](
+      const int mergingrank,
+      const std::vector<Dune::FieldVector<ctype,dimworld> >& remotePatch0coords,
+      const std::vector<unsigned int>& remotePatch0entities,
+      const std::vector<Dune::GeometryType>& remotePatch0types,
+      const std::vector<Dune::FieldVector<ctype,dimworld> >& remotePatch1coords,
+      const std::vector<unsigned int>& remotePatch1entities,
+      const std::vector<Dune::GeometryType>& remotePatch1types
+      )
     {
-      int remoterank = (myrank - i + commsize) % commsize;
-
-      /* send remote patch to right neighbor and receive from left neighbor */
-      std::array<MPI_Request,12> requests;
-
-      // patch0coords
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-      std::cout << myrank << " patch0coords" << std::endl;
-#endif
-      MPI_SendVectorInRing(
-        remotePatch0coords, nextPatch0coords, tag0coords,
-        rightrank, leftrank, mpicomm_,
-        requests[0], requests[1]);
-
-      // patch0entities
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-      std::cout << myrank << " patch0entities" << std::endl;
-#endif
-      MPI_SendVectorInRing(
-        remotePatch0entities, nextPatch0entities, tag0entities,
-        rightrank, leftrank, mpicomm_,
-        requests[2], requests[3]);
-
-      // patch0types
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-      std::cout << myrank << " patch0types" << std::endl;
-#endif
-      MPI_SendVectorInRing(
-        remotePatch0types, nextPatch0types, tag0types,
-        rightrank, leftrank, mpicomm_,
-        requests[4], requests[5]);
-
-      // patch1coords
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-      std::cout << myrank << " patch1coords" << std::endl;
-#endif
-      MPI_SendVectorInRing(
-        remotePatch1coords, nextPatch1coords, tag1coords,
-        rightrank, leftrank, mpicomm_,
-        requests[6], requests[7]);
-
-      // patch1entities
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-      std::cout << myrank << " patch1entities" << std::endl;
-#endif
-      MPI_SendVectorInRing(
-        remotePatch1entities, nextPatch1entities, tag1entities,
-        rightrank, leftrank, mpicomm_,
-        requests[8], requests[9]);
-
-      // patch1types
-#ifdef DEBUG_GRIDGLUE_PARALLELMERGE
-      std::cout << myrank << " patch1types" << std::endl;
-#endif
-      MPI_SendVectorInRing(
-        remotePatch1types, nextPatch1types, tag1types,
-        rightrank, leftrank, mpicomm_,
-        requests[10], requests[11]);
-
-      std::cout << "Sync processes" << std::endl;
-      MPI_Barrier(mpicomm_);
-      std::cout << "...done" << std::endl;
-
-      /* merging */
-      // merge local & remote patches
-      // patch0_is_ and patch1_is_ are updated automatically
       if (remotePatch1entities.size() > 0 && patch0entities.size() > 0)
         mergePatches(patch0coords, patch0entities, patch0types, myrank,
           remotePatch1coords, remotePatch1entities, remotePatch1types, mergingrank);
-      if (remotePatch0entities.size() > 0 && patch1entities.size() > 0)
+      if (mergingrank != myrank &&
+        remotePatch0entities.size() > 0 && patch1entities.size() > 0)
         mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, mergingrank,
           patch1coords, patch1entities, patch1types, myrank);
+    };
+  MPI_AllApply(mpicomm_, op,
+    patch0coords, patch0entities, patch0types,
+    patch1coords, patch1entities, patch1types
+    );
 
-      // wait for communication to finalize
-      std::array<MPI_Status,12> status;
-      MPI_Waitall(12,&requests[0],&status[0]);
-
-      // now the merging rank is remoterank
-      mergingrank = remoterank;
-
-      // get current patch sizes
-      // and resize vectors
-      MPI_SetVectorSize(nextPatch0coords,status[1]);
-      MPI_SetVectorSize(nextPatch0entities,status[3]);
-      MPI_SetVectorSize(nextPatch0types,status[5]);
-      MPI_SetVectorSize(nextPatch1coords,status[7]);
-      MPI_SetVectorSize(nextPatch1entities,status[9]);
-      MPI_SetVectorSize(nextPatch1types,status[11]);
-
-      // swap the communication buffers
-      std::swap(remotePatch0coords,nextPatch0coords);
-      nextPatch0coords.resize(nextPatch0coords.capacity());
-      std::swap(remotePatch0entities,nextPatch0entities);
-      nextPatch0entities.resize(nextPatch0entities.capacity());
-      std::swap(remotePatch0types,nextPatch0types);
-      nextPatch0types.resize(nextPatch0types.capacity());
-      std::swap(remotePatch1coords,nextPatch1coords);
-      nextPatch1coords.resize(nextPatch1coords.capacity());
-      std::swap(remotePatch1entities,nextPatch1entities);
-      nextPatch1entities.resize(nextPatch1entities.capacity());
-      std::swap(remotePatch1types,nextPatch1types);
-      nextPatch1types.resize(nextPatch1types.capacity());
-    }
-
-    // last merge (or the only one in the case of sequential merging)
-    if (remotePatch1entities.size() > 0 && patch0entities.size() > 0)
-      mergePatches(patch0coords, patch0entities, patch0types, myrank,
-        remotePatch1coords, remotePatch1entities, remotePatch1types, mergingrank);
-    if (remotePatch0entities.size() > 0 && patch1entities.size() > 0)
-      mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, mergingrank,
-        patch1coords, patch1entities, patch1types, myrank);
-  }
-  else // sequential
-  {
-    // last merge (the only one in the case of sequential merging)
-    // merge local patches and add to intersection list
-    if (patch0entities.size() > 0 && patch1entities.size() > 0)
-      mergePatches(patch0coords, patch0entities, patch0types, myrank,
-        patch1coords, patch1entities, patch1types, myrank);
-
-// #error always merge again if comm-size > 1
-#ifdef CALL_MERGER_TWICE
-    if (patch0entities.size() > 0 && patch1entities.size() > 0)
-      mergePatches(patch0coords, patch0entities, patch0types, myrank,
-        patch1coords, patch1entities, patch1types, myrank);
-#endif
-  }
-
+#if HAVE_MPI
   if (commsize > 1)
   {
     // finalize ParallelIndexSet & RemoteIndices
@@ -446,7 +164,7 @@ void GridGlue<P0, P1>::build()
     }
 #endif
   }
-#endif
+#endif // HAVE_MPI
 
 }
 
