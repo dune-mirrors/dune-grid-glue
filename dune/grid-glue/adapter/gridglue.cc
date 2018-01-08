@@ -6,7 +6,9 @@
 #include <vector>
 #include <iterator>
 #include "../gridglue.hh"
+#if HAVE_MPI
 #include "../common/ringcomm.hh"
+#endif
 
 #include <dune/common/unused.hh>
 
@@ -85,6 +87,9 @@ void GridGlue<P0, P1>::build()
   // std::cout << prefix << "Done writing patch1 surface!\n";
 #endif // WRITE_TO_VTK
 
+  // we start with an empty set
+  index__sz = 0;
+
 #if HAVE_MPI
   if (commsize > 1)
   {
@@ -92,10 +97,6 @@ void GridGlue<P0, P1>::build()
     patch0_is_.beginResize();
     patch1_is_.beginResize();
   }
-#endif // HAVE_MPI
-
-  // we start with an empty set
-  index__sz = 0;
 
   auto op =
     [&](
@@ -121,7 +122,6 @@ void GridGlue<P0, P1>::build()
     patch1coords, patch1entities, patch1types
     );
 
-#if HAVE_MPI
   if (commsize > 1)
   {
     // finalize ParallelIndexSet & RemoteIndices
@@ -146,6 +146,18 @@ void GridGlue<P0, P1>::build()
     }
 #endif
   }
+#else // HAVE_MPI
+
+  if (patch1entities.size() > 0 && patch0entities.size() > 0)
+  {
+    mergePatches(patch0coords, patch0entities, patch0types, myrank,
+      patch1coords, patch1entities, patch1types, myrank);
+#ifdef CALL_MERGER_TWICE
+    mergePatches(patch0coords, patch0entities, patch0types, myrank,
+      patch1coords, patch1entities, patch1types, myrank);
+#endif
+  }
+
 #endif // HAVE_MPI
 
 }
