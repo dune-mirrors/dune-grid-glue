@@ -10,9 +10,12 @@
 #include <functional>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/shared_ptr.hh>
 #include <dune/common/hybridutilities.hh>
 #include <dune/common/std/utility.hh>
 #include <dune/common/std/apply.hh>
+
+#include <dune/geometry/type.hh>
 
 namespace {
   template<typename T>
@@ -26,7 +29,6 @@ namespace {
     {
       return MPI_INT;
     }
-    static const int tag = 1234560;
   };
 
   template<typename K, int N>
@@ -37,7 +39,6 @@ namespace {
     {
       return Dune::MPITraits<K>::getType();
     }
-    static const int tag = 1234561;
   };
 
   template<>
@@ -48,19 +49,17 @@ namespace {
     {
       return MPI_UNSIGNED;
     }
-    static const int tag = 1234562;
   };
 
-  // template<>
-  // struct MPITypeInfo< Dune::GeometryType >
-  // {
-  //   static const unsigned int size = 1;
-  //   static inline MPI_Datatype getType()
-  //   {
-  //     return Dune::MPITraits< Dune::GeometryType >::getType();
-  //   }
-  //   static const int tag = 1234563;
-  // };
+  template<>
+  struct MPITypeInfo< Dune::GeometryType >
+  {
+    static const unsigned int size = 1;
+    static inline MPI_Datatype getType()
+    {
+      return Dune::MPITraits< Dune::GeometryType >::getType();
+    }
+  };
 
   template<typename T>
   void MPI_SetVectorSize(
@@ -115,31 +114,13 @@ namespace {
     // CheckMPIStatus(result, status);
   }
 
-  /** \brief struct to simplify communication of the patch data sizes */
-  struct PatchSizes
-  {
-    PatchSizes() :
-      patch0coords(0), patch0entities(0), patch0types(0),
-      patch1coords(0), patch1entities(0), patch1types(0) {}
-
-    //! initialize patch sizes
-    PatchSizes(unsigned int c0, unsigned int e0, unsigned int t0,
-               unsigned int c1, unsigned int e1, unsigned int t1) :
-      patch0coords(c0), patch0entities(e0), patch0types(t0),
-      patch1coords(c1), patch1entities(e1), patch1types(t1) {}
-
-    //! initialize patch sizes using the data containers
-    template<typename C, typename E, typename T>
-    PatchSizes(const C & c0, const E &  e0, const T & t0,
-               const C & c1, const E & e1, const T & t1) :
-      patch0coords(c0.size()), patch0entities(e0.size()), patch0types(t0.size()),
-      patch1coords(c1.size()), patch1entities(e1.size()), patch1types(t1.size()) {}
-
-    unsigned int patch0coords, patch0entities, patch0types,
-                 patch1coords, patch1entities, patch1types;
-  };
+  template<typename T>
+  using ptr_t = T*;
 }
 #endif // HAVE_MPI
+
+namespace Dune {
+namespace Parallel {
 
 template<typename OP, std::size_t... Indices, typename... Args>
 void MPI_AllApply_impl(MPI_Comm mpicomm,
@@ -177,15 +158,14 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
 
     // allocate receiving buffers with maxsize to ensure sufficient buffer size for communication
     std::tuple<Args...> remotedata { maxSize[Indices]... };
-    {
-      int dummy[sizeof...(Indices)] =
-        { (std::cout << myrank << ": size " << std::get<Indices>(remotedata).size() << std::endl, 0)... };
-    }
 
     // copy local data to receiving buffer
     {
-      [](std::initializer_list<auto>){}(
-        { (std::get<Indices>(remotedata) = data).size()... });
+      std::tuple<ptr_t<Args>...> dataptr = { ((ptr_t<Args>)&data)... };
+      Dune::Hybrid::forEach(indices,
+        [&](auto i){
+          std::get<i>(remotedata) = *(std::get<i>(dataptr));
+        });
     }
 
     // allocate second set of receiving buffers necessary for async communication
@@ -270,3 +250,6 @@ void MPI_AllApply(MPI_Comm mpicomm,
     data...
     );
 }
+
+} // end namespace Parallel
+} // end namespace Dune

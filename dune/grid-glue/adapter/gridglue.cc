@@ -10,24 +10,6 @@
 
 #include <dune/common/unused.hh>
 
-/** \todo Implement MPI Status check with exception handling */
-#define CheckMPIStatus(A,B) {}
-
-#if HAVE_MPI
-namespace {
-  template<>
-  struct MPITypeInfo< Dune::GeometryType >
-  {
-    static const unsigned int size = 1;
-    static inline MPI_Datatype getType()
-    {
-      return Dune::MPITraits< Dune::GeometryType >::getType();
-    }
-    static const int tag = 1234563;
-  };
-}
-#endif // HAVE_MPI
-
 namespace Dune {
 namespace GridGlue {
 
@@ -134,7 +116,7 @@ void GridGlue<P0, P1>::build()
         mergePatches(remotePatch0coords, remotePatch0entities, remotePatch0types, mergingrank,
           patch1coords, patch1entities, patch1types, myrank);
     };
-  MPI_AllApply(mpicomm_, op,
+  Parallel::MPI_AllApply(mpicomm_, op,
     patch0coords, patch0entities, patch0types,
     patch1coords, patch1entities, patch1types
     );

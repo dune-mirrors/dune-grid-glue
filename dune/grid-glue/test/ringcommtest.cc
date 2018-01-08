@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) try
   std::cout << "SIZE: " << sz << std::endl;
   std::cout << rank << ": COMM " << MPI_COMM_WORLD << std::endl;
 
-  MPI_AllApply(MPI_COMM_WORLD, op, data1, data2);
+  Dune::Parallel::MPI_AllApply(MPI_COMM_WORLD, op, data1, data2);
 
   for (int i=0; i<mpihelper.size(); i++)
     assert(seen[i] == true);
