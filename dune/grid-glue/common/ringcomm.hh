@@ -161,11 +161,13 @@ void MPI_AllApply_impl(MPI_Comm mpicomm,
 
     // copy local data to receiving buffer
     {
-      std::tuple<ptr_t<Args>...> dataptr = { ((ptr_t<Args>)&data)... };
-      Dune::Hybrid::forEach(indices,
-        [&](auto i){
-          std::get<i>(remotedata) = *(std::get<i>(dataptr));
-        });
+      std::tuple<const Args&...> datatuple = { data... };
+      remotedata = datatuple;
+      // Dune::Hybrid::forEach(indices,
+      //   [&](auto i){
+      //     assert(std::get<i>(remotedata).capacity() == maxSize[i]);
+      //     assert(std::get<i>(remotedata).size() == std::get<i>(dataptr).size());
+      //   });
     }
 
     // allocate second set of receiving buffers necessary for async communication
