@@ -5,7 +5,9 @@ else()
 endif()
 
 dune_add_test(SOURCES callmergertwicetest.cc)
-dune_add_test(SOURCES ringcommtest.cc)
+dune_add_test(SOURCES ringcommtest.cc
+              MPI_RANKS 1 2 3 4 5 6 7 8 9 10
+              TIMEOUT 300)
 dune_add_test(SOURCES computecyclicordertest.cc)
 dune_add_test(SOURCES disconnectedtest.cc
               CMAKE_GUARD UG_FOUND "NOT HAVE_UG_PARALLEL")
