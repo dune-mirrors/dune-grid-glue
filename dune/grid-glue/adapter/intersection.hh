@@ -107,7 +107,7 @@ namespace Dune {
       template<int side>
       void initializeGeometry(const GridGlue& glue, unsigned mergeindex);
 
-      /*   M E M B E R   V A R  I A B L E S   */
+      /*   M E M B E R   V A R I A B L E S   */
 
     public:
       /// @brief index of this intersection after GridGlue interface

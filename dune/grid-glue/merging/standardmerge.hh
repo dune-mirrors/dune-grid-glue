@@ -133,18 +133,17 @@ public:
   /**
    * @copydoc Merger<T,grid1Dim,grid2Dim,dimworld>::build
    */
-  virtual void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
+  void build(const std::vector<Dune::FieldVector<T,dimworld> >& grid1_Coords,
              const std::vector<unsigned int>& grid1_elements,
              const std::vector<Dune::GeometryType>& grid1_element_types,
              const std::vector<Dune::FieldVector<T,dimworld> >& grid2_coords,
              const std::vector<unsigned int>& grid2_elements,
-             const std::vector<Dune::GeometryType>& grid2_element_types
-             );
+             const std::vector<Dune::GeometryType>& grid2_element_types) override;
 
 
-  /*   Q U E S T I O N I N G   T H E   M E R G E D   G R I D   */
+  /*   P R O B I N G   T H E   M E R G E D   G R I D   */
 
-  void clear()
+  void clear() override
   {
     // Delete old internal data, from a possible previous run
     intersectionListProvider_->clear();

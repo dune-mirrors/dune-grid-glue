@@ -257,8 +257,7 @@ protected:
    * through this method (for internal use)
    *
    * @param patch0coords the patch0 vertices' coordinates ordered like e.g. in 3D x_0 y_0 z_0 x_1 y_1 ... y_(n-1) z_(n-1)
-   * @param patch0entities array with all patch0 entities represented as corner indices into @c patch0coords;
-   * the entities are just written to this array one after another
+   * @param patch0entities array with all patch0 entities represented as corner indices into @c patch0coords. Free of (potentially heterogeneous) block structure, the last component of one entity is immediately followed by the first component of the next entity here.
    * @param patch0types array with all patch0 entities types
    * @param patch0rank  rank of the process where patch0 was extracted
    *

@@ -178,7 +178,7 @@ private:
             const std::vector<Dune::FieldVector<T,dimworld> >& grid2ElementCorners,
             std::bitset<(1<<dim)>& neighborIntersects2,
             unsigned int grid2Index,
-            std::vector<SimplicialIntersection>& intersections);
+            std::vector<SimplicialIntersection>& intersections) override;
 
     /**
       * @copydoc StandardMerge<T,grid1Dim,grid2Dim,dimworld>::build
@@ -189,7 +189,7 @@ protected:
         const std::vector<Dune::GeometryType>& grid1ElementTypes,
         const std::vector<Dune::FieldVector<T,dimworld> >& grid2Coords,
         const std::vector<unsigned int>& grid2Elements,
-        const std::vector<Dune::GeometryType>& grid2ElementTypes)
+        const std::vector<Dune::GeometryType>& grid2ElementTypes) override
     {
         std::cout<<"ContactMerge building grid!\n";
         // setup the nodal direction vectors
