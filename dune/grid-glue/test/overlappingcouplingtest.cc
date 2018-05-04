@@ -253,7 +253,7 @@ void testHybridGridsUG(std::shared_ptr< Merger<double,dim,dim,dim> > merger, con
 #endif
 
 
-int main(int argc, char** argv) try
+int main(int argc, char** argv)
 {
   Dune::MPIHelper::instance(argc, argv);
 
@@ -292,7 +292,4 @@ int main(int argc, char** argv) try
 #if HAVE_UG && !HAVE_UG_PARALLEL && HAVE_HYBRIDTESTGRIDS
   testHybridGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
-} catch (Exception e) {
-  std::cout << e << std::endl;
-  return 1;
 }
