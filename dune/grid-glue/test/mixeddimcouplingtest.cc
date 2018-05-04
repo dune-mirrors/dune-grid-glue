@@ -354,7 +354,7 @@ void test2d1dCoupling(double slice=0.0)
   testCoupling(glue);
 }
 
-int main(int argc, char *argv[]) try
+int main(int argc, char *argv[])
 {
   Dune::MPIHelper::instance(argc, argv);
 
@@ -433,8 +433,4 @@ int main(int argc, char *argv[]) try
   std::cout << "====================================================\n";
 #endif
 
-}
-catch (Exception e) {
-  std::cout << e << std::endl;
-  return 1;
 }

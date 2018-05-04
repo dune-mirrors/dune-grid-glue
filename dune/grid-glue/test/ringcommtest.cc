@@ -25,7 +25,7 @@ void eh( MPI_Comm *comm, int *err, ... )
 }
 #endif // HAVE_MPI
 
-int main(int argc, char *argv[]) try
+int main(int argc, char *argv[])
 {
   auto & mpihelper = Dune::MPIHelper::instance(argc, argv);
   Dune::dinfo.attach(std::cout);
@@ -63,9 +63,4 @@ int main(int argc, char *argv[]) try
     assert(seen[i] == true);
 
   return 0;
-}
-catch (Exception e) {
-  int i = 0; char** c = 0;
-  std::cout << Dune::MPIHelper::instance(i,c).rank() << ": " << e << std::endl;
-  return 1;
 }
