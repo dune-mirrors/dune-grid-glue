@@ -219,12 +219,14 @@ void GridGlue<P0, P1>::mergePatches(
             << " GridGlue::mergePatches : "
             << "The number of remote intersections is " << intersections_.size()-1 << std::endl;
 
+#if 0
   printVector(patch0coords,"patch0coords",myrank);
   printVector(patch0entities,"patch0entities",myrank);
   printVector(patch0types,"patch0types",myrank);
   printVector(patch1coords,"patch1coords",myrank);
   printVector(patch1entities,"patch1entities",myrank);
   printVector(patch1types,"patch1types",myrank);
+#endif
 
 #if HAVE_MPI
   if (commsize > 1)
