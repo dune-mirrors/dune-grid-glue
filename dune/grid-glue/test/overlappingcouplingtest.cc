@@ -267,10 +267,10 @@ int main(int argc, char** argv)
   testCubeGrids<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
 
   testSimplexGrids<1>(overlappingMerge1d, FieldVector<double,1>(0.05));
-#if HAVE_UG && !HAVE_UG_PARALLEL
+#if HAVE_UG
   testSimplexGridsUG<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
 #endif
-#if HAVE_UG && !HAVE_UG_PARALLEL && HAVE_HYBRIDTESTGRIDS
+#if HAVE_UG && HAVE_HYBRIDTESTGRIDS
   testHybridGridsUG<2>(overlappingMerge2d, FieldVector<double,2>(0.05));
 #endif
 
@@ -286,10 +286,10 @@ int main(int argc, char** argv)
   testCubeGrids<2>(conformingMerge2d, FieldVector<double,2>(0));
 
   testSimplexGrids<1>(conformingMerge1d, FieldVector<double,1>(0));
-#if HAVE_UG && !HAVE_UG_PARALLEL
+#if HAVE_UG
   testSimplexGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
-#if HAVE_UG && !HAVE_UG_PARALLEL && HAVE_HYBRIDTESTGRIDS
+#if HAVE_UG && HAVE_HYBRIDTESTGRIDS
   testHybridGridsUG<2>(conformingMerge2d, FieldVector<double,2>(0));
 #endif
 }
