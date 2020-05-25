@@ -62,9 +62,7 @@ void insertCube(GridFactory& factory, unsigned int& vertex, const Vector& offset
     vertices.push_back(vertex++);
   }
 
-  Dune::GeometryType type;
-  type.makeCube(dim);
-  factory.insertElement(type, vertices);
+  factory.insertElement(Dune::GeometryTypes::cube(dim), vertices);
 }
 
 bool testDisconnected(const std::string& name, std::shared_ptr<MyMerger> merger)
