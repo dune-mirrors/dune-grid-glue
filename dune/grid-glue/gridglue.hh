@@ -25,7 +25,7 @@
 #include <dune/grid-glue/merging/merger.hh>
 
 #include <dune/common/parallel/mpitraits.hh>
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicommunication.hh>
 #include <dune/common/parallel/indexset.hh>
 #include <dune/common/parallel/plocalindex.hh>
 #include <dune/common/parallel/remoteindices.hh>
