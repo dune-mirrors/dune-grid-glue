@@ -14,7 +14,7 @@
 #include <dune/grid-glue/gridglue.hh>
 
 template <class IntersectionIt>
-bool testIntersection(const IntersectionIt & rIIt)
+bool testIntersection(const IntersectionIt & rIIt, double eps)
 {
   bool success = true;
 
@@ -49,27 +49,27 @@ bool testIntersection(const IntersectionIt & rIIt)
       rIIt->geometryOutside().global(quadPos);
 
     // Test whether local grid0 position is consistent with global grid0 position
-    if ( (localGrid0Pos-globalGrid0Pos).two_norm() >= 1e-6 )
+    if ( (localGrid0Pos-globalGrid0Pos).two_norm() >= eps )
     {
-      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid0Pos-globalGrid0Pos).two_norm() < 1e-6 ) failed\n";
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid0Pos-globalGrid0Pos).two_norm() < eps ) failed\n";
       std::cerr << "localGrid0Pos  = " << localGrid0Pos << "\n";
       std::cerr << "globalGrid0Pos = " << globalGrid0Pos << "\n";
       success = false;
     }
 
     // Test whether local grid1 position is consistent with global grid1 position
-    if ( (localGrid1Pos-globalGrid1Pos).two_norm() >= 1e-6 )
+    if ( (localGrid1Pos-globalGrid1Pos).two_norm() >= eps )
     {
-      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid1Pos-globalGrid1Pos).two_norm() < 1e-6 ) failed\n";
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (localGrid1Pos-globalGrid1Pos).two_norm() < eps ) failed\n";
       std::cerr << "localGrid1Pos  = " << localGrid1Pos << "\n";
       std::cerr << "globalGrid1Pos = " << globalGrid1Pos << "\n";
       success = false;
     }
 
     // Here we assume that the two interfaces match geometrically:
-    if ( (globalGrid0Pos-globalGrid1Pos).two_norm() >= 1e-4 )
+    if ( (globalGrid0Pos-globalGrid1Pos).two_norm() >= eps )
     {
-      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalGrid0Pos-globalGrid1Pos).two_norm() < 1e-4 ) failed\n";
+      std::cout << __FILE__ << ":" << __LINE__ << ": error: assert( (globalGrid0Pos-globalGrid1Pos).two_norm() < eps ) failed\n";
       std::cerr << "localGrid0Pos  = " << localGrid0Pos << "\n";
       std::cerr << "globalGrid0Pos = " << globalGrid0Pos << "\n";
       std::cerr << "localGrid1Pos  = " << localGrid1Pos << "\n";
@@ -92,7 +92,7 @@ bool testIntersection(const IntersectionIt & rIIt)
 
 
 template <class GlueType>
-void testCoupling(const GlueType& glue)
+void testCoupling(const GlueType& glue, double eps = 1e-12)
 {
   bool success = true;
 #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
@@ -161,7 +161,7 @@ void testCoupling(const GlueType& glue)
 
         countInside0[index0]++;
         countOutside1[index1]++;
-        success = success && testIntersection(rIIt);
+        success = success && testIntersection(rIIt, eps);
       }
     }
   }
@@ -180,7 +180,7 @@ void testCoupling(const GlueType& glue)
 
         countInside1[index1]++;
         countOutside0[index0]++;
-        success = success && testIntersection(rIIt);
+        success = success && testIntersection(rIIt, eps);
       }
     }
   }

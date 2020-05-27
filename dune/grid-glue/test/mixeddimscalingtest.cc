@@ -108,7 +108,7 @@ bool doTest(double scale)
   //   Test the coupling
   // ///////////////////////////////////////////
 
-  testCoupling(glue);
+  testCoupling(glue, scale * 1e-12);
 
   bool pass = true;
 
