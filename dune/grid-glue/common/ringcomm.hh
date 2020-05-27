@@ -7,12 +7,10 @@
 
 #include <mpi.h>
 #include <functional>
+#include <utility>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
-#include <dune/common/std/apply.hh>
 
 #include <dune/geometry/type.hh>
 

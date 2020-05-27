@@ -88,6 +88,8 @@ protected:
     , intersectionList_(std::make_shared<IntersectionList>(intersectionListProvider_))
     {}
 
+  virtual ~StandardMerge() = default;
+
   /** \brief Compute the intersection between two overlapping elements
 
      The result is a set of simplices stored in the vector intersections.
