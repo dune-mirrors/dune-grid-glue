@@ -130,7 +130,7 @@ void GridGlue<P0, P1>::build()
 
     // setup remote index information
     remoteIndices_.setIncludeSelf(true);
-#warning add list of neighbors ...
+    // #warning add list of neighbors ...
     remoteIndices_.setIndexSets(patch0_is_, patch1_is_, mpicomm_) ;
     remoteIndices_.rebuild<true/* all indices are public */>();
 
@@ -237,7 +237,7 @@ void GridGlue<P0, P1>::mergePatches(
 
     for (unsigned int i = 0; i < merger_->nSimplices(); i++)
     {
-#warning only handle the newest intersections / merger info
+      // #warning only handle the newest intersections / merger info
       const IntersectionData & it = intersections_[i];
       GlobalId gid(patch0rank, patch1rank, i);
       if (it.template local<0>())
