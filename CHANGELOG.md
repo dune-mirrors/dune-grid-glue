@@ -1,7 +1,7 @@
-Changes in dune-grid-glue v2.6.0
+Changes in dune-grid-glue v2.7.0
 ================================
 
-Major changes in dune-grid-glue v2.6.0
+Major changes in dune-grid-glue v2.7.0
 --------------------------------------
 
 * Constants and type aliases including the "side" in their names like
