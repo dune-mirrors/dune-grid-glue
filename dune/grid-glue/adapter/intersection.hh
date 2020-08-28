@@ -55,21 +55,21 @@ namespace Dune {
       using GridLocalGeometry = AffineGeometry<
         typename GridGlue::template GridView<side>::ctype, mydim, GridGlue::template GridView<side>::dimension>;
 
-      using Grid0LocalGeometry DUNE_DEPRECATED_MSG("please use GridLocalGeometry<0> instead") = GridLocalGeometry<0>;
-      using Grid1LocalGeometry DUNE_DEPRECATED_MSG("please use GridLocalGeometry<1> instead") = GridLocalGeometry<1>;
+      using Grid0LocalGeometry [[deprecated("please use GridLocalGeometry<0> instead")]] = GridLocalGeometry<0>;
+      using Grid1LocalGeometry [[deprecated("please use GridLocalGeometry<1> instead")]] = GridLocalGeometry<1>;
 
       template<int side>
       using GridGeometry = AffineGeometry<
         typename GridGlue::template GridView<side>::ctype, mydim, GridGlue::template GridView<side>::dimensionworld>;
 
-      using Grid0Geometry DUNE_DEPRECATED_MSG("please use GridGeometry<0> instead") = GridGeometry<0>;
-      using Grid1Geometry DUNE_DEPRECATED_MSG("please use GridGeometry<1> instead") = GridGeometry<1>;
+      using Grid0Geometry [[deprecated("please use GridGeometry<0> instead")]] = GridGeometry<0>;
+      using Grid1Geometry [[deprecated("please use GridGeometry<1> instead")]] = GridGeometry<1>;
 
       template<int side>
       using GridIndexType = typename GridGlue::template GridView<side>::IndexSet::IndexType;
 
-      using Grid0IndexType DUNE_DEPRECATED_MSG("please use GridIndexType<0> instead") = GridIndexType<0>;
-      using Grid1IndexType DUNE_DEPRECATED_MSG("please use GridIndexType<1> instead") = GridIndexType<1>;
+      using Grid0IndexType [[deprecated("please use GridIndexType<0> instead")]] = GridIndexType<0>;
+      using Grid1IndexType [[deprecated("please use GridIndexType<1> instead")]] = GridIndexType<1>;
 
       /** \brief Constructor the n'th IntersectionData of a given GridGlue */
       IntersectionData(const GridGlue& glue, unsigned int mergeindex, unsigned int offset, bool grid0local, bool grid1local);
