@@ -102,13 +102,13 @@ public:
   using Grid = typename GridView<side>::Grid;
 
   /** \brief GridView of grid 0 (aka domain grid) */
-  using Grid0View DUNE_DEPRECATED_MSG("please use GridView<0> instead") = GridView<0>;
+  using Grid0View [[deprecated("please use GridView<0> instead")]] = GridView<0>;
 
   /** \brief Grid 0 type */
-  using Grid0 DUNE_DEPRECATED_MSG("please use Grid<0> instead") = Grid<0>;
+  using Grid0 [[deprecated("please use Grid<0> instead")]] = Grid<0>;
 
   /** \brief Coupling patch of grid 0 */
-  using Grid0Patch DUNE_DEPRECATED_MSG("please use GridPatch<0> instead") = GridPatch<0>;
+  using Grid0Patch [[deprecated("please use GridPatch<0> instead")]] = GridPatch<0>;
 
   template<int side>
   static constexpr auto griddim()
@@ -119,43 +119,43 @@ public:
     { return GridPatch<side>::dimworld; }
 
   /** \brief dimension of the grid 0 extractor */
-  DUNE_DEPRECATED_MSG("please use griddim<0>() instead")
+  [[deprecated("please use griddim<0>() instead")]]
   static constexpr auto grid0dim = griddim<0>();
 
-  DUNE_DEPRECATED_MSG("please use griddim<0>() instead")
+  [[deprecated("please use griddim<0>() instead")]]
   static constexpr auto domdim = griddim<0>();
 
   /** \brief world dimension of the grid 0 extractor */
-  DUNE_DEPRECATED_MSG("please use griddimworld<0>() instead")
+  [[deprecated("please use griddimworld<0>() instead")]]
   static constexpr auto grid0dimworld = griddimworld<0>();
 
-  DUNE_DEPRECATED_MSG("please use griddimworld<0>() instead")
+  [[deprecated("please use griddimworld<0>() instead")]]
   static constexpr auto domdimworld = griddimworld<0>();
 
   /** \brief GridView of grid 1 (aka target grid) */
-  using Grid1View DUNE_DEPRECATED_MSG("please use GridView<0> instead") = GridView<1>;
+  using Grid1View [[deprecated("please use GridView<0> instead")]] = GridView<1>;
 
   /** \brief Grid 1 type */
-  using Grid1 DUNE_DEPRECATED_MSG("please use Grid<1> instead") = Grid<1>;
+  using Grid1 [[deprecated("please use Grid<1> instead")]] = Grid<1>;
 
   /** \brief Coupling patch of grid 1 */
-  using Grid1Patch DUNE_DEPRECATED_MSG("please use GridPatch<1> instead") = GridPatch<1>;
+  using Grid1Patch [[deprecated("please use GridPatch<1> instead")]] = GridPatch<1>;
 
   /** \todo */
   typedef unsigned int IndexType;
 
   /** \brief dimension of the grid 1 extractor */
-  DUNE_DEPRECATED_MSG("please use griddim<1>() instead")
+  [[deprecated("please use griddim<1>() instead")]]
   static constexpr auto grid1dim = griddim<1>();
 
-  DUNE_DEPRECATED_MSG("please use griddim<1>() instead")
+  [[deprecated("please use griddim<1>() instead")]]
   static constexpr auto tardim = griddim<1>();
 
   /** \brief world dimension of the grid 1 extractor */
-  DUNE_DEPRECATED_MSG("please use griddimworld<1>() instead")
+  [[deprecated("please use griddimworld<1>() instead")]]
   static constexpr auto grid1dimworld = griddimworld<1>();
 
-  DUNE_DEPRECATED_MSG("please use griddimworld<1>() instead")
+  [[deprecated("please use griddimworld<1>() instead")]]
   static constexpr auto tardimworld = griddimworld<1>();
 
   /** \brief export the world dimension
@@ -180,16 +180,16 @@ public:
   using GridVertex = typename GridView<side>::Traits::template Codim<Grid<side>::dimension>::Entity;
 
   /** \brief The type of the Grid0 elements */
-  using Grid0Element DUNE_DEPRECATED_MSG("please use GridElement<0> instead") = GridElement<0>;
+  using Grid0Element [[deprecated("please use GridElement<0> instead")]] = GridElement<0>;
 
   /** \brief The type of the Grid0 vertices */
-  using Grid0Vertex DUNE_DEPRECATED_MSG("please use GridVertex<0> instead") = GridVertex<0>;
+  using Grid0Vertex [[deprecated("please use GridVertex<0> instead")]] = GridVertex<0>;
 
   /** \brief The type of the Grid1 elements */
-  using Grid1Element DUNE_DEPRECATED_MSG("please use GridElement<1> instead") = GridElement<1>;
+  using Grid1Element [[deprecated("please use GridElement<1> instead")]] = GridElement<1>;
 
   /** \brief The type of the Grid1 vertices */
-  using Grid1Vertex DUNE_DEPRECATED_MSG("please use GridVertex<1> instead") = GridVertex<1>;
+  using Grid1Vertex [[deprecated("please use GridVertex<1> instead")]] = GridVertex<1>;
 
   /** \brief Instance of a Merger */
   typedef Dune::GridGlue::Merger<ctype,
@@ -208,10 +208,10 @@ public:
   using IntersectionIterator = Dune::GridGlue::IntersectionIterator<P0, P1, side, (side+1) % 2>;
 
   /** \todo Please doc me! */
-  using Grid0IntersectionIterator DUNE_DEPRECATED_MSG("please use IntersectionIterator<0> instead") = IntersectionIterator<0>;
+  using Grid0IntersectionIterator [[deprecated("please use IntersectionIterator<0> instead")]] = IntersectionIterator<0>;
 
   /** \todo Please doc me! */
-  using Grid1IntersectionIterator DUNE_DEPRECATED_MSG("please use IntersectionIterator<1> instead") = IntersectionIterator<1>;
+  using Grid1IntersectionIterator [[deprecated("please use IntersectionIterator<1> instead")]] = IntersectionIterator<1>;
 
 private:
 
