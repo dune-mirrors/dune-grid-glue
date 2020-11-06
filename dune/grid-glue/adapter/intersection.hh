@@ -75,11 +75,7 @@ namespace Dune {
       IntersectionData(const GridGlue& glue, unsigned int mergeindex, unsigned int offset, bool grid0local, bool grid1local);
 
       /** \brief Default Constructor */
-      IntersectionData()
-        {
-          std::get<0>(sideData_).gridlocal = false;
-          std::get<1>(sideData_).gridlocal = false;
-        }
+      IntersectionData() = default;
 
       /* Accessor Functions */
 
@@ -117,7 +113,7 @@ namespace Dune {
       template<int side>
       struct SideData {
         /** \brief true if the associated grid entity is local */
-        bool gridlocal;
+        bool gridlocal = false;
 
         /** \brief indices of the associated local grid entity */
         std::vector< GridIndexType<side> > gridindices;
