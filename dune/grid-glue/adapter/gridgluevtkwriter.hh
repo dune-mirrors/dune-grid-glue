@@ -28,6 +28,8 @@
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
 
+#include <dune/grid-glue/gridglue.hh>
+
 namespace Dune {
 namespace GridGlue {
 
@@ -183,8 +185,6 @@ class GridGlueVtkWriter
     fmerged.open(filename.c_str());
 
     using GridView = typename Glue::template GridView<side>;
-    using RemoteIntersectionIterator = typename Glue::template IntersectionIterator<side>;
-
     typedef typename GridView::ctype ctype;
 
     const int domdimw = GridView::dimensionworld;
@@ -208,12 +208,11 @@ class GridGlueVtkWriter
     fmerged << ((intersectionDim==3) ? "DATASET UNSTRUCTURED_GRID" : "DATASET POLYDATA") << std::endl;
     fmerged << "POINTS " << overlaps*(intersectionDim+1) << " " << Dune::className<ctype>() << std::endl;
 
-    for (RemoteIntersectionIterator isIt = glue.template ibegin<side>();
-         isIt != glue.template iend<side>();
-         ++isIt)
+    for (const auto& intersection : intersections(glue, Reverse<side == 1>{}))
     {
-      for (int i = 0; i < isIt->geometry().corners(); ++i)
-        fmerged << isIt->geometry().corner(i) << coordinatePadding << std::endl;
+      const auto& geometry = intersection.geometry();
+      for (int i = 0; i < geometry.corners(); ++i)
+        fmerged << geometry.corner(i) << coordinatePadding << std::endl;
     }
 
     // WRITE POLYGONS
