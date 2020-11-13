@@ -221,7 +221,7 @@ namespace Parallel {
           std::array<MPI_Request,N> requests_send;
           std::array<MPI_Request,N> requests_recv;
 
-          int tag = 12345678;
+          int tag = 0;
           Dune::Hybrid::forEach(indices,
             // [&](auto i){
             //   MPI_SendVectorInRing(
