@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 3.13)
 project(dune-grid-glue CXX)
 
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
