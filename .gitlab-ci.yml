@@ -19,6 +19,10 @@ dune:git  clang  C++17:
   <<: *common
   image: registry.dune-project.org/docker/ci/dune:git-debian-10-clang-7-libcpp-17
 
+dune:2.8 gcc-9 C++20:
+  <<: *common
+  image: registry.dune-project.org/docker/ci/dune:2.8-debian-11-gcc-9-20
+
 dune:2.7 gcc-8 C++17:
   <<: *common
   image: registry.dune-project.org/docker/ci/dune:2.7-debian-10-gcc-8-17
