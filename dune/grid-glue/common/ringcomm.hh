@@ -97,8 +97,7 @@ namespace Parallel {
       )
     {
       // mpi status stuff
-      int result DUNE_UNUSED;
-      result = 0;
+      [[maybe_unused]] int result = 0;
       typedef MPITypeInfo<T> Info;
       // resize next buffer to maximum size
       next.resize(next.capacity());
