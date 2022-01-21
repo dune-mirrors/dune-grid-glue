@@ -7,4 +7,5 @@ install(FILES
   projection_impl.hh
   projectionwriter.hh
   projectionwriter_impl.hh
+  ringcomm.hh
   DESTINATION include/dune/grid-glue/common)
