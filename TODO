@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightInfo: Copyright © DUNE Project contributors, see file LICENSE.md in module root
+SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-GPL-2.0-only-with-dune-grid-glue-exception
+-->
+
 - Test: does indexInInside for codim0-coupling always return 0?
 - GridGlueVTKWriter doesn't seem to work
 - GridGlueVTKWriter crashes when started on an empty GridGlue
