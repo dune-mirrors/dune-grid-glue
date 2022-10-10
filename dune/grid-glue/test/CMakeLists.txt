@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightInfo: Copyright © DUNE Project contributors, see file LICENSE.md in module root
+# SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-GPL-2.0-only-with-dune-grid-glue-exception
+
 dune_add_test(SOURCES callmergertwicetest.cc)
 dune_add_test(SOURCES ringcommtest.cc
               MPI_RANKS 1 2 3 4 5 6 7 8 9 10
