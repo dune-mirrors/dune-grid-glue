@@ -6,7 +6,7 @@
 
 #Name of the module
 Module: dune-grid-glue
-Version: 2.9-git
+Version: 2.9
 Maintainer: christian.engwer@uni-muenster.de,oliver.sander@tu-dresden.de
 #depending on
 Depends: dune-common (>= 2.4) dune-geometry (>= 2.4) dune-grid (>= 2.4)
