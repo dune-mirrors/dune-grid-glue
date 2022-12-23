@@ -6,7 +6,7 @@ SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-GPL-2.0-only-with-dune-
 Changes in dune-grid-glue v2.9.0
 ================================
 
-No major changes in dune-grid-glue v2.9.0
+* The dune-grid-glue source code contains SPDX licensing information now.
 
 
 Changes in dune-grid-glue v2.8.0
