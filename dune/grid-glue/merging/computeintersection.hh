@@ -145,7 +145,7 @@ private:
 
     /**
      * @brief Removes duplicate entries from the vector p.
-     * @param the list duplicat entries are removed from
+     * @param the list duplicate entries are removed from
      */
     static void removeDuplicates( std::vector<int> & p);
 

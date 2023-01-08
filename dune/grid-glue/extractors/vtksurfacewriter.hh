@@ -143,7 +143,7 @@ protected:
       //                      int index = 0;
       //                      for (int i = 0; i < ncorners; ++i)
       //                      {
-      //                              // write the first index twice if it is an egde
+      //                              // write the first index twice if it is an edge
       //                              // => triangle instead of edge - paraview can display it then
       //                              if (corners[i] > 2)
       //                                      fos << corners[i];

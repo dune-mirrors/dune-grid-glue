@@ -440,7 +440,7 @@ public:
                         return true;
                     }
                 } else if ((X[1]-X[0]).infinity_norm() > eps && (Y[1]-Y[0]).infinity_norm() > eps) {
-                    // lines are paralles, but non degenerated
+                    // lines are parallels, but non degenerated
                     bool found = false;
 
                     // use triangle equality ||a - b||_2 = || a -c ||_2 + || c - b ||_2 for non perpendicular lines

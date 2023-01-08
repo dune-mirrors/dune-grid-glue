@@ -184,11 +184,11 @@ protected:
 
     /** @brief the corner indices plus the numbers of the vertices in the parent element
 
-        This array has the length cube_corners, because currently that is an upper boun d
+        This array has the length cube_corners, because currently that is an upper bound
         for the number of corners of an element.  If more general element types appear we
         need to change this.
      */
-    CornerInfo corners[cube_corners];     // sim = numer of vertices in a simplex
+    CornerInfo corners[cube_corners];     // sim = number of vertices in a simplex
   };
 
 
@@ -248,7 +248,7 @@ public:
    */
   void clear()
   {
-    // this is an inofficial way on how to free the memory allocated
+    // this is an unofficial way on how to free the memory allocated
     // by a std::vector
     {
       std::vector<CoordinateInfo> dummy;

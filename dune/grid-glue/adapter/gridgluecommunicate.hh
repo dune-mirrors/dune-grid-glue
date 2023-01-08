@@ -64,7 +64,7 @@ namespace Dune {
        \brief describes the features of a data handle for
        communication in parallel runs using the GridGlue::communicate methods.
 
-       Here the Barton-Nackman trick is used to interprete data handle objects
+       Here the Barton-Nackman trick is used to interpret data handle objects
        as its interface. Therefore usable data handle classes need to be
        derived from this class.
 
@@ -80,7 +80,7 @@ namespace Dune {
       typedef DataTypeImp DataType;
 
     protected:
-      // one should not create an explicit instance of this inteface object
+      // one should not create an explicit instance of this interface object
       CommDataHandle() {}
 
     public:
@@ -264,7 +264,7 @@ namespace Dune {
     typedef CommunicationOperator<Dune::BackwardCommunication> BackwardOperator;
 
     /**
-       \brief collects all GridGlue data requried for communication
+       \brief collects all GridGlue data required for communication
        \ingroup GridGlueCommunication
      */
     template <typename GG, class DataHandleImp, class DataTypeImp>

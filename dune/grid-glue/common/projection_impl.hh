@@ -51,10 +51,10 @@ edgeToCorners(unsigned edge)
 }
 
 /**
- * Convert barycentric coordinates to euclidian coordinates.
+ * Convert barycentric coordinates to euclidean coordinates.
  *
  * This function converts barycentric coordinates <code>x</code> with respect
- * to the triangle with corners <code>corners</code> to euclidian coordinates.
+ * to the triangle with corners <code>corners</code> to euclidean coordinates.
  * For the result <code>y</code> the following equation holds:
  * <code>yᵢ = (cornersᵢ₊₁ - corners₀) xᵢ</code>
  *
@@ -63,7 +63,7 @@ edgeToCorners(unsigned edge)
  *
  * \param x barycentric coordinates
  * \param corners coordinates or normals at the corners
- * \return euclidian coordinates or interpolated normal
+ * \return euclidean coordinates or interpolated normal
  */
 template<typename Coordinate, typename Corners>
 inline typename Corners::value_type
@@ -103,7 +103,7 @@ interpolate_unit_normals(const Coordinate& x, const Normals& normals)
  * <code>xᵢ ≥ 0</code> and <code>∑ xᵢ ≤ 1</code>.
  *
  * \param x coordinates of point to check
- * \param epsilon tolerance used for floating-point comparisions
+ * \param epsilon tolerance used for floating-point comparisons
  * \return <code>true</code> if <code>x</code> is inside, <code>false</code> otherwise
  */
 template<typename Coordinate, typename Field>

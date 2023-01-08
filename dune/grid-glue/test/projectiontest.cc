@@ -170,8 +170,8 @@ test_project_simple2()
 bool
 test_project3()
 {
-  /* Test with intersting numbers.
-   * The result was not checked, but is given to prevent accidential changes... Hopefully it is right.
+  /* Test with interesting numbers.
+   * The result was not checked, but is given to prevent accidental changes... Hopefully it is right.
    */
   using std::get;
 
@@ -300,8 +300,8 @@ test_project3()
 bool
 test_project4()
 {
-  /* Test with intersting numbers.
-   * The result was not checked, but is given to prevent accidential changes... Hopefully it is right.
+  /* Test with interesting numbers.
+   * The result was not checked, but is given to prevent accidental changes... Hopefully it is right.
    */
   using std::get;
 

@@ -108,7 +108,7 @@ namespace Parallel {
         MPI_Isend(
           &(data[0]), Info::size*data.size(), Info::getType(), rightrank, tag,
           comm, &r_send);
-      // receive up to maximum size. The acutal size is stored in the status
+      // receive up to maximum size. The actual size is stored in the status
       result =
         MPI_Irecv(
           &(next[0]),  Info::size*next.size(),  Info::getType(), leftrank,  tag,
@@ -285,7 +285,7 @@ namespace Parallel {
 
    We consider distributed `data`, available on all processes in
    `mpicomm`. We ensure that the data is sent to each process so that
-   operator `op` can be applyed on each processor locally. This is
+   operator `op` can be applied on each processor locally. This is
    helpful, if `op` also involved other local data.
 
    \param mpicomm communicator which onctaines the distributed data

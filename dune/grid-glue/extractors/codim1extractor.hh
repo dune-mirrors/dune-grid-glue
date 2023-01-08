@@ -121,7 +121,7 @@ void Codim1Extractor<GV>::update(const Predicate& predicate)
     // several counter for consecutive indexing are needed
     int simplex_index = 0;
     int vertex_index = 0;
-    IndexType eindex = 0;     // supress warning
+    IndexType eindex = 0;     // suppress warning
 
     // needed later for insertion into a std::set which only
     // works with const references

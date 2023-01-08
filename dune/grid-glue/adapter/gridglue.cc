@@ -56,7 +56,7 @@ void GridGlue<P0, P1>::build()
   std::vector<Dune::GeometryType> patch1types;
 
   /*
-   * extract global surface patchs
+   * extract global surface patches
    */
 
   // retrieve the coordinate and topology information from the extractors
