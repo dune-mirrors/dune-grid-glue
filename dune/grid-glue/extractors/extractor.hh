@@ -248,16 +248,11 @@ public:
    */
   void clear()
   {
-    // this is an unofficial way on how to free the memory allocated
-    // by a std::vector
-    {
-      std::vector<CoordinateInfo> dummy;
-      coords_.swap(dummy);
-    }
-    {
-      std::vector<SubEntityInfo> dummy;
-      subEntities_.swap(dummy);
-    }
+    coords_.clear();
+    coords_.shrink_to_fit();
+
+    subEntities_.clear();
+    subEntities_.shrink_to_fit();
 
     // ...then clear the maps themselves, too
     vtxInfo_.clear();
