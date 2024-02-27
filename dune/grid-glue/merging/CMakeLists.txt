@@ -16,6 +16,11 @@ install(FILES
   standardmerge.hh
   DESTINATION include/dune/grid-glue/merging)
 
-dune_add_library(dunegridglue
-  standardmerge.cc
-  ADD_LIBS ${DUNE_LIBS})
+if(dune-common_VERSION VERSION_GREATER_EQUAL 2.10.0)
+    dune_add_library(dunegridglue standardmerge.cc EXPORT_NAME GridGlue)
+    target_link_libraries(dunegridglue PUBLIC ${DUNE_LIBS})
+else()
+    dune_add_library(dunegridglue
+            standardmerge.cc
+            ADD_LIBS ${DUNE_LIBS})
+endif()

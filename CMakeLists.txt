@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightInfo: Copyright © DUNE Project contributors, see file LICENSE.md in module root
 # SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-GPL-2.0-only-with-dune-grid-glue-exception
 
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 3.13)
 project(dune-grid-glue CXX)
 
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
@@ -28,4 +28,8 @@ add_subdirectory("doc")
 add_subdirectory("examples")
 
 # finalize the dune project, e.g. generating config.h etc.
-finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
+if(dune-common_VERSION VERSION_GREATER_EQUAL 2.10.0)
+    finalize_dune_project()
+else()
+    finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
+endif()
