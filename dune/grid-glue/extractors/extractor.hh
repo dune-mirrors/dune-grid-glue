@@ -67,12 +67,8 @@ public:
   typedef typename Element::EntitySeed ElementSeed;
 
   typedef std::vector<unsigned int>                                VertexVector;
-
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
   using CellMapper = MultipleCodimMultipleGeomTypeMapper<GridView>;
-#else
-  using CellMapper = MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout>;
-#endif
+
   // typedef typename CellMapper::IndexType                               IndexType;
   typedef int IndexType;
 public:
@@ -154,14 +150,8 @@ protected:
      * TODO: move default value of `geometryType_` to member declaration
      * when removing support for older dune-geometry
      */
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY, 2, 6)
       : geometryType_(GeometryTypes::simplex(dim-codim))
       {}
-#else
-    {
-      geometryType_.makeSimplex(dim-codim);
-    }
-#endif
 
     SubEntityInfo(IndexType parent_, unsigned int num_in_parent_,
                   const Dune::GeometryType& geometryType)
@@ -234,11 +224,7 @@ public:
    */
   Extractor(const GV& gv)
     :  gv_(gv)
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
     , cellMapper_(gv, mcmgElementLayout())
-#else
-    , cellMapper_(gv)
-#endif
   {}
 
   /*  F U N C T I O N A L I T Y  */
