@@ -97,17 +97,11 @@ template <class GlueType>
 void testCoupling(const GlueType& glue, double eps = 1e-12)
 {
   bool success = true;
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
+
   using View0Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<0> >;
   using View1Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<1> >;
   View0Mapper view0mapper(glue.template gridView<0>(), Dune::mcmgElementLayout());
   View1Mapper view1mapper(glue.template gridView<1>(), Dune::mcmgElementLayout());
-#else
-  using View0Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<0>, Dune::MCMGElementLayout >;
-  using View1Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename GlueType::template GridView<1>, Dune::MCMGElementLayout >;
-  View0Mapper view0mapper(glue.template gridView<0>());
-  View1Mapper view1mapper(glue.template gridView<1>());
-#endif
 
   std::vector<unsigned int> countInside0(view0mapper.size());
   std::vector<unsigned int> countOutside1(view1mapper.size());

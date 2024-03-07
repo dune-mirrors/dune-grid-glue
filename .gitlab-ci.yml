@@ -2,31 +2,46 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-GPL-2.0-only-with-dune-grid-glue-exception
 
 ---
+.install_dependencies:
+  before_script:
+    - . /duneci/bin/duneci-init-job
+    - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
+    - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
+    - duneci-install-module https://gitlab.dune-project.org/staging/dune-uggrid.git
+    - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
+
+
 .common: &common
   script: duneci-standard-test
-  artifacts:
-    expire_in: 2 years
-    reports:
-      junit: junit/*.xml
   tags: [duneci]
 
-dune:git gcc-8 C++17:
+dune-git-gcc-9-C++20:
   <<: *common
-  image: registry.dune-project.org/docker/ci/dune:git-debian-10-gcc-8-17
+  image: registry.dune-project.org/docker/ci/debian:11
+  extends: .install_dependencies
+  variables:
+    DUNECI_TOOLCHAIN: gcc-9-20
 
-dune:git gcc-9 C++20:
+dune-git-clang-8-C++17:
   <<: *common
-  image: registry.dune-project.org/docker/ci/dune:git-debian-11-gcc-9-20
+  image: registry.dune-project.org/docker/ci/debian:11
+  extends: .install_dependencies
+  variables:
+    DUNECI_TOOLCHAIN: clang-9-libcpp-17
 
-dune:git  clang  C++17:
+dune-git-clang-10-C++20:
   <<: *common
-  image: registry.dune-project.org/docker/ci/dune:git-debian-10-clang-7-libcpp-17
+  image: registry.dune-project.org/docker/ci/ubuntu:20.04
+  extends: .install_dependencies
+  variables:
+    DUNECI_TOOLCHAIN: clang-10-20
 
-dune:2.8 gcc-9 C++20:
+
+dune-2.8-gcc-9-C++20:
   <<: *common
   image: registry.dune-project.org/docker/ci/dune:2.8-debian-11-gcc-9-20
 
-dune:2.7 gcc-8 C++17:
+dune:2.7-gcc-8-C++17:
   <<: *common
   image: registry.dune-project.org/docker/ci/dune:2.7-debian-10-gcc-8-17
 
