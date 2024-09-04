@@ -3,10 +3,10 @@ SPDX-FileCopyrightInfo: Copyright © DUNE Project contributors, see file LICENSE
 SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-GPL-2.0-only-with-dune-grid-glue-exception
 -->
 
-Changes on the development branch (will become dune-grid-glue 2.10.0)
-=====================================================================
+Changes in dune-grid-glue 2.10.0
+================================
 
-* ...
+* Only minor maintenance changes happened for v2.10.0
 
 
 Changes in dune-grid-glue v2.9.0
